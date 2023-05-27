@@ -1,0 +1,53 @@
+#include "main_helper.h"
+
+
+/////// include the neccesary system related files 
+#include "system.h"
+
+
+//////// include the freertos related functions 
+#include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
+#include "queue.h"
+#include "semphr.h"
+
+#include "task.h"
+#include "message_buffer.h"
+
+#include "gpio.h"
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// GLOBAL data storage for containers (queue and msg buffers ) //////////////
+
+
+
+void taskdelete(xTaskHandle * handle)
+{
+    if (*handle != NULL)
+    {
+        vTaskDelete(*handle);
+        *handle = NULL;
+    }
+}
+
+/***
+ * @name validate_task_handle
+ * @param void
+ * @note
+ */
+ void FORCE_INLINE  validate_Task_handle(xTaskHandle handle)
+{
+    if (handle == NULL)
+    {
+        APP_ERROR_HANDLER(nrf_ERR_INVALID_STATE);
+    }
+}
+
+
+

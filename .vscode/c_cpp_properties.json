@@ -1,0 +1,100 @@
+{
+    "configurations": [
+        {
+            "name": "Nordicsemiconductor",
+            "includePath": [
+                
+                "C:\\Program Files (x86)\\GNU Arm Embedded Toolchain\\10 2021.07\\arm-none-eabi\\include",
+
+                "D:\\smart_watch\\watchx\\src\\config",
+
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\external\\freertos\\source\\include",
+                // "D:\\stimveda_codebase\\watchx\\nRF5_SDK_17\\freertos\\include",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\external\\fprintf",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\external\\segger_rtt",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\components\\boards",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\components\\drivers_nrf\\nrf_soc_nosd",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\components\\libraries\\util",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\components\\libraries\\experimental_section_vars",
+
+                
+                // CMSIS related includes files 
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\components\\toolchain\\cmsis\\include",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\components\\toolchain\\cmsis\\dsp\\Include",
+                
+                
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\integration\\nrfx",
+                
+                // softdevice path
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\components\\softdevice\\s132\\headers",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\components\\softdevice\\common",
+ 
+
+                /// HAL and driver layer for the nrf52 
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\modules\\nrfx",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\modules\\nrfx\\templates",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\modules\\nrfx\\mdk",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\modules\\nrfx\\soc",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\modules\\nrfx\\drivers\\include",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\modules\\nrfx\\drivers",
+                "D:\\smart_watch\\watchx\\nRF5_SDK_17\\modules\\nrfx\\hal",
+
+                // ///////////////////////////////////////////////////////////////////////////////////////
+                // //////////////////////////////////////////////////////////////////////////////////////
+                // //// nimble ble stack path 
+                // "D:/stimveda_codebase/v_2_Ease/nRF5_SDK_17/external/mynewt-nimble/nimble/host/include/**",
+                // "D:/stimveda_codebase/v_2_Ease/nRF5_SDK_17/external/mynewt-nimble/nimble/host/include/host/**",
+
+                // "D:/stimveda_codebase/v_2_Ease/nRF5_SDK_17/external/mynewt-nimble/nimble/host/services/gap/include/**",
+                // "D:/stimveda_codebase/v_2_Ease/nRF5_SDK_17/external/mynewt-nimble/nimble/host/services/gatt/include/**",
+                // /// #contains the address utilities",
+                // "D:/stimveda_codebase/v_2_Ease/nRF5_SDK_17/external/mynewt-nimble/nimble/host/util/include/**",
+                // //# usage of ram to store the database table for the peer connection
+                // "D:/stimveda_codebase/v_2_Ease/nRF5_SDK_17/external/mynewt-nimble/nimble/host/store/ram/include/**",
+                // "D:/stimveda_codebase/v_2_Ease/nRF5_SDK_17/external/mynewt-nimble/porting/nimble/include/**",
+                // "D:/stimveda_codebase/v_2_Ease/nRF5_SDK_17/external/mynewt-nimble/porting/npl/freertos/include/**",
+                // ////# set the path to nimble include
+                // "D:/stimveda_codebase/v_2_Ease/nRF5_SDK_17/external/mynewt-nimble/nimble/include/**",
+                // "D:/stimveda_codebase/v_2_Ease/nRF5_SDK_17/external/mynewt-nimble/nimble/include/**",
+
+                //// custom lib paths 
+                "D:\\smart_watch\\watchx\\src\\libs\\nrf_HAL\\gpio",
+                "D:\\smart_watch\\watchx\\src\\libs\\nrf_HAL\\system",
+                "D:\\smart_watch\\watchx\\src\\libs\\nrf_HAL\\timer",
+                "D:\\smart_watch\\watchx\\src\\libs\\nrf_HAL\\uart",
+                "D:\\smart_watch\\watchx\\src\\libs\\nrf_HAL\\spi",
+                "D:\\smart_watch\\watchx\\src\\libs\\nrf_HAL\\i2c",
+                "D:\\smart_watch\\watchx\\src\\libs\\nrf_HAL\\ppi",
+                "D:\\smart_watch\\watchx\\src\\libs\\nrf_HAL\\flash",
+                "D:\\smart_watch\\watchx\\src\\libs\\nrf_HAL\\watchdog",
+                "D:\\smart_watch\\watchx\\src\\libs\\nrf_HAL\\ARM_CM4_MPU", 
+
+
+
+                // external libraries path specify to vs code 
+                "D:\\smart_watch\\Watchx\\src\\libs\\components\\ble",
+                
+
+                //main folder 
+                "D:\\smart_watch\\Watchx\\src\\main"
+
+                
+                
+            ],
+            "defines": [
+                "UNICODE",
+                "_UNICODE",
+                "__CC_ARM"
+
+            ],
+            "compilerPath": "C:\\Program Files (x86)\\GNU Arm Embedded Toolchain\\10 2021.07\\bin\\arm-none-eabi-gcc.exe",
+    
+            "cStandard": "c99",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "windows-gcc-arm",
+            "configurationProvider": "ms-vscode.cpp-tools",
+            "compileCommands": "D:\\smart_watch\\Watchx\\build\\compile_commands.json"
+        }
+    ],
+    "version": 4
+}
