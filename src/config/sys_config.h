@@ -58,19 +58,56 @@
 ////================================================================================
 ////================================================================================
 ////=================================== I2c configurations 
+#define I2C_DRIVER_INSTALL 1
 
+#define I2C_HARDWARE_USE I2C0  
 
+#define I2C_SDA_LINE PIN_25 
 
+#define I2C_SCL_LINE PIN_26
+
+#define I2C_CLK_FREQ I2C_FREQ_400KHZ
+
+#define I2C_WAIT_FOR_DATA_RESPONSE 300
 ////================================================================================
 ////================================================================================
 ////=================================== SPI configurations 
 
+#define SPI_DRIVER_INSTALL 1 
+
+#define  SPI_DUMMY_TX_BYTE 0x00 
+
+#define  SPI_MISO_LINE  PIN_13
+
+#define  SPI_MOSI_LINE PIN_12 
+
+#define  SPI_SCK_LINE  PIN_11
+
+#define  SPI_MODE_USED  SPI_MODE_0
+
+#define  SPI_BIT_ORDER  SPI_BIT_ORDER_MSB_FIRST
+
+#define  SPI_SCK_FREQUENCY  SPI_SCK_500K
+
+#define SPI_HARDWARE_USE  SPI2
+ 
+#define SPI_DATA_RESPONSE_TIME 100
 
 
 ////================================================================================
 ////================================================================================
 ////==================================== accelrometer adxl345 configurations 
 
+#define ADXL_INT1_PIN PIN_27 
+// #define ADXL_INT2_PIN PIN_28
+
+#define ADXL_ACCEL_INT1_INTERRUPT_POLARITY EVENT_RISING_EDGE
+
+#define ADXL_ACCEL_INT1_GPIO_CHANNEL GPIOTE_CHANNEL_4
+
+#define ADXL_ACCEL_EVENT_Q_ITEM_SIZE  (sizeof(uint8_t))
+
+#define ADXL_ACCEL_EVENT_Q_LEN  3 /// let say we accomodate 3 accel event max 
 
 ////================================================================================
 ////================================================================================

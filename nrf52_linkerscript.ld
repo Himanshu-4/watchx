@@ -24,8 +24,8 @@ the flash only available is 360kb   */
 MEMORY
 {
   FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0x5A000
-  RAM (rwx) :  ORIGIN = 0x20005968, LENGTH = 0xa698
-  /* RAM (rwx) :  ORIGIN = 0x200022f0, LENGTH = 0xdd10 */
+  /* RAM (rwx) :  ORIGIN = 0x20005968, LENGTH = 0xa698 */
+  RAM (rwx) :  ORIGIN = 0x20003000, LENGTH = 0xd000
 }
 
 

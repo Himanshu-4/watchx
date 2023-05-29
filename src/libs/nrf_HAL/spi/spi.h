@@ -17,7 +17,7 @@ extern void SPIM2_SPIS2_SPI2_IRQHandler(void);
 
 
 // spi task enums to get the task index
-enum
+enum _SPI_TASK_TYPES_
 {
     SPI_TASKS_START,
     SPI_TASKS_STOP,
@@ -26,7 +26,7 @@ enum
 };
 
 /// @brief spi events address to get the events address 
-enum
+enum _SPI_EVENTS_TYPES_
 {
     SPI_EVENTS_STOPPED, //  0x104 SPI transaction has stopped
     SPI_EVENTS_ENDRX, //  0x110 End of RXD buffer reached
@@ -36,7 +36,7 @@ enum
 };
 
 /// @brief define the SPI sck frequency only these are supported 
-enum
+enum _SPI_CLOCK_FREQ_TYPES_
 {
     SPI_SCK_125K  = 0x02000000UL, //  125 kbps
     SPI_SCK_250K  = 0x04000000UL, //  250 kbps
@@ -49,14 +49,14 @@ enum
 };
 
 /// @brief  define the spi bit order 
-enum
+enum _SPI_BIT_ORDER_TYPES_
 {
     SPI_BIT_ORDER_MSB_FIRST, // bit order msb first 
     SPI_BIT_ORDER_LSB_FIRST  // bit order lsb first 
 };
 
 /// @brief spi mode  all 4 modes are supported 
-enum
+enum _SPI_MODE_TYPES_
 {
     SPI_MODE_0 =0,
     SPI_MODE_1, 
@@ -66,7 +66,7 @@ enum
 
 #define SPI_TOTAL_INTERRUPTS 5
 /// @brief alll the events can be used as interrupts 
-enum
+enum _SPI_INTERRUPT_TYPES_
 {
     SPI_INT_STOPPED,  //  0x104 SPI transaction has stopped
     SPI_INT_ENDRX,    //  0x110 End of RXD buffer reached
@@ -77,7 +77,7 @@ enum
 };
 
 /// @brief th masking value for the interrupt
-enum
+enum _SPI_INTERRUPT_MASK_TYPES_
 {
     SPI_INT_STOPPED_Mask = 1,  //  0x104 SPI transaction has stopped
     SPI_INT_ENDRX_Mask = 4,    //  0x110 End of RXD buffer reached
@@ -87,7 +87,7 @@ enum
 };
 
 /// @brief the function indexes of the static function array handlers 
-enum
+enum _SPI_INTERRUPT_HANDLER_TYPES_
 {
     SPI_INT_STOPPED_Func,  //  0x104 SPI transaction has stopped
     SPI_INT_ENDRX_Func,    //  0x110 End of RXD buffer reached

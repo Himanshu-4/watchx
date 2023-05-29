@@ -201,12 +201,12 @@ void driver_install(void)
             .internal_pullup = I2C_internal_pullup_enable,
             .sda_pin = I2C_SDA_LINE,
             .scl_pin = I2C_SCL_LINE,
-            .sck_freq = I2C_SCK_FREQ};
+            .sck_freq = I2C_CLK_FREQ};
 
     //// if freertos is defined then use the thread safe i2c API
 #if defined(FREERTOS_ENV)
 
-    i2c_thread_safe_init(I2C_HARDWARE_USE, &i2c_cfg, FUEL_GAUGE_WAIT_FOR_RESPONSE);
+    i2c_thread_safe_init(I2C_HARDWARE_USE, &i2c_cfg, I2C_WAIT_FOR_DATA_RESPONSE);
 #else
 
     i2c_config(I2C_HARDWARE_USE, &i2c_cfg);
@@ -229,7 +229,7 @@ void driver_install(void)
 
     //// if freertos is defined then use the thread safe i2c API
 #if defined(FREERTOS_ENV)
-    spi_thread_safe_init(SPI_HARDWARE_USE, &spi_cfg, EEG_WAIT_FOR_RESPONSE);
+    spi_thread_safe_init(SPI_HARDWARE_USE, &spi_cfg, SPI_DATA_RESPONSE_TIME);
 
 #else
     spi_config(SPI_HARDWARE_USE, &spi_cfg);

@@ -71,7 +71,6 @@ int main()
 
     ////////////////////////////////////
     NRF_LOG_INFO("starting aPP");
-
     // init the ble
     nrf_softdevice_init_and_start();
     //// init the gatt server
@@ -132,12 +131,7 @@ void general_task_function(void *param)
 {
     UNUSED_VARIABLE(param);
 
-    //// start the advertisement
-    ble_gap_start_advertise();
-    uint32_t buf1 = 0x32;
-    uint16_t  buff2[] = {0x12, 0x12, 0x13, 0x00, 0x01};
-    
-    char *mybuff = "hello my name is";
+   
 
     for (;;)
     {
@@ -148,17 +142,16 @@ void general_task_function(void *param)
             NRF_LOG_WARNING("evt %d",evt);
             if(evt == NRF_BUTTON_UP_EVT)
             {
-                /// save the data to the flash
-                NRF_LOG_WARNING("btn 1 %d", nvs_add_data(0x11, u8(buf1), sizeof(buf1)));
-                NRF_LOG_WARNING("erase %d", nvs_delete_data(0x13));
+                //// start the advertise
+                ble_gap_start_advertise();
             }
             else if(evt == NRF_BUTTON_DOWN_EVT)
             {
-                NRF_LOG_WARNING("btn 2 %d", nvs_add_data(0x12, (uint8_t *)buff2, sizeof(buff2)));
+                ble_gap_stop_advertise();
             }
             else if(evt == NRF_BUTTON_MIDD_EVT)
             {
-                NRF_LOG_WARNING("btn 3 %d", nvs_add_data(0x13, (uint8_t *)mybuff ,  17));
+                // NRF_LOG_WARNING("midbtn");
             }
         }
         delay(300);

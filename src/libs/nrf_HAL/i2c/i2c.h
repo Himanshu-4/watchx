@@ -12,7 +12,7 @@ extern void SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQHandler(void);
 
 
 /// @brief enum to store the task index 
-enum
+enum _I2C_TASK_TYPES_
 {
     I2C_TASKS_STARTRX,  //  Start TWI receive sequence
     I2C_TASKS_STARTTX,  //  Start TWI transmit sequence
@@ -22,7 +22,7 @@ enum
 };
 
 /// @brief i2c event indexeses  
-enum
+enum _I2C_EVENTS_TYPES_
 {
     I2C_EVENTS_STOPPED, //   TWI stopped
     I2C_EVENTS_ERROR, //   TWI error
@@ -34,7 +34,7 @@ enum
 };
 
 /// @brief the I2c frequecy 
-enum
+enum _I2C_FREQ_TYPES_
 {
     I2C_FREQ_100KHZ = 0x01980000UL, // 100 kbps
     I2C_FREQ_250KHZ = 0x04000000UL, // 250 kbps
@@ -47,7 +47,7 @@ enum
 
 
 /// @brief I2c interupt indexces 
-enum
+enum _I2C_INTERRUPT_TYPES_
 {
     I2C_INT_STOPPED, //   TWI stopped
     I2C_INT_ERROR, //   TWI error
@@ -60,7 +60,7 @@ enum
 
 
 /// @brief I2c interupt  function indexces
-enum
+enum _I2C_INTERRUPT_HANDLER_TYPES_
 {
     I2C_INT_STOPPED_Func, //   TWI stopped
     I2C_INT_ERROR_Func, //   TWI error
@@ -72,7 +72,7 @@ enum
 };
 
 /// @brief I2c interupt indexces function
-enum
+enum _I2C_INTERRUPT_MASK_TYPES_
 {
     I2C_INT_STOPPED_Mask = 1, //   TWI stopped
     I2C_INT_ERROR_Mask = 9, //   TWI error
@@ -94,7 +94,7 @@ enum
 
 
 /// @brief i2c short register to directly interconnect the task and events 
-enum
+enum _I2C_SHORT_REG_TYPES_
 {
     I2C_SHORT_LASTTX_STARTRX =7,
     I2C_SHORT_LASTTX_SUSPEND ,
