@@ -105,6 +105,13 @@ typedef void (*ble_gap_procdeure_callbacks)(void *param , ble_gap_evt_t * gap_ev
 /// @param callbacks 
 void ble_gap_add_callback(uint8_t callback_type, uint16_t conn_handle, ble_gap_procdeure_callbacks callbacks);
 
+/// @brief this is to get the connection handle of the connected device 
+/// @param  void 
+/// @return the conection handle , 
+uint16_t ble_gap_get_conn_handle(void);
+
+
+
 /// @brief this is to disconnect the
 /// @param conn_handle
 void ble_gap_disconnect(uint16_t conn_handle);

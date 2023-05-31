@@ -41,8 +41,6 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////
 
-        //// init the security procedure 
-        // ble_gap_security_init(ble_peer_conn_handle);
 
     }
     break;
@@ -53,7 +51,6 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         // after disconnecting
         ble_peer_conn_handle = BLE_CONN_HANDLE_INVALID;
 
-        ///// notify the genral task about the ble disconnection
     }
     break;
 
