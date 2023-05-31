@@ -154,9 +154,11 @@ void general_task_function(void *param)
                 // NRF_LOG_WARNING("midbtn");
             }
         }
-        delay(300);
-        // NRF_LOG_INFO("main task");
+        delay(1000);
+        // NRF_LOG_INFO("main task 1");
     }
+
+
 
     vTaskDelete(NULL);
 }

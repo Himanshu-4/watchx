@@ -30,7 +30,7 @@ bool gpio_install_isr_servc(void);
 bool gpio_uninstall_isr_servc(void);
 
 
-enum
+enum _GPIO_TASK_TYPES_
 {
     GPIO_TASK_ADDR_OUT,
     GPIO_TASK_ADDR_SET,
@@ -58,7 +58,7 @@ uint32_t * event_addr_get_ch_no(uint8_t);
 ///////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 // the mode of that GPIO channel
-enum
+enum _GPIO_MODE_TYPES_
 {
     GPIO_TE_DISABLED=0,
     GPIO_EVENT_MODE =1,
@@ -66,7 +66,7 @@ enum
 };
 
 // define the chaanel number here 
-enum
+enum _GPIO_CHANNEL_TYPES_
 {
     GPIOTE_CHANNEL_1,
     GPIOTE_CHANNEL_2, 
@@ -78,7 +78,7 @@ enum
 };
 
 // define the polarity here for the task mode and for the event mode 
-enum
+enum _GPIO_POLARITY_TYPES_
 {
     EVENT_NONE,
     EVENT_RISING_EDGE,
@@ -88,7 +88,7 @@ enum
 };
 
 // task configurations enums of the polarity of the task
-enum
+enum _GPIO_TASK_OUT_TYPES_
 {
     GPIO_TASK_OUT_NONE,
     GPIO_TASK_OUT_SET,
@@ -97,7 +97,7 @@ enum
 
 };
 
-enum
+enum _GPIO_TASK_OUT_LEVEL_TYPES_
 {
     TASK_OUT_INIT_LEVEL_LOW,
     TASK_OUT_INIT_LEVEL_HIGH

@@ -17,7 +17,7 @@
 
 
 // define the pin number 
-enum
+enum  _GPIO_PIN_NUMBER_TYPES_
 {
     PIN_0,
     PIN_1,
@@ -71,14 +71,14 @@ enum
 
 
 /** @brief Pin direction definitions. */
-enum
+enum _GPIO_PIN_DIR_TYPES_
 {
     GPIO_PIN_DIR_INPUT  = 0, ///< Input.
     GPIO_PIN_DIR_OUTPUT = 1 ///< Output.
 };
 
 /** @brief Connection of input buffer. */
-enum
+enum _GPIO_PIN_INPUT_BUFF_TYPES_
 {
     GPIO_PIN_INPUT_BUFF_CONNECT    = 0,   ///< Connect input buffer.
     GPIO_PIN_INPUT_BUFF_DISCONNECT = 1 ///< Disconnect input buffer.
@@ -88,7 +88,7 @@ enum
  * @brief Enumerator used for selecting the pin to be pulled down or up at the time of pin
  * configuration.
  */
-enum
+enum _GPIO_PIN_PULL_TYPES_
 {
     GPIO_PIN_NOPULL   = 0, ///<  Pin pull-up resistor disabled.
     GPIO_PIN_PULLDOWN = 1, ///<  Pin pull-down resistor enabled.
@@ -96,7 +96,7 @@ enum
 };
 
 /** @brief Enumerator used for selecting output drive mode. */
-enum
+enum _GPIO_PIN_DRIVE_TYPES_
 {
     GPIO_PIN_S0S1 = 0, ///< !< Standard '0', standard '1'.
     GPIO_PIN_H0S1 , ///< !< High-drive '0', standard '1'.
@@ -109,7 +109,7 @@ enum
 };
 
 /** @brief Enumerator used for selecting the pin to sense high or low level on the pin input. */
- enum
+ enum _GPIO_PIN_SENSE_TYPES_
 {
     GPIO_PIN_NOSENSE    =0, ///<  Pin sense level disabled.
     GPIO_PIN_SENSE_HIGH =2,     ///<  Pin sense high level.

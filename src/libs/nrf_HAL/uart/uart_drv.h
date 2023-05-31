@@ -24,7 +24,7 @@
 
 
 /// @brief uart task indexing for the get addr API
-enum
+enum  _UART_TASK_TYPES_
 {
     UART_TASK_START_RX,
     UART_TASK_STOP_RX,
@@ -35,7 +35,7 @@ enum
 };
 
 /// @brief uart events for the get addr API
-enum
+enum _UART_EVENT_TYPES_
 {
     UART_EVENT_CTS,
     UART_EVENT_NCTS,
@@ -50,7 +50,7 @@ enum
     UART_EVENT_TXSTOPPED
 };
 /// @brief the interrupts no to add the irq handlers and enable disable it 
-enum
+enum _UART_INTERRUPT_TYPES_
 {
     UART_INT_CTS,        
     UART_INT_NCTS,       
@@ -66,7 +66,7 @@ enum
 };
 
 /// @brief interrupt that can be set in interrupt set register 
-enum
+enum _UART_INTERRUPT_MASK_TYPES_
 {
     UART_INT_CTS_Mask       = 0,
     UART_INT_NCTS_Mask      = 1,
@@ -84,7 +84,7 @@ enum
 
 
 /// @brief errors in the uart through error register
-enum
+enum _UART_ERROR_TYPES_
 {
     UART_ERR_OVERRUN = _BV(0),
     UART_ERR_PARITY  = _BV(1),
@@ -92,7 +92,7 @@ enum
     UART_ERR_BREAK   = _BV(3)
 };
 /// @brief the uart baud rate 
-enum
+enum _UART_BAUD_RATE_TYPES_
 {
     UART_Baudrate_1200     = 0x0004F000UL, //  1200 baud (actual rate: 1205)
     UART_Baudrate_2400     = 0x0009D000UL, //  2400 baud (actual rate: 2396)
@@ -115,7 +115,7 @@ enum
 
 
 /// @brief uart Hardware flow control
-enum 
+enum  _UART_FLOW_CONTROL_TYPES_
 {
     HARDWARE_FLOW_DISABLE,
     HARDWARE_FLOW_ENABLE
@@ -130,7 +130,7 @@ typedef  struct __PACKED
     uint32_t rts_pin;
 }flow_control;
 
-enum
+enum _UART_PARITY_TYPES_
 {
     PARITY_EXCLUDED = 0x00,
     PARITY_INCLUDED = 0x07

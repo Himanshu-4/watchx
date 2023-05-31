@@ -147,10 +147,10 @@ uint8_t nrf_get_btn_evtq(void)
 
 /// @brief this function is to wait for the event q to have an event 
 /// @return this will wait for the specified time and return 0 if the time expires as event dont happen
-uint8_t nrf_get_btn_evtq_wait(void)
+uint8_t nrf_get_btn_evtq_wait(uint32_t wait_time)
 {
     uint8_t evt =NRF_BUTTON_NONE_EVT;
-    if(xQueueReceive(nrf_btn_evtq_handle , &evt , pdMS_TO_TICKS(NRF_BUTTON_EVENT_WAIT_TIME) ) != pdPASS)
+    if(xQueueReceive(nrf_btn_evtq_handle , &evt , pdMS_TO_TICKS(wait_time) ) != pdPASS)
     {
         evt =NRF_BUTTON_NONE_EVT;
     }

@@ -6,7 +6,7 @@
 
 
 /// @brief / define the channels here 
-enum
+enum _PPI_CHANNEL_TYPES_
 {
     PPI_CHANNEL_0 =0,
     PPI_CHANNEL_1, 
@@ -43,7 +43,7 @@ enum
 
 };
 
-enum
+enum _PPI_GROUP_TYPES_
 {
     PPI_GROUP_0 =0,
     PPI_GROUP_1,

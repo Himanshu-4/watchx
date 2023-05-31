@@ -15,6 +15,7 @@
 #include "main_helper.h"
 
 
+static void nrf_accelrometer_interrupt_handler(void);
 
 // function to read the register 
 static uint8_t read_reg( uint8_t reg_addr)
@@ -36,29 +37,18 @@ static void write_reg(uint8_t reg_addr, uint8_t data)
 
 }
 
-// function to init the bus 
-static void i2c_bus_init(void)
-{
-
-    // i2c_config_t conf = {
-    //     .mode = I2C_MODE_MASTER,
-    //     .sda_io_num = ADXL_SDA_IO,
-    //     .scl_io_num = ADXL_SCL_IO,
-    //     .sda_pullup_en = GPIO_PULLUP_DISABLE,
-    //     .scl_pullup_en = GPIO_PULLUP_DISABLE,
-    //     .master.clk_speed = ADXL_FREQ_HZ,
-    // };
-
-    // i2c_param_config(I2C_HOST_0, &conf);
-    
-    // i2c_driver_install(I2C_HOST_0 , conf.mode, ADXL_MASTER_RX_BUF_DISABLE, ADXL_MASTER_TX_BUF_DISABLE, 0);
-}
 
 // function to init the accelro
-void adxl_init(void)
+uint8_t adxl_init(void)
 {
-    i2c_bus_init();
-    printf("devid is 0xe5 act id is %x\r\n",read_reg(DEVID));
+    uint8_t ret = nrf_OK;
+    ///// init the interrupt handler and pins 
+
+    //////// init the gpio event type and interrupt 
+
+    ///////// init the event q here 
+
+    return ret;
 }
 
 
@@ -349,4 +339,14 @@ bool read_accelration(float *buff )
    
     return 0;
    
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+static void nrf_accelrometer_interrupt_handler(void)
+{
+
+
 }

@@ -28,8 +28,9 @@ void nrf_button_evt_lib_deinit(void);
 uint8_t nrf_get_btn_evtq(void);
 
 /// @brief this function is to wait for the event q to have an event 
+/// @param the wait time for tthe eventq to wait 
 /// @return this will wait for the specified time and return 0 if the time expires as event dont happen
-uint8_t nrf_get_btn_evtq_wait(void);
+uint8_t nrf_get_btn_evtq_wait(uint32_t );
 
 /// @brief this is to reset the btn event q 
 /// @param  void 

@@ -100,7 +100,7 @@ extern void delay_microsec(uint16_t delay_time);
 
 
 /// errors for the anonymus  enum
-enum
+enum _NRF_ERROR_TYPES_
 {
     nrf_OK = 0x00UL,
     nrf_ERR_TIMEOUT,

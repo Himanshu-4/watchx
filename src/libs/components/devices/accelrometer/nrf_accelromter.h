@@ -127,7 +127,7 @@ typedef struct __packed _CONFIG_
 typedef adxl_cfg * adxl_config;
 
 
-void adxl_init(void);
+uint8_t adxl_init(void);
 
 void adxl_deinit(void);
 

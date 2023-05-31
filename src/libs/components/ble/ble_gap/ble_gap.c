@@ -217,17 +217,27 @@ void ble_gap_pre_init(void)
     advertising_init();
 }
 
+static volatile uint8_t advertisement_state = false;
 
 
 uint32_t ble_gap_start_advertise(void)
 {
     NRF_LOG_WARNING("starting adv");
+
+    if(advertisement_state == true)
+    {
+        return nrf_ERR_INVALID_STATE;
+    }
     if (adv_conn_handle != BLE_GAP_ADV_SET_HANDLE_NOT_SET)
     {
         uint32_t err_code = NRF_SUCCESS;
         err_code = sd_ble_gap_adv_start(adv_conn_handle, NRF_SOFTDEVICE_DEFAULT_CONFIG_TAG);
-        check_assrt(err_code, "ble_gap_adv_start");
-        
+        // check_assrt(err_code, "ble_gap_adv_start");
+
+        if(err_code == nrf_OK)
+        {
+            advertisement_state = true;
+        }        
         return err_code;
     }
     return nrf_ERR_INVALID_STATE;
@@ -237,10 +247,19 @@ uint32_t ble_gap_start_advertise(void)
 
 uint32_t  ble_gap_stop_advertise(void)
 {
+    if(advertisement_state == false)
+    {
+        return nrf_ERR_INVALID_STATE;
+    }
     if (adv_conn_handle != BLE_GAP_ADV_SET_HANDLE_NOT_SET)
     {
         uint32_t ret_code = NRF_SUCCESS;
         ret_code = sd_ble_gap_adv_stop(adv_conn_handle);
+
+        if(ret_code == nrf_OK)
+        {
+            advertisement_state = false;
+        }
         return ret_code;
     }
 
