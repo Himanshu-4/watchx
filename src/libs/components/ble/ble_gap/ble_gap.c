@@ -1,84 +1,107 @@
 
 #include "ble_gap_func.h"
 
-void ble_gap_security_init(uint16_t conn_handle , ble_gap_sec_params * sec_param )
-{
-    uint32_t ret_code = 0;
-
-    //////////////////////////////////////// //////////////
-    ///////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////
-    //// init the authentication procedure
-    static const ble_gap_sec_params_t gap_sec_params =
-        {
-            .bond = BLE_GAP_SEC_PARAM_BOND,
-            .io_caps = BLE_GAP_SEC_PARAM_IO_CAPS,
-            .keypress = BLE_GAP_SEC_PARAM_KEYPRESS,
-            .lesc = BLE_GAP_SEC_PARAM_LESC_SUPPORT,
-            .max_key_size = BLE_GAP_SEC_PARAM_MAX_KEY_SIZE,
-            .min_key_size = BLE_GAP_SEC_PARAM_MIN_KEY_SIZE,
-            .mitm = BLE_GAP_SEC_PARAM_MITM,
-            .oob = BLE_GAP_SEC_PARAM_OOB_SUPPORT,
-            
-            .kdist_own.enc = BLE_GAP_SEC_PARAM_LTK,
-            .kdist_own.id = BLE_GAP_SEC_PARAM_IRK,
-            .kdist_own.sign = BLE_GAP_SEC_PARAM_CONN_SIGNATURE_RESOLVING_KEY,
-            .kdist_own.link = BLE_GAP_SEC_PARAM_DERV_LINK_FROM_LTK,
-
-            .kdist_peer.enc = BLE_GAP_SEC_PARAM_LTK,
-            .kdist_peer.id = BLE_GAP_SEC_PARAM_IRK,
-            .kdist_peer.sign = BLE_GAP_SEC_PARAM_CONN_SIGNATURE_RESOLVING_KEY,
-            .kdist_peer.link = BLE_GAP_SEC_PARAM_DERV_LINK_FROM_LTK,
-
-        };
-    ret_code = sd_ble_gap_authenticate(conn_handle, &gap_sec_params );
-    check_assrt(ret_code, "gap sec param");
-
-
-}
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////   GAP related callback implimented here 
+//////////////////////////   GAP related functions  implimented here 
 
-ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp] = {NULL};
+///////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////  global variables here 
+
+volatile ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp] = {NULL};
+
+///////////// this is to store the connection handle 
+static volatile uint16_t ble_gap_conn_handles[BLE_GAP_MAX_NO_OF_DEVICES];
+
+
 
 /// @brief this is to add the callback to the particular callback 
 /// @param callback_type 
 /// @param conn_handle 
 /// @param callbacks 
-void ble_gap_add_callback(uint8_t callback_type, uint16_t conn_handle, ble_gap_procdeure_callbacks callbacks)
+void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks)
 {
+    //// find the index by the connection handle 
 
+    if(callback_type > ble_gap_max_callback_supp) return ;
+    ///// this is to set the callback 
+    if(GAP_Callbacks[callback_type] == NULL)
+    {
+        //// add the callback 
+        GAP_Callbacks[callback_type] = callbacks;
+    }
+}
+
+/// @brief this is to remove the gap callbacks 
+/// @param callback_type
+void ble_gap_remove_callback(uint8_t callback_type)
+{
+    
+    if(callback_type > ble_gap_max_callback_supp) return ;
+    ///// this is to set the callback 
+        //// add the callback 
+        GAP_Callbacks[callback_type] = NULL;
     
 }
 
 
+/// @brief this is to set a connection handle to a particular index 
+/// @param index 
+/// @return the connection handle of particular index 
+uint32_t ble_gap_set_conn_handle(uint8_t * index , uint16_t conn_handle)
+{
+    ///// search for the 0 connection handle 
+    //// serach for the connection handle 
+    for(uint8_t i = 0; i<BLE_GAP_MAX_NO_OF_DEVICES; i++)
+    {
+        if(ble_gap_conn_handles[i] == 0)
+        {
+            ble_gap_conn_handles[i] = conn_handle;
+            *index = i;
+            return nrf_OK;
+        }
+    }
+
+    *index = BLE_GAP_MAX_NO_OF_DEVICES +1;
+    return nrf_ERR_OUT_OF_MEM;
+    
+}
+
+/// @brief this is to get the connection handle of the connected device 
+/// @param  index of the device 
+/// @return the conection handle , 
+uint16_t ble_gap_get_conn_handle(uint8_t index )
+{
+    if(index > BLE_GAP_MAX_NO_OF_DEVICES)
+    {
+        return BLE_CONN_HANDLE_INVALID;
+    }
+    return ble_gap_conn_handles[index];
+}
 
 
-//////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
+/// @brief this function is used to remove the connection handle from the global array list 
+/// @param connection handle 
+void ble_gap_remove_conn_handle(uint16_t conn_handle)
+{
+    //// serach for the connection handle 
+    for(uint8_t i = 0; i<BLE_GAP_MAX_NO_OF_DEVICES; i++)
+    {
+        if(ble_gap_conn_handles[i] == conn_handle)
+        {
+            ble_gap_conn_handles[i] = BLE_CONN_HANDLE_INVALID;
+            break;
+        }
+    }
+}
 
-
-
-// #define FIRST_CONN_PARAMS_UPDATE_DELAY 5000 /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
-// #define NEXT_CONN_PARAMS_UPDATE_DELAY 30000 /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
-// #define MAX_CONN_PARAMS_UPDATE_COUNT 3      /**< Number of attempts before giving up the connection parameter negotiation. */
-
-// #define SEC_PARAM_BOND 0                               /**< Perform bonding. */
-// #define SEC_PARAM_MITM 0                               /**< Man In The Middle protection not required. */
-// #define SEC_PARAM_LESC 0                               /**< LE Secure Connections not enabled. */
-// #define SEC_PARAM_KEYPRESS 0                           /**< Keypress notifications not enabled. */
-// #define SEC_PARAM_IO_CAPABILITIES BLE_GAP_IO_CAPS_NONE /**< No I/O capabilities. */
-// #define SEC_PARAM_OOB 0                                /**< Out Of Band data not available. */
-// #define SEC_PARAM_MIN_KEY_SIZE 7                       /**< Minimum encryption key size. */
-// #define SEC_PARAM_MAX_KEY_SIZE 16                      /**< Maximum encryption key size. */
-
-// #define DEAD_BEEF 0xDEADBEEF /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
+/// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
+/// @param conn_handle
+void ble_gap_disconnect(uint16_t conn_handle)
+{
+    
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +240,10 @@ void ble_gap_pre_init(void)
     advertising_init();
 }
 
-static volatile uint8_t advertisement_state = false;
+
+
+/// @brief this saves the advertisement state 
+volatile uint8_t advertisement_state = false;
 
 
 uint32_t ble_gap_start_advertise(void)
@@ -264,6 +290,46 @@ uint32_t  ble_gap_stop_advertise(void)
     }
 
     return nrf_ERR_INVALID_STATE;
+}
+
+
+
+void ble_gap_security_init(uint16_t conn_handle , ble_gap_sec_params * sec_param )
+{
+    uint32_t ret_code = 0;
+
+    //////////////////////////////////////// //////////////
+    ///////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////
+    //// init the authentication procedure
+    static const ble_gap_sec_params_t gap_sec_params =
+        {
+            .bond = BLE_GAP_SEC_PARAM_BOND,
+            .io_caps = BLE_GAP_SEC_PARAM_IO_CAPS,
+            .keypress = BLE_GAP_SEC_PARAM_KEYPRESS,
+            .lesc = BLE_GAP_SEC_PARAM_LESC_SUPPORT,
+            .max_key_size = BLE_GAP_SEC_PARAM_MAX_KEY_SIZE,
+            .min_key_size = BLE_GAP_SEC_PARAM_MIN_KEY_SIZE,
+            .mitm = BLE_GAP_SEC_PARAM_MITM,
+            .oob = BLE_GAP_SEC_PARAM_OOB_SUPPORT,
+            
+            //// @brief what the device will send the keys 
+            .kdist_own.enc = BLE_GAP_SEC_PARAM_LTK,
+            .kdist_own.id = BLE_GAP_SEC_PARAM_IRK,
+            .kdist_own.sign = BLE_GAP_SEC_PARAM_CONN_SIGNATURE_RESOLVING_KEY,
+            .kdist_own.link = BLE_GAP_SEC_PARAM_DERV_LINK_FROM_LTK,
+            
+            //// @brief what the peer device will have to send the keys 
+            .kdist_peer.enc = BLE_GAP_SEC_PARAM_LTK,
+            .kdist_peer.id = BLE_GAP_SEC_PARAM_IRK,
+            .kdist_peer.sign = BLE_GAP_SEC_PARAM_CONN_SIGNATURE_RESOLVING_KEY,
+            .kdist_peer.link = BLE_GAP_SEC_PARAM_DERV_LINK_FROM_LTK,
+
+        };
+    ret_code = sd_ble_gap_authenticate(conn_handle, &gap_sec_params );
+    check_assrt(ret_code, "gap sec param");
+
+
 }
 
 

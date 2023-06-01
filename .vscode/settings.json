@@ -9,7 +9,8 @@
         "nrf_soc.h": "c",
         "nrf.h": "c",
         "nrf_custom_log.h": "c",
-        "main_helper.h": "c"
+        "main_helper.h": "c",
+        "ble_softdevice_init.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false
 }

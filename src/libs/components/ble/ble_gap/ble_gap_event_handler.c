@@ -6,6 +6,10 @@
 //////////// the connection handle 
 uint16_t ble_peer_conn_handle = BLE_CONN_HANDLE_INVALID;
 
+
+
+extern volatile uint8_t advertisement_state;
+
 void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 {
     
@@ -41,6 +45,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////
 
+    advertisement_state = false;
 
     }
     break;
