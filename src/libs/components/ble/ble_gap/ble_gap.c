@@ -58,12 +58,12 @@ uint32_t ble_gap_set_conn_handle(uint8_t * index , uint16_t conn_handle)
         if(ble_gap_conn_handles[i] == 0)
         {
             ble_gap_conn_handles[i] = conn_handle;
-            *index = i;
+            *index = i+1;
             return nrf_OK;
         }
     }
 
-    *index = BLE_GAP_MAX_NO_OF_DEVICES +1;
+    *index = 0;
     return nrf_ERR_OUT_OF_MEM;
     
 }
@@ -79,7 +79,7 @@ uint16_t ble_gap_get_conn_handle(uint8_t index )
     {
         return BLE_CONN_HANDLE_INVALID;
     }
-    return ble_gap_conn_handles[index];
+    return ble_gap_conn_handles[index -1 ];
 }
 
 
@@ -114,7 +114,7 @@ void ble_gap_disconnect(uint16_t conn_handle)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////// GLobal variables for storing the connectin hadles
+//  ////////////    below are function and methods for advertising part only 
 
 static uint8_t adv_conn_handle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;
 

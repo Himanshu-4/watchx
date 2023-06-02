@@ -28,6 +28,7 @@
 ////////// include the ams to init the services
 #include "ble_ams.h"
 
+#include "ble_common_task.h"
 
 /////// include the device 
 #include "nrf_button.h"
@@ -83,6 +84,9 @@ int main()
     ble_ancs_pre_init();
     // init the ams service
     ble_ams_pre_init();
+    
+    ////// init the common task 
+    ble_common_task_pre_init(NULL);
     /// init nvs
     nvs_flash_init(NVS_FLASH_OPERATION_TIMEOUT);
 

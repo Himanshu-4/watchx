@@ -54,6 +54,13 @@
 #define UART_LOG_BAUD_RATE UART_Baudrate_115200
 
 
+#define NRF_LOG_ERRORS 1 
+#define NRF_LOG_WARNINGS 2
+#define NRF_LOG_INFO  3
+#define NRF_LOG_DEBUG 4
+
+
+#define DEBUG_LOG_MAX  NRF_LOG_WARNING  
 
 ////================================================================================
 ////================================================================================

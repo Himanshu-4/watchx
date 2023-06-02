@@ -30,11 +30,6 @@ set(RELEASE_Flags
         # -O3
         )
 
-
-set(ENABLE_DEBUG_LOGS 
-        -DDEBUG_LOG=1
-        )
-
 # specify the C standard and the c extensions
 
 set(CMAKE_C_STANDARD 99)
@@ -108,8 +103,7 @@ set(COMMON_DEFINES
         -DS132
         -DSOFTDEVICE_PRESENT
         
-        ${ENABLE_DEBUG_LOGS}
-        # -DDEBUG  # if you want to debug the code then check it otherwise comment it 
+          # -DDEBUG  # if you want to debug the code then check it otherwise comment it 
         # -DSOFTDEVICE_PRESENT # tell the compiler that softdevice is present 
         # -DENABLE_SWO # uncomment it if you want to enable serial wire output 
 )

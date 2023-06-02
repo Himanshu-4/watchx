@@ -8,6 +8,11 @@
 #include "ble_current_time.h"
 
 
+#define BLE_COMMON_TASK_NAME "ble_common"
+
+/// @brief this is to init the ble common task in static memory 
+/// @param param 
+void ble_common_task_pre_init(void *param);
 
 
 

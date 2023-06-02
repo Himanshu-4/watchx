@@ -73,7 +73,7 @@
 
                 // external libraries path specify to vs code 
                 "D:\\smart_watch\\Watchx\\src\\libs\\components\\ble",
-                
+                "D:\\smart_watch\\Watchx\\src\\libs\\components\\ble\\**",
 
                 //main folder 
                 "D:\\smart_watch\\Watchx\\src\\main"

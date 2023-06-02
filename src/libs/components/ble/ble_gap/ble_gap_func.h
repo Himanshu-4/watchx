@@ -89,6 +89,8 @@ enum _BLE_GAP_RELATED_ERRORS_
 
     ble_gap_err_max_Device_limit_reached,
 
+    ble_gap_err_device_index_invalid ,
+
 };
 /////////////////////////////////////////////////////////////////
 ///////////////// add the callback ////////////////////////////
