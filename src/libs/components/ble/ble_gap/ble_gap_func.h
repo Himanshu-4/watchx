@@ -78,7 +78,18 @@
 void ble_gap_pre_init(void);
 
 
+enum _BLE_GAP_RELATED_ERRORS_
+{
+    ble_gap_ok = 0x00,
 
+    ble_gap_err_timeout,
+
+    /// error regarding conn handle 
+    ble_gap_err_conn_handle_invalid,
+
+    ble_gap_err_max_Device_limit_reached,
+
+};
 /////////////////////////////////////////////////////////////////
 ///////////////// add the callback ////////////////////////////
 
@@ -92,7 +103,7 @@ enum _BLE_GAP_CALLBACKS_
 
 };
 
-typedef void (*ble_gap_procdeure_callbacks)(void *param , ble_gap_evt_t * gap_evt);
+typedef void (*ble_gap_procdeure_callbacks)(void *param , ble_gap_evt_t const  * gap_evt);
 
 /// @brief this is to add the callback to the particular callback 
 /// @param callback_type 
@@ -113,6 +124,12 @@ uint32_t ble_gap_set_conn_handle(uint8_t * index , uint16_t conn_handle);
 /// @param  index of the device 
 /// @return the conection handle , 
 uint16_t ble_gap_get_conn_handle(uint8_t index );
+
+
+/// @brief this function is used to remove the connection handle from the global array list 
+/// @param connection handle 
+uint8_t ble_gap_remove_conn_handle(uint16_t conn_handle);
+
 
 /// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
 /// @param conn_handle

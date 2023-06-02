@@ -1,12 +1,7 @@
 ////////// include the gap security params 
 #include "ble_gap_func.h"
 
-/////////// include the gatt client module ///////////
-
-//////////// the connection handle 
-uint16_t ble_peer_conn_handle = BLE_CONN_HANDLE_INVALID;
-
-
+extern volatile ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp];
 
 extern volatile uint8_t advertisement_state;
 
@@ -25,7 +20,8 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_CONNECTED:
     {
         NRF_LOG_INFO("connected");
-        ble_peer_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+   
+    
         // err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
 
         static const ble_gap_conn_params_t device_preferd_conn_params =
@@ -40,7 +36,25 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         sd_ble_gap_conn_param_update(p_ble_evt->evt.gap_evt.conn_handle,
                                      &device_preferd_conn_params);
 
+        uint8_t index = 10;
+        // set the connection handle 
+        ble_gap_set_conn_handle(&index, p_ble_evt->evt.gap_evt.conn_handle);
 
+        /////// only call the callback when we have a valid index 
+        if(index < BLE_GAP_MAX_NO_OF_DEVICES)
+        {
+        // call the callback 
+        if(GAP_Callbacks[ble_gap_evt_connected] != NULL)
+        {
+            ////// pass the index to the callback 
+            GAP_Callbacks[ble_gap_evt_connected](&index, &p_ble_evt->evt.gap_evt);
+        }
+        }
+        else 
+        {
+            ///////// disconnect the device 
+            ble_gap_disconnect( p_ble_evt->evt.gap_evt.conn_handle);
+        }
     ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////
@@ -54,7 +68,16 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     {
         NRF_LOG_ERROR("disconnected");
         // after disconnecting
-        ble_peer_conn_handle = BLE_CONN_HANDLE_INVALID;
+        
+        /// remove the connection handle 
+        if( ble_gap_ok == ble_gap_remove_conn_handle(p_ble_evt->evt.gap_evt.conn_handle))
+        {
+            /// only call the callback for a valid conn hadnle  
+            if(GAP_Callbacks[ble_gap_evt_disconnected] != NULL)
+            {
+                GAP_Callbacks[ble_gap_evt_disconnected](NULL, &p_ble_evt->evt.gap_evt);
+            }
+        }
 
     }
     break;
@@ -137,6 +160,15 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_TIMEOUT:
     {
+        /// disconnect the device and remove the conn handle 
+        ble_gap_disconnect(p_ble_evt->evt.gap_evt.conn_handle);
+
+        ////// call the callback 
+
+            if(GAP_Callbacks[ble_gap_evt_timeout] != NULL)
+            {
+                GAP_Callbacks[ble_gap_evt_timeout](NULL, &p_ble_evt->evt.gap_evt);
+            }
         NRF_LOG_ERROR("gap evt timeout ");
     }
     break;
@@ -192,6 +224,12 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_CONN_SEC_UPDATE:
     {
         NRF_LOG_WARNING("BLE_GAP_EVT_CONN_SEC_UPDATE");
+
+        /// call the callback 
+        if(GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt] != NULL)
+        {
+            GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt](NULL, &p_ble_evt->evt.gap_evt);
+        }
     }
     break;
 

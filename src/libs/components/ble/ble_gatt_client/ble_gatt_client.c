@@ -11,7 +11,7 @@
 
 #define IS_CLIENT_INITED(x)                 \
   if (x.client_inited != BLE_CLIENT_INITED) \
-  return ble_client_client_not_inited
+  return ble_client_err_client_not_inited
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ uint32_t gatt_client_init(uint16_t conn_handle)
     // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
 
   uint32_t ret_code = 0;
@@ -91,7 +91,7 @@ uint32_t gatt_client_init(uint16_t conn_handle)
       goto init_the_client;
     }
   }
-  ret_code = ble_client_max_limit_reached;
+  ret_code = ble_client_err_max_limit_reached;
   goto return_mech;
 
 init_the_client:
@@ -126,7 +126,7 @@ uint32_t gatt_client_deinit(uint16_t conn_handle)
     // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
   
   uint32_t ret_code = 0;
@@ -141,7 +141,7 @@ uint32_t gatt_client_deinit(uint16_t conn_handle)
       goto deinit_the_client;
     }
   }
-  ret_code = ble_client_conn_handle_not_found;
+  ret_code = ble_client_err_conn_handle_not_found;
   goto return_mech;
 
 deinit_the_client:
@@ -195,7 +195,7 @@ uint32_t gatt_client_add_timeout_callback(uint16_t conn_handle, gatt_client_time
   // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
 
   uint8_t index = 0;
@@ -210,7 +210,7 @@ uint32_t gatt_client_add_timeout_callback(uint16_t conn_handle, gatt_client_time
       goto init_callback;
     }
   }
-  err = ble_client_conn_handle_not_found;
+  err = ble_client_err_conn_handle_not_found;
   goto return_mech;
 
 init_callback:
@@ -235,7 +235,7 @@ uint32_t gatt_client_add_err_handler_callback(uint16_t conn_handle, gatt_client_
   // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
 
   uint8_t index = 0;
@@ -250,7 +250,7 @@ uint32_t gatt_client_add_err_handler_callback(uint16_t conn_handle, gatt_client_
       goto init_callback;
     }
   }
-  err = ble_client_conn_handle_not_found;
+  err = ble_client_err_conn_handle_not_found;
   goto return_mech;
 
 init_callback:
@@ -276,7 +276,7 @@ uint32_t gatt_client_add_indication_callback(uint16_t conn_handle, gatt_client_i
   // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
 
   uint8_t index = 0;
@@ -291,7 +291,7 @@ uint32_t gatt_client_add_indication_callback(uint16_t conn_handle, gatt_client_i
       goto init_callback;
     }
   }
-  err = ble_client_conn_handle_not_found;
+  err = ble_client_err_conn_handle_not_found;
   goto return_mech;
 
 init_callback:
@@ -318,7 +318,7 @@ uint32_t gatt_client_add_notif_callback(uint16_t conn_handle, gatt_client_notif_
   // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
 
   uint8_t index = 0;
@@ -333,7 +333,7 @@ uint32_t gatt_client_add_notif_callback(uint16_t conn_handle, gatt_client_notif_
       goto init_callback;
     }
   }
-  err = ble_client_conn_handle_not_found;
+  err = ble_client_err_conn_handle_not_found;
   goto return_mech;
 
 init_callback:
@@ -363,7 +363,7 @@ uint32_t gatt_client_discover_service(uint16_t conn_handle, ble_service_struct_t
   // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
 
   uint8_t index = 0;
@@ -378,7 +378,7 @@ uint32_t gatt_client_discover_service(uint16_t conn_handle, ble_service_struct_t
       goto discover_Data;
     }
   }
-  err = ble_client_conn_handle_not_found;
+  err = ble_client_err_conn_handle_not_found;
   goto return_mech;
 
 discover_Data:
@@ -396,7 +396,7 @@ discover_Data:
   /// wait for the notifcation from the callback
   if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)))
   {
-    err = ble_client_error_timeout;
+    err = ble_client_err_timeout;
     goto return_mech;
   }
 
@@ -411,7 +411,7 @@ discover_Data:
     service_struct->ble_service.handle_range.start_handle = BLE_GATT_CLIENT_HANDLE_NONE;
     service_struct->ble_service.handle_range.end_handle = BLE_GATT_CLIENT_HANDLE_NONE;
 
-    err = ble_client_srvc_not_found;
+    err = ble_client_err_srvc_not_found;
   }
 
 return_mech:
@@ -433,7 +433,7 @@ uint32_t gatt_client_discover_chars(uint16_t conn_handle, ble_service_struct_t *
   // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
 
   uint8_t index = 0;
@@ -448,7 +448,7 @@ uint32_t gatt_client_discover_chars(uint16_t conn_handle, ble_service_struct_t *
       goto discover_Data;
     }
   }
-  err = ble_client_conn_handle_not_found;
+  err = ble_client_err_conn_handle_not_found;
   goto return_mech;
 
 discover_Data:
@@ -471,7 +471,7 @@ discover_Data:
   /// wait for the notifcation from the callback
   if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)))
   {
-    err = ble_client_error_timeout;
+    err = ble_client_err_timeout;
     goto return_mech;
   }
 
@@ -485,7 +485,7 @@ discover_Data:
   {
     char_struct->characterstic.handle_decl = BLE_GATT_CLIENT_HANDLE_NONE;
     char_struct->characterstic.handle_value = BLE_GATT_CLIENT_HANDLE_NONE;
-    err = ble_client_char_not_found;
+    err = ble_client_err_char_not_found;
   }
 
 return_mech:
@@ -510,7 +510,7 @@ uint32_t gatt_client_discover_char_desc(uint16_t conn_handle, ble_char_struct_t 
   // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
 
   uint8_t index = 0;
@@ -525,7 +525,7 @@ uint32_t gatt_client_discover_char_desc(uint16_t conn_handle, ble_char_struct_t 
       goto discover_Data;
     }
   }
-  err = ble_client_conn_handle_not_found;
+  err = ble_client_err_conn_handle_not_found;
   goto return_mech;
 
 discover_Data:
@@ -552,7 +552,7 @@ discover_Data:
   /// wait for the notifcation from the callback
   if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)))
   {
-    err = ble_client_error_timeout;
+    err = ble_client_err_timeout;
     goto return_mech;
   }
 
@@ -565,7 +565,7 @@ discover_Data:
   else
   {
     desc_struct->descriptor.handle = BLE_GATT_CLIENT_HANDLE_NONE;
-    err = ble_client_desc_not_found;
+    err = ble_client_err_desc_not_found;
   }
 
 return_mech:
@@ -595,7 +595,7 @@ uint32_t gatt_client_char_write(uint16_t conn_handle, ble_char_struct_t *char_st
   // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
 
   uint8_t index = 0;
@@ -610,7 +610,7 @@ uint32_t gatt_client_char_write(uint16_t conn_handle, ble_char_struct_t *char_st
       goto server_operation;
     }
   }
-  err = ble_client_conn_handle_not_found;
+  err = ble_client_err_conn_handle_not_found;
   goto return_mech;
 
 server_operation:
@@ -640,7 +640,7 @@ server_operation:
   /// wait for the notifcation from the callback
   if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)))
   {
-    err = ble_client_error_timeout;
+    err = ble_client_err_timeout;
     goto return_mech;
   }
 
@@ -653,7 +653,7 @@ server_operation:
   {
     /// log the erroor
     NRF_LOG_ERROR("write %d", err);
-    err = ble_client_write_op_failed;
+    err = ble_client_err_write_op_failed;
   }
 
 return_mech:
@@ -676,7 +676,7 @@ uint32_t gatt_client_char_read(uint16_t conn_handle, ble_char_struct_t *char_str
   // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
   {
-    return ble_client_error_timeout;
+    return ble_client_err_timeout;
   }
 
   uint8_t index = 0;
@@ -691,7 +691,7 @@ uint32_t gatt_client_char_read(uint16_t conn_handle, ble_char_struct_t *char_str
       goto server_operation;
     }
   }
-  err = ble_client_conn_handle_not_found;
+  err = ble_client_err_conn_handle_not_found;
   goto return_mech;
 
 ///// perform the write operations
@@ -707,7 +707,7 @@ server_operation:
   /// wait for the notifcation from the callback
   if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)))
   {
-    err = ble_client_error_timeout;
+    err = ble_client_err_timeout;
     goto return_mech;
   }
 
@@ -722,7 +722,7 @@ server_operation:
   {
     /// log the erroor
     NRF_LOG_ERROR("read %d", err);
-    err = ble_client_read_op_failed;
+    err = ble_client_err_read_op_failed;
   }
 
 return_mech:

@@ -19,22 +19,22 @@ enum _CLIENT_ERR_CODE_
 {
     ble_client_ok = 0x00,
     /// @brief not found related error code
-    ble_client_conn_handle_not_found,
-    ble_client_srvc_not_found,
-    ble_client_char_not_found,
-    ble_client_desc_not_found,
+    ble_client_err_conn_handle_not_found,
+    ble_client_err_srvc_not_found,
+    ble_client_err_char_not_found,
+    ble_client_err_desc_not_found,
 
     /// @brief ble operation failed err code
-    ble_client_write_op_failed,
-    ble_client_read_op_failed,
-    ble_client_read_size_exceed,
-    ble_client_ex_mtu_failed,
+    ble_client_err_write_op_failed,
+    ble_client_err_read_op_failed,
+    ble_client_err_read_size_exceed,
+    ble_client_err_ex_mtu_failed,
     
     /// @brief invalid state, max limit reached , timeout errors
-    ble_client_error_timeout,
-    ble_client_invalid_state,
-    ble_client_max_limit_reached,
-    ble_client_client_not_inited,
+    ble_client_err_timeout,
+    ble_client_err_invalid_state,
+    ble_client_err_max_limit_reached,
+    ble_client_err_client_not_inited,
 
 };
 

@@ -68,6 +68,8 @@ uint32_t ble_gap_set_conn_handle(uint8_t * index , uint16_t conn_handle)
     
 }
 
+
+
 /// @brief this is to get the connection handle of the connected device 
 /// @param  index of the device 
 /// @return the conection handle , 
@@ -83,24 +85,31 @@ uint16_t ble_gap_get_conn_handle(uint8_t index )
 
 /// @brief this function is used to remove the connection handle from the global array list 
 /// @param connection handle 
-void ble_gap_remove_conn_handle(uint16_t conn_handle)
+/// @return succ/failure of function 
+uint8_t ble_gap_remove_conn_handle(uint16_t conn_handle)
 {
+    uint8_t ret = ble_gap_err_conn_handle_invalid;
     //// serach for the connection handle 
     for(uint8_t i = 0; i<BLE_GAP_MAX_NO_OF_DEVICES; i++)
     {
         if(ble_gap_conn_handles[i] == conn_handle)
         {
             ble_gap_conn_handles[i] = BLE_CONN_HANDLE_INVALID;
+            ret = ble_gap_ok;
             break;
         }
     }
+
+    return ret;
 }
 
 /// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
 /// @param conn_handle
 void ble_gap_disconnect(uint16_t conn_handle)
 {
-    
+    /////////// just disconnect the device from the master 
+
+    sd_ble_gap_disconnect(conn_handle ,BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

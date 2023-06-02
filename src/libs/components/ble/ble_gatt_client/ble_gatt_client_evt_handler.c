@@ -28,6 +28,10 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         /**< Primary Service Discovery Response event.          \n See @ref ble_gattc_evt_prim_srvc_disc_rsp_t.          */
     case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP:
     {
+        ///////// check about the gatt status 
+         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
+
+     
         /////// check that if task handle not null
         if (ble_client_task_handle != NULL)
         {
@@ -35,6 +39,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             memcpy(u8(msg_buff), u8(p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0]), s(ble_gattc_service_t));
             xTaskNotify(ble_client_task_handle, p_ble_evt->evt.gattc_evt.gatt_status, eSetValueWithOverwrite);
         }
+
 
         // for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.count; i++)
         // {
@@ -62,7 +67,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
         {
-            gatt_status = ble_client_char_not_found;
+            gatt_status = ble_client_err_char_not_found;
 
             /// copy the content to the buffer
             /// serach the char with the uuid
@@ -103,7 +108,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
         {
-            gatt_status = ble_client_desc_not_found;
+            gatt_status = ble_client_err_desc_not_found;
 
             /// copy the content to the buffer
             /// serach the char with the uuid
