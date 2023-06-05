@@ -14,6 +14,11 @@
 
 
 ///////////////////////////////////////////////////////////////////////
+//// this will resume the callback 
+#define resume 0x10
+///// this will suspend the callback 
+#define suspend 0x11
+
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 ///////////////////// global variables here 
@@ -58,19 +63,51 @@ void ble_common_task_pre_init(void *param)
 
 
 
+
+/////////////////////////////////////////////////////////////////////////////////////=============
+//////////////////////////////////////////////////////////////////////////////////////////////////
+///////======================================= static functions ==================================
+
+/// @brief this is the function to init the gatt client modules for apple ancs abd ams task 
+/// @param param 
+static void ble_client_task_init_process(void *param)
+{
+
+}
+
+
+static void ble_client_task_deinit_process(void *param)
+{
+
+}
+
+
+/// @brief this is the function defination for the ble task 
+/// @param param 
 static void ble_common_task(void *param)
 {
 
-    UNUSED_PARAMETER(param);
+    // UNUSED_PARAMETER(param);
+
+    uint8_t *callback_resume = (uint8_t *) param;
+
+    function_start:
 
 
     for(;;)
     {
 
+        if(*callback_resume  == resume )
+        {
+            goto function_start;
+        }
+
+
+
 
     }
 
-    ///// never reach here 
+    ///// should never reach here 
     vTaskDelete(NULL);
 }
 // uint32_t ble_apple_task_start(void *param)
@@ -123,8 +160,16 @@ static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * g
         return ;
     }
 
+    NRF_LOG_WARNING("connected");
     //////// start the encrytption process 
 
+
+
+    ///////////// resume the task 
+    vTaskResume(ble_common_Task_handle);
+
+    /// start the function from over 
+    
 
 
 }
@@ -132,7 +177,7 @@ static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * g
 
 static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  * gap_evt)
 {
-    
+    NRF_LOG_ERROR("device disconected");
 
 
 }

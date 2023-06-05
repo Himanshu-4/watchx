@@ -817,6 +817,15 @@ add_custom_command(TARGET ${EXECUTABLE}
         )
 
 
+########################## these are Python app 
+set(python_path 
+        D:\\smart_watch\\watchx\\python)
+
+
+# this is the test application for testing the device sensor and communication 
+add_custom_target(test
+                COMMAND echo "testing Host Application for device "
+                COMMAND python ${python_path}/test_app.py)
 
 
 
@@ -826,9 +835,16 @@ add_custom_command(TARGET ${EXECUTABLE}
 ############################################################################################################################################################################
 ##############################################################################################################################################################################
 ############################################################################################################################################################################
-##############################################################################################################################################################################
-################################ make the bootloader for the nrf52 ##################################################################################
+#########################################
 
+# merge the binaries  things at once 
+add_custom_target(mergebins
+                COMMAND  echo mergining hex files BLE stack and Main Application
+                COMMAND  echo using mergehex to merge differnt hex files 
+                COMMAND  mergehex -m ${NRF_SDK_DIR}/components/softdevice/s132/hex/s132_nrf52_7.2.0_softdevice.hex ${PROJECT_NAME}.hex  -o ${PROJECT_NAME}_final.hex 
+                COMMAND echo " the size of the Final FIrmware build is shown below :)"
+                COMMAND  ${CMAKE_SIZE_UTIL} ${PROJECT_NAME}_final.hex 
+                )
 
 ###################################################################################
 #########################   these are the cmds used to recover and erase the chip
