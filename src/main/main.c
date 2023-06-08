@@ -134,9 +134,7 @@ int main()
 void general_task_function(void *param)
 {
     UNUSED_VARIABLE(param);
-
-   
-
+ 
     for (;;)
     {
         ///// check for the button events and print it 
@@ -147,11 +145,11 @@ void general_task_function(void *param)
             if(evt == NRF_BUTTON_UP_EVT)
             {
                 //// start the advertise
-                ble_gap_start_advertise();
+               NRF_LOG_INFO("adv%d", ble_gap_start_advertise());
             }
             else if(evt == NRF_BUTTON_DOWN_EVT)
             {
-                ble_gap_stop_advertise();
+                NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
             }
             else if(evt == NRF_BUTTON_MIDD_EVT)
             {
@@ -159,6 +157,8 @@ void general_task_function(void *param)
             }
         }
         delay(1000);
+
+
         // NRF_LOG_INFO("main task 1");
     }
 

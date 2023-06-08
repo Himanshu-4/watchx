@@ -869,3 +869,9 @@ add_custom_target(flash
                 COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase --verify
                 COMMAND nrfjprog -f nrf52 --reset
                 )
+
+add_custom_target(flash_bin 
+                COMMAND echo "flashing ${PROJECT_NAME}.elf into the nrf52832"
+                COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}_final.hex --sectorerase --verify
+                COMMAND nrfjprog -f nrf52 --reset
+                )

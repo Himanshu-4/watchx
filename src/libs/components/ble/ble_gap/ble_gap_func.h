@@ -28,7 +28,7 @@
 #define BLE_GAP_SEC_PARAM_MIN_KEY_SIZE 16
 
 #define BLE_GAP_SEC_PARAM_LTK 1
-#define BLE_GAP_SEC_PARAM_IRK 1
+#define BLE_GAP_SEC_PARAM_IRK 0
 
 #define BLE_GAP_SEC_PARAM_DERV_LINK_FROM_LTK 1
 #define BLE_GAP_SEC_PARAM_CONN_SIGNATURE_RESOLVING_KEY 0
@@ -47,7 +47,7 @@
 
 
 
-#define DEVICE_NAME "WATCHX"          /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME BLE_DEVICE_GAP_ADVERTISEMENT_NAME          /**< Name of device. Will be included in the advertising data. */
 
 
 #define MIN_CONN_INTERVAL MSEC_TO_UNITS(BLE_MIN_CONNECTION_INTERVAL , UNIT_1_25_MS) /**< Minimum acceptable connection interval (0.4 seconds). */
@@ -105,6 +105,15 @@ enum _BLE_GAP_CALLBACKS_
 
 };
 
+enum _BLE_GAP_SECURITY_PARAMS_TYPE_
+{
+    ble_gap_security_param1,
+    ble_gap_security_param2,
+    ble_gap_security_param3,
+    ble_gap_security_max_params_supported
+
+};
+
 typedef void (*ble_gap_procdeure_callbacks)(void *param , ble_gap_evt_t const  * gap_evt);
 
 /// @brief this is to add the callback to the particular callback 
@@ -156,19 +165,10 @@ void ble_gap_delete_bonds(void);
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// function declarations ///////////////////////////////
 
-#define BLE_GAP_LESC_TYPE_PAIRING 10UL
-#define BLE_GAP_LEGACY_TYPE_PAIRING 20UL
-
-typedef PACKED_STRUCT _GAP_SEC_PROC_INIT_
-{
-    uint8_t gap_sec_pairing_type : 1; // do we require lesc pairing
-    uint8_t bond_formation : 1;
-}
-ble_gap_sec_params;
-
 /// @brief init the gap security procedure
 /// @param conn_handle
-void ble_gap_security_init(uint16_t conn_handle, ble_gap_sec_params *sec_param);
+/// @param sec_param_type 
+void ble_gap_security_init(uint16_t conn_handle, uint8_t sec_param_type);
 
 
 

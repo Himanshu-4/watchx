@@ -302,41 +302,103 @@ uint32_t  ble_gap_stop_advertise(void)
 }
 
 
+const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported] 
+=
+{
+    //// @brief this is a just work sceanrio where the mitm = 0, oob is also 0 , so therefore the iocaps is ignored 
+    [ble_gap_security_param1]=
+    {
+        .bond = 1,
+        .io_caps = BLE_GAP_IO_CAPS_NONE,
+        .mitm = 0,
+        .oob =0,
+        .keypress =0,
+        .lesc = 1,
+        ////// define the key size 
+        .max_key_size = 16,
+        .min_key_size = 7,
 
-void ble_gap_security_init(uint16_t conn_handle , ble_gap_sec_params * sec_param )
+        ///// define the key distribution 
+        .kdist_own.enc = 1, // LTK and Master identification 
+        .kdist_own.id = 0, // identity resolving key 
+        .kdist_own.sign = 0, // connection signature resolving key 
+        .kdist_own.link = 1,
+
+        /// define the key distribuition about peer 
+        //// this need not be valid , provided by peer after all 
+        .kdist_peer.enc = 1, 
+        .kdist_peer.id =0, 
+        .kdist_peer.sign =0,
+        .kdist_peer.link =0,
+
+    },
+
+    [ble_gap_security_param2]=
+    {
+        
+        .bond = 1,
+        .io_caps = BLE_GAP_IO_CAPS_NONE,
+        .mitm = 0,
+        .oob =0,
+        .keypress =0,
+        .lesc = 1,
+        ////// define the key size 
+        .max_key_size = 16,
+        .min_key_size = 7,
+
+        ///// define the key distribution 
+        .kdist_own.enc = 1, // LTK and Master identification 
+        .kdist_own.id = 0, // identity resolving key 
+        .kdist_own.sign = 0, // connection signature resolving key 
+        .kdist_own.link = 0,
+
+        /// define the key distribuition about peer 
+        //// this need not be valid , provided by peer after all 
+        .kdist_peer.enc = 1, 
+        .kdist_peer.id =0, 
+        .kdist_peer.sign =0,
+        .kdist_peer.link =0,
+    },
+
+    [ble_gap_security_param3]=
+    {
+        
+        .bond = 1,
+        .io_caps = BLE_GAP_IO_CAPS_NONE,
+        .mitm = 0,
+        .oob =0,
+        .keypress =0,
+        .lesc = 0,
+        ////// define the key size 
+        .max_key_size = 16,
+        .min_key_size = 7,
+
+        ///// define the key distribution 
+        .kdist_own.enc = 1, // LTK and Master identification 
+        .kdist_own.id = 0, // identity resolving key 
+        .kdist_own.sign = 0, // connection signature resolving key 
+        .kdist_own.link = 0,
+
+        /// define the key distribuition about peer 
+        //// this need not be valid , provided by peer after all 
+        .kdist_peer.enc = 1, 
+        .kdist_peer.id =0, 
+        .kdist_peer.sign =0,
+        .kdist_peer.link =0,
+    }
+
+};
+
+volatile uint8_t ble_gap_security_param_index =0;
+
+void ble_gap_security_init(uint16_t conn_handle , uint8_t sec_param_type )
 {
     uint32_t ret_code = 0;
+    ble_gap_security_param_index = sec_param_type;
 
-    //////////////////////////////////////// //////////////
-    ///////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////
-    //// init the authentication procedure
-    static const ble_gap_sec_params_t gap_sec_params =
-        {
-            .bond = BLE_GAP_SEC_PARAM_BOND,
-            .io_caps = BLE_GAP_SEC_PARAM_IO_CAPS,
-            .keypress = BLE_GAP_SEC_PARAM_KEYPRESS,
-            .lesc = BLE_GAP_SEC_PARAM_LESC_SUPPORT,
-            .max_key_size = BLE_GAP_SEC_PARAM_MAX_KEY_SIZE,
-            .min_key_size = BLE_GAP_SEC_PARAM_MIN_KEY_SIZE,
-            .mitm = BLE_GAP_SEC_PARAM_MITM,
-            .oob = BLE_GAP_SEC_PARAM_OOB_SUPPORT,
-            
-            //// @brief what the device will send the keys 
-            .kdist_own.enc = BLE_GAP_SEC_PARAM_LTK,
-            .kdist_own.id = BLE_GAP_SEC_PARAM_IRK,
-            .kdist_own.sign = BLE_GAP_SEC_PARAM_CONN_SIGNATURE_RESOLVING_KEY,
-            .kdist_own.link = BLE_GAP_SEC_PARAM_DERV_LINK_FROM_LTK,
-            
-            //// @brief what the peer device will have to send the keys 
-            .kdist_peer.enc = BLE_GAP_SEC_PARAM_LTK,
-            .kdist_peer.id = BLE_GAP_SEC_PARAM_IRK,
-            .kdist_peer.sign = BLE_GAP_SEC_PARAM_CONN_SIGNATURE_RESOLVING_KEY,
-            .kdist_peer.link = BLE_GAP_SEC_PARAM_DERV_LINK_FROM_LTK,
-
-        };
-    ret_code = sd_ble_gap_authenticate(conn_handle, &gap_sec_params );
-    check_assrt(ret_code, "gap sec param");
+    ret_code = sd_ble_gap_authenticate(conn_handle, &gap_sec_param[sec_param_type] );
+    // check_assrt(ret_code, "gap sec param");
+    NRF_ASSERT(ret_code);
 
 
 }

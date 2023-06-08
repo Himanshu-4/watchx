@@ -5,6 +5,38 @@ extern volatile ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_s
 
 extern volatile uint8_t advertisement_state;
 
+extern volatile uint8_t ble_gap_security_param_index; 
+
+extern const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported];
+
+
+
+ble_gap_enc_key_t dev_enc_key;
+
+ble_gap_lesc_p256_pk_t public_key = 
+{{ 0x20 ,0xb0 ,0x03, 0xd2,  0xf2, 0x97 , 0xbe ,0x2c, 0x5e,0x2c,0x83, 0xa7
+ ,0xe9 ,0xf9 ,0xa5 ,0xb9, 0xef ,0xf4 ,0x91 ,0x11, 0xac,0xf4,0xfd, 0xdb,
+0xcc ,0x03 ,0x01 ,0x48 ,0x0e ,0x35, 0x9d, 0xe6}};
+
+
+ble_gap_sec_keyset_t key_Set = {
+    /// owner key distribuition 
+    .keys_own.p_enc_key = NULL,
+    .keys_own.p_id_key = NULL, 
+    .keys_own.p_pk = &public_key, 
+    .keys_own.p_sign_key = NULL, 
+
+    ///// peer key distribution 
+    .keys_peer.p_enc_key = &dev_enc_key,
+    .keys_peer.p_id_key = NULL, 
+    .keys_peer.p_pk = NULL, 
+    .keys_peer.p_sign_key = NULL
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////// ble gpa event handler 
 void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 {
     
@@ -99,7 +131,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_PHY_UPDATE:
     {
         // the phy update rwquest is complete
-        NRF_LOG_INFO("updated PHY");
+        // NRF_LOG_INFO("updated PHY");
     }
     break;
 
@@ -130,7 +162,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_DATA_LENGTH_UPDATE:
     {
-        NRF_LOG_INFO("dl updated");
+        // NRF_LOG_INFO("dl updated");
     }
     break;
 
@@ -143,6 +175,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_ADV_SET_TERMINATED:
     {
         NRF_LOG_WARNING("adv set trm");
+        advertisement_state = false;
     }
     break;
 
@@ -154,7 +187,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_CONN_PARAM_UPDATE:
     {
-        NRF_LOG_INFO("con prm udted");
+        // NRF_LOG_INFO("con prm udted");
     }
     break;
 
@@ -182,6 +215,21 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
     {
         NRF_LOG_WARNING("BLE_GAP_EVT_SEC_PARAMS_REQUEST");
+
+        delay(100);
+        /// show the ble gpa security param by central
+        NRF_LOG_INFO("%x,%x,%x,%x,%x,%x|| %d,%d ||%x,%x,%x,%x ||%x,%x,%x,%x",p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.bond,
+        p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.mitm , p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.lesc,
+        p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.keypress , p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.io_caps,
+        p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.oob, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.min_key_size, 
+        p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.max_key_size, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.enc,
+        p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.sign,
+        p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.link, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.enc ,
+        p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign 
+        ,p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link );
+    
+
+       NRF_LOG_WARNING("%d",sd_ble_gap_sec_params_reply(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[ble_gap_security_param_index], &key_Set ));
     }
     break;
 
@@ -218,6 +266,12 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_AUTH_STATUS:
     {
         NRF_LOG_WARNING("BLE_GAP_EVT_AUTH_STATUS");
+        
+        /// call the callback 
+        if(GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt] != NULL)
+        {
+            GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt](NULL, &p_ble_evt->evt.gap_evt);
+        }
     }
     break;
 
@@ -225,11 +279,6 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     {
         NRF_LOG_WARNING("BLE_GAP_EVT_CONN_SEC_UPDATE");
 
-        /// call the callback 
-        if(GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt] != NULL)
-        {
-            GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt](NULL, &p_ble_evt->evt.gap_evt);
-        }
     }
     break;
 

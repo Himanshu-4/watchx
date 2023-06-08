@@ -19,11 +19,13 @@
 ///// this will suspend the callback 
 #define suspend 0x11
 
+static volatile uint8_t client_task  = suspend; 
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 ///////////////////// global variables here 
 
 static uint8_t device_index = 0;
+
 
 /////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,12 +75,13 @@ void ble_common_task_pre_init(void *param)
 static void ble_client_task_init_process(void *param)
 {
 
+    //// init the gap 
 }
 
 
 static void ble_client_task_deinit_process(void *param)
 {
-
+    
 }
 
 
@@ -92,8 +95,7 @@ static void ble_common_task(void *param)
     uint8_t *callback_resume = (uint8_t *) param;
 
     function_start:
-
-
+    NRF_LOG_WARNING("cb rsume");
     for(;;)
     {
 
@@ -103,7 +105,7 @@ static void ble_common_task(void *param)
         }
 
 
-
+        delay(10000);
 
     }
 
@@ -160,24 +162,30 @@ static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * g
         return ;
     }
 
-    NRF_LOG_WARNING("connected");
+    NRF_LOG_INFO("i %d",device_index);
     //////// start the encrytption process 
 
 
+    //// call the init process 
+    ble_client_task_init_process((uint8_t *)&client_task);
 
     ///////////// resume the task 
     vTaskResume(ble_common_Task_handle);
 
     /// start the function from over 
+    client_task = resume;
     
-
-
+    /// init the securoty procedure s
+    ble_gap_security_init(ble_gap_get_conn_handle(device_index),ble_gap_security_param1 );
 }
 
 
 static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  * gap_evt)
 {
-    NRF_LOG_ERROR("device disconected");
+    ////// suspend the client task 
+    vTaskSuspend(ble_common_Task_handle);
+    client_task = suspend;
+    ble_client_task_deinit_process(NULL);
 
 
 }
