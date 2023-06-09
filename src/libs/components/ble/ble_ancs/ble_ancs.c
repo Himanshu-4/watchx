@@ -94,9 +94,9 @@ static void ble_ancs_services_int()
     err_code = sd_ble_uuid_vs_add(&ble_ancs_data_source_char_uuid128, &ble_ancs_handler.ancs_srvc_char.ancs_data_source_char.uuid.type);
     check_assrt( err_code, "uuid_add");
 
-    NRF_LOG_INFO("type %d, %d, %d, %d",ble_ancs_handler.ancs_srvc_char.ancs_service.uuid.type,
-    ble_ancs_handler.ancs_srvc_char.ancs_control_point_char.uuid.type, ble_ancs_handler.ancs_srvc_char.ancs_notif_src_char.uuid.type,
-     ble_ancs_handler.ancs_srvc_char.ancs_data_source_char.uuid.type);
+    // NRF_LOG_INFO("type %d, %d, %d, %d",ble_ancs_handler.ancs_srvc_char.ancs_service.uuid.type,
+    // ble_ancs_handler.ancs_srvc_char.ancs_control_point_char.uuid.type, ble_ancs_handler.ancs_srvc_char.ancs_notif_src_char.uuid.type,
+    //  ble_ancs_handler.ancs_srvc_char.ancs_data_source_char.uuid.type);
 }
 
 

@@ -322,14 +322,14 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
         .kdist_own.enc = 1, // LTK and Master identification 
         .kdist_own.id = 0, // identity resolving key 
         .kdist_own.sign = 0, // connection signature resolving key 
-        .kdist_own.link = 1,
+        .kdist_own.link = 0, // 1 is not supported by sd 
 
         /// define the key distribuition about peer 
         //// this need not be valid , provided by peer after all 
         .kdist_peer.enc = 1, 
         .kdist_peer.id =0, 
         .kdist_peer.sign =0,
-        .kdist_peer.link =0,
+        .kdist_peer.link =0,// 1 is not supported by sd 
 
     },
 
@@ -398,6 +398,7 @@ void ble_gap_security_init(uint16_t conn_handle , uint8_t sec_param_type )
 
     ret_code = sd_ble_gap_authenticate(conn_handle, &gap_sec_param[sec_param_type] );
     // check_assrt(ret_code, "gap sec param");
+    // NRF_LOG_WARNING("%d",ret_code);
     NRF_ASSERT(ret_code);
 
 

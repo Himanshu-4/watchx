@@ -77,9 +77,9 @@ static void ble_ams_service_init()
     err_code = sd_ble_uuid_vs_add(&ble_ams_entity_attribute_char_uuid128 , &ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.uuid.type);
     check_assrt(err_code, "uuid_addams");
 
-    NRF_LOG_INFO("ams_type %d,%d,%d,%d",ble_ams_handler.ams_srvc_char.ams_service.uuid.type, 
-    ble_ams_handler.ams_srvc_char.ams_control_point_cahr.uuid.type , ble_ams_handler.ams_srvc_char.ams_entity_update_char.uuid.type , 
-    ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.uuid.type);
+    // NRF_LOG_INFO("ams_type %d,%d,%d,%d",ble_ams_handler.ams_srvc_char.ams_service.uuid.type, 
+    // ble_ams_handler.ams_srvc_char.ams_control_point_cahr.uuid.type , ble_ams_handler.ams_srvc_char.ams_entity_update_char.uuid.type , 
+    // ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.uuid.type);
 }
 
 

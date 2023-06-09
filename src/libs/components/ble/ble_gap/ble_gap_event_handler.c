@@ -11,25 +11,29 @@ extern const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supp
 
 
 
-ble_gap_enc_key_t dev_enc_key;
+ble_gap_enc_key_t dev_enc_key1;
+
+ble_gap_enc_key_t dev_enc_key2;
+
 
 ble_gap_lesc_p256_pk_t public_key = 
 {{ 0x20 ,0xb0 ,0x03, 0xd2,  0xf2, 0x97 , 0xbe ,0x2c, 0x5e,0x2c,0x83, 0xa7
  ,0xe9 ,0xf9 ,0xa5 ,0xb9, 0xef ,0xf4 ,0x91 ,0x11, 0xac,0xf4,0xfd, 0xdb,
 0xcc ,0x03 ,0x01 ,0x48 ,0x0e ,0x35, 0x9d, 0xe6}};
 
+ble_gap_lesc_p256_pk_t publickey_peer;
 
 ble_gap_sec_keyset_t key_Set = {
     /// owner key distribuition 
-    .keys_own.p_enc_key = NULL,
+    .keys_own.p_enc_key = &dev_enc_key1,
     .keys_own.p_id_key = NULL, 
     .keys_own.p_pk = &public_key, 
     .keys_own.p_sign_key = NULL, 
 
     ///// peer key distribution 
-    .keys_peer.p_enc_key = &dev_enc_key,
+    .keys_peer.p_enc_key = &dev_enc_key2,
     .keys_peer.p_id_key = NULL, 
-    .keys_peer.p_pk = NULL, 
+    .keys_peer.p_pk = &publickey_peer, 
     .keys_peer.p_sign_key = NULL
 };
 
@@ -225,11 +229,12 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.max_key_size, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.enc,
         p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.sign,
         p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.link, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.enc ,
-        p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign 
-        ,p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link );
+        p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign,
+        p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link );
     
 
-       NRF_LOG_WARNING("%d",sd_ble_gap_sec_params_reply(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[ble_gap_security_param_index], &key_Set ));
+        err_code  = sd_ble_gap_sec_params_reply(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[ble_gap_security_param_index], &key_Set );
+        NRF_ASSERT(err_code );
     }
     break;
 
@@ -267,18 +272,18 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     {
         NRF_LOG_WARNING("BLE_GAP_EVT_AUTH_STATUS");
         
-        /// call the callback 
-        if(GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt] != NULL)
-        {
-            GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt](NULL, &p_ble_evt->evt.gap_evt);
-        }
     }
     break;
 
     case BLE_GAP_EVT_CONN_SEC_UPDATE:
     {
         NRF_LOG_WARNING("BLE_GAP_EVT_CONN_SEC_UPDATE");
-
+        
+        /// call the callback 
+        if(GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt] != NULL)
+        {
+            GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt](NULL, &p_ble_evt->evt.gap_evt);
+        }
     }
     break;
 
