@@ -305,15 +305,15 @@ uint32_t  ble_gap_stop_advertise(void)
 const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported] 
 =
 {
-    //// @brief this is a just work sceanrio where the mitm = 0, oob is also 0 , so therefore the iocaps is ignored 
+    //// @brief this is a just work sceanrio where the mitm = 1, oob is also 0 , so therefore the iocaps is display only 
     [ble_gap_security_param1]=
     {
         .bond = 1,
-        .io_caps = BLE_GAP_IO_CAPS_NONE,
-        .mitm = 0,
+        .io_caps = BLE_GAP_IO_CAPS_DISPLAY_YESNO,
+        .mitm = 1,
         .oob =0,
         .keypress =0,
-        .lesc = 1,
+        .lesc = 0,
         ////// define the key size 
         .max_key_size = 16,
         .min_key_size = 7,
@@ -333,6 +333,7 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
 
     },
 
+    //// @brief this is a just work sceanrio where the mitm = 0, oob is also 0 , so therefore the iocaps is ignored 
     [ble_gap_security_param2]=
     {
         

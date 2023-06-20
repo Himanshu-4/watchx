@@ -30,6 +30,8 @@
 #include "task.h"
 
 #endif
+
+
 //// include the driver file from the nrfx driver API
 // #include "nrfx_power.h"
 // #include "nrf_drv_power.h"
@@ -213,7 +215,6 @@ void check_assrt(uint32_t , const char *);
 
 #define NRF_ASSERT(x) \
 check_assrt(x, __FUNCTION__  ) \
-
 
 ////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

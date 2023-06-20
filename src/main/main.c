@@ -92,6 +92,10 @@ int main()
 
     ////// init the devices here 
     nrf_button_evt_lib_init();
+
+    /// init the accelrometer task 
+    /// init the led , buzzer libs 
+    
     // hardfault is diabled . please enable it
 
     genral_task_handle = xTaskCreateStatic(general_task_function, genral_task_name, genral_task_stack_size,

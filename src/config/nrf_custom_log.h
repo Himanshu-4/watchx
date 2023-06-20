@@ -49,4 +49,8 @@
 #endif
 
 
+#define NRF_ASSERT_HANDLE(x)    \
+if(x==NULL)                     \
+NRF_LOG_ERROR("%s %d", __FUNCTION__ , __LINE__)
+
 #endif

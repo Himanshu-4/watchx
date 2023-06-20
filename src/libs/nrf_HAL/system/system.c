@@ -479,7 +479,7 @@ void check_assrt(uint32_t cond, const char *str_print)
 {
     if (cond != 0)
     {
-        printf(BRED "ERR %s ,retcode %dr\n" ANSI_RESET, str_print, cond);
-        delay(2000);
+        printf(BRED "%s->%d\r\n" ANSI_RESET, str_print, cond);
+        delay(1000);
     }
 }

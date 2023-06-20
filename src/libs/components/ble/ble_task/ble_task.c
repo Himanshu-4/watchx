@@ -37,12 +37,14 @@ static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  
 
 
 //////////////////////////////////// this is the ble common task that is handling all the ble stuff 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 static void ble_common_task(void *param);
 
 
 static xTaskHandle ble_common_Task_handle = NULL;
-// //////////////////////////////////////////////////////////////////////////////////////////////////
-// /////////////////////////////////////////////////////////////////////////////////////////////////////
 // /////////////////////////////////////  
 /* Structure that will hold the TCB of the task being created. */
 static StaticTask_t ble_common_Task_buffer;
@@ -50,11 +52,13 @@ static StaticTask_t ble_common_Task_buffer;
 static StackType_t ble_common_Task_Stack_buffer[BLE_COMMON_TASK_STACK_DEPTH];
 
 
+
+
 void ble_common_task_pre_init(void *param)
 {
-
-
     ble_common_Task_handle = xTaskCreateStatic(ble_common_task, BLE_COMMON_TASK_NAME, BLE_COMMON_TASK_STACK_DEPTH, param, BLE_COMMON_TASK_PRIORITY, ble_common_Task_Stack_buffer , &ble_common_Task_buffer );
+    
+    NRF_ASSERT_HANDLE(ble_common_Task_handle);
     vTaskSuspend(ble_common_Task_handle);
 
     ///// add the callbacks
@@ -96,12 +100,23 @@ static void ble_common_task(void *param)
 
     function_start:
     NRF_LOG_WARNING("cb rsume");
+
+    /// init the apple ancs, ams task 
+    ble_ams_init();
+
+    ble_ancs_init(ble_gap_get_conn_handle(device_index));
+
+    ble_time_init();
+
+
+
+    //////// spend the task in a while loop 
     for(;;)
     {
 
         if(*callback_resume  == resume )
         {
-            goto function_start;
+            goto function_suspend;
         }
 
 
@@ -109,8 +124,18 @@ static void ble_common_task(void *param)
 
     }
 
+    function_suspend:
+
+    ///// call the deinit function , the param may be diffenrt 
+    ble_client_task_deinit_process(NULL);
+
+    vTaskSuspend(NULL);
+
+    goto function_start;
+    
     ///// should never reach here 
-    vTaskDelete(NULL);
+    system_soft_reset();
+    // vTaskDelete(NULL);
 }
 // uint32_t ble_apple_task_start(void *param)
 // {
@@ -128,29 +153,6 @@ static void ble_common_task(void *param)
 
 
 
-
-
-// void ble_apple_Task(void *param)
-// {
-//     uint16_t * conn_handle = param;
-
-//     ble_ams_init(conn_handle);
-//     ble_ancs_init(conn_handle);
-
-
-//     for(;;)
-//     {
-
-
-
-//     }
-
-
-
-// }
-
-
-
 static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * gap_evt)
 {
     /// get the device index from the callback 
@@ -163,11 +165,7 @@ static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * g
     }
 
     NRF_LOG_INFO("i %d",device_index);
-    //////// start the encrytption process 
-
-
-    //// call the init process 
-    ble_client_task_init_process((uint8_t *)&client_task);
+    //////// start the encrytption pro
 
     ///////////// resume the task 
     vTaskResume(ble_common_Task_handle);
@@ -176,16 +174,15 @@ static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * g
     client_task = resume;
     
     /// init the securoty procedure s
-    ble_gap_security_init(ble_gap_get_conn_handle(device_index),ble_gap_security_param1 );
+    // ble_gap_security_init(ble_gap_get_conn_handle(device_index),ble_gap_security_param1 );
 }
 
 
 static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  * gap_evt)
 {
-    ////// suspend the client task 
-    vTaskSuspend(ble_common_Task_handle);
-    client_task = suspend;
-    ble_client_task_deinit_process(NULL);
+    ////// suspend the client task , no need to call here 
+    // vTaskSuspend(ble_common_Task_handle);
 
+    client_task = suspend;
 
 }
