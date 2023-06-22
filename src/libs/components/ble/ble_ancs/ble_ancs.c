@@ -1,5 +1,6 @@
 #include "ble_ancs.h"
 
+#include "ble_gatt_client.h"
 
 
 /////////////////////////////// 16 bit uuid ////////////////////////////
@@ -83,16 +84,16 @@ static void ble_ancs_services_int()
     uint32_t err_code =0;
      // Assign UUID types.
     err_code = sd_ble_uuid_vs_add(&ble_ancs_base_service_uuid128, &ble_ancs_handler.ancs_srvc_char.ancs_service.uuid.type);
-    check_assrt( err_code, "uuid_add");
+    NRF_ASSERT(err_code);
 
     err_code = sd_ble_uuid_vs_add(&ble_ancs_control_point_char_uuid128, &ble_ancs_handler.ancs_srvc_char.ancs_control_point_char.uuid.type);
-    check_assrt( err_code, "uuid_add");
+    NRF_ASSERT(err_code);
 
     err_code = sd_ble_uuid_vs_add(&ble_ancs_notificatoin_source_char_uuid128, &ble_ancs_handler.ancs_srvc_char.ancs_notif_src_char.uuid.type);
-    check_assrt( err_code, "uuid_add");
+    NRF_ASSERT(err_code);
 
     err_code = sd_ble_uuid_vs_add(&ble_ancs_data_source_char_uuid128, &ble_ancs_handler.ancs_srvc_char.ancs_data_source_char.uuid.type);
-    check_assrt( err_code, "uuid_add");
+    NRF_ASSERT(err_code);
 
     // NRF_LOG_INFO("type %d, %d, %d, %d",ble_ancs_handler.ancs_srvc_char.ancs_service.uuid.type,
     // ble_ancs_handler.ancs_srvc_char.ancs_control_point_char.uuid.type, ble_ancs_handler.ancs_srvc_char.ancs_notif_src_char.uuid.type,
@@ -111,7 +112,7 @@ void ble_ancs_pre_init(void)
 
 /// @brief this is to init the ancs profile from iphone 
 /// @param conn_handle 
-/// @return 
+/// @return succ/failure 
 uint32_t  ble_ancs_init(uint16_t conn_handle)
 {
     uint32_t ret_code = nrf_OK;
@@ -123,4 +124,22 @@ uint32_t  ble_ancs_init(uint16_t conn_handle)
 
 
     return ret_code;
+}
+
+/// @brief this is to deinit the ancs protocol 
+/// @param  void 
+/// @return succ/failure 
+uint32_t ble_ancs_deinit(void)
+{
+    
+    return nrf_OK;
+}
+
+
+/// @brief this the callback handler for the apple ancs events 
+/// @param param 
+/// @param evt 
+void ble_ancs_client_event_handler(void *param ,ble_gattc_evt_t *evt)
+{
+
 }

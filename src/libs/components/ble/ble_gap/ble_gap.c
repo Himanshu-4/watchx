@@ -136,11 +136,11 @@ static void gap_service_init(void)
                                           (const uint8_t *)DEVICE_NAME,
                                           strlen(DEVICE_NAME));
 
-    check_assrt(err_code, "devnameset");
+    NRF_ASSERT(err_code);
 
     err_code = sd_ble_gap_appearance_set(BLE_APPEARANCE_HEART_RATE_SENSOR_HEART_RATE_BELT);
 
-    check_assrt(err_code, "gap_appr_set");
+    NRF_ASSERT(err_code);
 
     static const ble_gap_conn_params_t gap_conn_params =
         {
@@ -152,7 +152,7 @@ static void gap_service_init(void)
         };
     err_code = sd_ble_gap_ppcp_set(&gap_conn_params);
 
-    check_assrt(err_code, "ble_gap_ppcp_set");
+    NRF_ASSERT(err_code);
 }
 
 /**@brief Function for initializing the Advertising functionality. */
@@ -234,7 +234,7 @@ static void advertising_init(void)
 
     /// configure the advertisement on the device
     ret_code = sd_ble_gap_adv_set_configure(&adv_conn_handle, &ble_gap_adv_data, &ble_gap_adv_params);
-    check_assrt(ret_code, "ble_gap_adv_set");
+    NRF_ASSERT(ret_code);
     // ret_code = sd_ble_gap_adv_start(adv_conn_handle, APP_BLE_CONN_CFG_TAG);
     //     check_assrt(ret_code, "ble_gap_adv_start");
 }

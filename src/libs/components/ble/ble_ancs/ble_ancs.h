@@ -311,7 +311,17 @@ void ble_ancs_pre_init(void);
 
 /// @brief this is to init the ancs profile from iphone 
 /// @param conn_handle 
-/// @return 
+/// @return succ/failure 
 uint32_t  ble_ancs_init(uint16_t conn_handle);
+
+/// @brief this is to deinit the ancs protocol 
+/// @param  void 
+/// @return succ/failure 
+uint32_t ble_ancs_deinit(void);
+
+/// @brief this the callback handler for the apple ancs events 
+/// @param param 
+/// @param evt 
+void ble_ancs_client_event_handler(void *param ,ble_gattc_evt_t *evt);
 
 #endif

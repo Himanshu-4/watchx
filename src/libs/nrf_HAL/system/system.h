@@ -198,7 +198,7 @@ uint32_t get_reset_reason(void);
  * @param srting to print when there is a failure 
  * @note better to use this instead of assert 
 */
-void check_assrt(uint32_t , const char *);
+void check_assrt(uint32_t , const char *, uint32_t line);
 
 // /// @brief the system delay API must be defined later
 // /// @param x
@@ -214,7 +214,7 @@ void check_assrt(uint32_t , const char *);
 
 
 #define NRF_ASSERT(x) \
-check_assrt(x, __FUNCTION__  ) \
+check_assrt(x, __FUNCTION__ , __LINE__ ) \
 
 ////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

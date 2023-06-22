@@ -76,6 +76,9 @@ set( PROJECT_DEVICE_FOLDER
 ${CMAKE_SOURCE_DIR}/libs/components/devices
 )
 
+set(PROJECT_KERNEL_FOLDER 
+${CMAKE_SOURCE_DIR}/libs/components/kernel
+)
 ############################################################################################################################
 ###############################################################################################################################
 ################################################################################################################################
@@ -540,7 +543,9 @@ file( GLOB ble_current_time_files
 ${PROJECT_BLE_FOLDER}/ble_time/*.c 
 )
 
-
+file(GLOB ble_peer_device_info_files 
+${PROJECT_BLE_FOLDER}/ble_peer_device_info/*.c 
+)
 
 
     # deifne the external libraries for the sensors ans peropheral that connect with nrf52
@@ -561,6 +566,8 @@ set(BLE_LIBS_SRC
         ${ble_task_files}
                 
         ${ble_current_time_files}
+
+        ${ble_peer_device_info_files}
 
         )
 
@@ -588,7 +595,8 @@ set(BLE_LIB_INCLUDE_DIR
        # ble time library 
         ${PROJECT_BLE_FOLDER}/ble_time 
 
-       
+        # peer device info library , can get the name of peer device 
+        ${PROJECT_BLE_FOLDER}/ble_peer_device_info
 
         )
 
@@ -720,7 +728,75 @@ target_include_directories(ext_devices PUBLIC SYSTEM
   
         )
 
+###########################################################################################################################################################
+##########################################################################################################################################################
+#########################################################################################################################################################
+############################################################## the watchx kernel  
 
+# this contains kernel   files 
+
+        # this is kernel task files 
+        file ( GLOB kernel_task_files 
+        ${PROJECT_KERNEL_FOLDER}/kernel_task/*.c 
+        )
+        # sleep handle related to the device sleep  
+        file ( GLOB kernel_sleep_handle_files
+        ${PROJECT_KERNEL_FOLDER}/sleep_handles/*.c 
+        )
+        # kernel time management 
+        file ( GLOB kernel_time_files
+        ${PROJECT_KERNEL_FOLDER}/time/*.c 
+        )
+   
+
+set( WATCHX_KERNEL_SRC 
+      ${kernel_task_files}
+      ${kernel_sleep_handle_files}
+        ${kernel_time_files}
+        )
+
+
+    # deifne the external libraries for the sensors ans peropheral that connect with nrf52
+set(WATCH_KERNEL_INCLUDE_DIR
+        # kernel task related files  
+        ${PROJECT_KERNEL_FOLDER}/kernel_task 
+
+        # kernel sleep handles 
+        ${PROJECT_KERNEL_FOLDER}/sleep_handles
+
+        # kernel time related 
+        ${PROJECT_KERNEL_FOLDER}/time
+
+        )
+
+
+        # make a library of external that are connected to the nrf52 
+add_library(watchx_kernel_lib  STATIC 
+${WATCHX_KERNEL_SRC}
+)
+
+
+
+target_compile_definitions(watchx_kernel_lib PRIVATE
+    ${COMMON_DEFINES}   
+#     ${NIMBLE_STACK_DEFINES}
+
+)
+
+target_compile_options(watchx_kernel_lib PRIVATE
+       ${COMMON_C_FLAGS}
+       $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized >
+       $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti >
+       $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp>
+         )
+
+
+target_include_directories(watchx_kernel_lib PUBLIC SYSTEM 
+    ${WATCH_KERNEL_INCLUDE_DIR}
+    ${SDK_INCLUDE_DIR}
+    ${FREERTOS_INCLUDE}
+  
+        )
 ###########################################################################################################################################################
 ##########################################################################################################################################################
 #########################################################################################################################################################
@@ -774,6 +850,7 @@ target_link_libraries(${EXECUTABLE}
                        ble_library
                        ext_devices
                        nrf_sdk_libs 
+                       watchx_kernel_lib
                 #        nimble_ble_stack
                 #        gpio_lib # no library gpio_lib so cmake discard it 
                         )

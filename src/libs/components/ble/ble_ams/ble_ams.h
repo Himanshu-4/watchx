@@ -50,14 +50,17 @@ typedef PACKED_STRUCT _BLE_AMS_STRUCT_
 void ble_ams_pre_init(void);
 
 /// @brief this is to init the ams at a coonection event 
-/// @param  void
-void ble_ams_init(void);
+/// @param  conn_handle
+uint32_t ble_ams_init(uint16_t conn_handle);
 
 /// @brief this is to deinit the ams at disconnection, ble disbale 
-/// @param  
-void ble_ams_deinit(void);
+/// @param  void
+uint32_t ble_ams_deinit(void);
 
 
+/// @brief this is the apple media service handler where 
+/// @param param 
+void ble_ams_client_event_handler(void *param ,ble_gattc_evt_t *evt);
 
 
 #endif

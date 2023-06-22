@@ -12,6 +12,8 @@
 
 #include "FreeRTOS.h"
 
+#include "ble_current_time.h"
+
 
 ///////////////////////////////////////////////////////////////////////
 //// this will resume the callback 
@@ -30,20 +32,29 @@ static uint8_t device_index = 0;
 /////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////// function prototypes 
-///////// add the callback to the ble client  
+
+/// @brief   device connected callback 
+/// @param param 
+/// @param gap_evt
 static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * gap_evt);
 
+/// @brief / device disconnected callback 
+/// @param param 
+/// @param gap_evt 
 static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  * gap_evt);
 
+/// @brief handle value notification handle 
+/// @param param 
+/// @param evt 
+static void ble_task_handle_value_notification(void *param, ble_gattc_evt_t *evt );
 
 //////////////////////////////////// this is the ble common task that is handling all the ble stuff 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 static void ble_common_task(void *param);
 
-
+/// @brief the task handle for the ble common events task handler 
 static xTaskHandle ble_common_Task_handle = NULL;
 // /////////////////////////////////////  
 /* Structure that will hold the TCB of the task being created. */
@@ -52,6 +63,12 @@ static StaticTask_t ble_common_Task_buffer;
 static StackType_t ble_common_Task_Stack_buffer[BLE_COMMON_TASK_STACK_DEPTH];
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 void ble_common_task_pre_init(void *param)
@@ -78,14 +95,46 @@ void ble_common_task_pre_init(void *param)
 /// @param param 
 static void ble_client_task_init_process(void *param)
 {
+    uint32_t err =0;
+    uint16_t conn_handle = ble_gap_get_conn_handle(device_index);
+    //// assign the callback for the 
+    err= gatt_client_add_notif_callback(conn_handle, ble_task_handle_value_notification, NULL);
+    NRF_ASSERT(err);
 
-    //// init the gap 
+    //// init the ancs , ams ,device info and other device functionality 
+    /// init the apple ancs, ams task , current time task  
+    err = ble_ams_init(conn_handle);
+    NRF_ASSERT(err);
+
+    err = ble_ancs_init(conn_handle);
+    NRF_ASSERT(err);
+
+    // err = ble_time_init(conn_handle);
+    // NRF_ASSERT(err);
+
+    // err = ble_peer_device_info_init(conn_handle);
+    // NRF_ASSERT(err);
 }
 
 
 static void ble_client_task_deinit_process(void *param)
 {
+    ////////// call the deinit process of the above init process     
+    uint32_t err =0;
+    //// deinit the ancs , ams ,device info and other device functionality 
     
+    /// deinit the apple ancs, ams task 
+    err = ble_ams_deinit();
+    NRF_ASSERT(err);
+
+    err = ble_ancs_deinit();
+    NRF_ASSERT(err);
+    
+    // err = ble_time_deinit();
+    // NRF_ASSERT(err);
+
+    // err = ble_peer_device_info_deinit();
+    // NRF_ASSERT(err);
 }
 
 
@@ -101,14 +150,7 @@ static void ble_common_task(void *param)
     function_start:
     NRF_LOG_WARNING("cb rsume");
 
-    /// init the apple ancs, ams task 
-    ble_ams_init();
-
-    ble_ancs_init(ble_gap_get_conn_handle(device_index));
-
-    ble_time_init();
-
-
+    ble_client_task_init_process(NULL);
 
     //////// spend the task in a while loop 
     for(;;)
@@ -185,4 +227,20 @@ static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  
 
     client_task = suspend;
 
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////// ble handle task notification 
+static void ble_task_handle_value_notification(void *param, ble_gattc_evt_t *evt )
+{
+    /// the param is null for now , can be updated in future 
+    UNUSED_PARAMETER(param);
+
+    ///////////// these callbacks are gonna run in the softdevice event handler 
+    ble_ams_client_event_handler(param, evt);
+    ble_ancs_client_event_handler(param , evt);
+    
 }

@@ -1,5 +1,11 @@
 #include "ble_ams.h"
 
+/// include the gatt client 
+#include "ble_gatt_client.h"
+
+
+
+
 /** @brief 128-bit service UUID for the Apple Media Service. */
 static ble_uuid128_t const ble_apple_media_service_uuid128 =
 {
@@ -66,16 +72,16 @@ static void ble_ams_service_init()
 
     uint32_t err_code =0;
     err_code = sd_ble_uuid_vs_add(&ble_apple_media_service_uuid128 , &ble_ams_handler.ams_srvc_char.ams_service.uuid.type);
-    check_assrt(err_code, "uuid_addams");
+    NRF_ASSERT(err_code);
 
     err_code = sd_ble_uuid_vs_add(&ble_ams_remote_command_char_uuid128, &ble_ams_handler.ams_srvc_char.ams_control_point_cahr.uuid.type);
-    check_assrt(err_code, "uuid_addams");
+    NRF_ASSERT(err_code);
 
     err_code = sd_ble_uuid_vs_add(&ble_ams_entity_update_char_uuid128 , &ble_ams_handler.ams_srvc_char.ams_entity_update_char.uuid.type);
-    check_assrt(err_code, "uuid_addams");
+    NRF_ASSERT(err_code);
 
     err_code = sd_ble_uuid_vs_add(&ble_ams_entity_attribute_char_uuid128 , &ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.uuid.type);
-    check_assrt(err_code, "uuid_addams");
+    NRF_ASSERT(err_code);
 
     // NRF_LOG_INFO("ams_type %d,%d,%d,%d",ble_ams_handler.ams_srvc_char.ams_service.uuid.type, 
     // ble_ams_handler.ams_srvc_char.ams_control_point_cahr.uuid.type , ble_ams_handler.ams_srvc_char.ams_entity_update_char.uuid.type , 
@@ -96,5 +102,35 @@ void ble_ams_pre_init(void)
     ble_ams_service_init();
 
 
+
+}
+
+/// @brief this is to init the ams at a coonection event 
+/// @param  void
+uint32_t ble_ams_init(uint16_t conn_handle)
+{
+    NRF_LOG_INFO("ams init");
+
+    /// it is asssumed that the gatt client module is inited and working succesfully 
+    
+    //// search for the ams service 
+    return nrf_OK;
+}
+
+/// @brief this is to deinit the ams at disconnection, ble disbale 
+/// @param  void
+uint32_t ble_ams_deinit(void )
+{
+    NRF_LOG_WARNING("ams deinit");
+
+    return nrf_OK;
+}
+
+
+/// @brief this is the apple media service handler where 
+/// @param param 
+/// @param ble_evt
+void ble_ams_client_event_handler(void *param ,ble_gattc_evt_t *evt)
+{
 
 }
