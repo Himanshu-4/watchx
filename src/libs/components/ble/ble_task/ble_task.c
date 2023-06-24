@@ -48,6 +48,13 @@ static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  
 /// @param evt 
 static void ble_task_handle_value_notification(void *param, ble_gattc_evt_t *evt );
 
+/// @brief this function is called when there is an error triggered 
+/// @param param 
+static void ble_client_error_handler(void *param, uint16_t gatt_status );
+
+/// @brief this function got called when the timeout occured 
+/// @param param 
+static void ble_client_timeout_handler(void *param);
 //////////////////////////////////// this is the ble common task that is handling all the ble stuff 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,10 +85,11 @@ void ble_common_task_pre_init(void *param)
     NRF_ASSERT_HANDLE(ble_common_Task_handle);
     vTaskSuspend(ble_common_Task_handle);
 
-    ///// add the callbacks
+    ///// add the callbacks for the gap  
     ble_gap_add_callback(ble_gap_evt_connected,ble_device_connected_callback );
-    ble_gap_add_callback(ble_gap_evt_disconnected ,ble_device_disconnected_callback );
+    ble_gap_add_callback(ble_gap_evt_disconnected ,ble_device_disconnected_callback );  
 
+    ///@todo add the callback for the security procedure complete 
 }
 
 
@@ -97,8 +105,19 @@ static void ble_client_task_init_process(void *param)
 {
     uint32_t err =0;
     uint16_t conn_handle = ble_gap_get_conn_handle(device_index);
-    //// assign the callback for the 
+
+    /// init the ble client 
+    err = gatt_client_init(conn_handle);
+    NRF_ASSERT(err);
+
+    //// assign the callback for that connection 
     err= gatt_client_add_notif_callback(conn_handle, ble_task_handle_value_notification, NULL);
+    NRF_ASSERT(err);
+
+    err = gatt_client_add_err_handler_callback(conn_handle , ble_client_error_handler , NULL );
+    NRF_ASSERT(err);
+
+    err = gatt_client_add_timeout_callback(conn_handle, ble_client_timeout_handler, NULL);
     NRF_ASSERT(err);
 
     //// init the ancs , ams ,device info and other device functionality 
@@ -121,6 +140,7 @@ static void ble_client_task_deinit_process(void *param)
 {
     ////////// call the deinit process of the above init process     
     uint32_t err =0;
+    
     //// deinit the ancs , ams ,device info and other device functionality 
     
     /// deinit the apple ancs, ams task 
@@ -135,6 +155,7 @@ static void ble_client_task_deinit_process(void *param)
 
     // err = ble_peer_device_info_deinit();
     // NRF_ASSERT(err);
+
 }
 
 
@@ -156,7 +177,7 @@ static void ble_common_task(void *param)
     for(;;)
     {
 
-        if(*callback_resume  == resume )
+        if(*callback_resume  == suspend )
         {
             goto function_suspend;
         }
@@ -179,24 +200,15 @@ static void ble_common_task(void *param)
     system_soft_reset();
     // vTaskDelete(NULL);
 }
-// uint32_t ble_apple_task_start(void *param)
-// {
-//     /// check that the task is not created and then create the task and assign the handle 
-
-// }
 
 
 
-
-// uint32_t ble_apple_task_close(void *param)
-// {
-
-// }
-
-
-
+/// @brief   device connected callback 
+/// @param param 
+/// @param gap_evt
 static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * gap_evt)
 {
+    uint32_t err =0;
     /// get the device index from the callback 
     device_index = *(uint8_t *)param;
 
@@ -208,7 +220,12 @@ static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * g
 
     NRF_LOG_INFO("i %d",device_index);
     //////// start the encrytption pro
+    uint16_t conn_handle = ble_gap_get_conn_handle(device_index);
 
+    //// set the gatt server mtu 
+    err = gatt_client_set_server_mtu(conn_handle, BLE_GATT_SERVER_RX_MTU );
+    NRF_ASSERT(err);
+    
     ///////////// resume the task 
     vTaskResume(ble_common_Task_handle);
 
@@ -219,11 +236,16 @@ static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * g
     // ble_gap_security_init(ble_gap_get_conn_handle(device_index),ble_gap_security_param1 );
 }
 
-
+/// @brief / device disconnected callback 
+/// @param param 
+/// @param gap_evt 
 static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  * gap_evt)
 {
     ////// suspend the client task , no need to call here 
     // vTaskSuspend(ble_common_Task_handle);
+    uint16_t *conn_handle = param;
+    /// call the deinit process 
+    gatt_client_deinit( *conn_handle);
 
     client_task = suspend;
 
@@ -243,4 +265,23 @@ static void ble_task_handle_value_notification(void *param, ble_gattc_evt_t *evt
     ble_ams_client_event_handler(param, evt);
     ble_ancs_client_event_handler(param , evt);
     
+}
+
+/// @brief this function is called when there is an error triggered 
+/// @param param 
+static void ble_client_error_handler(void *param, uint16_t gatt_status )
+{
+    UNUSED_PARAMETER(param);
+
+    NRF_LOG_ERROR("err triggered %x",gatt_status);
+}
+
+/// @brief this function got called when the timeout occured 
+/// @param param 
+static void ble_client_timeout_handler(void *param)
+{
+    UNUSED_PARAMETER(param);
+    
+    NRF_LOG_ERROR("timeout");
+   
 }

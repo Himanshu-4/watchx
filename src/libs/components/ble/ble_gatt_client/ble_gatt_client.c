@@ -180,6 +180,7 @@ uint32_t gatt_client_set_server_mtu(uint16_t conn_hand, uint16_t mtu)
 
   if (err != nrf_OK)
   {
+    NRF_LOG_ERROR("client_mtu exch err");
   }
   return err;
 }

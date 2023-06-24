@@ -215,9 +215,9 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
             if(GAP_Callbacks[ble_gap_evt_timeout] != NULL)
             {
-                GAP_Callbacks[ble_gap_evt_timeout](NULL, &p_ble_evt->evt.gap_evt);
+                GAP_Callbacks[ble_gap_evt_timeout](&con_handle, &p_ble_evt->evt.gap_evt);
             }
-        NRF_LOG_ERROR("gap evt timeout ");
+        
     }
     break;
 
