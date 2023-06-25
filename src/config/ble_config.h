@@ -9,6 +9,14 @@
 
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+//======================= BLE COMMON  CONFIG =============================================
+
+#define BLE_MAX_DEVICE_SUPPORTED 1 
+// #define BLE_MAX_DEVICE_SUPPORTED 3 
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //======================= BLE SOFTDEVICE  CONFIG =============================================
 
 #define NRF_SDH_BLE_EVT_BUF_SIZE   300
@@ -74,7 +82,7 @@
 #define NRF_BLE_GAP_CONFIG_ROLE_COUNT_ADV_SET_COUNT  1
 
 // Maximum number of connections concurrently acting as a peripheral.
-#define NRF_BLE_GAP_CONFIG_ROLE_COUNT_PERIPH_ROLE_COUNT  1
+#define NRF_BLE_GAP_CONFIG_ROLE_COUNT_PERIPH_ROLE_COUNT  BLE_MAX_DEVICE_SUPPORTED
 
 //  Maximum number of connections concurrently acting as a central.
 #define NRF_BLE_GAP_CONFIG_ROLE_COUNT_CENTRAL_ROLE_COUNT  0
@@ -96,14 +104,6 @@
 
 /// Attribute table size, cfg_id is @ref BLE_GATTS_CFG_ATTR_TAB_SIZE. 
 #define NRF_BLE_GATT_ATTRIBUTE_TABLE_SIZE 512  ///  512 bytes 
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-//======================= BLE COMMON  CONFIG =============================================
-
-#define BLE_MAX_DEVICE_SUPPORTED 3 
 
 
 //////////////////////////////////////////////////////////////////////////////////////

@@ -58,8 +58,6 @@ set(app_linker_Script
     )
 
 
-
-
 set(NIMBLE_PATH 
         D:/smart_watch/watchx/nRF5_SDK_17/external/mynewt-nimble 
     )
@@ -71,10 +69,6 @@ set(NRFX_DRIV_PATH
 set( PROJECT_BLE_FOLDER 
         ${CMAKE_SOURCE_DIR}/libs/components/ble
         )       
-
-set( PROJECT_DEVICE_FOLDER 
-${CMAKE_SOURCE_DIR}/libs/components/devices
-)
 
 set(PROJECT_KERNEL_FOLDER 
 ${CMAKE_SOURCE_DIR}/libs/components/kernel
@@ -531,6 +525,7 @@ ${PROJECT_BLE_FOLDER}/ble_gatt_server/*.c
 ${PROJECT_BLE_FOLDER}/ble_stack_init/*.c
 
 ${PROJECT_BLE_FOLDER}/ble_task/*.c 
+
 ${PROJECT_BLE_FOLDER}/ble_time/*.c 
 
 ${PROJECT_BLE_FOLDER}/ble_peer_device_info/*.c 
