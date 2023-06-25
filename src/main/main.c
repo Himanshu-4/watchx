@@ -59,20 +59,8 @@ xTaskHandle genral_task_handle = NULL; //!< Reference to SoftDevice FreeRTOS tas
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////// defination of main task
 
-
-int main()
+static void ble_functionalities_init(void)
 {
-    
-    if (sys_init() != nrf_OK)
-    {
-        APP_ERROR_HANDLER(nrf_ERR_OPERATION_FAILED);
-    }
-
-    // // install all the communication drivers
-    driver_install();
-
-    ////////////////////////////////////
-    NRF_LOG_INFO("starting aPP");
     // init the ble
     nrf_softdevice_init_and_start();
     //// init the gatt server
@@ -88,12 +76,31 @@ int main()
     
     ////// init the common task 
     ble_common_task_pre_init(NULL);
+}
+
+int main()
+{
+    
+    if (sys_init() != nrf_OK)
+    {
+        APP_ERROR_HANDLER(nrf_ERR_OPERATION_FAILED);
+    }
+
+    // // install all the communication drivers
+    driver_install();
+
+    ////////////////////////////////////
+    NRF_LOG_INFO("starting aPP");
+    
+    ble_functionalities_init();
     /// init nvs
     nvs_flash_init(NVS_FLASH_OPERATION_TIMEOUT);
 
     ////// init the devices here 
     nrf_button_evt_lib_init();
 
+    /// @todo have to implement the kernel init file 
+    // watchx_kernel_init();
     /// init the accelrometer task 
     /// init the led , buzzer libs 
     

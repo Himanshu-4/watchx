@@ -90,7 +90,7 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     NRF_LOG_INFO("ams init");
 
     /// it is asssumed that the gatt client module is inited and working succesfully
-
+    
     //// search for the ams service
     return nrf_OK;
 }
@@ -147,6 +147,46 @@ char *ble_ams_get_attribute_name(ble_ams_attribute_name index)
 
     return string;
 }
+
+
+
+/// @brief ble_ams_execute cmd is the function used to execute a specific cmd in media player  
+/// @param cmd_id 
+/// @return succ/Failure of the cmd 
+uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id);
+
+/// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_ 
+/// @param  void 
+/// @return return the playback state 
+uint8_t ble_ams_get_playback_State(void);
+
+/// @brief get the playback rate in the integer fromat 
+/// @param void   
+/// @return the float value of the playback rate 1.2x 1.5x 2.3x etc 
+float ble_ams_get_playbackrate(void);
+
+/// @brief returns the volume of the media in percentage 
+/// @param  void 
+/// @return return between 0 to 100 , value should be  consider in % 
+uint8_t ble_ams_get_volume(void);
+
+/// @brief geive the elapsed time in seconds 
+/// @param  void 
+/// @return returns the elpased time in seconds 
+uint32_t ble_ams_get_elapsed_time(void);
+
+/// @brief get the total time of the track 
+/// @param  void 
+/// @return returns the track time in seconds 
+uint32_t ble_ams_get_track_time(void);
+
+/// @brief get the q attribute like q index , repeat mode @ref ble_ams_q_att_data
+/// @param  ble_ams_q_att_data
+/// @return returns cmd specific  @ref _BLE_AMS_SHUFFLE_MODE_  @ref _BLE_AMS_REPEAT_MODE_
+uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index);
+
+
+
 /// @brief this is the apple media service handler where
 /// @param param
 /// @param ble_evt

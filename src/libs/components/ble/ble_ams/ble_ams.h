@@ -46,11 +46,17 @@ typedef PACKED_STRUCT _BLE_AMS_REMOTE_CMD_STRUCT_
 }
 ble_ams_supported_cmdsets;
 
+
+#define BLE_AMS_INSTACNE_INITED 0x10
+#define BLE_AMS_INSTANCE_DEINITED 0x20
+
 typedef PACKED_STRUCT _BLE_AMS_STRUCT_
 {
     /// @brief contains the structure for the apple media service att table
     ble_ams_services_struct_t ams_srvc_char;
     ble_ams_supported_cmdsets cmds;
+    
+    uint8_t ble_ams_instance_inited;
 }
 ble_ams_struct_t;
 
@@ -67,7 +73,7 @@ enum _BLE_AMS_ERROR_CODES_
 };
 
 /// @brief remote cmd supported by the AMS
-enum _BLE_AMS_SUPPORTED_RREMOTE_CMDS_
+typedef enum _BLE_AMS_SUPPORTED_RREMOTE_CMDS_
 {
     ble_ams_cmd_play,
     ble_ams_cmd_pause,
@@ -84,7 +90,7 @@ enum _BLE_AMS_SUPPORTED_RREMOTE_CMDS_
     ble_ams_cmd_dislike_track,
     ble_ams_cmd_bookmark_track,
     ble_ams_cmd_rfus,
-};
+}ble_ams_media_cmds;
 
 /// @brief this is the entity id for the player, q, and track
 enum _BLE_AMS_SUPPORTED_ENTITY_IDS_
@@ -126,15 +132,16 @@ enum _BLE_AMS_PLAYBACK_STATE_
 #define ENTITY_UPDATE_FLAG_TRUNCATED_FALSE 0
 
 /// @brief define the queue attribute
-enum _BLE_AMS_SUPPORTED_QUEUE_ATTRIBUTE_IDS_
+typedef enum _BLE_AMS_SUPPORTED_QUEUE_ATTRIBUTE_IDS_
 {
-    ble_ams_queue_attribute_index,
-    ble_ams_queue_attribute_byte_count,
+    ble_ams_queue_attribute_index, // give the q present index 
+    ble_ams_queue_attribute_byte_count, // give the total no of item in q 
     ble_ams_queue_attribute_shuffle_mode,
     ble_ams_queue_attribute_repeat_mode,
     ble_ams_queue_attribute_rfus,
-};
+}ble_ams_q_att_data;
 
+//// return of the cmd ble_ams_queue_attribute_shuffle_mode 
 /// @brief define the shuffle mode
 enum _BLE_AMS_SHUFFLE_MODE_
 {
@@ -145,6 +152,7 @@ enum _BLE_AMS_SHUFFLE_MODE_
     ble_ams_shuffle_mode_rfus,
 };
 
+//// return of the cmd ble_ams_queue_attribute_repeat_mode
 /// @brief define the repeat mode
 enum _BLE_AMS_REPEAT_MODE_
 {
@@ -202,6 +210,46 @@ typedef enum _BLE_AMS_ATTRIBUTES_NAME_INDEX_
 /// @param attributeindex
 /// @return string containg attribute , NULL if none
 char *ble_ams_get_attribute_name(ble_ams_attribute_name index);
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+///////////// below API are used to exectute the cmd on the media player 
+
+/// @brief ble_ams_execute cmd is the function used to execute a specific cmd in media player  
+/// @param cmd_id 
+/// @return succ/Failure of the cmd 
+uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id);
+
+/// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_ 
+/// @param  void 
+/// @return return the playback state 
+uint8_t ble_ams_get_playback_State(void);
+
+/// @brief get the playback rate in the integer fromat 
+/// @param void   
+/// @return the float value of the playback rate 1.2x 1.5x 2.3x etc 
+float ble_ams_get_playbackrate(void);
+
+/// @brief returns the volume of the media in percentage 
+/// @param  void 
+/// @return return between 0 to 100 , value should be  consider in % 
+uint8_t ble_ams_get_volume(void);
+
+/// @brief geive the elapsed time in seconds 
+/// @param  void 
+/// @return returns the elpased time in seconds 
+uint32_t ble_ams_get_elapsed_time(void);
+
+/// @brief get the total time of the track 
+/// @param  void 
+/// @return returns the track time in seconds 
+uint32_t ble_ams_get_track_time(void);
+
+/// @brief get the q attribute like q index , repeat mode @ref ble_ams_q_att_data
+/// @param  ble_ams_q_att_data
+/// @return returns cmd specific  @ref _BLE_AMS_SHUFFLE_MODE_  @ref _BLE_AMS_REPEAT_MODE_
+uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index);
 
 /// @brief this is the apple media service handler where
 /// @param param
