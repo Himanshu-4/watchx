@@ -2,31 +2,32 @@
 #define BLE_AMS_H
 
 #include "ble_softdevice_init.h"
+#include "ble_gatt_client.h"
 
 #define NULL_STRING '\0'
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 ///////////////// this  is the database table of the apple media service
-typedef PACKED_STRUCT _BLE_AMS_SERVICES_STRUCT_
+typedef PACKED_STRUCT __ALIGNED(4) _BLE_AMS_SERVICES_STRUCT_
 {
     /// @brief the apple media service
-    ble_gattc_service_t ams_service;
+    ble_service_struct_t ams_service;
 
     /// @brief control point of the Apple media service
-    ble_gattc_char_t ams_control_point_cahr;
-    ble_gattc_desc_t ams_control_point_desc;
+    ble_char_struct_t ams_control_point_cahr;
+    ble_char_desc_struct_t ams_control_point_desc;
 
     /// @brief entity update for the apple media service
-    ble_gattc_char_t ams_entity_update_char;
-    ble_gattc_desc_t ams_entity_update_desc;
+    ble_char_struct_t ams_entity_update_char;
+    ble_char_desc_struct_t ams_entity_update_desc;
 
     /// @brief entity attribute for the apple media service
-    ble_gattc_char_t ams_entity_attribute_char;
-    ble_gattc_desc_t ams_entity_attribute_desc;
+    ble_char_struct_t ams_entity_attribute_char;
+    ble_char_desc_struct_t ams_entity_attribute_desc;
 }
 ble_ams_services_struct_t;
 
-typedef PACKED_STRUCT _BLE_AMS_REMOTE_CMD_STRUCT_
+typedef PACKED_STRUCT __ALIGNED(4) _BLE_AMS_REMOTE_CMD_STRUCT_
 {
     uint8_t ams_supp_cmd_play : 1;
     uint8_t ams_supp_cmd_pause, : 1;
@@ -47,13 +48,13 @@ typedef PACKED_STRUCT _BLE_AMS_REMOTE_CMD_STRUCT_
 ble_ams_supported_cmdsets;
 
 
-#define BLE_AMS_INSTACNE_INITED 0x10
+#define BLE_AMS_INSTANCE_INITED 0x10
 #define BLE_AMS_INSTANCE_DEINITED 0x20
 
-typedef PACKED_STRUCT _BLE_AMS_STRUCT_
+typedef struct __ALIGNED(4) _BLE_AMS_STRUCT_
 {
     /// @brief contains the structure for the apple media service att table
-    ble_ams_services_struct_t ams_srvc_char;
+    ble_ams_services_struct_t  ams_srvc_char;
     ble_ams_supported_cmdsets cmds;
     
     uint8_t ble_ams_instance_inited;

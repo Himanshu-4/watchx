@@ -3,7 +3,13 @@
 /// include the gatt client
 #include "ble_gatt_client.h"
 
+#include "memory_manager/kernel_mem_manager.h"
+
 #include "string.h"
+
+//// create a kernel memory instance to hold the data from the notification handler into this memory
+/// this is useful because it can give us compile time memory consumption , which in our case is useful because now run time
+///// consumption can be minimized
 
 /** @brief 128-bit service UUID for the Apple Media Service. */
 static ble_uuid128_t const ble_apple_media_service_uuid128 =
@@ -42,7 +48,7 @@ static ble_uuid128_t const ble_ams_entity_attribute_char_uuid128 =
 ///////////////////////////////////////////////////////////////////////////////
 ///////// defining the global struct
 
-static ble_ams_struct_t ble_ams_handler = {0};
+static volatile ble_ams_struct_t ble_ams_handler = {0};
 
 ////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -51,19 +57,19 @@ static void ble_ams_service_init()
 {
 
     ///////// first make sure that all the data is 0 for the services
-    memset(&ble_ams_handler.ams_srvc_char, 0, sizeof(ble_ams_services_struct_t));
+    memset((uint8_t *)&ble_ams_handler.ams_srvc_char, 0, sizeof(ble_ams_services_struct_t));
 
     uint32_t err_code = 0;
-    err_code = sd_ble_uuid_vs_add(&ble_apple_media_service_uuid128, &ble_ams_handler.ams_srvc_char.ams_service.uuid.type);
+    err_code = sd_ble_uuid_vs_add(&ble_apple_media_service_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_service.ble_service.uuid.type);
     NRF_ASSERT(err_code);
 
-    err_code = sd_ble_uuid_vs_add(&ble_ams_remote_command_char_uuid128, &ble_ams_handler.ams_srvc_char.ams_control_point_cahr.uuid.type);
+    err_code = sd_ble_uuid_vs_add(&ble_ams_remote_command_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_cahr.characterstic.uuid.type);
     NRF_ASSERT(err_code);
 
-    err_code = sd_ble_uuid_vs_add(&ble_ams_entity_update_char_uuid128, &ble_ams_handler.ams_srvc_char.ams_entity_update_char.uuid.type);
+    err_code = sd_ble_uuid_vs_add(&ble_ams_entity_update_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.uuid.type);
     NRF_ASSERT(err_code);
 
-    err_code = sd_ble_uuid_vs_add(&ble_ams_entity_attribute_char_uuid128, &ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.uuid.type);
+    err_code = sd_ble_uuid_vs_add(&ble_ams_entity_attribute_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.uuid.type);
     NRF_ASSERT(err_code);
 
     // NRF_LOG_INFO("ams_type %d,%d,%d,%d",ble_ams_handler.ams_srvc_char.ams_service.uuid.type,
@@ -89,9 +95,46 @@ uint32_t ble_ams_init(uint16_t conn_handle)
 {
     NRF_LOG_INFO("ams init");
 
+    if ((conn_handle == BLE_CONN_HANDLE_INVALID) || (conn_handle == 0))
+        return nrf_ERR_INVALID_PARAM;
+
+    uint32_t err = 0;
     /// it is asssumed that the gatt client module is inited and working succesfully
-    
+    ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_DEINITED;
+
     //// search for the ams service
+    err = gatt_client_discover_service(conn_handle, (ble_service_struct_t *)&ble_ams_handler.ams_srvc_char.ams_service);
+    NRF_ASSERT(err);
+
+    // serach the service if present
+    if (err == nrf_OK)
+    {
+        /// discover control point char and desc
+        err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ams_handler.ams_srvc_char.ams_service, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_cahr);
+        NRF_ASSERT(err);
+
+        err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_cahr, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_desc);
+        NRF_ASSERT(err);
+
+        /// disconver entity update char and desc
+        err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ams_handler.ams_srvc_char.ams_service, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char);
+        NRF_ASSERT(err);
+
+        err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_desc);
+        NRF_ASSERT(err);
+
+        /// discover the entity attribute  char and desc
+        err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ams_handler.ams_srvc_char.ams_service, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_char);
+        NRF_ASSERT(err);
+
+        err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_char, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc);
+        NRF_ASSERT(err);
+
+        ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_INITED;
+    }
+
+    /// make all the data to zero
+
     return nrf_OK;
 }
 
@@ -115,7 +158,7 @@ char *ble_ams_get_attribute_name(ble_ams_attribute_name index)
     {
     case ble_ams_attribute_index_mediaplayer:
     {
-        // string = /// the pointer to the stored media player name 
+        // string = /// the pointer to the stored media player name
     }
     break;
 
@@ -148,44 +191,40 @@ char *ble_ams_get_attribute_name(ble_ams_attribute_name index)
     return string;
 }
 
-
-
-/// @brief ble_ams_execute cmd is the function used to execute a specific cmd in media player  
-/// @param cmd_id 
-/// @return succ/Failure of the cmd 
+/// @brief ble_ams_execute cmd is the function used to execute a specific cmd in media player
+/// @param cmd_id
+/// @return succ/Failure of the cmd
 uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id);
 
-/// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_ 
-/// @param  void 
-/// @return return the playback state 
+/// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_
+/// @param  void
+/// @return return the playback state
 uint8_t ble_ams_get_playback_State(void);
 
-/// @brief get the playback rate in the integer fromat 
-/// @param void   
-/// @return the float value of the playback rate 1.2x 1.5x 2.3x etc 
+/// @brief get the playback rate in the integer fromat
+/// @param void
+/// @return the float value of the playback rate 1.2x 1.5x 2.3x etc
 float ble_ams_get_playbackrate(void);
 
-/// @brief returns the volume of the media in percentage 
-/// @param  void 
-/// @return return between 0 to 100 , value should be  consider in % 
+/// @brief returns the volume of the media in percentage
+/// @param  void
+/// @return return between 0 to 100 , value should be  consider in %
 uint8_t ble_ams_get_volume(void);
 
-/// @brief geive the elapsed time in seconds 
-/// @param  void 
-/// @return returns the elpased time in seconds 
+/// @brief geive the elapsed time in seconds
+/// @param  void
+/// @return returns the elpased time in seconds
 uint32_t ble_ams_get_elapsed_time(void);
 
-/// @brief get the total time of the track 
-/// @param  void 
-/// @return returns the track time in seconds 
+/// @brief get the total time of the track
+/// @param  void
+/// @return returns the track time in seconds
 uint32_t ble_ams_get_track_time(void);
 
 /// @brief get the q attribute like q index , repeat mode @ref ble_ams_q_att_data
 /// @param  ble_ams_q_att_data
 /// @return returns cmd specific  @ref _BLE_AMS_SHUFFLE_MODE_  @ref _BLE_AMS_REPEAT_MODE_
 uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index);
-
-
 
 /// @brief this is the apple media service handler where
 /// @param param
