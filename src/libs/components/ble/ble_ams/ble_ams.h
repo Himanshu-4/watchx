@@ -31,7 +31,7 @@ typedef PACKED_STRUCT _BLE_AMS_STRUCT_
 {
     /// @brief contains the structure for the apple media service att table 
     ble_ams_services_struct_t ams_srvc_char;
-    ble_ams_supported_cmdsets cmds;
+    //ble_ams_supported_cmdsets cmds;
 
 
 
@@ -91,20 +91,64 @@ enum _BLE_AMS_SUPPORTED_PLAYER_ATTRIBUTE_IDS_
     ble_ams_player_attribute_rfus,
 };
 
+//// the playbackinfo have 3 string concatenate 
+//// playbackstate,playbackrate,elapsetime
+
+/// @brief define the playback state 
+enum _BLE_AMS_PLAYBACK_STATE_
+{
+    ble_ams_playback_state_paused,
+    ble_ams_playback_state_playing,
+    ble_ams_playback_state_revinding,
+    ble_ams_playback_state_fastforward
+};
+
+//// the playback rate is a string that reprsent the floating point value of rate 
+
+/// elapsed time  string that represent the floating point value 
+
 
 #define ENTITY_UPDATE_FLAG_TRUNCATED_TRUE 1
 #define ENTITY_UPDATE_FLAG_TRUNCATED_FALSE 0
 
-
+/// @brief define the queue attribute 
 enum _BLE_AMS_SUPPORTED_QUEUE_ATTRIBUTE_IDS_
 {
     ble_ams_queue_attribute_index,
     ble_ams_queue_attribute_byte_count,
     ble_ams_queue_attribute_shuffle_mode,
     ble_ams_queue_attribute_repeat_mode,
+    ble_ams_queue_attribute_rfus,
 };
 
+/// @brief define the shuffle mode 
+enum _BLE_AMS_SHUFFLE_MODE_
+{
+    ble_ams_shuffle_mode_constant,
+    ble_ams_shuffle_mode_off,
+    ble_ams_shuffle_mode_one,
+    ble_ams_shuffle_mode_all,
+    ble_ams_shuffle_mode_rfus,
+};
 
+/// @brief define the repeat mode 
+enum _BLE_AMS_REPEAT_MODE_
+{
+    ble_ams_repetat_mode_constant,
+    ble_ams_repetat_mode_off,
+    ble_ams_repetat_mode_one,
+    ble_ams_repetat_mode_all,
+    ble_ams_repeat_mode_rfus,
+};
+
+enum _BLE_AMS_SUPPORTED_TRACK_ATTRIBUTE_IDS_
+{
+    ble_ams_track_attribute_artist,
+    ble_ams_track_attribute_album,
+    ble_ams_track_attribute_title,
+    ble_ams_track_attribute_duration,
+    ble_ams_track_Attribute_rfus,
+};
 
 ////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -122,6 +166,14 @@ uint32_t ble_ams_init(uint16_t conn_handle);
 /// @param  void
 uint32_t ble_ams_deinit(void);
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+/////////////// these are the player attribute 
+
+/// @brief this function gives the active 
+/// @param  
+/// @return 
+char * ble_ams_get_active_media_player(void);
 
 /// @brief this is the apple media service handler where 
 /// @param param 

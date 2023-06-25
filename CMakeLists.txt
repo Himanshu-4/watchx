@@ -437,6 +437,9 @@ list(APPEND
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/startup/gcc_startup_nrf52.S 
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/startup/system_nrf52.c 
 
+        # nrf rtc library
+        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/rtc/nrf_rtc.c 
+
     )
 
 list(APPEND 
@@ -468,6 +471,9 @@ list(APPEND
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/flash 
         # non volatile storage library 
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/nvs
+
+        # nrf real time counter library 
+        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/rtc 
 
         # contains the startup scripts 
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/startup
@@ -511,39 +517,22 @@ list(APPEND
 # this contains the all ble  related files 
 
 
-file(GLOB ble_ams_files 
+file(GLOB ble_nordic_files 
 ${PROJECT_BLE_FOLDER}/ble_ams/*.c 
-)
 
-file(GLOB ble_ancs_files 
 ${PROJECT_BLE_FOLDER}/ble_ancs/*.c 
-)
 
-file( GLOB ble_gap_files 
 ${PROJECT_BLE_FOLDER}/ble_gap/*.c 
-)
 
-file ( GLOB ble_gatt_client_files
 ${PROJECT_BLE_FOLDER}/ble_gatt_client/*.c 
-)
 
-file( GLOB ble_gatt_server_files
 ${PROJECT_BLE_FOLDER}/ble_gatt_server/*.c
-)
 
-file(GLOB  ble_stack_init_files  
 ${PROJECT_BLE_FOLDER}/ble_stack_init/*.c
-)
 
-file(GLOB ble_task_files 
 ${PROJECT_BLE_FOLDER}/ble_task/*.c 
-)
-
-file( GLOB ble_current_time_files
 ${PROJECT_BLE_FOLDER}/ble_time/*.c 
-)
 
-file(GLOB ble_peer_device_info_files 
 ${PROJECT_BLE_FOLDER}/ble_peer_device_info/*.c 
 )
 
@@ -551,24 +540,7 @@ ${PROJECT_BLE_FOLDER}/ble_peer_device_info/*.c
     # deifne the external libraries for the sensors ans peropheral that connect with nrf52
 set(BLE_LIBS_SRC
         # this is the ble stack init files 
-        ${ble_ams_files}
-
-        ${ble_ancs_files}
-        
-        ${ble_gap_files}
-        
-        ${ble_gatt_client_files}
-        
-        ${ble_gatt_server_files}
-        
-        ${ble_stack_init_files}
-        
-        ${ble_task_files}
-                
-        ${ble_current_time_files}
-
-        ${ble_peer_device_info_files}
-
+        ${ble_nordic_files}
         )
 
 set(BLE_LIB_INCLUDE_DIR
@@ -631,107 +603,12 @@ target_include_directories(ble_library PUBLIC SYSTEM
   
         )
 
-
-
 ##############################################################################
 ###########################################################################################3
 ################################################################################################
 ######################################################################################################
 ####################################################################################################
 
-# this contains external  devices  files 
-
-        # this is accelrometer related  files 
-        file ( GLOB device_accelrometer_files 
-        ${PROJECT_DEVICE_FOLDER}/accelrometer/*.c 
-        )
-        # battery related 
-        file ( GLOB device_battery_files
-        ${PROJECT_DEVICE_FOLDER}/battery/*.c 
-        )
-        # button related
-        file ( GLOB device_button_files
-        ${PROJECT_DEVICE_FOLDER}/button/*.c 
-        )
-        # buzzer related 
-        file ( GLOB device_buzzer_files
-        ${PROJECT_DEVICE_FOLDER}/buzzer/*.c 
-        )
-        #display related 
-        file ( GLOB device_display_files
-        ${PROJECT_DEVICE_FOLDER}/display/*.c 
-        )
-        # led relted 
-        file ( GLOB device_led_files
-        ${PROJECT_DEVICE_FOLDER}/led/*.c 
-        )
-
-set( EXTERNAL_DEVICES_SRC 
-        ${device_accelrometer_files}
-        ${device_battery_files}
-        ${device_button_files}
-        ${device_buzzer_files}
-        ${device_buzzer_files}
-        ${device_display_files}
-        ${device_led_files}
-
-        )
-
-
-    # deifne the external libraries for the sensors ans peropheral that connect with nrf52
-set(EXTERNAL_DEVICES_INCLUDE_DIR
-        # this is accelrometer related  files 
-        ${PROJECT_DEVICE_FOLDER}/accelrometer 
-
-        # battery related 
-        ${PROJECT_DEVICE_FOLDER}/battery
-
-        # button related
-        ${PROJECT_DEVICE_FOLDER}/button
-
-        # buzzer related 
-        ${PROJECT_DEVICE_FOLDER}/buzzer 
-
-        #display related 
-        ${PROJECT_DEVICE_FOLDER}/display 
-
-        # led relted 
-        ${PROJECT_DEVICE_FOLDER}/led 
-        )
-
-
-        # make a library of external that are connected to the nrf52 
-add_library(ext_devices  STATIC 
-${EXTERNAL_DEVICES_SRC}
-)
-
-
-
-target_compile_definitions(ext_devices PRIVATE
-    ${COMMON_DEFINES}   
-#     ${NIMBLE_STACK_DEFINES}
-
-)
-
-target_compile_options(ext_devices PRIVATE
-       ${COMMON_C_FLAGS}
-       $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized >
-       $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti >
-       $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp>
-         )
-
-
-target_include_directories(ext_devices PUBLIC SYSTEM 
-    ${EXTERNAL_DEVICES_INCLUDE_DIR}
-    ${SDK_INCLUDE_DIR}
-    ${FREERTOS_INCLUDE}
-  
-        )
-
-###########################################################################################################################################################
-##########################################################################################################################################################
-#########################################################################################################################################################
-############################################################## the watchx kernel  
 
 # this contains kernel   files 
 
@@ -745,14 +622,58 @@ target_include_directories(ext_devices PUBLIC SYSTEM
         )
         # kernel time management 
         file ( GLOB kernel_time_files
-        ${PROJECT_KERNEL_FOLDER}/time/*.c 
+        ${PROJECT_KERNEL_FOLDER}/time_manager/*.c 
         )
-   
+
+        file(GLOB Kernel_memory_manager_files 
+        ${PROJECT_KERNEL_FOLDER}/memory_manager/*.c 
+        )
+
+#    this contains Kernel  devices  drivers  
+
+        # this is accelrometer related  files 
+        file ( GLOB kernel_Device_drivers 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/accelrometer/*.c 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/battery/*.c 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/button/*.c 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/buzzer/*.c 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/display/*.c 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/led/*.c 
+        )
+     
+
+        set(kernel_device_drivers_files 
+        ${kernel_Device_drivers}
+        )
+
+
+    # deifne the external libraries for the sensors ans peropheral that connect with nrf52
+set(EXTERNAL_DEVICES_INCLUDE_DIR
+        # this is accelrometer related  files 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/accelrometer 
+
+        # battery related 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/battery
+
+        # button related
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/button
+
+        # buzzer related 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/buzzer 
+
+        #display related 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/display 
+
+        # led relted 
+        ${PROJECT_KERNEL_FOLDER}/device_drivers/led 
+        )
+
 
 set( WATCHX_KERNEL_SRC 
       ${kernel_task_files}
       ${kernel_sleep_handle_files}
         ${kernel_time_files}
+        ${kernel_device_drivers_files}
         )
 
 
@@ -765,8 +686,12 @@ set(WATCH_KERNEL_INCLUDE_DIR
         ${PROJECT_KERNEL_FOLDER}/sleep_handles
 
         # kernel time related 
-        ${PROJECT_KERNEL_FOLDER}/time
+        ${PROJECT_KERNEL_FOLDER}/time_manager
 
+        # kernel memory manager 
+        ${PROJECT_KERNEL_FOLDER}/memory_manager
+
+        ${EXTERNAL_DEVICES_INCLUDE_DIR}
         )
 
 
@@ -824,8 +749,8 @@ add_executable(${EXECUTABLE}
 target_include_directories(${EXECUTABLE} PRIVATE
              ${SDK_INCLUDE_DIR}
              ${BLE_LIB_INCLUDE_DIR}
-             ${EXTERNAL_LIB_INCLUDE_DIR}
-                ${PROJECT_INCLUDE_DIR}
+             ${PROJECT_INCLUDE_DIR}
+             ${WATCH_KERNEL_INCLUDE_DIR}
         )
 
         
@@ -848,7 +773,6 @@ target_compile_options(${EXECUTABLE} PRIVATE
 target_link_libraries(${EXECUTABLE}
                        freertos_lib
                        ble_library
-                       ext_devices
                        nrf_sdk_libs 
                        watchx_kernel_lib
                 #        nimble_ble_stack
