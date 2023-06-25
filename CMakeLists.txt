@@ -295,6 +295,15 @@ set(SDK_INCLUDE_DIR
          # contains the main_helper library 
          ${CMAKE_SOURCE_DIR}/main
 
+         # the kernel component directory 
+         ${CMAKE_SOURCE_DIR}/libs/components/Kernel 
+
+        # the ble component directory  
+        ${CMAKE_SOURCE_DIR}/libs/components/ble 
+
+        # the watchx app directory 
+        ${CMAKE_SOURCE_DIR}/libs/components/app  
+         
       )
 
 
@@ -608,19 +617,16 @@ target_include_directories(ble_library PUBLIC SYSTEM
 # this contains kernel   files 
 
         # this is kernel task files 
-        file ( GLOB kernel_task_files 
+        file ( GLOB watchx_kernel_files 
         ${PROJECT_KERNEL_FOLDER}/kernel_task/*.c 
-        )
-        # sleep handle related to the device sleep  
-        file ( GLOB kernel_sleep_handle_files
-        ${PROJECT_KERNEL_FOLDER}/sleep_handles/*.c 
-        )
-        # kernel time management 
-        file ( GLOB kernel_time_files
-        ${PROJECT_KERNEL_FOLDER}/time_manager/*.c 
-        )
 
-        file(GLOB Kernel_memory_manager_files 
+        # sleep handle related to the device sleep  
+        ${PROJECT_KERNEL_FOLDER}/sleep_handles/*.c 
+        
+        # kernel time management 
+        ${PROJECT_KERNEL_FOLDER}/time_manager/*.c 
+
+        # kernel memory management file 
         ${PROJECT_KERNEL_FOLDER}/memory_manager/*.c 
         )
 
@@ -665,9 +671,7 @@ set(EXTERNAL_DEVICES_INCLUDE_DIR
 
 
 set( WATCHX_KERNEL_SRC 
-      ${kernel_task_files}
-      ${kernel_sleep_handle_files}
-        ${kernel_time_files}
+      ${watchx_kernel_files}
         ${kernel_device_drivers_files}
         )
 
