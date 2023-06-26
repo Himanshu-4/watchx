@@ -107,8 +107,9 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     NRF_ASSERT(err);
 
     // serach the service if present
-    if (err == nrf_OK)
-    {
+    if (err != nrf_OK)
+        return nrf_ERR_OPERATION_FAILED;
+    
         /// discover control point char and desc
         err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ams_handler.ams_srvc_char.ams_service, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_cahr);
         NRF_ASSERT(err);
@@ -130,11 +131,15 @@ uint32_t ble_ams_init(uint16_t conn_handle)
         err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_char, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc);
         NRF_ASSERT(err);
 
+        /// now here suscribe for the notification for the gatt char 
+        /// suscribe the gatt notication of remote cmd
+        err =  
+
+
         ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_INITED;
-    }
+    
 
     /// make all the data to zero
-
     return nrf_OK;
 }
 

@@ -15,5 +15,5 @@
         "spi.c" : "c",
         
     },
-    "C_Cpp.dimInactiveRegions": true
+    "C_Cpp.dimInactiveRegions": false
 }

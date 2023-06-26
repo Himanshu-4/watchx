@@ -734,3 +734,161 @@ return_mech:
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
+
+
+
+
+/// @brief this is to write a value to the gatt client descriptor 
+/// @param conn_hand 
+/// @param desc_struct 
+/// @param buff 
+/// @param size 
+/// @return succ/Failure of func 
+uint32_t gattc_client_char_desc_write(uint16_t conn_handle , ble_char_desc_struct_t *desc_struct, uint8_t *buff, uint16_t size)
+{
+  
+  uint32_t err = ble_client_ok;
+
+  // take the semaphore
+  if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
+  {
+    return ble_client_err_timeout;
+  }
+
+  uint8_t index = 0;
+  /// add the timeout callback
+
+  for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
+  {
+    if (client_struct[i].conn_handle == conn_handle)
+    {
+      index = i;
+      IS_CLIENT_INITED(client_struct[i]);
+      goto server_operation;
+    }
+  }
+  err = ble_client_err_conn_handle_not_found;
+  goto return_mech;
+
+server_operation:
+  /// get the current task handle
+  ble_client_task_handle = xTaskGetCurrentTaskHandle();
+
+  //// do a write operatioln
+  ble_gattc_write_params_t ble_write_param;
+
+  ble_write_param.write_op = BLE_GATT_OP_WRITE_CMD;
+  ble_write_param.flags = BLE_GATT_EXEC_WRITE_FLAG_PREPARED_CANCEL;
+  ble_write_param.offset = 0;
+  ble_write_param.handle = desc_struct->descriptor.handle;
+
+  // data part
+  ble_write_param.p_value = buff;
+  ble_write_param.len = size;
+
+  /// call the function
+  err = sd_ble_gattc_write(conn_handle, &ble_write_param);
+
+  if (err != nrf_OK)
+  {
+    goto return_mech;
+  }
+
+  /// wait for the notifcation from the callback
+  if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)))
+  {
+    err = ble_client_err_timeout;
+    goto return_mech;
+  }
+
+  /// check if error or not
+  if (!err)
+  {
+    NRF_LOG_INFO("w ds cmpt");
+  }
+  else
+  {
+    /// log the erroor
+    NRF_LOG_ERROR("write %d", err);
+    err = ble_client_err_write_op_failed;
+  }
+
+return_mech:
+  ble_client_task_handle = NULL;
+  xSemaphoreGive(ble_client_semphr_handle);
+  return err;
+}
+
+/// @brief this to read the char descriptor value 
+/// @param conn_hand 
+/// @param desc_struct 
+/// @param buff 
+/// @param size 
+/// @return succ/Failure of the func 
+uint32_t gattc_client_char_desc_read(uint16_t conn_handle , ble_char_desc_struct_t *desc_struct, uint8_t *buff, uint16_t size)
+{
+  
+  uint32_t err = ble_client_ok;
+
+  // take the semaphore
+  if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
+  {
+    return ble_client_err_timeout;
+  }
+
+  uint8_t index = 0;
+  /// add the timeout callback
+
+  for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
+  {
+    if (client_struct[i].conn_handle == conn_handle)
+    {
+      index = i;
+      IS_CLIENT_INITED(client_struct[i]);
+      goto server_operation;
+    }
+  }
+  err = ble_client_err_conn_handle_not_found;
+  goto return_mech;
+
+///// perform the write operations
+server_operation:
+  /// perform the read operation and wait for the notification
+  sd_ble_gattc_read(conn_handle, desc_struct->descriptor.handle, 0);
+
+  if (err != nrf_OK)
+  {
+    goto return_mech;
+  }
+
+  /// wait for the notifcation from the callback
+  if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)))
+  {
+    err = ble_client_err_timeout;
+    goto return_mech;
+  }
+
+  /// check if error or not
+  if (!err)
+  {
+    /// copy the content
+    memcpy(buff, u8(msg_buff), MIN_OF(sizeof(msg_buff), size));
+    NRF_LOG_INFO("r ds cmpt");
+  }
+  else
+  {
+    /// log the erroor
+    NRF_LOG_ERROR("read %d", err);
+    err = ble_client_err_read_op_failed;
+  }
+
+return_mech:
+
+  //// reset the msg buffer
+  memset(u8(msg_buff), 0, s(msg_buff));
+  ble_client_task_handle = NULL;
+  xSemaphoreGive(ble_client_semphr_handle);
+  return err;
+}
+
+
