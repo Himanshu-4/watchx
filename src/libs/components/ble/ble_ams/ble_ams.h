@@ -14,7 +14,7 @@ typedef PACKED_STRUCT __ALIGNED(4) _BLE_AMS_SERVICES_STRUCT_
     ble_service_struct_t ams_service;
 
     /// @brief control point of the Apple media service
-    ble_char_struct_t ams_control_point_cahr;
+    ble_char_struct_t ams_control_point_char;
     ble_char_desc_struct_t ams_control_point_desc;
 
     /// @brief entity update for the apple media service
@@ -29,21 +29,8 @@ ble_ams_services_struct_t;
 
 typedef PACKED_STRUCT __ALIGNED(4) _BLE_AMS_REMOTE_CMD_STRUCT_
 {
-    uint8_t ams_supp_cmd_play : 1;
-    uint8_t ams_supp_cmd_pause, : 1;
-    uint8_t ams_supp_cmd_toogle_playpause : 1;
-    uint8_t ams_supp_cmd_next_track : 1;
-    uint8_t ams_supp_cmd_previous_track : 1;
-    uint8_t ams_supp_cmd_volume_up : 1;
-    uint8_t ams_supp_cmd_volue_down : 1;
-    uint8_t ams_supp_cmd_advance_repeat_mode : 1;
-    uint8_t ams_supp_cmd_advance_shuffle_mode : 1;
-    uint8_t ams_supp_cmd_skip_forward : 1;
-    uint8_t ams_supp_cmd_skip_backward : 1;
-    uint8_t ams_supp_cmd_like_track : 1;
-    uint8_t ams_supp_cmd_dislike_track : 1;
-    uint8_t ams_supp_cmd_bookmark_track, : 1;
-    uint8_t ams_supp_cmd_rfus : 1;
+    // so ther are  14 cmds in total that we are available with 
+    bool ams_supp_cmds[14];
 }
 ble_ams_supported_cmdsets;
 
@@ -56,7 +43,7 @@ typedef struct __ALIGNED(4) _BLE_AMS_STRUCT_
     /// @brief contains the structure for the apple media service att table
     ble_ams_services_struct_t  ams_srvc_char;
     ble_ams_supported_cmdsets cmds;
-    
+    uint16_t conn_handle;
     uint8_t ble_ams_instance_inited;
 }
 ble_ams_struct_t;

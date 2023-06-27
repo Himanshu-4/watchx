@@ -460,7 +460,7 @@ discover_Data:
   /// set the buffer content to char
   memset(u8(msg_buff), 0, s(msg_buff));
   // copy the content of the char data
-  memcpy(u8(msg_buff), u8(char_struct), sizeof(ble_gattc_char_t));
+  memcpy(u8(msg_buff), u8(char_struct), sizeof(ble_char_struct_t));
 
   err = sd_ble_gattc_characteristics_discover(conn_handle, &service_struct->ble_service.handle_range);
 
@@ -480,7 +480,7 @@ discover_Data:
   if (!err)
   {
     /// copy the content to the structure
-    memcpy(u8(char_struct), u8(msg_buff), sizeof(ble_gattc_char_t));
+    memcpy(u8(char_struct), u8(msg_buff), sizeof(ble_char_struct_t));
   }
   else
   {
@@ -537,7 +537,7 @@ discover_Data:
   /// set the buffer content to char
   memset(u8(msg_buff), 0, s(msg_buff));
   // copy the content of the char data
-  memcpy(u8(msg_buff), u8(desc_struct), sizeof(ble_gattc_desc_t));
+  memcpy(u8(msg_buff), u8(desc_struct), sizeof(ble_char_desc_struct_t));
   ble_gattc_handle_range_t desc_disc_range;
 
   desc_disc_range.start_handle = char_struct->characterstic.handle_value;
@@ -561,7 +561,7 @@ discover_Data:
   if (!err)
   {
     /// copy the content to the structure
-    memcpy(u8(desc_struct), u8(msg_buff), sizeof(ble_gattc_desc_t));
+    memcpy(u8(desc_struct), u8(msg_buff), sizeof(ble_char_desc_struct_t));
   }
   else
   {

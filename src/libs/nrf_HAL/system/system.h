@@ -212,9 +212,18 @@ void check_assrt(uint32_t , const char *, uint32_t line);
 
 // }
 
+#ifdef NRF_ASSERT_WITH_RETURN_ON_FAIL
+
+#define NRF_ASSERT(x) \
+check_assrt(x, __FUNCTION__ , __LINE__ ); \
+return nrf_ERR_OPERATION_FAILED \
+
+#else 
 
 #define NRF_ASSERT(x) \
 check_assrt(x, __FUNCTION__ , __LINE__ ) \
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

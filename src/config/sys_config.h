@@ -16,7 +16,23 @@
 // // enable the trace clock on pin 18 with 2 mhz clock
 // #define  ENABLE_TRACE  1
 
+/// @brief in this return type when assert will failed it return from the funcition with an err code 
+#define ASSERT_TYPE_WITH_RETURN 0x02
 
+/// @brief in this if assert will fail it just continue to next inst 
+#define ASSERT_TYPE_WITHOUT_RETURN 0x03
+
+
+#define NRF_ASSERT_TYPE ASSERT_TYPE_WITH_RETURN 
+// #define NRF_ASSERT_TYPE ASSERT_TYPE_WITHOUT_RETURN
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+#if (NRF_ASSERT_TYPE == ASSERT_TYPE_WITH_RETURN)
+#define NRF_ASSERT_WITH_RETURN_ON_FAIL
+#endif
 ///////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// NRF TIMER BASED DELAY API
 //// this is defined to use the nrf_delay_us(x) and nrf_delay_ms(x) macros

@@ -67,7 +67,7 @@ typedef struct _BLE_GATT_CHAR_
 /// @brief define the ble gatt char descriptor 
 typedef struct _BLE_GATT_DESC_
 {
-    /// @brief 
+    /// @brief the char descritpor  
     ble_gattc_desc_t descriptor;
 } ble_char_desc_struct_t;
 /////////////////////////////////////////////////////////////////////////

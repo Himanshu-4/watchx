@@ -60,10 +60,11 @@ static void ble_ams_service_init()
     memset((uint8_t *)&ble_ams_handler.ams_srvc_char, 0, sizeof(ble_ams_services_struct_t));
 
     uint32_t err_code = 0;
+    //// the apple media service id 
     err_code = sd_ble_uuid_vs_add(&ble_apple_media_service_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_service.ble_service.uuid.type);
     NRF_ASSERT(err_code);
-
-    err_code = sd_ble_uuid_vs_add(&ble_ams_remote_command_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_cahr.characterstic.uuid.type);
+    
+    err_code = sd_ble_uuid_vs_add(&ble_ams_remote_command_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.uuid.type);
     NRF_ASSERT(err_code);
 
     err_code = sd_ble_uuid_vs_add(&ble_ams_entity_update_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.uuid.type);
@@ -72,6 +73,17 @@ static void ble_ams_service_init()
     err_code = sd_ble_uuid_vs_add(&ble_ams_entity_attribute_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.uuid.type);
     NRF_ASSERT(err_code);
 
+        //// assignt the descritptor 
+    ble_ams_handler.ams_srvc_char.ams_control_point_desc.descriptor.uuid.type = BLE_UUID_TYPE_BLE;
+    ble_ams_handler.ams_srvc_char.ams_control_point_desc.descriptor.uuid.uuid = BLE_UUID_DESCRIPTOR_CLIENT_CHAR_CONFIG;
+
+    //// assignt the descritptor 
+    ble_ams_handler.ams_srvc_char.ams_entity_update_desc.descriptor.uuid.type = BLE_UUID_TYPE_BLE;
+    ble_ams_handler.ams_srvc_char.ams_entity_update_desc.descriptor.uuid.uuid = BLE_UUID_DESCRIPTOR_CLIENT_CHAR_CONFIG;
+
+    ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc.descriptor.uuid.type = BLE_UUID_TYPE_BLE;
+    ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc.descriptor.uuid.uuid = BLE_UUID_DESCRIPTOR_CHAR_EXT_PROP;
+    
     // NRF_LOG_INFO("ams_type %d,%d,%d,%d",ble_ams_handler.ams_srvc_char.ams_service.uuid.type,
     // ble_ams_handler.ams_srvc_char.ams_control_point_cahr.uuid.type , ble_ams_handler.ams_srvc_char.ams_entity_update_char.uuid.type ,
     // ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.uuid.type);
@@ -102,25 +114,30 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     /// it is asssumed that the gatt client module is inited and working succesfully
     ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_DEINITED;
 
+    /// assign the conn handle 
+    ble_ams_handler.conn_handle = conn_handle;
+
     //// search for the ams service
     err = gatt_client_discover_service(conn_handle, (ble_service_struct_t *)&ble_ams_handler.ams_srvc_char.ams_service);
     NRF_ASSERT(err);
 
     // serach the service if present
     if (err != nrf_OK)
-        return nrf_ERR_OPERATION_FAILED;
+        {return nrf_ERR_OPERATION_FAILED;}
     
         /// discover control point char and desc
-        err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ams_handler.ams_srvc_char.ams_service, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_cahr);
+        err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ams_handler.ams_srvc_char.ams_service, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_char);
         NRF_ASSERT(err);
 
-        err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_cahr, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_desc);
+        //discover the client char config descriptor
+        err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_char, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_desc);
         NRF_ASSERT(err);
 
         /// disconver entity update char and desc
         err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ams_handler.ams_srvc_char.ams_service, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char);
         NRF_ASSERT(err);
 
+        ///// discover the client char config descriptor 
         err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_desc);
         NRF_ASSERT(err);
 
@@ -128,13 +145,45 @@ uint32_t ble_ams_init(uint16_t conn_handle)
         err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ams_handler.ams_srvc_char.ams_service, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_char);
         NRF_ASSERT(err);
 
+        //// discover the char descriptor extended properties 
         err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_char, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc);
         NRF_ASSERT(err);
 
+        uint8_t notif_en_data = NOTIFICATION_ENABLED;
         /// now here suscribe for the notification for the gatt char 
-        /// suscribe the gatt notication of remote cmd
-        err =  
+        /// suscribe the gatt notication of remote cmd and entity update char 
+        err =  gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_desc , &notif_en_data , sizeof(notif_en_data));
+        NRF_ASSERT(err);
+        err= gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc , &notif_en_data , sizeof(notif_en_data));
+        NRF_ASSERT(err);
+    
+        //// clear the cmd supported  values
+        memset( (uint8_t *)&ble_ams_handler.cmds ,0 , sizeof(ble_ams_handler.cmds ));
 
+        /// suscribe for the differnt entity attributes 
+
+        //// subscribe all the attribute for player entity like playername ,player playbacinfo ,player volume 
+        uint8_t entity_id_player[] = {ble_ams_entityid_player , ble_ams_player_attribute_name 
+        , ble_ams_player_attribute_playbackinfo,ble_ams_player_attribute_volume};
+
+        //// subscribe all the attribute for the entity  queue like q properties 
+        uint8_t entity_id_queue[] =   { ble_ams_entityid_queue,ble_ams_queue_attribute_index, // give the q present index 
+        ble_ams_queue_attribute_byte_count,ble_ams_queue_attribute_shuffle_mode, ble_ams_queue_attribute_repeat_mode};
+
+        ///// subscribe all the track attributes like name, duration , artist name 
+        uint8_t entity_id_track[] = {ble_ams_entityid_Track ,ble_ams_track_attribute_artist,ble_ams_track_attribute_album,
+            ble_ams_track_attribute_title,ble_ams_track_attribute_duration};
+        
+        /////// write this to the entty update char 
+        err = gatt_client_char_write(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char , CHAR_WRITE_WITH_RSP, entity_id_player, sizeof(entity_id_player));
+        NRF_ASSERT(err);
+        
+        err = gatt_client_char_write(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char , CHAR_WRITE_WITH_RSP, entity_id_queue, sizeof(entity_id_queue));
+        NRF_ASSERT(err);
+        
+        err = gatt_client_char_write(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char , CHAR_WRITE_WITH_RSP, entity_id_track, sizeof(entity_id_track));
+        NRF_ASSERT(err);
+        
 
         ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_INITED;
     
@@ -149,6 +198,12 @@ uint32_t ble_ams_deinit(void)
 {
     NRF_LOG_WARNING("ams deinit");
 
+    //// clear the cmd supported  values
+    memset( (uint8_t *)&ble_ams_handler.cmds ,0 , sizeof(ble_ams_handler.cmds ));
+
+    ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_DEINITED;   
+
+    //// clear the 
     return nrf_OK;
 }
 
@@ -199,7 +254,30 @@ char *ble_ams_get_attribute_name(ble_ams_attribute_name index)
 /// @brief ble_ams_execute cmd is the function used to execute a specific cmd in media player
 /// @param cmd_id
 /// @return succ/Failure of the cmd
-uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id);
+uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id)
+{
+    if(ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
+    {
+        return nrf_ERR_INVALID_STATE;
+    }
+
+    if(cmd_id >= ble_ams_cmd_rfus)
+    {
+        return nrf_ERR_INVALID_PARAM;
+    }
+    if(ble_ams_handler.cmds.ams_supp_cmds[cmd_id] == 0)
+    {
+        return nrf_ERR_OPERATION_FAILED;
+    }
+
+    uint8_t err = 0;
+    uint8_t cmd = cmd_id;
+    /// we can execute the cmds 
+    err = gatt_client_char_write( ble_ams_handler.conn_handle , (ble_char_struct_t * )&ble_ams_handler.ams_srvc_char.ams_control_point_char , CHAR_WRITE_WITH_RSP , &cmd, 1 );
+    NRF_ASSERT(err);
+
+    return nrf_OK;
+}
 
 /// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_
 /// @param  void

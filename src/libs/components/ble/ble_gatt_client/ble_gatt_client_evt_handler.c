@@ -59,11 +59,11 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     case BLE_GATTC_EVT_CHAR_DISC_RSP:
     {
         /////// the message buffer have the content of serach charcteristic
-        ble_gattc_char_t serach_char;
+        ble_char_struct_t serach_char;
 
         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
 
-        memcpy(u8(serach_char), u8(msg_buff), sizeof(ble_gattc_char_t));
+        memcpy(u8(serach_char), u8(msg_buff), sizeof(ble_char_struct_t));
 
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
         {
@@ -73,8 +73,13 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             /// serach the char with the uuid
             for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.char_disc_rsp.count; i++)
             {
+                //// match the characteristic type first 
+                if(p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i].uuid.type !=  serach_char.characterstic.uuid.type)
+                {
+                    continue;
+                }
                 ///// serach for the uuid
-                if (p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i].uuid.uuid == serach_char.uuid.uuid)
+                if (p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i].uuid.uuid == serach_char.characterstic.uuid.uuid)
                 {
                     /// found the uuid, change the gatt status
                     gatt_status = ble_client_ok;
@@ -100,11 +105,11 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     case BLE_GATTC_EVT_DESC_DISC_RSP:
     {
         /////// the message buffer have the content of serach charcteristic
-        ble_gattc_desc_t search_desc;
+        ble_char_desc_struct_t search_desc;
 
         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
 
-        memcpy(u8(search_desc), u8(msg_buff), sizeof(ble_gattc_desc_t));
+        memcpy(u8(search_desc), u8(msg_buff), sizeof(ble_char_desc_struct_t));
 
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
         {
@@ -115,13 +120,13 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.count; i++)
             {
                 ///// serach for the uuid
-                if (p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i].uuid.uuid == search_desc.uuid.uuid)
+                if (p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i].uuid.uuid == search_desc.descriptor.uuid.uuid)
                 {
                     /// found the uuid, change the gatt status
                     gatt_status = ble_client_ok;
 
                     /// copy the content to buffer
-                    memcpy(u8(p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i]), u8(msg_buff), sizeof(ble_gattc_desc_t));
+                    memcpy(u8(p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i]), u8(msg_buff), sizeof(ble_char_desc_struct_t));
                     /// exit from the loop
                     break;
                 }

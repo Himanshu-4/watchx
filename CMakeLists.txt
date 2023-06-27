@@ -593,8 +593,8 @@ target_compile_definitions(ble_library PRIVATE
 
 target_compile_options(ble_library PRIVATE
        ${COMMON_C_FLAGS}
-       $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized >
-       $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti >
+       $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-return-type >
+       $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-return-type -fno-rtti >
        $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp>
          )
 
