@@ -252,6 +252,10 @@ int int_to_str(int x, char str[], int d);
 /// @param res
 void ftoa(float n, char *res, int afterpoint);
 
+///// @todo this algo is not working , 
+/// @brief convert a string to float 
+/// @param str 
+/// @return float value 
 float str_to_float(char *str);
 
 /// @brief to get the power of the number 

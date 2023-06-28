@@ -396,6 +396,10 @@ FORCE_INLINE int str_to_int(char *str, uint16_t len)
     return res;
 }
 
+///// @todo this algo is not working , 
+/// @brief convert a string to float 
+/// @param str 
+/// @return float value 
 FORCE_INLINE float str_to_float(char *str )
 {
     int mantisa =0;
