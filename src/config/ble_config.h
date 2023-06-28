@@ -150,6 +150,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 //======================= BLE APPLE AMS CONFIG =============================================
 
+/// @brief this is the number of bytes you want to allocate to the ble apple media service libary to hold the media data (track name , etc )
+#define BLE_AMS_MEM_SIZE 512 
 
 
 //////////////////////////////////////////////////////////////////////////////////////

@@ -233,7 +233,7 @@ check_assrt(x, __FUNCTION__ , __LINE__ ) \
 /// @param str
 /// @param stringlength
 /// @return integer
-int aToi(char *str , uint16_t len);
+int str_to_int(char *str , uint16_t len);
 
 /// @brief reverse a string .
 /// @param str
@@ -245,12 +245,14 @@ void reverse(char *str, int len);
 /// @param str
 /// @param d
 /// @return return the str
-int intToStr(int x, char str[], int d);
+int int_to_str(int x, char str[], int d);
 
 /// @brief used to convert the float value in an ascii strinf to send it to uart
 /// @param n
 /// @param res
 void ftoa(float n, char *res, int afterpoint);
+
+float str_to_float(char *str);
 
 /// @brief to get the power of the number 
 /// @param base 

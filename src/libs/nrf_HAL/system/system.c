@@ -378,9 +378,8 @@ void system_shutdown(void)
     enter_low_pwr_mode();
 }
 
-FORCE_INLINE int aToi(char *str, uint16_t len)
+FORCE_INLINE int str_to_int(char *str, uint16_t len)
 {
-
     // Initialize result
     int res = 0;
 
@@ -397,6 +396,39 @@ FORCE_INLINE int aToi(char *str, uint16_t len)
     return res;
 }
 
+FORCE_INLINE float str_to_float(char *str )
+{
+    int mantisa =0;
+    float fraction =0;
+
+    bool dot_started  =0;
+
+    uint16_t afterpoint =0;
+
+    uint16_t len = strlen(str);
+
+    for (int i = 0; i < len ; ++i)
+    {   
+        if(str[i] == '.')
+        {
+            dot_started =1;
+            afterpoint = i;
+        }
+        /// calculate the mantisa part 
+        if(!dot_started)
+        {
+            mantisa = mantisa *10 + (str[i] - '0');
+        }
+        //// calculate the fraction part 
+        else 
+        {
+            fraction += (str[i] -'0') / pow(10, i - afterpoint);
+        }
+    }
+
+    return (float)(mantisa + fraction);
+}
+
 // Reverses a string 'str' of length 'len'
 FORCE_INLINE void reverse(char *str, int len)
 {
@@ -411,7 +443,7 @@ FORCE_INLINE void reverse(char *str, int len)
     }
 }
 
-FORCE_INLINE int intToStr(int x, char str[], int d)
+FORCE_INLINE int int_to_str(int x, char str[], int d)
 {
     int i = 0;
     while (x)

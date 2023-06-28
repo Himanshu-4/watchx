@@ -7,9 +7,34 @@
 
 #include "string.h"
 
+
+//// define the enum to get the string for the particular attributes 
+enum _ATTRIBUTE_STRING_UIDS_
+{
+    ble_ams_uid_media_player_name = 0x10,
+    ble_ams_uid_artist_name,
+    ble_ams_uid_album_name,
+    ble_ams_uid_track_name,
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//// in the global vars to store the volume, duration, etc 
+static volatile float volume =0;
+
+static volatile uint8_t playbackstate;
+
+static volatile float track_duration =1, elpased_time=0, playbackrate;
+
+static volatile uint8_t q_att_index =0, att_total_items_q =0, q_att_shuffle_mode, q_att_repeat_mode; 
+
 //// create a kernel memory instance to hold the data from the notification handler into this memory
 /// this is useful because it can give us compile time memory consumption , which in our case is useful because now run time
 ///// consumption can be minimized
+
+KERNEL_MEM_INIT(ble_ams_mem, BLE_AMS_MEM_SIZE);
+
 
 /** @brief 128-bit service UUID for the Apple Media Service. */
 static ble_uuid128_t const ble_apple_media_service_uuid128 =
@@ -84,6 +109,7 @@ static void ble_ams_service_init()
     ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc.descriptor.uuid.type = BLE_UUID_TYPE_BLE;
     ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc.descriptor.uuid.uuid = BLE_UUID_DESCRIPTOR_CHAR_EXT_PROP;
     
+
     // NRF_LOG_INFO("ams_type %d,%d,%d,%d",ble_ams_handler.ams_srvc_char.ams_service.uuid.type,
     // ble_ams_handler.ams_srvc_char.ams_control_point_cahr.uuid.type , ble_ams_handler.ams_srvc_char.ams_entity_update_char.uuid.type ,
     // ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.uuid.type);
@@ -99,6 +125,8 @@ void ble_ams_pre_init(void)
 {
     /// init the ble ams srvice
     ble_ams_service_init();
+    
+    kernel_mem_init(ble_ams_mem);
 }
 
 /// @brief this is to init the ams at a coonection event
@@ -202,7 +230,7 @@ uint32_t ble_ams_deinit(void)
     memset( (uint8_t *)&ble_ams_handler.cmds ,0 , sizeof(ble_ams_handler.cmds ));
 
     ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_DEINITED;   
-
+    ble_ams_handler.conn_handle = BLE_CONN_HANDLE_INVALID;
     //// clear the 
     return nrf_OK;
 }
@@ -309,9 +337,55 @@ uint32_t ble_ams_get_track_time(void);
 /// @return returns cmd specific  @ref _BLE_AMS_SHUFFLE_MODE_  @ref _BLE_AMS_REPEAT_MODE_
 uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index);
 
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// @brief this is the apple media service handler where
 /// @param param
 /// @param ble_evt
 void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
 {
+    /// match the connection handle 
+    if(evt->conn_handle != ble_ams_handler.conn_handle)
+    {
+        return;
+    }
+    //// search for the char handle
+
+    //// handle the remote cmd char  
+    if(evt->params.hvx.handle == ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.handle_value)
+    {
+        if(evt->params.hvx.len <=2)
+        {
+
+        /// based on the length we get err and cmd sets 
+        NRF_LOG_ERROR("l%d %d",evt->params.hvx.len,evt->params.hvx.data[0]);
+        }
+        else 
+        {
+            uint8_t total_cmds = evt->params.hvx.len;
+            //// here you get the cmd supported in the ams control char 
+            for(uint8_t i=0; i< total_cmds; i++)
+            {
+                /// put the cmd in the 
+                ble_ams_handler.cmds.ams_supp_cmds[evt->params.hvx.data[i]] =1;             
+            }
+
+        }
+    }
+    /// handle the entity update char , here we recieve the differnt entity attributes value 
+    else if(evt->params.hvx.handle == ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.handle_value)
+    {
+        //// handle the string 
+
+    }
 }

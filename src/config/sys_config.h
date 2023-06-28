@@ -23,8 +23,8 @@
 #define ASSERT_TYPE_WITHOUT_RETURN 0x03
 
 
-#define NRF_ASSERT_TYPE ASSERT_TYPE_WITH_RETURN 
-// #define NRF_ASSERT_TYPE ASSERT_TYPE_WITHOUT_RETURN
+// #define NRF_ASSERT_TYPE ASSERT_TYPE_WITH_RETURN 
+#define NRF_ASSERT_TYPE ASSERT_TYPE_WITHOUT_RETURN
 
 
 //////////////////////////////////////////////////////////////////////////////////////
