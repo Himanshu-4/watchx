@@ -1,1 +1,0 @@
-#include "ble_current_time.h"

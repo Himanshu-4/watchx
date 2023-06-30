@@ -689,43 +689,83 @@
 
 
 
+/// @brief this is to init the kernel memory space 
+/// @param mem_inst 
+/// @return succ/failure of the funcction 
 kernel_mem_err_type kernel_mem_init(uint8_t *mem_inst)
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
+
+/// @brief this function is to add the data in the uid 
+/// @param mem_inst 
+/// @param uid 
+/// @param data 
+/// @param size 
+/// @return succ/ err codes 
 kernel_mem_err_type kernel_mem_add_data(uint8_t * mem_inst , uint32_t uid, uint8_t *data, uint16_t size)
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
+/// @brief this function is used to modify the data 
+/// @param mem_inst 
+/// @param uid 
+/// @param data 
+/// @param size 
+/// @return succ/err codes 
 kernel_mem_err_type kernel_mem_modify_data(uint8_t * mem_inst , uint32_t uid, uint8_t *data, uint16_t size)
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
+/// @brief this function is used to get the data pointer where the data start
+/// @param mem_inst 
+/// @param uid 
+/// @param ptr 
+/// @return succ/ err codes 
+kernel_mem_err_type kernel_mem_get_Data_ptr(uint8_t *mem_inst, uint32_t uid , uint32_t *ptr)
+{
+    return KERNEL_MEM_OP_SUCCESS;
+}
+
+/// @brief this function is to read the data from that uid 
+/// @param mem_inst 
+/// @param uid 
+/// @param data 
+/// @param size 
+/// @return succ/err codes
 kernel_mem_err_type kernel_mem_read_data(uint8_t * mem_inst , uint32_t uid, uint8_t *data, uint16_t size)
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
-kernel_mem_err_type kernel_mem_get_Data_ptr(uint8_t *mem_inst, uint32_t uid , uint32_t *ptr)
-{
-
-    return KERNEL_MEM_OP_SUCCESS;
-}
-
+/// @brief this is to delete the data of that uid 
+/// @param mem_inst 
+/// @param uid 
+/// @return succ/err codes 
 kernel_mem_err_type kernel_mem_delete_data(uint8_t * mem_inst , uint32_t uid )
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
-kernel_mem_err_type kernel_read_data_size(uint8_t *mem_inst , uint32_t uid)
+/// @brief read the data size of the memory that is in the uid 
+/// @param mem_inst 
+/// @param uid 
+/// @param size pointer 
+/// @return succ/err codes 
+kernel_mem_err_type kernel_read_data_size(uint8_t *mem_inst , uint32_t uid , uint16_t * size )
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
-kernel_mem_err_type kernel_get_uid_from_pointer(uint8_t *buff, uint32_t *mem_ptr)
+/// @brief this function is get the uid from the data pointer 
+/// @param buff 
+/// @param mem_ptr 
+/// @param uid pointer 
+/// @return succ/err codes 
+kernel_mem_err_type kernel_get_uid_from_pointer(uint8_t *buff, uint32_t *mem_ptr ,  uint32_t * uid )
 {
     return KERNEL_MEM_OP_SUCCESS;
 }

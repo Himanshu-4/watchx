@@ -159,7 +159,6 @@ void ble_ams_pre_init(void)
     /// init the ble ams srvice
     ble_ams_service_init();
 
-    kernel_mem_init(ble_ams_mem);
 }
 
 /// @brief this is to init the ams at a coonection event
@@ -167,6 +166,9 @@ void ble_ams_pre_init(void)
 uint32_t ble_ams_init(uint16_t conn_handle)
 {
     NRF_LOG_INFO("ams init");
+
+    /// init the kernel memory here 
+    kernel_mem_init(ble_ams_mem);
 
     if ((conn_handle == BLE_CONN_HANDLE_INVALID) || (conn_handle == 0))
         return nrf_ERR_INVALID_PARAM;
