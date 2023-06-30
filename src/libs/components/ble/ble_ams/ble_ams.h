@@ -187,7 +187,7 @@ uint32_t ble_ams_deinit(void);
 
 typedef enum _BLE_AMS_ATTRIBUTES_NAME_INDEX_
 {
-    ble_ams_attribute_index_mediaplayer,
+    ble_ams_attribute_index_mediaplayer =0x10,
     ble_ams_attribute_index_artist_name,
     ble_ams_attribute_index_track_name,
     ble_ams_attribute_index_album_name,
@@ -209,36 +209,41 @@ char *ble_ams_get_attribute_name(ble_ams_attribute_name index);
 /// @return succ/Failure of the cmd 
 uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id);
 
-/// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_ 
-/// @param  void 
-/// @return return the playback state 
-uint32_t ble_ams_get_playback_State(void);
 
-/// @brief get the playback rate in the integer fromat 
-/// @param void   
-/// @return the float value of the playback rate 1.2x 1.5x 2.3x etc 
-uint32_t ble_ams_get_playbackrate(void);
+/// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_
+/// @param  playstate
+/// @return succ/faliure
+uint32_t ble_ams_get_playback_State(uint8_t *playstate);
 
-/// @brief returns the volume of the media in percentage 
-/// @param  void 
-/// @return return between 0 to 100 , value should be  consider in % 
-uint32_t ble_ams_get_volume(void);
+/// @brief get the playback rate in the integer fromat  playback rate 1.2x 1.5x 2.3x etc
+/// @param the playback rate in float value 
+/// @return succ/faliure
+uint32_t ble_ams_get_playbackrate(float * rate);
+
+/// @brief returns the volume of the media in percentage
+/// @param  volume pointer 
+/// @return succ/filure 
+uint32_t ble_ams_get_volume(uint8_t * volume);
 
 /// @brief geive the elapsed time in seconds 
 /// @param  void 
 /// @return returns the elpased time in seconds 
-uint32_t ble_ams_get_elapsed_time(void);
+uint32_t ble_ams_get_elapsed_time(uint32_t * elapse_time);
 
 /// @brief get the total time of the track 
 /// @param  void 
 /// @return returns the track time in seconds 
-uint32_t ble_ams_get_track_time(void);
+uint32_t ble_ams_get_track_time(uint32_t * track_time);
+
 
 /// @brief get the q attribute like q index , repeat mode @ref ble_ams_q_att_data
 /// @param  ble_ams_q_att_data
+/// @param ble_ams_QUeue data 
 /// @return returns cmd specific  @ref _BLE_AMS_SHUFFLE_MODE_  @ref _BLE_AMS_REPEAT_MODE_
-uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index);
+uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index , uint8_t *data);
 
+//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 /// @brief this is the apple media service handler where
 /// @param param
 void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt);

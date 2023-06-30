@@ -19,24 +19,14 @@ enum __ENTITY_UPDATE_CHAR_NOTIF_CB_FORMAT_
     ble_ams_index_data_value, // this data value can be in variable size
 };
 
-//// define the enum to get the string for the particular attributes
-enum _ATTRIBUTE_STRING_UIDS_
-{
-    ble_ams_uid_media_player_name = 0x10,
-    ble_ams_uid_artist_name,
-    ble_ams_uid_album_name,
-    ble_ams_uid_track_name,
-
-};
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //// in the global vars to store the volume, duration, etc
-static volatile float volume = 0;
+static volatile float player_volume = 0;
 
 static volatile uint8_t playbackstate;
 
-static volatile float track_duration = 1, elpased_time = 0, playbackrate;
+static volatile float track_duration = 1, elapsed_time = 0, playbackrate;
 
 static volatile uint8_t q_att_index = 0, att_total_items_q = 0, q_att_shuffle_mode, q_att_repeat_mode;
 
@@ -106,17 +96,17 @@ static void ble_ams_seperate_playbackinfo(const char *str)
             temp[temp_index++] = str[index++];
         }
         index++;
-        if (i == 0) // first is the playback state 
+        if (i == 0) // first is the playback state
         {
             playbackstate = atoi(temp);
         }
-        else if (i == 1) /// after that is the playback rate 
+        else if (i == 1) /// after that is the playback rate
         {
             playbackrate = atof(temp);
         }
-        else if (i == 2) ///// after that is the elapsed time 
+        else if (i == 2) ///// after that is the elapsed time
         {
-            elpased_time = atof(temp);
+            elapsed_time = atof(temp);
         }
     }
 }
@@ -283,36 +273,42 @@ uint32_t ble_ams_deinit(void)
 char *ble_ams_get_attribute_name(ble_ams_attribute_name index)
 {
     char *string = NULL_STRING;
-
+    if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
+    {
+        return string;
+    }
+    uint8_t err = 0;
     switch (index)
     {
     case ble_ams_attribute_index_mediaplayer:
     {
-        // string = /// the pointer to the stored media player name
+        err = kernel_mem_get_Data_ptr(ble_ams_mem, ble_ams_attribute_index_mediaplayer, (uint32_t *)string);
+        NRF_ASSERT(err);
     }
     break;
 
     case ble_ams_attribute_index_artist_name:
     {
+        err = kernel_mem_get_Data_ptr(ble_ams_mem, ble_ams_attribute_index_artist_name, (uint32_t *)string);
+        NRF_ASSERT(err);
     }
     break;
 
     case ble_ams_attribute_index_track_name:
     {
+        err = kernel_mem_get_Data_ptr(ble_ams_mem, ble_ams_attribute_index_track_name,(uint32_t *) string);
+        NRF_ASSERT(err);
     }
     break;
 
     case ble_ams_attribute_index_album_name:
     {
+        err = kernel_mem_get_Data_ptr(ble_ams_mem, ble_ams_attribute_index_album_name, (uint32_t *)string);
+        NRF_ASSERT(err);
     }
     break;
 
-    case ble_ams_attribute_index_misc:
-    {
-    }
-    break;
-
-    default:
+     default:
         /// return the null string
         string = NULL_STRING;
         break;
@@ -354,36 +350,114 @@ uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id)
 /// @return succ/faliure
 uint32_t ble_ams_get_playback_State(uint8_t *playstate)
 {
-
+    if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
+    {
+        return nrf_ERR_INVALID_STATE;
+    }
+    /// give the playback state 
+    *playstate = playbackstate;
+    return nrf_OK;
 }
 
 /// @brief get the playback rate in the integer fromat  playback rate 1.2x 1.5x 2.3x etc
-/// @param the playback rate in float value 
+/// @param the playback rate in float value
 /// @return succ/faliure
-uint32_t ble_ams_get_playbackrate(float * rate);
+uint32_t ble_ams_get_playbackrate(float *rate)
+{
+    if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
+    {
+        return nrf_ERR_INVALID_STATE;
+    }
+
+    *rate = playbackrate;
+    return nrf_OK;
+}
 
 /// @brief returns the volume of the media in percentage
-/// @param  volume pointer 
-/// @return succ/filure 
-uint32_t ble_ams_get_volume(uint8_t * volume)
+/// @param  volume pointer
+/// @return succ/filure
+uint32_t ble_ams_get_volume(uint8_t *volume)
 {
-
+    if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
+    {
+        return nrf_ERR_INVALID_STATE;
+    }
+    
+    *volume = (uint8_t)(player_volume * 100);
+    return nrf_OK;
 }
 
 /// @brief geive the elapsed time in seconds
 /// @param  void
 /// @return returns the elpased time in seconds
-uint32_t ble_ams_get_elapsed_time(void);
+uint32_t ble_ams_get_elapsed_time(uint32_t *time)
+{
+    if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
+    {
+        return nrf_ERR_INVALID_STATE;
+    }
+
+    *time = (uint32_t) elapsed_time;
+    return nrf_OK;
+}
 
 /// @brief get the total time of the track
 /// @param  void
 /// @return returns the track time in seconds
-uint32_t ble_ams_get_track_time(void);
+uint32_t ble_ams_get_track_time(uint32_t  *track_time)
+{
+    if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
+    {
+        return nrf_ERR_INVALID_STATE;
+    }
+    *track_time = (uint32_t)track_duration;
+    return nrf_OK;
+}
 
 /// @brief get the q attribute like q index , repeat mode @ref ble_ams_q_att_data
 /// @param  ble_ams_q_att_data
+/// @param ble_ams_QUeue data
 /// @return returns cmd specific  @ref _BLE_AMS_SHUFFLE_MODE_  @ref _BLE_AMS_REPEAT_MODE_
-uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index);
+uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index, uint8_t *data)
+{
+    if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
+    {
+        return nrf_ERR_INVALID_STATE;
+    }
+
+    switch (index)
+    {
+    case ble_ams_queue_attribute_index:
+    {
+        *data = q_att_index;
+    }
+    break;
+
+    case ble_ams_queue_attribute_byte_count:
+    {
+        *data = att_total_items_q;
+    }
+    break;
+
+    case ble_ams_queue_attribute_shuffle_mode:
+    {
+        *data = q_att_shuffle_mode;
+    }
+    break;
+    case ble_ams_queue_attribute_repeat_mode:
+    {
+        *data = q_att_repeat_mode;
+    }
+    break;
+
+    default:
+    {
+        *data = 0;
+    }
+    break;
+    }
+    return nrf_OK;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -443,19 +517,19 @@ void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
             {
             case ble_ams_player_attribute_name:
             {
-                uint8_t err = kernel_mem_add_data(ble_ams_mem, ble_ams_uid_media_player_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                uint8_t err = kernel_mem_add_data(ble_ams_mem, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 /// either add it or modify it
                 if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
                 {
                     //// uid already present , have to modify it
-                    kernel_mem_modify_data(ble_ams_mem, ble_ams_uid_media_player_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                    kernel_mem_modify_data(ble_ams_mem, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 }
             }
             break;
 
             case ble_ams_player_attribute_playbackinfo:
             {
-                /// 
+                ///
                 ble_ams_seperate_playbackinfo((char *)(char *)&evt->params.hvx.data[ble_ams_index_data_value]);
             }
             break;
@@ -463,7 +537,7 @@ void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
             case ble_ams_player_attribute_volume:
             {
                 /// convert the string volume to float
-                volume = atof((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
+                player_volume = atof((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
             }
             break;
             default:
@@ -520,36 +594,36 @@ void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
 
             case ble_ams_track_attribute_artist:
             {
-                err = kernel_mem_add_data(ble_ams_mem, ble_ams_uid_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                err = kernel_mem_add_data(ble_ams_mem, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 /// either add it or modify it
                 if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
                 {
                     //// uid already present , have to modify it
-                    kernel_mem_modify_data(ble_ams_mem, ble_ams_uid_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                    kernel_mem_modify_data(ble_ams_mem, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 }
             }
             break;
             case ble_ams_track_attribute_album:
             {
 
-                err = kernel_mem_add_data(ble_ams_mem, ble_ams_uid_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                err = kernel_mem_add_data(ble_ams_mem, ble_ams_attribute_index_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 /// either add it or modify it
                 if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
                 {
                     //// uid already present , have to modify it
-                    kernel_mem_modify_data(ble_ams_mem, ble_ams_uid_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                    kernel_mem_modify_data(ble_ams_mem, ble_ams_attribute_index_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 }
             }
             break;
             case ble_ams_track_attribute_title:
             {
 
-                err = kernel_mem_add_data(ble_ams_mem, ble_ams_uid_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                err = kernel_mem_add_data(ble_ams_mem, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 /// either add it or modify it
                 if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
                 {
                     //// uid already present , have to modify it
-                    kernel_mem_modify_data(ble_ams_mem, ble_ams_uid_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                    kernel_mem_modify_data(ble_ams_mem, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 }
             }
             break;
