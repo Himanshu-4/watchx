@@ -350,19 +350,25 @@ uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id)
 }
 
 /// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_
-/// @param  void
-/// @return return the playback state
-uint8_t ble_ams_get_playback_State(void);
+/// @param  playstate
+/// @return succ/faliure
+uint32_t ble_ams_get_playback_State(uint8_t *playstate)
+{
 
-/// @brief get the playback rate in the integer fromat
-/// @param void
-/// @return the float value of the playback rate 1.2x 1.5x 2.3x etc
-float ble_ams_get_playbackrate(void);
+}
+
+/// @brief get the playback rate in the integer fromat  playback rate 1.2x 1.5x 2.3x etc
+/// @param the playback rate in float value 
+/// @return succ/faliure
+uint32_t ble_ams_get_playbackrate(float * rate);
 
 /// @brief returns the volume of the media in percentage
-/// @param  void
-/// @return return between 0 to 100 , value should be  consider in %
-uint8_t ble_ams_get_volume(void);
+/// @param  volume pointer 
+/// @return succ/filure 
+uint32_t ble_ams_get_volume(uint8_t * volume)
+{
+
+}
 
 /// @brief geive the elapsed time in seconds
 /// @param  void
