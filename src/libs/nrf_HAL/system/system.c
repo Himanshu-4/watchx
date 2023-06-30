@@ -478,7 +478,7 @@ void ftoa(float n, char *res, int afterpoint)
     float fpart = n - (float)ipart;
 
     // convert integer part to string
-    int i = intToStr(ipart, res, 0);
+    int i = int_to_str(ipart, res, 0);
 
     res[i] = '.'; // add dot
 
@@ -487,7 +487,7 @@ void ftoa(float n, char *res, int afterpoint)
     // is needed to handle cases like 233.007
     fpart = fpart * pow(10, afterpoint);
 
-    intToStr((int)fpart, res + i + 1, afterpoint);
+    int_to_str((int)fpart, res + i + 1, afterpoint);
 }
 
 uint32_t pow(uint32_t base, uint32_t power)

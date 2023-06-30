@@ -85,9 +85,43 @@ static ble_uuid128_t const ble_ams_entity_attribute_char_uuid128 =
 
 static volatile ble_ams_struct_t ble_ams_handler = {0};
 
-////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////// static function here ////////////////////////////////////////////////////////////
 
+static void ble_ams_seperate_playbackinfo(const char *str)
+{
+    uint16_t index = 0;
+    //// the loop will be run 3 times as there are 3 commas
+    uint16_t lenofstr = strlen(str);
+
+    for (int i = 0; i < 3; i++)
+    {
+        char temp[20] = {0};
+        int temp_index = 0;
+
+        while (str[index] != ',' && index < lenofstr)
+        {
+            temp[temp_index++] = str[index++];
+        }
+        index++;
+        if (i == 0) // first is the playback state 
+        {
+            playbackstate = atoi(temp);
+        }
+        else if (i == 1) /// after that is the playback rate 
+        {
+            playbackrate = atof(temp);
+        }
+        else if (i == 2) ///// after that is the elapsed time 
+        {
+            elpased_time = atof(temp);
+        }
+    }
+}
+
+/// @brief this function is used to init the ble apple media services
 static void ble_ams_service_init()
 {
 
@@ -388,12 +422,14 @@ void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
         uint8_t entity_id = evt->params.hvx.data[ble_ams_index_entity_id];
         uint8_t att_id = evt->params.hvx.data[ble_ams_index_att_id];
 
+        uint8_t err = 0;
+
         switch (entity_id)
         {
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////// entity id media player info 
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////// entity id media player info
         case ble_ams_entityid_player:
         {
             //// switch between the att id
@@ -401,16 +437,27 @@ void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
             {
             case ble_ams_player_attribute_name:
             {
+                uint8_t err = kernel_mem_add_data(ble_ams_mem, ble_ams_uid_media_player_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                /// either add it or modify it
+                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+                {
+                    //// uid already present , have to modify it
+                    kernel_mem_modify_data(ble_ams_mem, ble_ams_uid_media_player_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                }
             }
             break;
 
             case ble_ams_player_attribute_playbackinfo:
             {
+                /// 
+                ble_ams_seperate_playbackinfo((char *)(char *)&evt->params.hvx.data[ble_ams_index_data_value]);
             }
             break;
 
             case ble_ams_player_attribute_volume:
             {
+                /// convert the string volume to float
+                volume = atof((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
             }
             break;
             default:
@@ -420,26 +467,33 @@ void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
         }
         break;
 
+            /////////////// ./////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////// ams entity id queue
         case ble_ams_entityid_queue:
         {
             switch (att_id)
             {
             case ble_ams_queue_attribute_index:
             {
+                q_att_index = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
             }
             break;
             case ble_ams_queue_attribute_byte_count:
             {
+                att_total_items_q = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
             }
             break;
 
             case ble_ams_queue_attribute_shuffle_mode:
             {
+                q_att_shuffle_mode = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
             }
             break;
 
             case ble_ams_queue_attribute_repeat_mode:
             {
+                q_att_repeat_mode = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
             }
             break;
             default:
@@ -448,6 +502,10 @@ void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
             }
         }
         break;
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////// ams entity id track /////////////////////////////////////////////
 
         case ble_ams_entityid_Track:
         {
@@ -456,18 +514,42 @@ void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
 
             case ble_ams_track_attribute_artist:
             {
+                err = kernel_mem_add_data(ble_ams_mem, ble_ams_uid_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                /// either add it or modify it
+                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+                {
+                    //// uid already present , have to modify it
+                    kernel_mem_modify_data(ble_ams_mem, ble_ams_uid_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                }
             }
             break;
             case ble_ams_track_attribute_album:
             {
+
+                err = kernel_mem_add_data(ble_ams_mem, ble_ams_uid_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                /// either add it or modify it
+                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+                {
+                    //// uid already present , have to modify it
+                    kernel_mem_modify_data(ble_ams_mem, ble_ams_uid_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                }
             }
             break;
             case ble_ams_track_attribute_title:
             {
+
+                err = kernel_mem_add_data(ble_ams_mem, ble_ams_uid_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                /// either add it or modify it
+                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+                {
+                    //// uid already present , have to modify it
+                    kernel_mem_modify_data(ble_ams_mem, ble_ams_uid_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                }
             }
             break;
             case ble_ams_track_attribute_duration:
             {
+                track_duration = atof((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
             }
             break;
 

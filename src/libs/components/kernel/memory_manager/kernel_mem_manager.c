@@ -686,3 +686,46 @@
 //     return err;
 // }
 
+
+
+
+kernel_mem_err_type kernel_mem_init(uint8_t *mem_inst)
+{
+    return KERNEL_MEM_OP_SUCCESS;
+}
+
+kernel_mem_err_type kernel_mem_add_data(uint8_t * mem_inst , uint32_t uid, uint8_t *data, uint16_t size)
+{
+    return KERNEL_MEM_OP_SUCCESS;
+}
+
+kernel_mem_err_type kernel_mem_modify_data(uint8_t * mem_inst , uint32_t uid, uint8_t *data, uint16_t size)
+{
+    return KERNEL_MEM_OP_SUCCESS;
+}
+
+kernel_mem_err_type kernel_mem_read_data(uint8_t * mem_inst , uint32_t uid, uint8_t *data, uint16_t size)
+{
+    return KERNEL_MEM_OP_SUCCESS;
+}
+
+kernel_mem_err_type kernel_mem_get_Data_ptr(uint8_t *mem_inst, uint32_t uid , uint32_t *ptr)
+{
+
+    return KERNEL_MEM_OP_SUCCESS;
+}
+
+kernel_mem_err_type kernel_mem_delete_data(uint8_t * mem_inst , uint32_t uid )
+{
+    return KERNEL_MEM_OP_SUCCESS;
+}
+
+kernel_mem_err_type kernel_read_data_size(uint8_t *mem_inst , uint32_t uid)
+{
+    return KERNEL_MEM_OP_SUCCESS;
+}
+
+kernel_mem_err_type kernel_get_uid_from_pointer(uint8_t *buff, uint32_t *mem_ptr)
+{
+    return KERNEL_MEM_OP_SUCCESS;
+}

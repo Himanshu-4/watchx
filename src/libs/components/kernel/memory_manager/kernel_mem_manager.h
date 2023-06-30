@@ -63,6 +63,9 @@ kernel_mem_err_type kernel_mem_add_data(uint8_t * mem_inst , uint32_t uid, uint8
 
 kernel_mem_err_type kernel_mem_modify_data(uint8_t * mem_inst , uint32_t uid, uint8_t *data, uint16_t size);
 
+
+kernel_mem_err_type kernel_mem_get_Data_ptr(uint8_t *mem_inst, uint32_t uid , uint32_t *ptr);
+
 kernel_mem_err_type kernel_mem_read_data(uint8_t * mem_inst , uint32_t uid, uint8_t *data, uint16_t size);
 
 kernel_mem_err_type kernel_mem_delete_data(uint8_t * mem_inst , uint32_t uid );
