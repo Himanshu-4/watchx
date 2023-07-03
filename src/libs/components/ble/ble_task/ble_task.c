@@ -12,8 +12,6 @@
 
 #include "FreeRTOS.h"
 
-#include "ble_current_time.h"
-
 
 ///////////////////////////////////////////////////////////////////////
 //// this will resume the callback 

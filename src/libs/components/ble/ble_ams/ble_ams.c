@@ -30,12 +30,6 @@ static volatile float track_duration = 1, elapsed_time = 0, playbackrate;
 
 static volatile uint8_t q_att_index = 0, att_total_items_q = 0, q_att_shuffle_mode, q_att_repeat_mode;
 
-//// create a kernel memory instance to hold the data from the notification handler into this memory
-/// this is useful because it can give us compile time memory consumption , which in our case is useful because now run time
-///// consumption can be minimized
-
-KERNEL_MEM_INIT(ble_ams_mem, BLE_AMS_MEM_SIZE);
-
 /** @brief 128-bit service UUID for the Apple Media Service. */
 static ble_uuid128_t const ble_apple_media_service_uuid128 =
     {
@@ -161,14 +155,22 @@ void ble_ams_pre_init(void)
 
 }
 
+
+//// create a kernel memory instance to hold the data from the notification handler into this memory
+/// this is useful because it can give us compile time memory consumption , which in our case is useful because now run time
+///// consumption can be minimized
+
+KERNEL_MEM_INSTANTISE(ble_ams_mem_inst, ble_ams_mem_pool ,BLE_AMS_MEM_SIZE , ble_ams_memory_mutex);
+
+
 /// @brief this is to init the ams at a coonection event
-/// @param  void
+/// @param  connection_handle 
 uint32_t ble_ams_init(uint16_t conn_handle)
 {
     NRF_LOG_INFO("ams init");
 
     /// init the kernel memory here 
-    kernel_mem_init(ble_ams_mem);
+    kernel_mem_init(&ble_ams_mem_inst ,ble_ams_mem_pool, BLE_AMS_MEM_SIZE, &ble_ams_memory_mutex);
 
     if ((conn_handle == BLE_CONN_HANDLE_INVALID) || (conn_handle == 0))
         return nrf_ERR_INVALID_PARAM;
@@ -284,28 +286,28 @@ char *ble_ams_get_attribute_name(ble_ams_attribute_name index)
     {
     case ble_ams_attribute_index_mediaplayer:
     {
-        err = kernel_mem_get_Data_ptr(ble_ams_mem, ble_ams_attribute_index_mediaplayer, (uint32_t *)string);
+        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, (uint32_t *)string);
         NRF_ASSERT(err);
     }
     break;
 
     case ble_ams_attribute_index_artist_name:
     {
-        err = kernel_mem_get_Data_ptr(ble_ams_mem, ble_ams_attribute_index_artist_name, (uint32_t *)string);
+        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, (uint32_t *)string);
         NRF_ASSERT(err);
     }
     break;
 
     case ble_ams_attribute_index_track_name:
     {
-        err = kernel_mem_get_Data_ptr(ble_ams_mem, ble_ams_attribute_index_track_name,(uint32_t *) string);
+        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_track_name,(uint32_t *) string);
         NRF_ASSERT(err);
     }
     break;
 
     case ble_ams_attribute_index_album_name:
     {
-        err = kernel_mem_get_Data_ptr(ble_ams_mem, ble_ams_attribute_index_album_name, (uint32_t *)string);
+        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_album_name, (uint32_t *)string);
         NRF_ASSERT(err);
     }
     break;
@@ -519,12 +521,12 @@ void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
             {
             case ble_ams_player_attribute_name:
             {
-                uint8_t err = kernel_mem_add_data(ble_ams_mem, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                uint8_t err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 /// either add it or modify it
                 if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
                 {
                     //// uid already present , have to modify it
-                    kernel_mem_modify_data(ble_ams_mem, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 }
             }
             break;
@@ -596,36 +598,36 @@ void ble_ams_client_event_handler(void *param, ble_gattc_evt_t *evt)
 
             case ble_ams_track_attribute_artist:
             {
-                err = kernel_mem_add_data(ble_ams_mem, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 /// either add it or modify it
                 if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
                 {
                     //// uid already present , have to modify it
-                    kernel_mem_modify_data(ble_ams_mem, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 }
             }
             break;
             case ble_ams_track_attribute_album:
             {
 
-                err = kernel_mem_add_data(ble_ams_mem, ble_ams_attribute_index_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 /// either add it or modify it
                 if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
                 {
                     //// uid already present , have to modify it
-                    kernel_mem_modify_data(ble_ams_mem, ble_ams_attribute_index_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 }
             }
             break;
             case ble_ams_track_attribute_title:
             {
 
-                err = kernel_mem_add_data(ble_ams_mem, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 /// either add it or modify it
                 if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
                 {
                     //// uid already present , have to modify it
-                    kernel_mem_modify_data(ble_ams_mem, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
                 }
             }
             break;

@@ -396,41 +396,32 @@ FORCE_INLINE int str_to_int(char *str, uint16_t len)
     return res;
 }
 
-///// @todo this algo is not working , 
+///// @todo this algo is the worst algorithm for float conversion . should not use this  
 /// @brief convert a string to float 
 /// @param str 
 /// @return float value 
 FORCE_INLINE float str_to_float(char *str )
 {
-    int mantisa =0;
-    float fraction =0;
+      float floatValue = 0.0f;
+    int decimalFlag = 0;
+    int decimalPlace = 0;
+    float powerOfTen = 1.0f;
 
-    bool dot_started  =0;
-
-    uint16_t afterpoint =0;
-
-    uint16_t len = strlen(str);
-
-    for (int i = 0; i < len ; ++i)
-    {   
-        if(str[i] == '.')
-        {
-            dot_started =1;
-            afterpoint = i;
-        }
-        /// calculate the mantisa part 
-        if(!dot_started)
-        {
-            mantisa = mantisa *10 + (str[i] - '0');
-        }
-        //// calculate the fraction part 
-        else 
-        {
-            fraction += (str[i] -'0') / pow(10, i - afterpoint);
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            if (!decimalFlag) {
+                floatValue = (floatValue * 10.0f) + (str[i] - '0');
+            } else {
+                floatValue += (float)(str[i] - '0') / powerOfTen;
+                powerOfTen *= 10.0f;
+            }
+        } else if (str[i] == '.') {
+            decimalFlag = 1;
+            powerOfTen = 10.0f;
         }
     }
 
-    return (float)(mantisa + fraction);
+    return floatValue;
 }
 
 // Reverses a string 'str' of length 'len'

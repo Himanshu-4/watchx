@@ -5,7 +5,6 @@
 //// include the ble specific library 
 #include "ble_ams.h"
 #include "ble_ancs.h"
-#include "ble_current_time.h"
 
 
 #define BLE_COMMON_TASK_NAME "ble_common"

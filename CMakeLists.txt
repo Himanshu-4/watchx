@@ -535,7 +535,6 @@ ${PROJECT_BLE_FOLDER}/ble_stack_init/*.c
 
 ${PROJECT_BLE_FOLDER}/ble_task/*.c 
 
-${PROJECT_BLE_FOLDER}/ble_time/*.c 
 
 ${PROJECT_BLE_FOLDER}/ble_peer_device_info/*.c 
 )
@@ -568,8 +567,6 @@ set(BLE_LIB_INCLUDE_DIR
         # the ble task folder 
         ${PROJECT_BLE_FOLDER}/ble_task
         
-       # ble time library 
-        ${PROJECT_BLE_FOLDER}/ble_time 
 
         # peer device info library , can get the name of peer device 
         ${PROJECT_BLE_FOLDER}/ble_peer_device_info
