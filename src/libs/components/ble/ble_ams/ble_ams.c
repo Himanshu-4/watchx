@@ -170,7 +170,7 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     NRF_LOG_INFO("ams init");
 
     /// init the kernel memory here 
-    kernel_mem_init(&ble_ams_mem_inst ,ble_ams_mem_pool, BLE_AMS_MEM_SIZE, &ble_ams_memory_mutex);
+    kernel_mem_init(&ble_ams_mem_inst ,ble_ams_mem_pool, BLE_AMS_MEM_SIZE, &ble_ams_memory_mutex ,BLE_AMS_MUTEX_TIMEOUT );
 
     if ((conn_handle == BLE_CONN_HANDLE_INVALID) || (conn_handle == 0))
         return nrf_ERR_INVALID_PARAM;

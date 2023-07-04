@@ -11,6 +11,8 @@ typedef struct  _KERNEL_MEM_INSTANCE_
 {
     uint8_t * mem_ptr;
     SemaphoreHandle_t kernel_mem_mutex_handle;
+    uint16_t mem_size;
+    uint16_t mutex_timeout;
 }
 kernel_mem_instance;
 
@@ -66,7 +68,7 @@ typedef enum _KERNEL_MEM_ERR_CODE_
 /// @param size of the memory 
 /// @param instnace mutex buffer 
 /// @return succ/failure of the funcction
-kernel_mem_err_type kernel_mem_init(kernel_mem_instance *kernel_inst_ptr, uint32_t *mem_inst, uint16_t size , StaticStreamBuffer_t * mutexbuffer_ptr);
+kernel_mem_err_type kernel_mem_init(kernel_mem_instance *kernel_inst_ptr, uint32_t *mem_inst, uint16_t size , StaticStreamBuffer_t * mutexbuffer_ptr ,uint16_t timeout);
 
 /// @brief this function is to add the data in the uid
 /// @param mem_inst

@@ -3,7 +3,6 @@
 #include "semphr.h"
 #include "FreeRTOS.h"
 
-
 ///// mutex handle for the nvs functions
 ///////// create a semaphore buffer to store the semaphore data
 static StaticSemaphore_t kernel_semaphore_buffer;
@@ -439,7 +438,7 @@ static uint32_t nvs_raw_modify_data(uint32_t uid, uint8_t *buff, uint16_t size)
 
     if (softdevice_enabled)
     {
-        uint16_t len = nvs_get_size_of_stored_data(NVS_PARTITION_START_ADDR) - nvs_get_size_of_data(NVS_PARTITION_START_ADDR, uid) + buff_size8_to_32(size) ;
+        uint16_t len = nvs_get_size_of_stored_data(NVS_PARTITION_START_ADDR) - nvs_get_size_of_data(NVS_PARTITION_START_ADDR, uid) + buff_size8_to_32(size);
 
         uint32_t arr_data[len];
         uint32_t arr_shift = 0;
@@ -467,20 +466,20 @@ static uint32_t nvs_raw_modify_data(uint32_t uid, uint8_t *buff, uint16_t size)
             ptr += ptr[NVS_STRUCT_LEN];
         }
 
-        // add the content of modified data 
+        // add the content of modified data
         arr_data[arr_shift + NVS_STRUCT_SOD] = START_OF_DATA;
         arr_data[arr_shift + NVS_STRUCT_LEN] = buff_size8_to_32(size) + NVS_META_DATA_SIZE_WORDS;
         arr_data[arr_shift + NVS_STRUCT_UID] = uid;
         arr_data[arr_shift + NVS_STRUCT_RFU0] = 0;
-        arr_data[arr_shift + NVS_STRUCT_RFU1] =0;
+        arr_data[arr_shift + NVS_STRUCT_RFU1] = 0;
 
-        memcpy( u8(arr_data[arr_shift + NVS_STRUCT_DATA]), buff, size );
+        memcpy(u8(arr_data[arr_shift + NVS_STRUCT_DATA]), buff, size);
 
-        //only for debug // show the content
-        // for (int i = 0; i < len; i++)
-        // {
-        //     printf("%x ", arr_data[i]);
-        // }
+        // only for debug // show the content
+        //  for (int i = 0; i < len; i++)
+        //  {
+        //      printf("%x ", arr_data[i]);
+        //  }
 
         /////// start erasing the partitoin
         /////// get the current task handle
@@ -590,7 +589,6 @@ uint32_t FORCE_INLINE nvs_erase_partition(void)
     return nvs_erase_page(NVS_PARTITION_PAGE_INDEX);
 }
 
-
 /// @brief used to modify the data of that uid to the new data
 /// @param uid
 /// @param buff
@@ -600,113 +598,113 @@ uint32_t nvs_modify_data(uint32_t uid, uint8_t *buff, uint16_t size)
 {
     uint32_t err = 0;
 
-        ///// check that is uid present or not
-        if (!nvs_is_uid_present(NVS_PARTITION_START_ADDR, uid))
-        {
-            return NVS_ERR_UID_ABSENT;
-        }
+    ///// check that is uid present or not
+    if (!nvs_is_uid_present(NVS_PARTITION_START_ADDR, uid))
+    {
+        return NVS_ERR_UID_ABSENT;
+    }
 
-        err = nvs_raw_modify_data(uid, buff, size);
-    
+    err = nvs_raw_modify_data(uid, buff, size);
+
     return err;
 }
 
-
-/// @brief this is to init the kernel memory space, its mutex is inited separtely 
-/// @param kernelmem_instanace 
-/// @param memory buffer 
-/// @param size of the memory 
-/// @param instnace mutex buffer 
+/// @brief this is to init the kernel memory space, its mutex is inited separtely
+/// @param kernelmem_instanace
+/// @param memory buffer
+/// @param size of the memory
+/// @param instnace mutex buffer
 /// @return succ/failure of the funcction
-kernel_mem_err_type kernel_mem_init(kernel_mem_instance *kernel_inst_ptr, uint32_t *mem_inst, uint16_t size , StaticStreamBuffer_t * mutexbuffer_ptr)
+kernel_mem_err_type kernel_mem_init(kernel_mem_instance *kernel_inst_ptr, uint32_t *mem_inst, uint16_t size, StaticStreamBuffer_t *mutexbuffer_ptr ,uint16_t timeout)
 {
     kernel_inst_ptr->kernel_mem_mutex_handle = xSemaphoreCreateMutexStatic(mutexbuffer_ptr);
 
+    kernel_inst_ptr->mutex_timeout = timeout;
+    kernel_inst_ptr->mem_size = size;
     ///// give the mutex at starting
-    xSemaphoreGive(kernel_inst_ptr->kernel_mem_mutex_handle );
+    xSemaphoreGive(kernel_inst_ptr->kernel_mem_mutex_handle);
 
     kernel_inst_ptr->mem_ptr = mem_inst;
     memset(mem_inst, 0, size);
     return KERNEL_MEM_OP_SUCCESS;
 }
 
-/// @brief this function is to add the data in the uid 
-/// @param kernel mem instance 
-/// @param uid 
-/// @param data 
-/// @param size 
-/// @return succ/ err codes 
-kernel_mem_err_type kernel_mem_add_data(kernel_mem_instance * instance, uint32_t uid, uint8_t *data, uint16_t size)
+/// @brief this function is to add the data in the uid
+/// @param kernel mem instance
+/// @param uid
+/// @param data
+/// @param size
+/// @return succ/ err codes
+kernel_mem_err_type kernel_mem_add_data(kernel_mem_instance *instance, uint32_t uid, uint8_t *data, uint16_t size)
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
-/// @brief this function is used to modify the data 
-/// @param mem_inst 
-/// @param uid 
-/// @param data 
-/// @param size 
-/// @return succ/err codes 
-kernel_mem_err_type kernel_mem_modify_data(kernel_mem_instance * instance , uint32_t uid, uint8_t *data, uint16_t size)
+/// @brief this function is used to modify the data
+/// @param mem_inst
+/// @param uid
+/// @param data
+/// @param size
+/// @return succ/err codes
+kernel_mem_err_type kernel_mem_modify_data(kernel_mem_instance *instance, uint32_t uid, uint8_t *data, uint16_t size)
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
 /// @brief this function is used to get the data pointer where the data start
-/// @param mem_inst 
-/// @param uid 
-/// @param ptr 
-/// @return succ/ err codes 
-kernel_mem_err_type kernel_mem_get_Data_ptr(kernel_mem_instance * instance, uint32_t uid , uint32_t *ptr)
+/// @param mem_inst
+/// @param uid
+/// @param ptr
+/// @return succ/ err codes
+kernel_mem_err_type kernel_mem_get_Data_ptr(kernel_mem_instance *instance, uint32_t uid, uint32_t *ptr)
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
-/// @brief this function is to read the data from that uid 
-/// @param mem_inst 
-/// @param uid 
-/// @param data 
-/// @param size 
+/// @brief this function is to read the data from that uid
+/// @param mem_inst
+/// @param uid
+/// @param data
+/// @param size
 /// @return succ/err codes
-kernel_mem_err_type kernel_mem_read_data(kernel_mem_instance * instance, uint32_t uid, uint8_t *data, uint16_t size)
+kernel_mem_err_type kernel_mem_read_data(kernel_mem_instance *instance, uint32_t uid, uint8_t *data, uint16_t size)
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
-/// @brief this is to delete the data of that uid 
-/// @param mem_inst 
-/// @param uid 
-/// @return succ/err codes 
-kernel_mem_err_type kernel_mem_delete_data(kernel_mem_instance * instance, uint32_t uid )
+/// @brief this is to delete the data of that uid
+/// @param mem_inst
+/// @param uid
+/// @return succ/err codes
+kernel_mem_err_type kernel_mem_delete_data(kernel_mem_instance *instance, uint32_t uid)
 {
-        ///// check that is uid present or not
-        if (!nvs_is_uid_present(mem_inst, uid))
-        {
-            return KERNEL_MEM_ERR_UID_ABSENT;
-        }
+    ///// check that is uid present or not
+    if (!nvs_is_uid_present(mem_inst, uid))
+    {
+        return KERNEL_MEM_ERR_UID_ABSENT;
+    }
 
-         nvs_raw_delete_data(uid);
-    
-     return KERNEL_MEM_OP_SUCCESS;
+    nvs_raw_delete_data(uid);
 
+    return KERNEL_MEM_OP_SUCCESS;
 }
 
-/// @brief read the data size of the memory that is in the uid 
-/// @param mem_inst 
-/// @param uid 
-/// @param size pointer 
-/// @return succ/err codes 
-kernel_mem_err_type kernel_read_data_size(kernel_mem_instance * instance, uint32_t uid , uint16_t * size )
+/// @brief read the data size of the memory that is in the uid
+/// @param mem_inst
+/// @param uid
+/// @param size pointer
+/// @return succ/err codes
+kernel_mem_err_type kernel_read_data_size(kernel_mem_instance *instance, uint32_t uid, uint16_t *size)
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
 
-/// @brief this function is get the uid from the data pointer 
-/// @param buff 
-/// @param mem_ptr 
-/// @param uid pointer 
-/// @return succ/err codes 
-kernel_mem_err_type kernel_get_uid_from_pointer(kernel_mem_instance * instance, uint32_t *mem_ptr ,  uint32_t * uid )
+/// @brief this function is get the uid from the data pointer
+/// @param buff
+/// @param mem_ptr
+/// @param uid pointer
+/// @return succ/err codes
+kernel_mem_err_type kernel_get_uid_from_pointer(kernel_mem_instance *instance, uint32_t *mem_ptr, uint32_t *uid)
 {
     return KERNEL_MEM_OP_SUCCESS;
 }
