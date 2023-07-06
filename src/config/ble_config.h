@@ -40,8 +40,8 @@
 #define NRF_BLE_TOTAL_LINK_COUNT   1
 
 ///The time set aside for this connection on every connection interval in 1.25 ms units.
-#define NRF_BLE_GAP_EVENT_LENGTH_TIME   6 // 7.5 msec 
-
+// #define NRF_BLE_GAP_EVENT_LENGTH_TIME   6 // 7.5 msec 
+#define NRF_BLE_GAP_EVENT_LENGTH_TIME   24 // 30 msec 
 
 /// GATTS connection configuration, cfg_id is @ref BLE_CONN_CFG_GATTS.
 /// Minimum guaranteed number of Handle Value Notifications that can be queued for transmission.The default value is @ref BLE_GATTS_HVN_TX_QUEUE_SIZE_DEFAULT */
@@ -112,7 +112,7 @@
 
 //////////////////////// ble connection param config 
 
-#define BLE_MIN_CONNECTION_INTERVAL 30 //// in terms of milliseconds 
+#define BLE_MIN_CONNECTION_INTERVAL 40 //// in terms of milliseconds 
 #define BLE_MAX_CONNECTION_INTERVAL 100 ////// in terms of millisec
 
 // these packets the masters chooses to skip without risking connection /**< Slave latency. */ slave can 
@@ -159,11 +159,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 //======================= BLE APPLE ANCS CONFIG =============================================
 
+#define BLE_ANCS_MEM_SIZE 1024 
 
+#define BLE_ANCS_MUTEX_TIMEOUT 500
 
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-//======================= BLE APPLE CURRENT TIME CONFIG =============================================
+//======================= BLE APPLE PEER DEVICE INFO CONFIG =============================================
 
 
 

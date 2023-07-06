@@ -2,6 +2,8 @@
 
 #include "ble_gatt_client.h"
 
+#include "memory_manager/kernel_mem_manager.h"
+
 
 /////////////////////////////// 16 bit uuid ////////////////////////////
 #define BLE_BATT_SRVC_UUID 0x180F
@@ -78,21 +80,21 @@ static ble_ancs_struct_t ble_ancs_handler = {0};
 static void ble_ancs_services_int()
 {
     // Make sure that the instance of service is clear. GATT handles inside the service and characteristics are set to @ref BLE_GATT_HANDLE_INVALID.
-    memset(&ble_ancs_handler.ancs_srvc_char , 0, sizeof(ble_ancs_services_struct_t));
+    memset(&ble_ancs_handler.ancs_srvcs , 0, sizeof(ble_ancs_services_struct_t));
 
 
     uint32_t err_code =0;
      // Assign UUID types.
-    err_code = sd_ble_uuid_vs_add(&ble_ancs_base_service_uuid128, &ble_ancs_handler.ancs_srvc_char.ancs_service.uuid.type);
+    err_code = sd_ble_uuid_vs_add(&ble_ancs_base_service_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_service.uuid.type);
     NRF_ASSERT(err_code);
 
-    err_code = sd_ble_uuid_vs_add(&ble_ancs_control_point_char_uuid128, &ble_ancs_handler.ancs_srvc_char.ancs_control_point_char.uuid.type);
+    err_code = sd_ble_uuid_vs_add(&ble_ancs_control_point_char_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_control_point_char.uuid.type);
     NRF_ASSERT(err_code);
 
-    err_code = sd_ble_uuid_vs_add(&ble_ancs_notificatoin_source_char_uuid128, &ble_ancs_handler.ancs_srvc_char.ancs_notif_src_char.uuid.type);
+    err_code = sd_ble_uuid_vs_add(&ble_ancs_notificatoin_source_char_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_notif_src_char.uuid.type);
     NRF_ASSERT(err_code);
 
-    err_code = sd_ble_uuid_vs_add(&ble_ancs_data_source_char_uuid128, &ble_ancs_handler.ancs_srvc_char.ancs_data_source_char.uuid.type);
+    err_code = sd_ble_uuid_vs_add(&ble_ancs_data_source_char_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_data_source_char.uuid.type);
     NRF_ASSERT(err_code);
 
     // NRF_LOG_INFO("type %d, %d, %d, %d",ble_ancs_handler.ancs_srvc_char.ancs_service.uuid.type,
@@ -109,6 +111,15 @@ void ble_ancs_pre_init(void)
     ble_ancs_services_int();
 
 }
+
+
+
+//// create a kernel memory instance to hold the data from the notification handler into this memory
+/// this is useful because it can give us compile time memory consumption , which in our case is useful because now run time
+///// consumption can be minimized
+
+KERNEL_MEM_INSTANTISE(ble_ancs_mem_inst, ble_ancss_mem_pool ,BLE_ANCS_MEM_SIZE , ble_ancs_memory_mutex);
+
 
 /// @brief this is to init the ancs profile from iphone 
 /// @param conn_handle 

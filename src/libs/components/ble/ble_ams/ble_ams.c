@@ -286,28 +286,28 @@ char *ble_ams_get_attribute_name(ble_ams_attribute_name index)
     {
     case ble_ams_attribute_index_mediaplayer:
     {
-        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, (uint32_t *)string);
+        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, (uint8_t *)string);
         NRF_ASSERT(err);
     }
     break;
 
     case ble_ams_attribute_index_artist_name:
     {
-        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, (uint32_t *)string);
+        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, (uint8_t *)string);
         NRF_ASSERT(err);
     }
     break;
 
     case ble_ams_attribute_index_track_name:
     {
-        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_track_name,(uint32_t *) string);
+        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_track_name,(uint8_t *) string);
         NRF_ASSERT(err);
     }
     break;
 
     case ble_ams_attribute_index_album_name:
     {
-        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_album_name, (uint32_t *)string);
+        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_album_name, (uint8_t *)string);
         NRF_ASSERT(err);
     }
     break;
