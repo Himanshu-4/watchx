@@ -4,8 +4,7 @@
 
 //// include the kernel memory manager 
 #include "memory_manager/kernel_mem_manager.h"
-/// include the kernel time manager 
-#include "time_manager/kernel_time.h"
+
 
 
 /////////////////////////////// 16 bit uuid ////////////////////////////
@@ -116,7 +115,7 @@ uint32_t ble_ancs_init(uint16_t conn_handle)
     ble_ancs_handler.conn_handle = BLE_ANCS_INSTANCE_INITED;
     ble_ancs_handler.conn_handle = conn_handle;
     ble_ancs_handler.total_notif_added = 0;
-    
+
 
     ///// search for services and charcteristics
 
@@ -202,7 +201,9 @@ void ble_ancs_client_event_handler(void *param, ble_gattc_evt_t *evt)
 
         //// show the content of the notif data 
 
-        NRF_LOG_INFO("ev-%d f-%d c-%d cc-%d " );
+        NRF_LOG_INFO("ev-%d f-%d c-%d cc-%d u-%d",my_notif_struct->event_id,
+        my_notif_struct->event_Flag, my_notif_struct->category_id,my_notif_struct->category_count,
+        my_notif_struct->notif_uid);
         switch (my_notif_struct->event_id)
         {
         case BLE_ANCS_EVT_NOTIF_ADDED:
@@ -232,5 +233,7 @@ void ble_ancs_client_event_handler(void *param, ble_gattc_evt_t *evt)
     /// handle the data source  char
     else if (evt->params.hvx.handle == ble_ancs_handler.ancs_srvcs.ancs_data_source_char.handle_value)
     {
+
+        /// do the respective action based on the uid 
     }
 }

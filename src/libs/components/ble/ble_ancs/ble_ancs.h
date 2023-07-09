@@ -4,7 +4,8 @@
 #include "ble_softdevice_init.h"
 #include "system.h"
 
-
+/// include the kernel time manager 
+#include "time_manager/kernel_time.h"
 
 #define ANCS_UUID_SERVICE                   0xF431  //!< 16-bit service UUID for the Apple Notification Center Service.
 #define ANCS_UUID_CHAR_CONTROL_POINT        0xD8F3  //!< 16-bit control point UUID.
@@ -20,6 +21,18 @@
 #define BLE_ANCS_NP_INVALID_PARAMETER       0x01A2  //!< One or more parameters do not exist in the NP.
 #define BLE_ANCS_NP_ACTION_FAILED           0x01A3  //!< The action failed to be performed by the NP.
 
+
+enum _BLE_ANCS_ERR_CODES_
+{
+    ble_ancs_op_ok,
+    ble_ancs_err_not_intited,
+    ble_ancs_err_unknown_cmd_id,
+
+    /// @brief uid specific erros 
+    ble_ancs_err_uid_fetch_Data_first,
+    ble_ancs_err_uid_action_failed,
+    ble_ancs_err_uid_Absent,
+};
 
 /// @brief define the notification event id for the notif structure 
 enum _NOTIFICATION_EVENT_ID_
@@ -186,7 +199,7 @@ typedef PACKED_STRUCT _BLE_ANCS_NOTIF_UID_
     uint8_t category_id;
     uint8_t category_count;
     
-}ble_ancs_notif_stored_struct_t;
+}ble_ancs_notif_metadata_struct_t;
 
 
 
@@ -209,15 +222,92 @@ uint32_t  ble_ancs_init(uint16_t conn_handle);
 uint32_t ble_ancs_deinit(void);
 
 
+//////========================================================================================
+////////=======================================================================================
 
+/// @brief to get the total no of uids rcvd till now 
+/// @param  void 
+/// @return the total no of uids 
 uint32_t ble_ancs_get_total_nuid(void);
 
+/// @brief to get the notification meta data 
+/// @param uid 
+/// @param notif_meta 
+/// @return 
+uint32_t ble_ancs_get_notif_meta_data(uint32_t uid, ble_ancs_notif_metadata_struct_t * notif_meta);
 
-uint32_t ble_ancs_remove_nuid();
-
-/// @brief this function is to read the notification uid characteristic 
+/// @brief this function is to read the notification uid characteristic
+/// @param nuid pointer  
 /// @return succ/err code 
-uint32_t ble_ancs_read_ancs_nuid_char(uint16_t index , );
+uint32_t ble_ancs_read_ancs_nuid_char(uint16_t index , uint32_t *nuid );
+
+/// @brief to remove that particular uid from cache and iphone 
+/// @param nuid 
+/// @return succ/failure 
+uint32_t ble_ancs_remove_nuid(uint32_t nuid);
+
+/// @brief to clear the data recvd in the nuid like title, msg , msg size ,etc 
+/// @param nuid 
+/// @return succ/failure 
+uint32_t ble_ancs_clear_nuid(uint32_t nuid);
+
+/// @brief this func must be called before reading the notification attributes 
+/// @param uid 
+/// @return succ/failure
+uint32_t ble_ancs_get_notif_data(uint32_t uid);
+
+//// below functions are only operation when you called above function firsst
+//////=======================================================================================
+////////======================================================================================
+
+/// @brief to get the current time that when the notif rcvd 
+/// @param nuid 
+/// @param ancs_time structure for the time deifne in kernel time manager  
+/// @return succ/failure 
+uint32_t ble_ancs_get_notif_time(uint32_t nuid, kernel_time_struct_t *ancs_time);
+
+/// @brief to get the notification date from the notification uid 
+/// @param nuid 
+/// @param ancs_date 
+/// @return succ/failure 
+uint32_t ble_ancs_get_notif_date(uint32_t nuid, kernel_date_struct_t *ancs_date);
+
+/// @brief get the time differnce between the current time and when the notification recieved 
+/// @param nuid 
+/// @param notif_time 
+/// @return succ/failure 
+uint32_t ble_ancs_get_notif_rcvd_time(uint32_t nuid, kernel_time_struct_t * notif_time );
+
+/// @brief get the title string  of the notification 
+/// @param uid 
+/// @param title 
+/// @return succ/failure 
+uint32_t ble_ancs_get_notif_title(uint32_t uid, const char * title);
+
+/// @brief get the subtitle of the notif string 
+/// @param uid 
+/// @param subtitle 
+/// @return succ/failure 
+uint32_t ble_ancs_get_notif_subtitle(uint32_t uid, const char *subtitle);
+
+/// @brief get the msg string of the notif 
+/// @param uid 
+/// @param notif_msg 
+/// @return succ/failure 
+uint32_t ble_ancs_get_notif_msg(uint32_t uid, const char * notif_msg);
+
+/// @brief get the msg size of the notification 
+/// @param uid 
+/// @param size 
+/// @return succ/failure 
+uint32_t ble_ancs_get_notif_msg_size(uint32_t uid  , uint32_t *size);
+
+/// @brief get the action that can be oerformed on that particular notif
+/// @param nuid 
+/// @param actions 
+/// @return succ/failure 
+uint32_t ble_ancs_get_notif_aciton(uint32_t nuid, uint32_t *actions);
+
 
 
 ///// this function can remove the notif from the notif 
@@ -230,7 +320,7 @@ uint32_t ble_ancs_perform_notif_Action(uint32_t nuid, uint8_t action);
 /// @brief this func is used to get the string from the category id 
 /// @param cat_id 
 /// @return return the string frim the category id 
-char * ble_ancs_get_string(uint8_t cat_id);
+char * ble_ancs_get_catg_string(uint8_t cat_id);
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
