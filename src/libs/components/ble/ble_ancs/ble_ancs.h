@@ -12,14 +12,6 @@
 #define ANCS_UUID_CHAR_NOTIFICATION_SOURCE  0x120D  //!< 16-bit notification source UUID.
 
 
-#define BLE_ANCS_EVENT_FLAG_SILENT_MASK_BIT          0       //!< 0b.......1 Silent: First (LSB) bit is set. All flags can be active at the same time.
-#define BLE_ANCS_EVENT_FLAG_IMPORTANT_MASK_BIT       1       //!< 0b......1. Important: Second (LSB) bit is set. All flags can be active at the same time.
-#define BLE_ANCS_EVENT_FLAG_PREEXISTING_MASK_BIT     2       //!< 0b.....1.. Pre-existing: Third (LSB) bit is set. All flags can be active at the same time.
-#define BLE_ANCS_EVENT_FLAG_POSITIVE_ACTION_MASK_BIT 3       //!< 0b....1... Positive action: Fourth (LSB) bit is set. All flags can be active at the same time.
-#define BLE_ANCS_EVENT_FLAG_NEGATIVE_ACTION_MASK_BIT 4       //!< 0b...1.... Negative action: Fifth (LSB) bit is set. All flags can be active at the same time.
-
-
-
 
 /// @defgroup BLE_ANCS_NP_ERROR_CODES Notification Provider (iOS) Error Codes
 
@@ -28,6 +20,26 @@
 #define BLE_ANCS_NP_INVALID_PARAMETER       0x01A2  //!< One or more parameters do not exist in the NP.
 #define BLE_ANCS_NP_ACTION_FAILED           0x01A3  //!< The action failed to be performed by the NP.
 
+
+/// @brief define the notification event id for the notif structure 
+enum _NOTIFICATION_EVENT_ID_
+{
+    BLE_ANCS_EVT_NOTIF_ADDED,
+    BLE_ANCS_EVT_NOTIF_MODIFIED,
+    BLE_ANCS_EVT_NOTIF_REMOVED,
+};
+
+/// @brief define the notification event flag of the ios notif 
+enum _NOTIF_EVENT_FLAG_
+{
+    BLE_ANCS_NOTIF_EVENT_FLAG_SILENT = (1<<0),
+    BLE_ANCS_NOTIF_EVENT_FLAG_IMP = (1<<1),
+    BLE_ANCS_NOTIF_EVENT_FLAG_PRE_EXISTING = (1<<2),
+    BLE_ANCS_NOTIF_EVENT_FLAG_POSITIVE_ACTION = (1<<3),
+    BLE_ANCS_NOTIF_EVENT_FLAG_NEGATIVE_ACTION = (1<<4),
+    BLE_ANCS_NOTIF_EVENT_FLAG_RFU,
+
+};
 
 
 /// @brief Category IDs for iOS notifications. */
@@ -44,25 +56,24 @@ typedef enum
     BLE_ANCS_CATEGORY_ID_HEALTH_AND_FITNESS,   /**< The iOS notification belongs to the "Health and Fitness" category. */
     BLE_ANCS_CATEGORY_ID_BUSINESS_AND_FINANCE, /**< The iOS notification belongs to the "Business and Finance" category. */
     BLE_ANCS_CATEGORY_ID_LOCATION,             /**< The iOS notification belongs to the "Location" category. */
-    BLE_ANCS_CATEGORY_ID_ENTERTAINMENT         /**< The iOS notification belongs to the "Entertainment" category. */
+    BLE_ANCS_CATEGORY_ID_ENTERTAINMENT,         /**< The iOS notification belongs to the "Entertainment" category. */
+    BLE_ANCS_CATEGORY_ID_TOTAL
 } ble_ancs_c_category_id_val_t;
 
 
 
-/**@brief Control point command IDs that the Notification Consumer can send to the Notification Provider. */
-typedef enum
-{
-    BLE_ANCS_COMMAND_ID_GET_NOTIF_ATTRIBUTES,      /**< Requests attributes to be sent from the NP to the NC for a given notification. */
-    BLE_ANCS_COMMAND_ID_GET_APP_ATTRIBUTES,        /**< Requests attributes to be sent from the NP to the NC for a given iOS app. */
-    BLE_ANCS_COMMAND_ID_GET_PERFORM_NOTIF_ACTION,  /**< Requests an action to be performed on a given notification. For example, dismiss an alarm. */
-} ble_ancs_c_cmd_id_val_t;
+/// @brief Control point command IDs that the Notification Consumer can send to the Notification Provider. */
+
+#define BLE_ANCS_COMMAND_ID_GET_NOTIF_ATTRIBUTES 0      /**< Requests attributes to be sent from the NP to the NC for a given notification. */
+#define BLE_ANCS_COMMAND_ID_GET_APP_ATTRIBUTES  1        /**< Requests attributes to be sent from the NP to the NC for a given iOS app. */
+#define BLE_ANCS_COMMAND_ID_GET_PERFORM_NOTIF_ACTION 2  /**< Requests an action to be performed on a given notification. For example, dismiss an alarm. */
+
 
 /**@brief IDs for actions that can be performed for iOS notifications. */
-typedef enum
-{
-    ACTION_ID_POSITIVE = 0,  /**< Positive action. */
-    ACTION_ID_NEGATIVE       /**< Negative action. */
-} ble_ancs_c_action_id_values_t;
+
+#define  ACTION_ID_POSITIVE  0  /**< Positive action. */
+#define  ACTION_ID_NEGATIVE  1    /**< Negative action. */
+
 
 /**@brief App attribute ID values.
  * @details Currently, only one value is defined. However, the number of app
@@ -76,14 +87,14 @@ typedef enum
 /**@brief IDs for iOS notification attributes. */
 typedef enum
 {
-    BLE_ANCS_NOTIF_ATTR_ID_APP_IDENTIFIER = 0,     /**< Identifies that the attribute data is of an "App Identifier" type. */
-    BLE_ANCS_NOTIF_ATTR_ID_TITLE,                  /**< Identifies that the attribute data is a "Title". */
-    BLE_ANCS_NOTIF_ATTR_ID_SUBTITLE,               /**< Identifies that the attribute data is a "Subtitle". */
-    BLE_ANCS_NOTIF_ATTR_ID_MESSAGE,                /**< Identifies that the attribute data is a "Message". */
-    BLE_ANCS_NOTIF_ATTR_ID_MESSAGE_SIZE,           /**< Identifies that the attribute data is a "Message Size". */
-    BLE_ANCS_NOTIF_ATTR_ID_DATE,                   /**< Identifies that the attribute data is a "Date". */
-    BLE_ANCS_NOTIF_ATTR_ID_POSITIVE_ACTION_LABEL,  /**< The notification has a "Positive action" that can be executed associated with it. */
-    BLE_ANCS_NOTIF_ATTR_ID_NEGATIVE_ACTION_LABEL,  /**< The notification has a "Negative action" that can be executed associated with it. */
+    BLE_ANCS_NOTIF_ATTR_ID_APP_IDENTIFIER = 0,     // Identifies that the attribute data is of an "App Identifier" type. */
+    BLE_ANCS_NOTIF_ATTR_ID_TITLE,                  // Identifies that the attribute data is a "Title". need to followed by 2 byte max len 
+    BLE_ANCS_NOTIF_ATTR_ID_SUBTITLE,               // Identifies that the attribute data is a "Subtitle". */need to followed by 2 byte max len
+    BLE_ANCS_NOTIF_ATTR_ID_MESSAGE,                // Identifies that the attribute data is a "Message". */need to followed by 2 byte max len
+    BLE_ANCS_NOTIF_ATTR_ID_MESSAGE_SIZE,           // Identifies that the attribute data is a "Message Size". */
+    BLE_ANCS_NOTIF_ATTR_ID_DATE,                   // Identifies that the attribute data is a "Date". */
+    BLE_ANCS_NOTIF_ATTR_ID_POSITIVE_ACTION_LABEL,  // The notification has a "Positive action" that can be executed associated with it. */
+    BLE_ANCS_NOTIF_ATTR_ID_NEGATIVE_ACTION_LABEL,  // The notification has a "Negative action" that can be executed associated with it. */
 } ble_ancs_c_notif_attr_id_val_t;
 
 
@@ -105,7 +116,7 @@ typedef enum
 
 
 
-
+/// @brief this is the ios notification structure 
 typedef PACKED_STRUCT _IOS_NOTIFICATION_STRUCTURE_
 {
     uint8_t event_id;
@@ -115,93 +126,6 @@ typedef PACKED_STRUCT _IOS_NOTIFICATION_STRUCTURE_
     uint32_t notif_uid;
 }ble_ancs_notif_struct_t;
 
-/**@brief iOS attribute structure. This type is used for both notification attributes and app attributes. */
-// typedef struct
-// {
-//     uint16_t                          attr_len;     //!< Length of the received attribute data.
-//     uint32_t                          attr_id;      //!< Classification of the attribute type. For example, "Title" or "Date".
-//     uint8_t                         * p_attr_data;  //!< Pointer to where the memory is allocated for storing incoming attributes.
-// } ble_ancs_c_attr_t;
-
-// /**@brief iOS notification attribute structure for incoming attributes. */
-// typedef struct
-// {
-//     uint32_t                          notif_uid;    //!< UID of the notification that the attribute belongs to.
-//     ble_ancs_c_attr_t                 attrs;        //!< A received attribute.
-// } ble_ancs_c_evt_attr_t;
-
-// typedef struct
-// {
-//     uint16_t                          attr_len;     //!< Length of the received attribute data.
-//     uint32_t                          attr_id;      //!< Classification of the attribute type. For example, "Title" or "Date".
-//     uint8_t                         * p_attr_data;  //!< Pointer to where the memory is allocated for storing incoming attributes.
-// } ble_ancs_c_evt_app_attr_t;
-
-// /**@brief iOS notification attribute content requested by the application. */
-// typedef struct
-// {
-//     bool                              get;          //!< Boolean to determine whether this attribute will be requested from the Notification Provider.
-//     uint32_t                          attr_id;      //!< Attribute ID: AppIdentifier(0), Title(1), Subtitle(2), Message(3), MessageSize(4), Date(5), PositiveActionLabel(6), NegativeActionLabel(7).
-//     uint16_t                          attr_len;     //!< Length of the attribute. If more data is received from the Notification Provider, all the data beyond this length is discarded.
-//     uint8_t                         * p_attr_data;  //!< Pointer to where the memory is allocated for storing incoming attributes.
-// } ble_ancs_c_attr_list_t;
-
-// /**@brief ANCS client module event structure.
-//  *
-//  * @details The structure contains the event that is to be handled by the main application.
-//  */
-// typedef struct
-// {
-//     ble_ancs_c_evt_type_t  evt_type;                       //!< Type of event.
-//     uint16_t               conn_handle;                    //!< Connection handle on which the ANCS service was discovered on the peer device. This is filled if the @p evt_type is @ref BLE_ANCS_C_EVT_DISCOVERY_COMPLETE.
-//     ble_ancs_c_evt_notif_t notif;                          //!< iOS notification. This is filled if @p evt_type is @ref BLE_ANCS_C_EVT_NOTIF.
-//     uint16_t               err_code_np;                    //!< An error coming from the Notification Provider. This is filled with @ref BLE_ANCS_NP_ERROR_CODES if @p evt_type is @ref BLE_ANCS_C_EVT_NP_ERROR.
-//     ble_ancs_c_attr_t      attr;                           //!< iOS notification attribute or app attribute, depending on the event type.
-//     uint32_t               notif_uid;                      //!< Notification UID.
-//     uint8_t                app_id[BLE_ANCS_ATTR_DATA_MAX]; //!< App identifier.
-//     ble_ancs_c_service_t   service;                        //!< Information on the discovered Alert Notification Service. This is filled if the @p evt_type is @ref BLE_ANCS_C_EVT_DISCOVERY_COMPLETE.
-// } ble_ancs_c_evt_t;
-
-// /**@brief iOS notification event handler type. */
-// // typedef void (*ble_ancs_c_evt_handler_t) (ble_ancs_c_evt_t * p_evt);
-
-// typedef struct
-// {
-//     ble_ancs_c_attr_list_t * p_attr_list;              //!< The current list of attributes that are being parsed. This will point to either @ref ble_ancs_c_t::ancs_notif_attr_list or @ref  ble_ancs_c_t::ancs_app_attr_list.
-//     uint32_t                 nb_of_attr;               //!< Number of possible attributes. When parsing begins, it is set to either @ref BLE_ANCS_NB_OF_NOTIF_ATTR or @ref BLE_ANCS_NB_OF_APP_ATTR.
-//     uint32_t                 expected_number_of_attrs; //!< The number of attributes expected upon receiving attributes. Keeps track of when to stop reading incoming attributes.
-//     ble_ancs_c_parse_state_t parse_state;              //!< ANCS notification attribute parsing state.
-//     ble_ancs_c_cmd_id_val_t  command_id;               //!< Variable to keep track of what command type is being parsed ( @ref BLE_ANCS_COMMAND_ID_GET_NOTIF_ATTRIBUTES or @ref BLE_ANCS_COMMAND_ID_GET_APP_ATTRIBUTES).
-//     uint8_t                * p_data_dest;              //!< Attribute that the parsed data is copied into.
-//     uint16_t                 current_attr_index;       //!< Variable to keep track of the parsing progress, for the given attribute.
-//     uint32_t                 current_app_id_index;     //!< Variable to keep track of the parsing progress, for the given app identifier.
-// } ble_ancs_parse_sm_t;
-
-/**@brief iOS notification structure, which contains various status information for the client. */
-// typedef struct
-// {
-//     ble_ancs_c_evt_handler_t         evt_handler;                                     //!< Event handler to be called for handling events in the Apple Notification client application.
-//     ble_srv_error_handler_t          error_handler;                                   //!< Function to be called in case of an error.
-//     nrf_ble_gq_req_error_cb_t        gatt_err_handler;                                //!< Error handler to be called in case of an error from SoftDevice.
-//     uint16_t                         conn_handle;                                     //!< Handle of the current connection. Set with @ref nrf_ble_ancs_c_handles_assign when connected.
-//     ble_ancs_c_service_t             service;                                         //!< Structure to store the different handles and UUIDs related to the service.
-//     ble_ancs_c_attr_list_t           ancs_notif_attr_list[BLE_ANCS_NB_OF_NOTIF_ATTR]; //!< For all attributes: contains information about whether the attributes are to be requested upon attribute request, and the length and buffer of where to store attribute data.
-//     ble_ancs_c_attr_list_t           ancs_app_attr_list[BLE_ANCS_NB_OF_APP_ATTR];     //!< For all app attributes: contains information about whether the attributes are to be requested upon attribute request, and the length and buffer of where to store attribute data.
-//     uint32_t                         number_of_requested_attr;                        //!< The number of attributes that are to be requested when an iOS notification attribute request is made.
-//     ble_ancs_parse_sm_t              parse_info;                                      //!< Structure containing different information used to parse incoming attributes correctly (from data_source characteristic).
-//     ble_ancs_c_evt_t                 evt;                                             //!< Allocate memory for the event here. The event is filled with several iterations of the @ref ancs_parse_get_attrs_response function when requesting iOS notification attributes. 
-//     nrf_ble_gq_t                   * p_gatt_queue;                                    //!< Pointer to the BLE GATT Queue instance.
-
-// } ble_ancs_c_t;
-
-/**@brief Apple Notification client init structure, which contains all options and data needed for
- *        initialization of the client. */
-// typedef struct
-// {
-//     ble_ancs_c_evt_handler_t   evt_handler;    //!< Event handler to be called for handling events in the Battery Service.
-//     ble_srv_error_handler_t    error_handler;  //!< Function to be called in case of an error.
-//     nrf_ble_gq_t             * p_gatt_queue;   //!< Pointer to the BLE GATT Queue instance.
-// } ble_ancs_c_init_t;
 
 #define BLE_ANCS_INSTANCE_INITED 0x11
 #define BLE_ANCS_INSTANCE_DEINITED 0x22
@@ -231,7 +155,7 @@ typedef PACKED_STRUCT _BLE_ANCS_SERVICES_STRUCT_
 
 typedef PACKED_STRUCT _BLE_ANCS_STRUCT_
 {
-    ble_ancs_services_struct_t ancs_srvc;
+    ble_ancs_services_struct_t ancs_srvcs;
 
     uint16_t total_notif_added;
 
@@ -241,7 +165,26 @@ typedef PACKED_STRUCT _BLE_ANCS_STRUCT_
 
 }ble_ancs_struct_t;
 
+//////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
+/// @brief this is the enum for storing the meta data of the notification 
+enum _BLE_ANCS_NOTIF_STORED_METAS_
+{
+    BLE_ANCS_NOTIF_META_EVT_FLAG=0,
+    BLE_ANCS_NOTIF_META_CATG_ID,
+    BLE_ANCS_NOTIF_META_CATG_COUNT_ID,
+    BLE_ANCS_NOTIF_META_DATA_
+};
+
+//// the notification uid format 
+typedef PACKED_STRUCT _BLE_ANCS_NOTIF_UID_
+{
+    uint8_t event_Flag;
+    uint8_t category_id;
+    uint8_t category_count;
+    
+}ble_ancs_notif_stored_struct_t;
 
 
 
@@ -262,6 +205,35 @@ uint32_t  ble_ancs_init(uint16_t conn_handle);
 /// @param  void 
 /// @return succ/failure 
 uint32_t ble_ancs_deinit(void);
+
+
+
+uint32_t ble_ancs_get_total_nuid(void);
+
+
+uint32_t ble_ancs_remove_nuid();
+
+/// @brief this function is to read the notification uid characteristic 
+/// @return succ/err code 
+uint32_t ble_ancs_read_ancs_nuid_char(uint16_t index , );
+
+
+///// this function can remove the notif from the notif 
+/// @brief this function is to perform the notification action on the nuid 
+/// @param nuid 
+/// @param action 
+/// @return succ/err code 
+uint32_t ble_ancs_perform_notif_Action(uint32_t nuid, uint8_t action);
+
+/// @brief this func is used to get the string from the category id 
+/// @param cat_id 
+/// @return return the string frim the category id 
+char * ble_ancs_get_string(uint8_t cat_id);
+
+////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 /// @brief this the callback handler for the apple ancs events 
 /// @param param 
