@@ -263,7 +263,7 @@ uint32_t ble_ams_deinit(void)
     NRF_LOG_WARNING("ams deinit");
 
     //// clear the cmd supported  values
-    memset((uint8_t *)&ble_ams_handler.cmds, 0, sizeof(ble_ams_handler.cmds));
+    memset((uint8_t *)&ble_ams_handler.cmds.ams_supp_cmds, 0, sizeof(ble_ams_handler.cmds.ams_supp_cmds));
 
     ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_DEINITED;
     ble_ams_handler.conn_handle = BLE_CONN_HANDLE_INVALID;

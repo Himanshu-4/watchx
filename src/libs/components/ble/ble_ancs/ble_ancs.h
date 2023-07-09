@@ -98,21 +98,22 @@ typedef enum
 } ble_ancs_c_notif_attr_id_val_t;
 
 
-/**@brief Parsing states for received iOS notification and app attributes. */
-typedef enum
-{
-    COMMAND_ID,    /**< Parsing the command ID. */
-    NOTIF_UID,     /**< Parsing the notification UID. */
-    APP_ID,        /**< Parsing app ID. */
-    ATTR_ID,       /**< Parsing attribute ID. */
-    ATTR_LEN1,     /**< Parsing the LSB of the attribute length. */
-    ATTR_LEN2,     /**< Parsing the MSB of the attribute length. */
-    ATTR_DATA,     /**< Parsing the attribute data. */
-    ATTR_SKIP,     /**< Parsing is skipped for the rest of an attribute (or entire attribute). */
-    DONE,          /**< Parsing for one attribute is done. */
-} ble_ancs_c_parse_state_t;
+// /**@brief Parsing states for received iOS notification and app attributes. */
+// typedef enum
+// {
+//     COMMAND_ID,    /**< Parsing the command ID. */
+//     NOTIF_UID,     /**< Parsing the notification UID. */
+//     APP_ID,        /**< Parsing app ID. */
+//     ATTR_ID,       /**< Parsing attribute ID. */
+//     ATTR_LEN1,     /**< Parsing the LSB of the attribute length. */
+//     ATTR_LEN2,     /**< Parsing the MSB of the attribute length. */
+//     ATTR_DATA,     /**< Parsing the attribute data. */
+//     ATTR_SKIP,     /**< Parsing is skipped for the rest of an attribute (or entire attribute). */
+//     DONE,          /**< Parsing for one attribute is done. */
+// } ble_ancs_c_parse_state_t;
 
 
+//// ancs time format yyyyMMdd'T'HHmmSS.
 
 
 
@@ -173,7 +174,8 @@ enum _BLE_ANCS_NOTIF_STORED_METAS_
 {
     BLE_ANCS_NOTIF_META_EVT_FLAG=0,
     BLE_ANCS_NOTIF_META_CATG_ID,
-    BLE_ANCS_NOTIF_META_CATG_COUNT_ID,
+    BLE_ANCS_NOTIF_META_CATG_COUNT,
+    BLE_ANCS_NOTIF_META_CATG_MSG_SIZE_4,
     BLE_ANCS_NOTIF_META_DATA_
 };
 

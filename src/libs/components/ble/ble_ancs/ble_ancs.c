@@ -2,7 +2,11 @@
 
 #include "ble_gatt_client.h"
 
+//// include the kernel memory manager 
 #include "memory_manager/kernel_mem_manager.h"
+/// include the kernel time manager 
+#include "time_manager/kernel_time.h"
+
 
 /////////////////////////////// 16 bit uuid ////////////////////////////
 #define BLE_BATT_SRVC_UUID 0x180F
@@ -109,6 +113,10 @@ uint32_t ble_ancs_init(uint16_t conn_handle)
     uint32_t ret_code = nrf_OK;
 
     ///// assign the handler and callback function
+    ble_ancs_handler.conn_handle = BLE_ANCS_INSTANCE_INITED;
+    ble_ancs_handler.conn_handle = conn_handle;
+    ble_ancs_handler.total_notif_added = 0;
+    
 
     ///// search for services and charcteristics
 
@@ -120,6 +128,11 @@ uint32_t ble_ancs_init(uint16_t conn_handle)
 /// @return succ/failure
 uint32_t ble_ancs_deinit(void)
 {
+    NRF_LOG_WARNING("ancs deinit");
+
+    ble_ancs_handler.conn_handle = BLE_ANCS_INSTANCE_DEINITED;
+    ble_ancs_handler.conn_handle = BLE_CONN_HANDLE_INVALID;
+    ble_ancs_handler.total_notif_added = 0;
 
     return nrf_OK;
 }
@@ -189,21 +202,24 @@ void ble_ancs_client_event_handler(void *param, ble_gattc_evt_t *evt)
 
         //// show the content of the notif data 
 
-        NRF_LOG_INFO("ev-%d f-%d c-%d cc-%d " )
+        NRF_LOG_INFO("ev-%d f-%d c-%d cc-%d " );
         switch (my_notif_struct->event_id)
         {
         case BLE_ANCS_EVT_NOTIF_ADDED:
         {
+            /// add the notification id to the ancs mem pool 
         }
         break;
 
         case BLE_ANCS_EVT_NOTIF_MODIFIED:
         {
+            /// modify the notification id to the ancs mem pool
         }
         break;
 
         case BLE_ANCS_EVT_NOTIF_REMOVED:
         {
+            /// remove the notification id from the ancs mem pool
         }
         break;
 

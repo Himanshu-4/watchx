@@ -4,8 +4,8 @@
 #include "system.h"
 //// define the time format for the kernel , this will be managed by the kernel 
 
-#define KERNEL_TIME_AM 10
-#define KERNEL_TIME_PM 20 
+// #define KERNEL_TIME_AM 0x10UL
+// #define KERNEL_TIME_PM 0x20UL 
 
 /// @brief define the month data like jan,feb,etc
 typedef enum
@@ -42,17 +42,44 @@ typedef PACKED_STRUCT _KERNEL_TIME_FORMAT_
     uint8_t hour;
     uint8_t minutes;
     uint8_t seconds;
-    uint8_t am_pm;
 }kernel_time_struct_t;
 
 typedef PACKED_STRUCT _KEERNEL_DATE_FORAMT_ 
 {
     uint8_t date;
-    day_enum_t day;
-    month_enum_t month;
-    uint8_t year;
+    uint8_t day;
+    uint8_t month;
+    uint32_t year;
 }kernel_date_struct_t;
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////// the set and get time functions 
+
+/// @brief 
+/// @param my_time 
+/// @return 
+uint32_t kernel_get_current_time(kernel_time_struct_t * my_time);
+
+/// @brief 
+/// @param my_date 
+/// @return 
+uint32_t kernel_get_current_date(kernel_date_struct_t * my_date);
+
+/// @brief 
+/// @param my_time 
+/// @return 
+uint32_t kernel_set_current_time(kernel_time_struct_t * my_time);
+
+/// @brief 
+/// @param my_date 
+/// @return 
+uint32_t kernel_set_current_date(kernel_date_struct_t * my_date);
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// //////////////////////////////////////////////////////
+///////////////////////////////////// you can also create timers based event in this kernel 
 
 
 #endif 
