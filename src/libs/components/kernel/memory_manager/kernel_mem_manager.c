@@ -27,6 +27,23 @@ kernel_mem_err_type kernel_mem_init(kernel_mem_instance *kernel_inst_ptr, uint8_
     return KERNEL_MEM_OP_SUCCESS;
 }
 
+
+/// @brief this is to init the kernel memory space, its mutex is inited separtely
+/// @param kernelmem_instanace
+/// @param memory buffer
+/// @param size of the memory
+/// @param instnace mutex buffer
+/// @return succ/failure of the funcction
+kernel_mem_err_type kernel_mem_deinit(const kernel_mem_instance *kernel_inst_ptr)
+{
+    ///// give the mutex at starting
+    xSemaphoreGive(kernel_inst_ptr->kernel_mem_mutex_handle); 
+    memset(kernel_inst_ptr->mem_ptr, 0, kernel_inst_ptr->mem_size);
+    return KERNEL_MEM_OP_SUCCESS;
+}
+
+
+
 /// @brief this function is to add the data in the uid
 /// @param kernel mem instance
 /// @param uid

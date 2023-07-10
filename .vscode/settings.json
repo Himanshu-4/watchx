@@ -12,8 +12,9 @@
         "main_helper.h": "c",
         "ble_softdevice_init.h": "c",
         "nrf_pwm.h": "c",
-        "spi.c" : "c",
-        
+        "spi.c": "c",
+        "kernel_time.h": "c",
+        "message_buffer.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false
 }

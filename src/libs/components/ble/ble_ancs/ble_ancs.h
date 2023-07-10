@@ -192,13 +192,49 @@ enum _BLE_ANCS_NOTIF_STORED_METAS_
     BLE_ANCS_NOTIF_META_DATA_
 };
 
+
+/// @brief this is to fetch the notification  
+enum _BLE_ANCS_NOTIF_FETCH_LEVEL_
+{
+    BLE_ANCS_NOTIF_FETCH_PENDING,
+    BLE_ANCS_NOTIF_FETCH_APP_ATT,
+    BLE_ANCS_NOTIF_FETCH_TITLE_ONLY,
+    BLE_ANCS_NOTIF_FETCH_WITH_SUBTITLE,
+    BLE_ANCS_NOTIF_FETCH_FULL_MSG,
+};
+
 //// the notification uid format 
 typedef PACKED_STRUCT _BLE_ANCS_NOTIF_UID_
 {
+    /// the notification uid of the particular notification 
+    uint32_t nuid;
+    
+    /// @brief notification properties  
     uint8_t event_Flag;
     uint8_t category_id;
     uint8_t category_count;
     
+    uint8_t notif_fetched_level;
+
+    /// @brief this is the notif data that are fetched from iphone , these store the pointer 
+    //// where that strings are present 
+    char *app_identifier; /// this contain the application name 
+    char *app_attr_display_name; /// this contain the name of the msg 
+
+    char *notif_title; /// this contains the title of notif 
+    char *notif_subtitle; /// this contains the subtitle of notif 
+    char *notif_msg; /// this contains the actual msg 
+    
+    uint16_t notif_msg_size;
+
+    /// @brief keep track of at what time the notif rcvd 
+    kernel_time_struct_t time_rcvd;
+    kernel_date_struct_t date_rcvd;
+
+    /// @brief keep track of the actions that can be performed 
+    uint8_t positive_action;
+    uint8_t negative_action;
+
 }ble_ancs_notif_metadata_struct_t;
 
 
@@ -230,12 +266,6 @@ uint32_t ble_ancs_deinit(void);
 /// @return the total no of uids 
 uint32_t ble_ancs_get_total_nuid(void);
 
-/// @brief to get the notification meta data 
-/// @param uid 
-/// @param notif_meta 
-/// @return 
-uint32_t ble_ancs_get_notif_meta_data(uint32_t uid, ble_ancs_notif_metadata_struct_t * notif_meta);
-
 /// @brief this function is to read the notification uid characteristic
 /// @param nuid pointer  
 /// @return succ/err code 
@@ -246,19 +276,26 @@ uint32_t ble_ancs_read_ancs_nuid_char(uint16_t index , uint32_t *nuid );
 /// @return succ/failure 
 uint32_t ble_ancs_remove_nuid(uint32_t nuid);
 
-/// @brief to clear the data recvd in the nuid like title, msg , msg size ,etc 
+/// @brief to clear the data recvd in the nuid like title, msg , all string data  
 /// @param nuid 
 /// @return succ/failure 
 uint32_t ble_ancs_clear_nuid(uint32_t nuid);
 
 /// @brief this func must be called before reading the notification attributes 
 /// @param uid 
+/// @param notif_fetch_level @ref _BLE_ANCS_NOTIF_FETCH_LEVEL_
 /// @return succ/failure
-uint32_t ble_ancs_get_notif_data(uint32_t uid);
+uint32_t ble_ancs_fetch_notif_data(uint32_t uid ,uint8_t fetch_level);
 
 //// below functions are only operation when you called above function firsst
 //////=======================================================================================
 ////////======================================================================================
+
+/// @brief to get the notification meta data 
+/// @param uid 
+/// @param notif_meta 
+/// @return 
+uint32_t ble_ancs_get_notif_meta_data(uint32_t uid, ble_ancs_notif_metadata_struct_t * notif_meta);
 
 /// @brief to get the current time that when the notif rcvd 
 /// @param nuid 
@@ -320,7 +357,7 @@ uint32_t ble_ancs_perform_notif_Action(uint32_t nuid, uint8_t action);
 /// @brief this func is used to get the string from the category id 
 /// @param cat_id 
 /// @return return the string frim the category id 
-char * ble_ancs_get_catg_string(uint8_t cat_id);
+const char * ble_ancs_get_catg_string(uint8_t cat_id);
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
