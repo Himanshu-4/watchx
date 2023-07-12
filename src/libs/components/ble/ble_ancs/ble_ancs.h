@@ -203,6 +203,26 @@ enum _BLE_ANCS_NOTIF_FETCH_LEVEL_
     BLE_ANCS_NOTIF_FETCH_FULL_MSG,
 };
 
+/// @brief this is the index of the stored meta data  
+enum _BLE_ANCS_NOTIF_UID_META_DATA_INDEX_
+{
+    BLE_ANCS_META_INDEX_UID = 0x00,
+    BLE_ANCS_META_INDEX_EVT_FLAG =  BLE_ANCS_META_INDEX_UID + 4,
+    BLE_ANCS_META_INDEX_CATG_ID,
+    BLE_ANCS_META_INDEX_CATG_COUNT,
+    BLE_ANCS_META_INDEX_NOTIF_FETCHED_LEVEL,
+    BLE_ANCS_META_INDEX_APP_ID ,
+    BLE_ANCS_META_INDEX_APP_DISPLAY_NAME = BLE_ANCS_META_INDEX_APP_ID+4,
+    BLE_ANCS_META_INDEX_NOTIF_TITLE = BLE_ANCS_META_INDEX_APP_DISPLAY_NAME +4,
+    BLE_ANCS_META_INDEX_NOTIF_SUBTITLE = BLE_ANCS_META_INDEX_NOTIF_TITLE +4,
+    BLE_ANCS_META_INDEX_NOTIF_MSG =  BLE_ANCS_META_INDEX_NOTIF_SUBTITLE +4,
+    BLE_ANCS_META_INDEX_NOTIF_MSG_SIZE = BLE_ANCS_META_INDEX_NOTIF_MSG +4,
+    BLE_ANCS_META_INDEX_POS_ACTION = BLE_ANCS_META_INDEX_NOTIF_MSG_SIZE +2,
+    BLE_ANCS_META_INDEX_NEG_ACTION,
+  
+};
+
+
 //// the notification uid format 
 typedef PACKED_STRUCT _BLE_ANCS_NOTIF_UID_
 {
@@ -227,13 +247,14 @@ typedef PACKED_STRUCT _BLE_ANCS_NOTIF_UID_
     
     uint16_t notif_msg_size;
 
+    /// @brief keep track of the actions that can be performed 
+    uint8_t positive_action;
+    uint8_t negative_action;
+
     /// @brief keep track of at what time the notif rcvd 
     kernel_time_struct_t time_rcvd;
     kernel_date_struct_t date_rcvd;
 
-    /// @brief keep track of the actions that can be performed 
-    uint8_t positive_action;
-    uint8_t negative_action;
 
 }ble_ancs_notif_metadata_struct_t;
 
@@ -266,10 +287,24 @@ uint32_t ble_ancs_deinit(void);
 /// @return the total no of uids 
 uint32_t ble_ancs_get_total_nuid(void);
 
-/// @brief this function is to read the notification uid characteristic
+/// @brief this function is to read the notification uid value based on index 
 /// @param nuid pointer  
 /// @return succ/err code 
-uint32_t ble_ancs_read_ancs_nuid_char(uint16_t index , uint32_t *nuid );
+uint32_t ble_ancs_read_ancs_nuid_value(uint16_t index , uint32_t *nuid );
+
+/// @brief to get the notification meta data with the help of index  
+/// @param uid 
+/// @param notif_meta 
+/// @return succ/failure 
+uint32_t ble_ancs_get_notif_meta_info(uint16_t index, ble_ancs_notif_metadata_struct_t * notif_meta);
+
+/// @brief this is to modify the meta data info of that particular uid  
+/// @param uid 
+/// @param meta_Data_index  @ref _BLE_ANCS_NOTIF_UID_META_DATA_INDEX_
+/// @param data_pointer 
+/// @param size 
+/// @return succ/failure 
+uint32_t ble_ancs_modify_meta_info(uint32_t uid, uint16_t meta_Data_index, void *data_pointer , uint8_t size);
 
 /// @brief to remove that particular uid from cache and iphone 
 /// @param nuid 

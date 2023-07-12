@@ -55,7 +55,7 @@ kernel_mem_storage_type;
 #define KERNEL_MEMORY_START_OF_DATA_DELIMITER 0x12
 
 /// @brief this is the meta data memory size in bytes for the kernel mem storage
-#define KERNEL_MEMORY_META_DATA_SIZE 8
+#define KERNEL_MEMORY_META_DATA_SIZE 7
 
 /// @brief these are the error  code that returns of function faliures
 typedef enum _KERNEL_MEM_ERR_CODE_
@@ -105,8 +105,8 @@ kernel_mem_err_type kernel_mem_modify_data(const kernel_mem_instance *kernel_ins
 /// @param mem_inst
 /// @param uid
 /// @param ptr
-/// @return succ/ err codes
-kernel_mem_err_type kernel_mem_get_Data_ptr(const kernel_mem_instance *kernel_inst_ptr, uint32_t uid, uint8_t *ptr);
+/// @return pointer to return 
+uint8_t * kernel_mem_get_Data_ptr(const kernel_mem_instance *kernel_inst_ptr, uint32_t uid);
 
 /// @brief this function is to read the data from that uid
 /// @param mem_inst

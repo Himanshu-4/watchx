@@ -115,16 +115,16 @@ return_mech:
 /// @brief this function is used to get the data pointer where the data start
 /// @param mem_inst
 /// @param uid
-/// @param ptr
-/// @return succ/ err codes
-kernel_mem_err_type kernel_mem_get_Data_ptr(const kernel_mem_instance *instance, uint32_t uid, uint8_t *ptr)
+/// @return pointer NULL if not found or any other err 
+uint8_t * kernel_mem_get_Data_ptr(const kernel_mem_instance *instance, uint32_t uid)
 {
     //// acquire the lock and start operations
     if (xSemaphoreTake(instance->kernel_mem_mutex_handle, pdMS_TO_TICKS(instance->mutex_timeout)) != pdPASS)
     {
-        return KERNEL_MEM_ERR_MUTEX_TIMEOUT;
+        return NULL;
     }
-    uint32_t err = KERNEL_MEM_OP_SUCCESS;
+    
+    uint8_t *ret_ptr  = NULL ;
 
     uint8_t *arr = instance->mem_ptr;
   
@@ -137,7 +137,7 @@ kernel_mem_err_type kernel_mem_get_Data_ptr(const kernel_mem_instance *instance,
         if (my_inst->kernel_UID == uid)
         {
             // give back the pointer
-            ptr = &arr[KERNEL_MEM_STRUCT_DATA];
+            ret_ptr = &arr[KERNEL_MEM_STRUCT_DATA];
             goto return_mech;
         }
 
@@ -145,12 +145,11 @@ kernel_mem_err_type kernel_mem_get_Data_ptr(const kernel_mem_instance *instance,
         // increment the arr to this length
         arr += (uint32_t)my_inst->kernel_len;
     }
-    err = KERNEL_MEM_ERR_UID_ABSENT;
 
 return_mech:
     // give back the mutex
     xSemaphoreGive(instance->kernel_mem_mutex_handle);
-    return err;
+    return ret_ptr;
 }
 
 /// @brief read the data size of the memory that is in the uid

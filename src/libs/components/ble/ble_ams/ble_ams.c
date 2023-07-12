@@ -276,49 +276,15 @@ uint32_t ble_ams_deinit(void)
 /// @return string containg attribute , NULL if none
 char *ble_ams_get_attribute_name(ble_ams_attribute_name index)
 {
-    char *string = NULL_STRING;
     if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
     {
-        return string;
+        return NULL;
     }
-    uint8_t err = 0;
-    switch (index)
+    if(index>= ble_ams_attribute_index_misc)
     {
-    case ble_ams_attribute_index_mediaplayer:
-    {
-        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, (uint8_t *)string);
-        NRF_ASSERT(err);
+        return NULL;
     }
-    break;
-
-    case ble_ams_attribute_index_artist_name:
-    {
-        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, (uint8_t *)string);
-        NRF_ASSERT(err);
-    }
-    break;
-
-    case ble_ams_attribute_index_track_name:
-    {
-        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_track_name,(uint8_t *) string);
-        NRF_ASSERT(err);
-    }
-    break;
-
-    case ble_ams_attribute_index_album_name:
-    {
-        err = kernel_mem_get_Data_ptr(&ble_ams_mem_inst, ble_ams_attribute_index_album_name, (uint8_t *)string);
-        NRF_ASSERT(err);
-    }
-    break;
-
-     default:
-        /// return the null string
-        string = NULL_STRING;
-        break;
-    }
-
-    return string;
+    return (char *) kernel_mem_get_Data_ptr(&ble_ams_mem_inst, index);
 }
 
 /// @brief ble_ams_execute cmd is the function used to execute a specific cmd in media player

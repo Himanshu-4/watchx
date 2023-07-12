@@ -451,13 +451,14 @@ void ble_ancs_client_event_handler(void *param, ble_gattc_evt_t *evt)
         {
         case BLE_ANCS_EVT_NOTIF_ADDED:
         {
-            sizeof(ble_ancs_notif_metadata_struct_t);
-            
-            ble_ancs_notif_metadata_struct_t notif_meta;
-            notif_meta.event_Flag = my_notif_struct->event_id;
-            notif_meta.category_id = my_notif_struct->category_id;
-            // notif_meta.notif_fetched = BLE_ANCS_NOTIF_DATA_PENING;
+            // sizeof(ble_ancs_notif_metadata_struct_t);
 
+            // ble_ancs_notif_metadata_struct_t notif_meta;
+            // notif_meta.event_Flag = my_notif_struct->event_id;
+            // notif_meta.category_id = my_notif_struct->category_id;
+            // // notif_meta.notif_fetched = BLE_ANCS_NOTIF_DATA_PENING;
+
+            
 
             /// add the notification id to the ancs mem pool 
             // kernel_mem_add_data(&ble_ancs_mem_inst, my_notif_struct->event_id, )

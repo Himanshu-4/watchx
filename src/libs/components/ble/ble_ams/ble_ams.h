@@ -187,7 +187,7 @@ uint32_t ble_ams_deinit(void);
 
 typedef enum _BLE_AMS_ATTRIBUTES_NAME_INDEX_
 {
-    ble_ams_attribute_index_mediaplayer =0x10,
+    ble_ams_attribute_index_mediaplayer =0x01,
     ble_ams_attribute_index_artist_name,
     ble_ams_attribute_index_track_name,
     ble_ams_attribute_index_album_name,
