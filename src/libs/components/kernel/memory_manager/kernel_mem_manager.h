@@ -6,12 +6,29 @@
 
 #define KERNEL_MEM_SECTION __section(".kernel_mem_data")
 
+
+//// assign some random number to inits and deinits 
+#define KERNEL_MEM_POOL_INITED 0x10
+
+#define KERNEL_MEM_POOL_DEINITED 0x20
+
+
+
 /// @brief  this is the memory instance strucutre type , means that the kernel mem is allocate as this
 typedef struct _KERNEL_MEM_INSTANCE_
 {
     uint8_t *mem_ptr;
-    SemaphoreHandle_t kernel_mem_mutex_handle;
+    
+    /// @brief  size of the mem pool
     uint16_t mem_size;
+    uint16_t used_size;
+
+    /// @brief total no of uid present 
+    uint16_t total_uid;
+    uint8_t kernel_mem_pool_inited;
+
+    /// @brief mutex reltaed info 
+    SemaphoreHandle_t kernel_mem_mutex_handle;
     uint16_t mutex_timeout;
 } kernel_mem_instance;
 
@@ -62,6 +79,7 @@ typedef enum _KERNEL_MEM_ERR_CODE_
 {
     KERNEL_MEM_OP_SUCCESS,
     KERNEL_MEM_ERR_MUTEX_TIMEOUT,
+    KERNEL_MEM_ERR_MEMPOOL_DEINITED,
     KERNEL_MEM_ERR_INVALID_PARAM,
     KERNEL_MEM_ERR_UID_ABSENT,
     KERNEL_MEM_ERR_UID_ALRDY_PRESENT,
@@ -83,7 +101,7 @@ kernel_mem_err_type kernel_mem_init(kernel_mem_instance *kernel_inst_ptr, uint8_
 /// @brief this is to deinit the kernel memory space,
 /// @param kernelmem_instanace
 /// @return succ of the funcction
-kernel_mem_err_type kernel_mem_deinit(const kernel_mem_instance *kernel_inst_ptr);
+kernel_mem_err_type kernel_mem_deinit( kernel_mem_instance *kernel_inst_ptr);
 
 /// @brief this function is to add the data in the uid
 /// @param mem_inst
@@ -91,7 +109,7 @@ kernel_mem_err_type kernel_mem_deinit(const kernel_mem_instance *kernel_inst_ptr
 /// @param data
 /// @param size
 /// @return succ/ err codes
-kernel_mem_err_type kernel_mem_add_data(const kernel_mem_instance *kernel_inst_ptr, uint32_t uid, const uint8_t *data, uint16_t size);
+kernel_mem_err_type kernel_mem_add_data( kernel_mem_instance *kernel_inst_ptr, uint32_t uid, const uint8_t *data, uint16_t size);
 
 /// @brief this function is used to modify the data
 /// @param mem_inst
@@ -99,7 +117,7 @@ kernel_mem_err_type kernel_mem_add_data(const kernel_mem_instance *kernel_inst_p
 /// @param data
 /// @param size
 /// @return succ/err codes
-kernel_mem_err_type kernel_mem_modify_data(const kernel_mem_instance *kernel_inst_ptr, uint32_t uid, const uint8_t *data, uint16_t size);
+kernel_mem_err_type kernel_mem_modify_data( kernel_mem_instance *kernel_inst_ptr, uint32_t uid, const uint8_t *data, uint16_t size);
 
 /// @brief this function is used to get the data pointer where the data start
 /// @param mem_inst
@@ -120,14 +138,14 @@ kernel_mem_err_type kernel_mem_read_data(const kernel_mem_instance *kernel_inst_
 /// @param mem_inst
 /// @param uid
 /// @return succ/err codes
-kernel_mem_err_type kernel_mem_delete_data(const kernel_mem_instance *kernel_inst_ptr, uint32_t uid);
+kernel_mem_err_type kernel_mem_delete_data( kernel_mem_instance *kernel_inst_ptr, uint32_t uid);
 
 /// @brief read the data size of the memory that is in the uid
 /// @param mem_inst
 /// @param uid
 /// @param size pointer
 /// @return succ/err codes
-kernel_mem_err_type kernel_read_data_size(const kernel_mem_instance *kernel_inst_ptr, uint32_t uid, uint16_t *size);
+kernel_mem_err_type kernel_get_data_size(const kernel_mem_instance *kernel_inst_ptr, uint32_t uid, uint16_t *size);
 
 /// @brief to get the remaining data size from the kernel memory
 /// @param kernel_inst_ptr

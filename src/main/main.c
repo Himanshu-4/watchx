@@ -164,7 +164,8 @@ void general_task_function(void *param)
 
     NRF_LOG_INFO("init %d ptr%x ,%x",ret, &my_pool, my_pool);
 
-    uint8_t data_arr[3][5] = {{1,2,3,4,5}, {1,2,3,4,5}, {5,4,3,2,1}};
+    uint8_t data_arr[5][5] = {{1,1,1,1,1}, {2,2,2,2,2}, {3,3,3,3,3}, 
+    {4,4,4,4,4}, {5,5,5,5,5}};
 
     uint8_t tx_index =1;
     uint8_t rx_index =1;
@@ -184,7 +185,7 @@ void general_task_function(void *param)
             ret = kernel_mem_add_data(&test_inst, tx_index, (uint8_t *)&data_arr[tx_index-1] , sizeof(data_arr[tx_index-1]));
             NRF_LOG_INFO("in %d add %d",tx_index, ret);
             tx_index ++;
-            if(tx_index >=4)
+            if(tx_index >=6)
             {
                 tx_index =1;
             }
@@ -194,9 +195,25 @@ void general_task_function(void *param)
             {
                 // NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
                 uint8_t *ptr ;
+                uint16_t size =0;
 
-                ret = kernel_mem_get_Data_ptr(&test_inst, tx_index, &ptr);
-                NRF_LOG_INFO("ret %d, ptr %x",ret, ptr);
+                ptr = kernel_mem_get_Data_ptr(&test_inst, tx_index);
+                ret = kernel_get_data_size(&test_inst,tx_index, &size);
+                NRF_LOG_INFO("i %dptr %x",tx_index, ptr);
+
+                uint16_t usize =0;
+                ret = kernel_get_used_data_size(&test_inst, &usize);
+                NRF_LOG_INFO("r %d us %d",ret,usize);
+                
+                uint16_t rsize =0;
+                ret = kernel_get_rem_data_size(&test_inst, &rsize);
+                NRF_LOG_INFO("r %d rs %d",ret,rsize);
+                
+                tx_index ++;
+            if(tx_index >=6)
+            {
+                tx_index =1;
+            }
                 
             }
             else if(evt == NRF_BUTTON_MIDD_EVT)
@@ -207,6 +224,16 @@ void general_task_function(void *param)
                 uint16_t total =0;
                 ret = kernel_get_total_no_of_uids(&test_inst, &total);
                 NRF_LOG_INFO("ret %d to %d",ret, total);
+
+                /// also delate a uid 
+                ret = kernel_mem_delete_data(&test_inst, tx_index);
+                NRF_LOG_INFO("di %d,re%d",tx_index, ret);
+
+                //// also to get toal uid again
+                ret = kernel_get_total_no_of_uids(&test_inst, &total);
+                NRF_LOG_INFO("ret %d to %d",ret, total);
+
+                
             }
         }
         delay(100);
