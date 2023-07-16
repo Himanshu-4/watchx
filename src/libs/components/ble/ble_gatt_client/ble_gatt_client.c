@@ -55,6 +55,11 @@ uint32_t gatt_client_pre_init(void)
     ble_client_semphr_handle = xSemaphoreCreateMutexStatic(&ble_client_semphr_buffer);
   }
 
+  /// set the client conn handle 
+  for(uint8_t i=0; i<BLE_NO_OF_CLIENT_SUPPORTED; i++)
+  {
+    client_struct[i].conn_handle = BLE_CONN_HANDLE_INVALID;
+  }
   // configASSERT(ble_client_semphr_handle);
   
   // always give the  semaphore after initaling
@@ -79,13 +84,18 @@ uint32_t gatt_client_init(uint16_t conn_handle)
     return ble_client_err_timeout;
   }
 
+  if((conn_handle == BLE_CONN_HANDLE_INVALID))
+  {
+    return nrf_ERR_INVALID_PARAM;
+  } 
+
   uint32_t ret_code = 0;
 
   uint8_t index = 0;
 
   for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
   {
-    if (client_struct[i].conn_handle == 0)
+    if (client_struct[i].conn_handle == BLE_CONN_HANDLE_INVALID)
     {
       index = i;
       goto init_the_client;
@@ -158,7 +168,7 @@ deinit_the_client:
   client_struct[index].client_err_handler = NULL;
   client_struct[index].client_err_hand_param = NULL;
 
-  client_struct[index].conn_handle = 0;
+  client_struct[index].conn_handle = BLE_CONN_HANDLE_INVALID;
   client_struct[index].client_inited = 0;
 
   ret_code = ble_client_ok;
@@ -395,7 +405,7 @@ discover_Data:
   }
 
   /// wait for the notifcation from the callback
-  if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)))
+  if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)) != pdPASS)
   {
     err = ble_client_err_timeout;
     goto return_mech;
@@ -470,15 +480,16 @@ discover_Data:
   }
 
   /// wait for the notifcation from the callback
-  if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)))
+  if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)) != pdPASS)
   {
     err = ble_client_err_timeout;
     goto return_mech;
   }
 
   /// check if error or not
-  if (!err)
+  if (err == nrf_OK)
   {
+    NRF_LOG_DEBUG("r");
     /// copy the content to the structure
     memcpy(u8(char_struct), u8(msg_buff), sizeof(ble_char_struct_t));
   }
@@ -551,7 +562,7 @@ discover_Data:
   }
 
   /// wait for the notifcation from the callback
-  if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)))
+  if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)) != pdPASS)
   {
     err = ble_client_err_timeout;
     goto return_mech;

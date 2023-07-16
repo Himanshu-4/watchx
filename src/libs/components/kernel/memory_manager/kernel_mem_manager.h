@@ -145,30 +145,30 @@ kernel_mem_err_type kernel_mem_delete_data( kernel_mem_instance *kernel_inst_ptr
 /// @param uid
 /// @param size pointer
 /// @return succ/err codes
-kernel_mem_err_type kernel_get_data_size(const kernel_mem_instance *kernel_inst_ptr, uint32_t uid, uint16_t *size);
+kernel_mem_err_type kernel_mem_get_data_size(const kernel_mem_instance *kernel_inst_ptr, uint32_t uid, uint16_t *size);
 
 /// @brief to get the remaining data size from the kernel memory
 /// @param kernel_inst_ptr
 /// @return succ/err codes
-kernel_mem_err_type kernel_get_rem_data_size(const kernel_mem_instance *kernel_inst_ptr, uint16_t *size);
+kernel_mem_err_type kernel_mem_get_rem_data_size(const kernel_mem_instance *kernel_inst_ptr, uint16_t *size);
 
 /// @brief to get the used data size in the memory , the size occupied by the uids
 /// @param kernel_inst_ptr
 /// @param size
 /// @return succ/err codes
-kernel_mem_err_type kernel_get_used_data_size(const kernel_mem_instance *kernel_inst_ptr, uint16_t *size);
+kernel_mem_err_type kernel_mem_get_used_data_size(const kernel_mem_instance *kernel_inst_ptr, uint16_t *size);
 
 /// @brief to get the total no of the uids present in that memory space
 /// @param kernel_inst_ptr
 /// @param uid_total
 /// @return succ/err codes
-kernel_mem_err_type kernel_get_total_no_of_uids(const kernel_mem_instance *kernel_inst_ptr, uint16_t *uid_total);
+kernel_mem_err_type kernel_mem_get_total_no_of_uids(const kernel_mem_instance *kernel_inst_ptr, uint16_t *uid_total);
 
 /// @brief this function is get the uid from the data pointer
 /// @param buff
 /// @param mem_ptr
 /// @param uid pointer
 /// @return succ/err codes
-kernel_mem_err_type kernel_get_uid_from_pointer(const kernel_mem_instance *kernel_inst_ptr, uint8_t *mem_ptr, uint32_t *uid);
+kernel_mem_err_type kernel_mem_get_uid_from_pointer(const kernel_mem_instance *kernel_inst_ptr, uint8_t *mem_ptr, uint32_t *uid);
 
 #endif

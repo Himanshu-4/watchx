@@ -31,12 +31,14 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         ///////// check about the gatt status 
          uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
 
-     
         /////// check that if task handle not null
         if (ble_client_task_handle != NULL)
         {
             /// copy the data into the msg buffer
             memcpy(u8(msg_buff), u8(p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0]), s(ble_gattc_service_t));
+            
+            NRF_LOG_INFO("s%d,%d,%d", p_ble_evt->evt.gattc_evt.gatt_status, p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.start_handle,
+            p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.end_handle);
             xTaskNotify(ble_client_task_handle, p_ble_evt->evt.gattc_evt.gatt_status, eSetValueWithOverwrite);
         }
 
@@ -292,7 +294,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
     {
         //// print the mtu set by server
-        NRF_LOG_WARNING("server RX MTU %d", p_ble_evt->evt.gattc_evt.params.exchange_mtu_rsp.server_rx_mtu);
+        NRF_LOG_WARNING("RX MTU %d", p_ble_evt->evt.gattc_evt.params.exchange_mtu_rsp.server_rx_mtu);
     }
     break;
 

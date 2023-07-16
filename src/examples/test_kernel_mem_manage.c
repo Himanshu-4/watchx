@@ -155,6 +155,20 @@ void general_task_function(void *param)
 
     uint8_t ret = 0;
 
+    /// init the mem here
+    ret = kernel_mem_init(&test_inst, my_pool, 100, &test_mutex, 100);
+
+    NRF_LOG_INFO("init %d ptr%x ,%x", ret, &my_pool, my_pool);
+
+    uint8_t data_arr[5][5] = {{1, 1, 1, 1, 1}, {2, 2, 2, 2, 2}, {3, 3, 3, 3, 3}, {4, 4, 4, 4, 4}, {5, 5, 5, 5, 5}};
+
+    for (int i = 1; i <= 5; i++)
+    {
+        ret = kernel_mem_add_data(&test_inst, i, (uint8_t *)&data_arr[i - 1], sizeof(data_arr[i - 1]));
+        NRF_LOG_INFO("in %d add %d", i, ret);
+    }
+
+    uint8_t tx_index = 1;
 
     for (;;)
     {
@@ -165,17 +179,56 @@ void general_task_function(void *param)
             NRF_LOG_WARNING("evt %d", evt);
             if (evt == NRF_BUTTON_UP_EVT)
             {
+                 tx_index++;
+                if (tx_index > 7)
+                {
+                    tx_index = 1;
+                }
                 //     //// start the advertise
-                   NRF_LOG_INFO("adv%d", ble_gap_start_advertise());
+                //    NRF_LOG_INFO("adv%d", ble_gap_start_advertise());
+
+                // check the data pointers ,size, used, and rem size
+                uint8_t *ptr = kernel_mem_get_Data_ptr(&test_inst, tx_index);
+
+                uint32_t uid = 0;
+                kernel_mem_get_uid_from_pointer(&test_inst, ptr, &uid);
+
+                uint16_t size = 0;
+                ret = kernel_mem_get_data_size(&test_inst, tx_index, &size);
+
+                NRF_LOG_INFO("i%d ptr %xsize %d uid %dret %d", tx_index, ptr, size, uid, ret);
+               
             }
             else if (evt == NRF_BUTTON_DOWN_EVT)
             {
-                NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
+                // NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
+                uint16_t rem_size = 0, used_size = 0, total_uid = 0;
 
+                ret = kernel_mem_get_used_data_size(&test_inst, &used_size);
+                NRF_ASSERT(ret);
+                ret = kernel_mem_get_rem_data_size(&test_inst, &rem_size);
+                NRF_ASSERT(ret);
+                ret = kernel_mem_get_total_no_of_uids(&test_inst, &total_uid);
+
+                uint8_t *ptr = kernel_mem_get_Data_ptr(&test_inst, tx_index);
+                if (ptr != NULL)
+                {
+                    NRF_LOG_INFO("prt %xd%d", ptr, ptr[0]);
+                }
+
+                NRF_LOG_INFO("ret %d uid %d used %d rem %d", ret, total_uid, used_size, rem_size);
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
 
+                    uint32_t new_data =10;
+                /// delet some data
+                ret = kernel_mem_modify_data(&test_inst, tx_index ,(uint8_t *) &new_data, sizeof(new_data) );
+                NRF_LOG_INFO("del ret %d,index %d", ret, tx_index);
+                // if (tx_index++ > 7)
+                // {
+                //     tx_index = 1;
+                // }
             }
         }
         delay(100);

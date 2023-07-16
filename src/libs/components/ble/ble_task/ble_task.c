@@ -63,9 +63,9 @@ static void ble_common_task(void *param);
 static xTaskHandle ble_common_Task_handle = NULL;
 // /////////////////////////////////////  
 /* Structure that will hold the TCB of the task being created. */
-static StaticTask_t ble_common_Task_buffer;
+// static StaticTask_t ble_common_Task_buffer;
 
-static StackType_t ble_common_Task_Stack_buffer[BLE_COMMON_TASK_STACK_DEPTH];
+// static StackType_t ble_common_Task_Stack_buffer[BLE_COMMON_TASK_STACK_DEPTH];
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,10 +78,10 @@ static StackType_t ble_common_Task_Stack_buffer[BLE_COMMON_TASK_STACK_DEPTH];
 
 void ble_common_task_pre_init(void *param)
 {
-    ble_common_Task_handle = xTaskCreateStatic(ble_common_task, BLE_COMMON_TASK_NAME, BLE_COMMON_TASK_STACK_DEPTH, param, BLE_COMMON_TASK_PRIORITY, ble_common_Task_Stack_buffer , &ble_common_Task_buffer );
+    // ble_common_Task_handle = xTaskCreateStatic(ble_common_task, BLE_COMMON_TASK_NAME, BLE_COMMON_TASK_STACK_DEPTH, param, BLE_COMMON_TASK_PRIORITY, ble_common_Task_Stack_buffer , &ble_common_Task_buffer );
     
-    NRF_ASSERT_HANDLE(ble_common_Task_handle);
-    vTaskSuspend(ble_common_Task_handle);
+    // NRF_ASSERT_HANDLE(ble_common_Task_handle);
+    // vTaskSuspend(ble_common_Task_handle);
 
     ///// add the callbacks for the gap  
     ble_gap_add_callback(ble_gap_evt_connected,ble_device_connected_callback );
@@ -101,11 +101,13 @@ void ble_common_task_pre_init(void *param)
 /// @param param 
 static void ble_client_task_init_process(void *param)
 {
+    delay(10000);
     uint32_t err =0;
     uint16_t conn_handle = ble_gap_get_conn_handle(device_index);
 
+    NRF_LOG_INFO("ind %dc %x",device_index, conn_handle);
     /// init the ble client 
-    err = gatt_client_init(conn_handle);
+    NRF_LOG_INFO("cinit %d", gatt_client_init(conn_handle));
     NRF_ASSERT(err);
 
     //// assign the callback for that connection 
@@ -118,13 +120,25 @@ static void ble_client_task_init_process(void *param)
     err = gatt_client_add_timeout_callback(conn_handle, ble_client_timeout_handler, NULL);
     NRF_ASSERT(err);
 
+
+    // discover some services 
+    ble_service_struct_t gap_srv =
+    {
+        .ble_service.uuid.type = BLE_UUID_TYPE_BLE,
+        .ble_service.uuid.uuid = BLE_UUID_GATT,
+    };
+
+    err = gatt_client_discover_service(conn_handle, &gap_srv);
+    NRF_LOG_INFO("re %d,ha %x,%x",err, gap_srv.ble_service.handle_range.start_handle,
+    gap_srv.ble_service.handle_range.end_handle);
+
     //// init the ancs , ams ,device info and other device functionality 
     /// init the apple ancs, ams task , current time task  
-    err = ble_ams_init(conn_handle);
-    NRF_ASSERT(err);
+    // err = ble_ams_init(conn_handle);
+    // NRF_ASSERT(err);
 
-    err = ble_ancs_init(conn_handle);
-    NRF_ASSERT(err);
+    // err = ble_ancs_init(conn_handle);
+    // NRF_ASSERT(err);
 
     // err = ble_time_init(conn_handle);
     // NRF_ASSERT(err);
@@ -142,17 +156,18 @@ static void ble_client_task_deinit_process(void *param)
     //// deinit the ancs , ams ,device info and other device functionality 
     
     /// deinit the apple ancs, ams task 
-    err = ble_ams_deinit();
-    NRF_ASSERT(err);
+    // err = ble_ams_deinit();
+    // NRF_ASSERT(err);
 
-    err = ble_ancs_deinit();
-    NRF_ASSERT(err);
+    // err = ble_ancs_deinit();
+    // NRF_ASSERT(err);
     
     // err = ble_time_deinit();
     // NRF_ASSERT(err);
 
     // err = ble_peer_device_info_deinit();
     // NRF_ASSERT(err);
+
 
 }
 
@@ -166,9 +181,6 @@ static void ble_common_task(void *param)
 
     uint8_t *callback_resume = (uint8_t *) param;
 
-    function_start:
-    NRF_LOG_WARNING("cb rsume");
-
     ble_client_task_init_process(NULL);
 
     //////// spend the task in a while loop 
@@ -177,26 +189,20 @@ static void ble_common_task(void *param)
 
         if(*callback_resume  == suspend )
         {
-            goto function_suspend;
+            break;
         }
 
 
         delay(10000);
 
-    }
 
-    function_suspend:
+    }
 
     ///// call the deinit function , the param may be diffenrt 
     ble_client_task_deinit_process(NULL);
-
-    vTaskSuspend(NULL);
-
-    goto function_start;
     
     ///// should never reach here 
-    system_soft_reset();
-    // vTaskDelete(NULL);
+    vTaskDelete(NULL);
 }
 
 
@@ -216,17 +222,22 @@ static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * g
         return ;
     }
 
-    NRF_LOG_INFO("i %d",device_index);
     //////// start the encrytption pro
     uint16_t conn_handle = ble_gap_get_conn_handle(device_index);
+
+    // NRF_LOG_INFO("i %dconha %x",device_index,conn_handle);
 
     //// set the gatt server mtu 
     err = gatt_client_set_server_mtu(conn_handle, BLE_GATT_SERVER_RX_MTU );
     NRF_ASSERT(err);
     
-    ///////////// resume the task 
-    vTaskResume(ble_common_Task_handle);
+    // ///////////// resume the task 
+    // vTaskResume(ble_common_Task_handle);
 
+    //create the taskm 
+    
+    xTaskCreate(ble_common_task, BLE_COMMON_TASK_NAME, BLE_COMMON_TASK_STACK_DEPTH, param, BLE_COMMON_TASK_PRIORITY, &ble_common_Task_handle);
+    
     /// start the function from over 
     client_task = resume;
     
@@ -241,9 +252,11 @@ static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  
 {
     ////// suspend the client task , no need to call here 
     // vTaskSuspend(ble_common_Task_handle);
-    uint16_t *conn_handle = param;
+    // uint16_t *conn_handle = param;
     /// call the deinit process 
-    gatt_client_deinit( *conn_handle);
+    gatt_client_deinit( gap_evt->conn_handle);
+
+    NRF_LOG_WARNING("deinit %x",gap_evt->conn_handle);
 
     client_task = suspend;
 
@@ -271,7 +284,7 @@ static void ble_client_error_handler(void *param, uint16_t gatt_status )
 {
     UNUSED_PARAMETER(param);
 
-    NRF_LOG_ERROR("err triggered %x",gatt_status);
+    NRF_LOG_ERROR("err  %x",gatt_status);
 }
 
 /// @brief this function got called when the timeout occured 

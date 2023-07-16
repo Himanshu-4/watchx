@@ -254,7 +254,7 @@ extern uint32_t SystemCoreClock;
 
 #define BLE_COMMON_TASK_STACK_DEPTH 256 //// this will equal to 1KB of space  
 
-#define BLE_COMMON_TASK_PRIORITY 5 //////// task priority of the ble common task 
+#define BLE_COMMON_TASK_PRIORITY 4 //////// task priority of the ble common task 
 
 
 

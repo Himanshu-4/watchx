@@ -11,7 +11,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //======================= BLE COMMON  CONFIG =============================================
 
-#define BLE_MAX_DEVICE_SUPPORTED 1 
+#define BLE_MAX_DEVICE_SUPPORTED 1
 // #define BLE_MAX_DEVICE_SUPPORTED 3 
 
 
@@ -37,7 +37,7 @@
 
 //// GAP connection configuration, cfg_id is @ref BLE_CONN_CFG_GAP.
 ////The number of concurrent connections the application can create with this configuration.
-#define NRF_BLE_TOTAL_LINK_COUNT   1
+#define NRF_BLE_TOTAL_LINK_COUNT   BLE_MAX_DEVICE_SUPPORTED
 
 ///The time set aside for this connection on every connection interval in 1.25 ms units.
 // #define NRF_BLE_GAP_EVENT_LENGTH_TIME   6 // 7.5 msec 
@@ -74,7 +74,7 @@
 #define NRF_BLE_GAP_CHAR_PERIPHERAL_PREFERD_CONN_INCLUDE    0
 
 ///  Device name configuration, cfg_id is @ref BLE_GAP_CFG_DEVICE_NAME. 
-#define NRF_BLE_GAP_CONFIG_DEVICE_NAME 
+#define NRF_BLE_GAP_CONFIG_DEVICE_NAME  "WATCHX"
 
 //// ===Role count configuration, cfg_id is @ref BLE_GAP_CFG_ROLE_COUNT.
 
@@ -112,8 +112,8 @@
 
 //////////////////////// ble connection param config 
 
-#define BLE_MIN_CONNECTION_INTERVAL 40 //// in terms of milliseconds 
-#define BLE_MAX_CONNECTION_INTERVAL 100 ////// in terms of millisec
+#define BLE_MIN_CONNECTION_INTERVAL 30 //// in terms of milliseconds 
+#define BLE_MAX_CONNECTION_INTERVAL 80 ////// in terms of millisec
 
 // these packets the masters chooses to skip without risking connection /**< Slave latency. */ slave can 
 #define BLE_CONNECTION_SLAVE_LATENCY 4 
@@ -140,7 +140,7 @@
 #define BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME 300
 
 ///////// define the wit time for task notification 
-#define BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME 400
+#define BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME 1000
 
 #define BLE_CLIENT_MESSAGE_BUFFER_SIZE 30
 //////////////////////////////////////////////////////////////////////////////////////

@@ -12,7 +12,7 @@
 volatile ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp] = {NULL};
 
 ///////////// this is to store the connection handle 
-static volatile uint16_t ble_gap_conn_handles[BLE_GAP_MAX_NO_OF_DEVICES];
+static volatile uint16_t ble_gap_conn_handles[BLE_GAP_MAX_NO_OF_DEVICES] = {BLE_CONN_HANDLE_INVALID};
 
 
 
@@ -53,9 +53,9 @@ uint32_t ble_gap_set_conn_handle(uint8_t * index , uint16_t conn_handle)
 {
     ///// search for the 0 connection handle 
     //// serach for the connection handle 
-    for(uint8_t i = 0; i<BLE_GAP_MAX_NO_OF_DEVICES; i++)
+    for(uint8_t i = 0; i< BLE_GAP_MAX_NO_OF_DEVICES; i++)
     {
-        if(ble_gap_conn_handles[i] == 0)
+        if(ble_gap_conn_handles[i] == BLE_CONN_HANDLE_INVALID)
         {
             ble_gap_conn_handles[i] = conn_handle;
             *index = i+1;
@@ -75,7 +75,7 @@ uint32_t ble_gap_set_conn_handle(uint8_t * index , uint16_t conn_handle)
 /// @return the conection handle , 
 uint16_t ble_gap_get_conn_handle(uint8_t index )
 {
-    if(index > BLE_GAP_MAX_NO_OF_DEVICES)
+    if((index-1) > BLE_GAP_MAX_NO_OF_DEVICES)
     {
         return BLE_CONN_HANDLE_INVALID;
     }

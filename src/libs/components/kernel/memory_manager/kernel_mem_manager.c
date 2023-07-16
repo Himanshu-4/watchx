@@ -143,7 +143,10 @@ return_mech:
 /// @return pointer NULL if not found or any other err 
 uint8_t * kernel_mem_get_Data_ptr(const kernel_mem_instance *instance, uint32_t uid)
 {
-    VERIFY_INIT(instance);
+    if(instance->kernel_mem_pool_inited != KERNEL_MEM_POOL_INITED)
+    {
+        return NULL;
+    }
     //// acquire the lock and start operations
     if (xSemaphoreTake(instance->kernel_mem_mutex_handle, pdMS_TO_TICKS(instance->mutex_timeout)) != pdPASS)
     {
@@ -163,7 +166,7 @@ uint8_t * kernel_mem_get_Data_ptr(const kernel_mem_instance *instance, uint32_t 
         if (my_inst->kernel_UID == uid)
         {
             // give back the pointer
-            ret_ptr = &arr[KERNEL_MEM_STRUCT_DATA];
+            ret_ptr = my_inst->kernel_data;
             goto return_mech;
         }
 
@@ -183,7 +186,7 @@ return_mech:
 /// @param uid
 /// @param size pointer
 /// @return succ/err codes
-kernel_mem_err_type kernel_get_data_size(const kernel_mem_instance *instance, uint32_t uid, uint16_t *size)
+kernel_mem_err_type kernel_mem_get_data_size(const kernel_mem_instance *instance, uint32_t uid, uint16_t *size)
 {
     VERIFY_INIT(instance);
     //// acquire the lock and start operations
@@ -225,7 +228,7 @@ return_mech:
 /// @param mem_ptr
 /// @param uid pointer
 /// @return succ/err codes
-kernel_mem_err_type kernel_get_uid_from_pointer(const kernel_mem_instance *instance, uint8_t *mem_ptr, uint32_t *uid)
+kernel_mem_err_type kernel_mem_get_uid_from_pointer(const kernel_mem_instance *instance, uint8_t *mem_ptr, uint32_t *uid)
 {
     VERIFY_INIT(instance);
     //// acquire the lock and start operations
@@ -263,7 +266,7 @@ return_mech:
 /// @brief to get the remaining data size from the kernel memory
 /// @param kernel_inst_ptr
 /// @return succ/err codes
-kernel_mem_err_type kernel_get_rem_data_size(const kernel_mem_instance *instance, uint16_t *size)
+kernel_mem_err_type kernel_mem_get_rem_data_size(const kernel_mem_instance *instance, uint16_t *size)
 {
     VERIFY_INIT(instance);
     //// acquire the lock and start operations
@@ -286,7 +289,7 @@ kernel_mem_err_type kernel_get_rem_data_size(const kernel_mem_instance *instance
 /// @param kernel_inst_ptr
 /// @param size
 /// @return succ/err codes
-kernel_mem_err_type kernel_get_used_data_size(const kernel_mem_instance *instance, uint16_t *size)
+kernel_mem_err_type kernel_mem_get_used_data_size(const kernel_mem_instance *instance, uint16_t *size)
 {
     VERIFY_INIT(instance);
     //// acquire the lock and start operations
@@ -308,7 +311,7 @@ kernel_mem_err_type kernel_get_used_data_size(const kernel_mem_instance *instanc
 /// @param kernel_inst_ptr
 /// @param uid_total
 /// @return succ/err codes
-kernel_mem_err_type kernel_get_total_no_of_uids(const kernel_mem_instance *instance, uint16_t *uid_total)
+kernel_mem_err_type kernel_mem_get_total_no_of_uids(const kernel_mem_instance *instance, uint16_t *uid_total)
 {
     VERIFY_INIT(instance);
     //// acquire the lock and start operations
@@ -396,17 +399,18 @@ kernel_mem_err_type kernel_mem_delete_data( kernel_mem_instance *instance, uint3
     while (arr[KERNEL_MEM_STRUCT_SOD] == KERNEL_MEMORY_START_OF_DATA_DELIMITER)
     {
         kernel_mem_storage_type *my_inst = (kernel_mem_storage_type *)&arr[KERNEL_MEM_STRUCT_SOD];
-
+                
         if (my_inst->kernel_UID == uid)
         {
             that_uid_data_size = my_inst->kernel_len;
 
-            old_ptr = &my_inst->kernel_sod;
-            new_ptr = old_ptr + that_uid_data_size;
-    
+            new_ptr = &arr[KERNEL_MEM_STRUCT_SOD];
+            old_ptr = new_ptr + that_uid_data_size;
+            break;
         }
-
+        
         prev_data_size += my_inst->kernel_len; 
+        
         /// get the len of the data and add it in the pointer
         // increment the arr to this length
         arr += (uint32_t)my_inst->kernel_len;
@@ -419,9 +423,9 @@ kernel_mem_err_type kernel_mem_delete_data( kernel_mem_instance *instance, uint3
         //// is only one uid or this target uid is the last uid , in that case we have to
         /// instead of copy the data make it zero
 
-        if((that_uid_data_size + prev_data_size ) == instance->used_size)
+        if((that_uid_data_size + prev_data_size ) >= instance->used_size)
         {
-            memset(old_ptr, 0, that_uid_data_size);
+            memset(new_ptr, 0, that_uid_data_size);
         }
         else
         {
@@ -429,7 +433,7 @@ kernel_mem_err_type kernel_mem_delete_data( kernel_mem_instance *instance, uint3
             memcpy(new_ptr, old_ptr , size_to_copy);
 
             // also memset the remaing data to 0
-            memset((old_ptr + size_to_copy) , 0, that_uid_data_size);
+            memset((new_ptr + size_to_copy) , 0, that_uid_data_size);
         }
 
         /// update the size 
@@ -441,10 +445,10 @@ kernel_mem_err_type kernel_mem_delete_data( kernel_mem_instance *instance, uint3
         err = KERNEL_MEM_ERR_UID_ABSENT;
     }
 
-return_mech:
+
     // give back the mutex
     xSemaphoreGive(instance->kernel_mem_mutex_handle);
-    return KERNEL_MEM_OP_SUCCESS;
+    return err;
 }
 
 /// @brief this function is used to modify the data
@@ -455,7 +459,7 @@ return_mech:
 /// @return succ/err codes
 kernel_mem_err_type kernel_mem_modify_data( kernel_mem_instance *instance, uint32_t uid, const uint8_t *data, uint16_t size)
 {
-       VERIFY_INIT(instance);
+    VERIFY_INIT(instance);
     //// acquire the lock and start operations
     if (xSemaphoreTake(instance->kernel_mem_mutex_handle, pdMS_TO_TICKS(instance->mutex_timeout)) != pdPASS)
     {
@@ -475,17 +479,18 @@ kernel_mem_err_type kernel_mem_modify_data( kernel_mem_instance *instance, uint3
     while (arr[KERNEL_MEM_STRUCT_SOD] == KERNEL_MEMORY_START_OF_DATA_DELIMITER)
     {
         kernel_mem_storage_type *my_inst = (kernel_mem_storage_type *)&arr[KERNEL_MEM_STRUCT_SOD];
-
+                
         if (my_inst->kernel_UID == uid)
         {
             that_uid_data_size = my_inst->kernel_len;
 
-            old_ptr = &my_inst->kernel_sod;
-            new_ptr = old_ptr + that_uid_data_size;
-    
+            new_ptr = &arr[KERNEL_MEM_STRUCT_SOD];
+            old_ptr = new_ptr + that_uid_data_size;
+            break;
         }
-
+        
         prev_data_size += my_inst->kernel_len; 
+        
         /// get the len of the data and add it in the pointer
         // increment the arr to this length
         arr += (uint32_t)my_inst->kernel_len;
@@ -499,11 +504,10 @@ kernel_mem_err_type kernel_mem_modify_data( kernel_mem_instance *instance, uint3
         /// instead of copy the data make it zero
         uint8_t *ptr_start =0;
 
-        if((that_uid_data_size + prev_data_size ) == instance->used_size)
+        if((that_uid_data_size + prev_data_size ) >= instance->used_size)
         {
-            memset(old_ptr, 0, that_uid_data_size);
-            /// either we start from the end 
-            ptr_start = old_ptr;
+            memset(new_ptr, 0, that_uid_data_size);
+            ptr_start = new_ptr;
         }
         else
         {
@@ -511,11 +515,12 @@ kernel_mem_err_type kernel_mem_modify_data( kernel_mem_instance *instance, uint3
             memcpy(new_ptr, old_ptr , size_to_copy);
 
             // also memset the remaing data to 0
-            memset((old_ptr + size_to_copy) , 0, that_uid_data_size);
+            memset((new_ptr + size_to_copy) , 0, that_uid_data_size);
 
-            ptr_start = (old_ptr + size_to_copy);
+            ptr_start = new_ptr +size_to_copy;
         }
-        
+
+             
         kernel_mem_storage_type *my_inst = (kernel_mem_storage_type *) ptr_start;
         /// copy the meta data 
         my_inst->kernel_sod = KERNEL_MEMORY_START_OF_DATA_DELIMITER;
@@ -525,15 +530,14 @@ kernel_mem_err_type kernel_mem_modify_data( kernel_mem_instance *instance, uint3
         memcpy(my_inst->kernel_data, data, size);
 
         /// update the size 
-        instance->used_size +=  size - that_uid_data_size;
+        instance->used_size +=  my_inst->kernel_len - that_uid_data_size;
     }
     else
     {
         err = KERNEL_MEM_ERR_UID_ABSENT;
     }
 
-return_mech:
     // give back the mutex
     xSemaphoreGive(instance->kernel_mem_mutex_handle);
-    return KERNEL_MEM_OP_SUCCESS;
+    return err;
 }
