@@ -532,7 +532,6 @@ ${PROJECT_BLE_FOLDER}/ble_stack_init/*.c
 
 ${PROJECT_BLE_FOLDER}/ble_task/*.c 
 
-
 ${PROJECT_BLE_FOLDER}/ble_peer_device_info/*.c 
 )
 
@@ -600,6 +599,9 @@ target_include_directories(ble_library PUBLIC SYSTEM
 
   
         )
+
+target_link_libraries(ble_library 
+                freertos_lib)
 
 ##############################################################################
 ###########################################################################################3

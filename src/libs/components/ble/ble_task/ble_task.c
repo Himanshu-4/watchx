@@ -10,8 +10,10 @@
 
 #include "ble_gatt_client.h"
 
-#include "FreeRTOS.h"
-
+//// include the ble specific library 
+#include "ble_ams.h"
+#include "ble_ancs.h"
+#include "ble_peer_info.h"
 
 ///////////////////////////////////////////////////////////////////////
 //// this will resume the callback 
@@ -120,18 +122,14 @@ static void ble_client_task_init_process(void *param)
     err = gatt_client_add_timeout_callback(conn_handle, ble_client_timeout_handler, NULL);
     NRF_ASSERT(err);
 
-
-    // discover some services 
-    ble_service_struct_t gap_srv =
-    {
-        .ble_service.uuid.type = BLE_UUID_TYPE_BLE,
-        .ble_service.uuid.uuid = BLE_UUID_GATT,
-    };
-
-    err = gatt_client_discover_service(conn_handle, &gap_srv);
-    NRF_LOG_INFO("re %d,ha %x,%x",err, gap_srv.ble_service.handle_range.start_handle,
-    gap_srv.ble_service.handle_range.end_handle);
-
+       //// set the gatt server mtu 
+    err = gatt_client_set_server_mtu(conn_handle, BLE_GATT_SERVER_RX_MTU );
+    NRF_ASSERT(err);
+    
+    /// init the peer device 
+    err = ble_peer_device_init(conn_handle);
+    NRF_ASSERT(err);
+   
     //// init the ancs , ams ,device info and other device functionality 
     /// init the apple ancs, ams task , current time task  
     // err = ble_ams_init(conn_handle);
@@ -152,7 +150,8 @@ static void ble_client_task_deinit_process(void *param)
 {
     ////////// call the deinit process of the above init process     
     uint32_t err =0;
-    
+
+       
     //// deinit the ancs , ams ,device info and other device functionality 
     
     /// deinit the apple ancs, ams task 
@@ -197,10 +196,9 @@ static void ble_common_task(void *param)
 
 
     }
-
+        
     ///// call the deinit function , the param may be diffenrt 
     ble_client_task_deinit_process(NULL);
-    
     ///// should never reach here 
     vTaskDelete(NULL);
 }
@@ -227,10 +225,7 @@ static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * g
 
     // NRF_LOG_INFO("i %dconha %x",device_index,conn_handle);
 
-    //// set the gatt server mtu 
-    err = gatt_client_set_server_mtu(conn_handle, BLE_GATT_SERVER_RX_MTU );
-    NRF_ASSERT(err);
-    
+ 
     // ///////////// resume the task 
     // vTaskResume(ble_common_Task_handle);
 
@@ -255,6 +250,7 @@ static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  
     // uint16_t *conn_handle = param;
     /// call the deinit process 
     gatt_client_deinit( gap_evt->conn_handle);
+
 
     NRF_LOG_WARNING("deinit %x",gap_evt->conn_handle);
 

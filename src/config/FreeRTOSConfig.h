@@ -60,7 +60,7 @@
 #define configCHECK_FOR_STACK_OVERFLOW 0
 #define configUSE_MALLOC_FAILED_HOOK 0
 #define configUSE_DAEMON_TASK_STARTUP_HOOK 0
-#define configUSE_SB_COMPLETED_CALLBACK 1
+#define configUSE_SB_COMPLETED_CALLBACK 0
 
 #define configUSE_PREEMPTION 1                    // use preemptive scheduling
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 1 // use optimised task selecetion
@@ -92,7 +92,8 @@
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 #define configUSE_MINI_LIST_ITEM 1
 
-#define configSTACK_DEPTH_TYPE             uint16_t
+//  configure the stack depth as 4 byte word 
+#define configSTACK_DEPTH_TYPE             uint32_t 
 
 // #define configMESSAGE_BUFFER_LENGTH_TYPE size_t
 
@@ -157,7 +158,7 @@
 #define INCLUDE_uxTaskGetStackHighWaterMark 1
 #define INCLUDE_uxTaskGetStackHighWaterMark2 1
 #define INCLUDE_xTaskGetIdleTaskHandle 1
-#define INCLUDE_xTimerGetTimerDaemonTaskHandle 1
+#define INCLUDE_xTimerGetTimerDaemonTaskHandle 0
 #define INCLUDE_pcTaskGetTaskName 1
 #define INCLUDE_eTaskGetState 1
 #define INCLUDE_xEventGroupSetBitFromISR 1

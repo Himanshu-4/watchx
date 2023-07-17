@@ -2,10 +2,6 @@
 #define _BLE_COMMON_TASK_
 
 
-//// include the ble specific library 
-#include "ble_ams.h"
-#include "ble_ancs.h"
-
 
 #define BLE_COMMON_TASK_NAME "ble_common"
 
