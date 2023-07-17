@@ -52,16 +52,16 @@ extern uint8_t  uart_log_bytes(const uint8_t * buff , uint16_t size );
 // {
 // }
 
-// int _getpid(void)
-// {
-// 	return 1;
-// }
+int _getpid(void)
+{
+	return 1;
+}
 
-// int _kill(int pid, int sig)
-// {
-// 	errno = EINVAL;
-// 	return -1;
-// }
+int _kill(int pid, int sig)
+{
+	// errno = EINVAL;
+	return -1;
+}
 
 // void _exit (int status)
 // {
@@ -69,19 +69,14 @@ extern uint8_t  uart_log_bytes(const uint8_t * buff , uint16_t size );
 // 	while (1) {}		/* Make sure we hang here */
 // }
 
-// __attribute__((weak)) int _read(int file, char *ptr, int len)
-// {
-// 	int DataIdx;
+ int _read(int file, char *ptr, int len)
+{
+	
 
-// 	for (DataIdx = 0; DataIdx < len; DataIdx++)
-// 	{
-// 		*ptr++ = __io_getchar();
-// 	}
+return len;
+}
 
-// return len;
-// }
-
-__attribute__((weak)) int _write(int file, char *ptr, int len)
+ int _write(int file, char *ptr, int len)
 {
 	
     uart_log_bytes((uint8_t *)ptr , len);
@@ -93,27 +88,33 @@ __attribute__((weak)) int _write(int file, char *ptr, int len)
 	return len;
 }
 
-// int _close(int file)
-// {
-// 	return -1;
-// }
+
+//////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+/////////////// here are some low level system calls 
 
 
-// int _fstat(int file, struct stat *st)
-// {
-// 	st->st_mode = S_IFCHR;
-// 	return 0;
-// }
+int _close(int file)
+{
+	return -1;
+}
 
-// int _isatty(int file)
-// {
-// 	return 1;
-// }
 
-// int _lseek(int file, int ptr, int dir)
-// {
-// 	return 0;
-// }
+int _fstat(int file, struct stat *st)
+{
+	// st->st_mode = S_IFCHR;
+	return 0;
+}
+
+int _isatty(int file)
+{
+	return 1;
+}
+
+int _lseek(int file, int ptr, int dir)
+{
+	return 0;
+}
 
 // int _open(char *path, int flags, ...)
 // {
@@ -161,6 +162,8 @@ __attribute__((weak)) int _write(int file, char *ptr, int len)
 // 	errno = ENOMEM;
 // 	return -1;
 // }
+
+
 
 
 /// enable the defualt handlers 

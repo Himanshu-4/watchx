@@ -142,7 +142,7 @@
 ///////// define the wit time for task notification 
 #define BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME 1000
 
-#define BLE_CLIENT_MESSAGE_BUFFER_SIZE 30
+#define BLE_CLIENT_MESSAGE_BUFFER_SIZE 200
 //////////////////////////////////////////////////////////////////////////////////////
 //============================================================================================
 //======================= BLE ADDITIONAL  CONFIGs =============================================

@@ -1,9 +1,13 @@
 #include "ble_gatt_client.h"
 
 //// freertos librares
-#include "semphr.h"
+#include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
+#include "semphr.h"
 #include "task.h"
+
+#include "message_buffer.h"
+
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -32,8 +36,6 @@ static SemaphoreHandle_t ble_client_semphr_handle;
 // these are used to create a semaphore buffer
 static StaticSemaphore_t ble_client_semphr_buffer;
 
-/// @brief this is the task handle for handling the client functions
-volatile xTaskHandle ble_client_task_handle = NULL;
 
 #define BLE_GATTC_DESC_DISC_HANDLE_EXTEND 5
 //////////////////////////////////////////////////////////////////////////
@@ -41,7 +43,14 @@ volatile xTaskHandle ble_client_task_handle = NULL;
 
 volatile ble_client_struct client_struct[BLE_NO_OF_CLIENT_SUPPORTED] = {0};
 
-volatile uint8_t msg_buff[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
+/////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////                                                 
+static uint8_t client_msg_buff_storage[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
+
+static StaticMessageBuffer_t client_msg_Buff_struct;
+
+volatile MessageBufferHandle_t client_msg_buff_handle =NULL;
 
 //////////////////////////////////////////////////////////////////////////
 /////////////////////// static variables  ////////////////////////////////
@@ -55,6 +64,13 @@ uint32_t gatt_client_pre_init(void)
     ble_client_semphr_handle = xSemaphoreCreateMutexStatic(&ble_client_semphr_buffer);
   }
 
+  //// init the msg buffer   
+  // client_msg_buff_handle = xMessageBufferCreateStatic( BLE_CLIENT_MESSAGE_BUFFER_SIZE,
+  //                                                client_msg_buff_storage,
+  //                                                &client_msg_Buff_struct );
+
+    
+  client_msg_buff_handle = xMessageBufferCreate(BLE_CLIENT_MESSAGE_BUFFER_SIZE);
   /// set the client conn handle 
   for(uint8_t i=0; i<BLE_NO_OF_CLIENT_SUPPORTED; i++)
   {
@@ -123,6 +139,9 @@ init_the_client:
 
   ret_code = ble_client_ok;
 
+  /// reset the message buffer 
+  xMessageBufferReset(client_msg_buff_handle);
+
 return_mech:
   xSemaphoreGive(ble_client_semphr_handle);
   return ret_code;
@@ -184,6 +203,12 @@ return_mech:
 /// @return succ/failure of function
 uint32_t gatt_client_set_server_mtu(uint16_t conn_hand, uint16_t mtu)
 {
+    // take the semaphore
+  if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
+  {
+    return ble_client_err_timeout;
+  }
+
   uint32_t err = ble_client_ok;
 
   err = sd_ble_gattc_exchange_mtu_request(conn_hand, mtu);
@@ -192,6 +217,22 @@ uint32_t gatt_client_set_server_mtu(uint16_t conn_hand, uint16_t mtu)
   {
     NRF_LOG_ERROR("client_mtu exch err");
   }
+
+  uint16_t rsp =0;
+  /// wait for the msg from msg buffe r
+  err = xMessageBufferReceive(client_msg_buff_handle, &rsp, sizeof(rsp), pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME) );
+
+  if(err == 0)
+  {
+    err = ble_client_err_timeout;
+    goto return_mech;
+  }
+
+  err = rsp;
+
+  return_mech:
+  xMessageBufferReset(client_msg_buff_handle);
+  xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
 
@@ -229,7 +270,6 @@ init_callback:
   client_struct[index].client_timeout_hand_param = param;
 
 return_mech:
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -269,7 +309,6 @@ init_callback:
   client_struct[index].client_err_hand_param = param;
 
 return_mech:
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -310,7 +349,6 @@ init_callback:
   client_struct[index].client_indi_hand_param = param;
 
 return_mech:
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -352,7 +390,6 @@ init_callback:
   client_struct[index].client_notif_hand_param = param;
 
 return_mech:
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -393,8 +430,6 @@ uint32_t gatt_client_discover_service(uint16_t conn_handle, ble_service_struct_t
   goto return_mech;
 
 discover_Data:
-  /// get the current task handle
-  ble_client_task_handle = xTaskGetCurrentTaskHandle();
 
   //// call the serach service function
   err = sd_ble_gattc_primary_services_discover(conn_handle, BLE_SEARCH_START_HANDLE, &service_struct->ble_service.uuid);
@@ -404,29 +439,32 @@ discover_Data:
     goto return_mech;
   }
 
-  /// wait for the notifcation from the callback
-  if (xTaskNotifyWait(0x00, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)) != pdPASS)
-  {
-    err = ble_client_err_timeout;
-    goto return_mech;
-  }
+  ble_service_struct_t temp_Struct;
+  /// recievet the msg from the handler 
+  err = xMessageBufferReceive(client_msg_buff_handle, &temp_Struct, sizeof(ble_service_struct_t),  pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME));
 
-  /// check if error or not
-  if (!err)
-  {
-    /// copy the content to the structure
-    memcpy(u8(service_struct), u8(msg_buff), sizeof(ble_service_struct_t));
-  }
-  else
+  /// timeout occures 
+  if(err ==0)
   {
     service_struct->ble_service.handle_range.start_handle = BLE_GATT_CLIENT_HANDLE_NONE;
     service_struct->ble_service.handle_range.end_handle = BLE_GATT_CLIENT_HANDLE_NONE;
+    err = ble_client_err_timeout;
+    goto return_mech;
+  }  
 
+  if(err != sizeof(ble_service_struct_t))
+  {
+    /// copy the data 
+    service_struct->ble_service.handle_range.start_handle = temp_Struct.ble_service.handle_range.start_handle; 
+    service_struct->ble_service.handle_range.end_handle= temp_Struct.ble_service.handle_range.end_handle;
+    err = ble_client_ok;
+  }
+  else
+  {
     err = ble_client_err_srvc_not_found;
   }
 
 return_mech:
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -463,14 +501,12 @@ uint32_t gatt_client_discover_chars(uint16_t conn_handle, ble_service_struct_t *
   goto return_mech;
 
 discover_Data:
-  /// get the current task handle
-  ble_client_task_handle = xTaskGetCurrentTaskHandle();
 
   // discover the characteristcs
-  /// set the buffer content to char
-  memset(u8(msg_buff), 0, s(msg_buff));
-  // copy the content of the char data
-  memcpy(u8(msg_buff), u8(char_struct), sizeof(ble_char_struct_t));
+  // /// set the buffer content to char
+  // memset(u8(msg_buff), 0, s(msg_buff));
+  // // copy the content of the char data
+  // memcpy(u8(msg_buff), u8(char_struct), sizeof(ble_char_struct_t));
 
   err = sd_ble_gattc_characteristics_discover(conn_handle, &service_struct->ble_service.handle_range);
 
@@ -491,7 +527,7 @@ discover_Data:
   {
     NRF_LOG_DEBUG("r");
     /// copy the content to the structure
-    memcpy(u8(char_struct), u8(msg_buff), sizeof(ble_char_struct_t));
+    // memcpy(u8(char_struct), u8(msg_buff), sizeof(ble_char_struct_t));
   }
   else
   {
@@ -501,10 +537,6 @@ discover_Data:
   }
 
 return_mech:
-
-  //// reset the msg buffer
-  memset(u8(msg_buff), 0, s(msg_buff));
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -541,14 +573,12 @@ uint32_t gatt_client_discover_char_desc(uint16_t conn_handle, ble_char_struct_t 
   goto return_mech;
 
 discover_Data:
-  /// get the current task handle
-  ble_client_task_handle = xTaskGetCurrentTaskHandle();
 
+  __NOP();
   // discover the characteristcs
   /// set the buffer content to char
-  memset(u8(msg_buff), 0, s(msg_buff));
   // copy the content of the char data
-  memcpy(u8(msg_buff), u8(desc_struct), sizeof(ble_char_desc_struct_t));
+  // memcpy(u8(msg_buff), u8(desc_struct), sizeof(ble_char_desc_struct_t));
   ble_gattc_handle_range_t desc_disc_range;
 
   desc_disc_range.start_handle = char_struct->characterstic.handle_value;
@@ -572,7 +602,7 @@ discover_Data:
   if (!err)
   {
     /// copy the content to the structure
-    memcpy(u8(desc_struct), u8(msg_buff), sizeof(ble_char_desc_struct_t));
+    // memcpy(u8(desc_struct), u8(msg_buff), sizeof(ble_char_desc_struct_t));
   }
   else
   {
@@ -582,9 +612,6 @@ discover_Data:
 
 return_mech:
 
-  //// reset the msg buffer
-  memset(u8(msg_buff), 0, s(msg_buff));
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -626,9 +653,8 @@ uint32_t gatt_client_char_write(uint16_t conn_handle, ble_char_struct_t *char_st
   goto return_mech;
 
 server_operation:
-  /// get the current task handle
-  ble_client_task_handle = xTaskGetCurrentTaskHandle();
 
+  __NOP();
   //// do a write operatioln
   ble_gattc_write_params_t ble_write_param;
 
@@ -669,7 +695,6 @@ server_operation:
   }
 
 return_mech:
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -727,7 +752,7 @@ server_operation:
   if (!err)
   {
     /// copy the content
-    memcpy(buff, u8(msg_buff), MIN_OF(sizeof(msg_buff), size));
+    // memcpy(buff, u8(msg_buff), MIN_OF(sizeof(msg_buff), size));
     NRF_LOG_INFO("r cmpt");
   }
   else
@@ -739,9 +764,6 @@ server_operation:
 
 return_mech:
 
-  //// reset the msg buffer
-  memset(u8(msg_buff), 0, s(msg_buff));
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -782,8 +804,8 @@ uint32_t gattc_client_char_desc_write(uint16_t conn_handle , ble_char_desc_struc
   goto return_mech;
 
 server_operation:
-  /// get the current task handle
-  ble_client_task_handle = xTaskGetCurrentTaskHandle();
+
+  __NOP();
 
   //// do a write operatioln
   ble_gattc_write_params_t ble_write_param;
@@ -825,7 +847,6 @@ server_operation:
   }
 
 return_mech:
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -883,7 +904,7 @@ server_operation:
   if (!err)
   {
     /// copy the content
-    memcpy(buff, u8(msg_buff), MIN_OF(sizeof(msg_buff), size));
+    // memcpy(buff, u8(msg_buff), MIN_OF(sizeof(msg_buff), size));
     NRF_LOG_INFO("r ds cmpt");
   }
   else
@@ -894,10 +915,6 @@ server_operation:
   }
 
 return_mech:
-
-  //// reset the msg buffer
-  memset(u8(msg_buff), 0, s(msg_buff));
-  ble_client_task_handle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }

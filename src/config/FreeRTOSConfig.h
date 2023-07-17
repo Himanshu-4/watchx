@@ -60,7 +60,7 @@
 #define configCHECK_FOR_STACK_OVERFLOW 0
 #define configUSE_MALLOC_FAILED_HOOK 0
 #define configUSE_DAEMON_TASK_STARTUP_HOOK 0
-#define configUSE_SB_COMPLETED_CALLBACK 0
+#define configUSE_SB_COMPLETED_CALLBACK 1
 
 #define configUSE_PREEMPTION 1                    // use preemptive scheduling
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 1 // use optimised task selecetion
@@ -92,8 +92,12 @@
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 #define configUSE_MINI_LIST_ITEM 1
 
-// #define configSTACK_DEPTH_TYPE                           uint16_t
-#define configMESSAGE_BUFFER_LENGTH_TYPE size_t
+#define configSTACK_DEPTH_TYPE             uint16_t
+
+// #define configMESSAGE_BUFFER_LENGTH_TYPE size_t
+
+#define configMESSAGE_BUFFER_LENGTH_TYPE  uint16_t
+
 #define configHEAP_CLEAR_MEMORY_ON_FREE 1
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -159,9 +163,10 @@
 #define INCLUDE_xEventGroupSetBitFromISR 1
 #define INCLUDE_xTimerPendFunctionCall 1
 
-#define INCLUDE_xTaskAbortDelay 0
+#define INCLUDE_xTaskAbortDelay 1
 #define INCLUDE_xTaskGetHandle 1
 #define INCLUDE_xTaskResumeFromISR 1
+
 
 /* The lowest interrupt priority that can be used in a call to a "set priority"
 function. */
@@ -249,13 +254,9 @@ extern uint32_t SystemCoreClock;
 ///////// rest application uses the priority 5 and idle task have 0 priority 
 #define SOFTDEVICE_TASK_PRIORITY 6
 
-
-
-
 #define BLE_COMMON_TASK_STACK_DEPTH 256 //// this will equal to 1KB of space  
 
 #define BLE_COMMON_TASK_PRIORITY 4 //////// task priority of the ble common task 
-
 
 
 

@@ -1,14 +1,17 @@
 #include "ble_gatt_client.h"
 
+#include "FreeRTOSConfig.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "message_buffer.h"
 ///////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 /////////// extern variables
 
+
 extern volatile ble_client_struct client_struct[BLE_NO_OF_CLIENT_SUPPORTED];
 
-extern volatile xTaskHandle ble_client_task_handle;
-
-extern volatile uint8_t msg_buff[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
+extern volatile MessageBufferHandle_t client_msg_buff_handle;
 
 void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 {
@@ -31,16 +34,23 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         ///////// check about the gatt status 
          uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
 
-        /////// check that if task handle not null
-        if (ble_client_task_handle != NULL)
-        {
-            /// copy the data into the msg buffer
-            memcpy(u8(msg_buff), u8(p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0]), s(ble_gattc_service_t));
+            if(gatt_status == BLE_GATT_STATUS_SUCCESS)
+            {
+
+            //// send the msg 
+            xMessageBufferSend(client_msg_buff_handle, &p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0]
+            ,s(ble_gattc_service_t), pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME));
             
-            NRF_LOG_INFO("s%d,%d,%d", p_ble_evt->evt.gattc_evt.gatt_status, p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.start_handle,
+            NRF_LOG_INFO("s%d,%x,%d,%d", p_ble_evt->evt.gattc_evt.gatt_status, p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.uuid,
+             p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.start_handle,
             p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.end_handle);
-            xTaskNotify(ble_client_task_handle, p_ble_evt->evt.gattc_evt.gatt_status, eSetValueWithOverwrite);
-        }
+            }
+
+            else 
+            {
+            xMessageBufferSend(client_msg_buff_handle, &gatt_status
+                ,s(gatt_status), pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME));
+            }
 
 
         // for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.count; i++)
@@ -65,8 +75,6 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 
         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
 
-        memcpy(u8(serach_char), u8(msg_buff), sizeof(ble_char_struct_t));
-
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
         {
             gatt_status = ble_client_err_char_not_found;
@@ -87,7 +95,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
                     gatt_status = ble_client_ok;
 
                     /// copy the content to buffer
-                    memcpy(u8(p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i]), u8(msg_buff), sizeof(ble_char_struct_t));
+                    // memcpy(u8(p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i]), u8(msg_buff), sizeof(ble_char_struct_t));
                     /// exit from the loop
                     break;
                 }
@@ -95,11 +103,10 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         }
         else
         {
-            memset(u8(msg_buff), 0, sizeof(msg_buff));
+            // memset(u8(msg_buff), 0, sizeof(msg_buff));
         }
 
         //// send the task notification
-        xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
     }
     break;
 
@@ -111,7 +118,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 
         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
 
-        memcpy(u8(search_desc), u8(msg_buff), sizeof(ble_char_desc_struct_t));
+        // memcpy(u8(search_desc), u8(msg_buff), sizeof(ble_char_desc_struct_t));
 
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
         {
@@ -128,7 +135,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
                     gatt_status = ble_client_ok;
 
                     /// copy the content to buffer
-                    memcpy(u8(p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i]), u8(msg_buff), sizeof(ble_char_desc_struct_t));
+                    // memcpy(u8(p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i]), u8(msg_buff), sizeof(ble_char_desc_struct_t));
                     /// exit from the loop
                     break;
                 }
@@ -136,11 +143,11 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         }
         else
         {
-            memset(u8(msg_buff), 0, sizeof(msg_buff));
+            // memset(u8(msg_buff), 0, sizeof(msg_buff));
         }
 
         //// send the task notification
-        xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
+        // xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
     }
     break;
 
@@ -165,10 +172,10 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
         {
             /// copy the content
-            memcpy(u8(msg_buff), u8(p_ble_evt->evt.gattc_evt.params.read_rsp.data[0]), MIN_OF(sizeof(msg_buff), p_ble_evt->evt.gattc_evt.params.read_rsp.len));
+            // memcpy(u8(msg_buff), u8(p_ble_evt->evt.gattc_evt.params.read_rsp.data[0]), MIN_OF(sizeof(msg_buff), p_ble_evt->evt.gattc_evt.params.read_rsp.len));
         }
 
-        xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
+        // xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
     }
     break;
 
@@ -196,7 +203,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             NRF_LOG_INFO("w succ");
         }
 
-        xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
+        // xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
     }
     break;
 
@@ -211,7 +218,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             NRF_LOG_INFO("wcmd succ");
         }
 
-        xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
+        // xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
     }
     break;
 
@@ -293,6 +300,8 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     /**< Exchange MTU Response event.                       \n See @ref ble_gattc_evt_exchange_mtu_rsp_t.            */
     case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
     {
+        uint16_t status = p_ble_evt->evt.gattc_evt.gatt_status;
+        xMessageBufferSend(client_msg_buff_handle, &status, sizeof(status), pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME));
         //// print the mtu set by server
         NRF_LOG_WARNING("RX MTU %d", p_ble_evt->evt.gattc_evt.params.exchange_mtu_rsp.server_rx_mtu);
     }

@@ -2,7 +2,7 @@
 	"folders": [
 		{
 			"name": "Watchx",
-			"path": "D:\\stimveda_codebase\\v_2_Ease\\PROJECT\\NRF_projects\\watchx"
+			"path": "D:\\smart_watch\\watchx"
 		}
 	],
 	"settings": {
@@ -70,6 +70,5 @@
 			"partition_table.h": "c"
 		},
 		"C_Cpp.errorSquiggles": "enabled",
-		"cmake.generator": "MinGW Makefiles"
 	}
 }

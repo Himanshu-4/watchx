@@ -23,13 +23,12 @@ enable_language(C ASM)
 
 # specify whether u want to generate DEbug or release Version
 set(DEBUG_Flags 
-        -O3 -g3
+        # -O3 -g3
         )
 
 set(RELEASE_Flags 
-        # -O3
+        -O3 -g0
         )
-
 # specify the C standard and the c extensions
 
 set(CMAKE_C_STANDARD 99)
@@ -127,6 +126,7 @@ set(COMMON_C_FLAGS
         -Wno-format
         -Wno-unused-function
         -Wno-unused-variable
+        -Wno-array-bounds
 )
 
 
@@ -137,14 +137,14 @@ set(LINKER_FLAGS
         -mthumb -mabi=aapcs
         -mfloat-abi=hard -mfpu=fpv4-sp-d16
         ${DEBUG_Flags}
+        ${RELEASE_Flags}
         -Wl,-Map=${PROJECT_NAME}.map
         -Wl,--gc-sections  --specs=nano.specs
         -Wl,--start-group
         -lstdc++
         -Wl,--end-group
-        -lc
         -lnosys
-        -lm
+        -lm # link with the math library 
         -Wl,--print-memory-usage
     )
 
@@ -307,13 +307,10 @@ set(SDK_INCLUDE_DIR
       )
 
 
-
-
 ###########################################################################################################################################################
 ##########################################################################################################################################################
 #########################################################################################################################################################
 ############################################################## set the FREERTOS sources and include directories 
-
 
 # freertos source files 
 set(FREERTOS_SRC
