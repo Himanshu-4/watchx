@@ -40,6 +40,7 @@ enum _CLIENT_ERR_CODE_
     
     /// @brief invalid state, max limit reached , timeout errors
     ble_client_err_timeout,
+    ble_client_mutex_not_avialble,
     ble_client_err_invalid_state,
     ble_client_err_max_limit_reached,
     ble_client_err_client_not_inited,

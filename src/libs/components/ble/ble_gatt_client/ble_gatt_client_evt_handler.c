@@ -44,10 +44,12 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 
             if(gatt_status == BLE_GATT_STATUS_SUCCESS)
             {
+                // copy the content to the client buffer
+                memcpy(u8(client_buff) , &p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0] , sizeof(ble_service_struct_t));
+                /// notify tabout the task 
 
-           
-            NRF_LOG_INFO("s%d,%x,%d,%d", p_ble_evt->evt.gattc_evt.gatt_status, p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.uuid,
-             p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.start_handle,
+            NRF_LOG_INFO("s%d,%x,%d,%d,%d", p_ble_evt->evt.gattc_evt.gatt_status, p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.uuid,
+             p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.type ,p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.start_handle,
             p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.end_handle);
             }
 
@@ -55,6 +57,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             {
                 NRF_LOG_ERROR("gatt eer");
             }
+            task_notify(gatt_status);
 
 
         // for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.count; i++)
@@ -75,8 +78,10 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     case BLE_GATTC_EVT_CHAR_DISC_RSP:
     {
         /////// the message buffer have the content of serach charcteristic
-        ble_char_struct_t serach_char;
+        ble_char_struct_t serch_char;
 
+        /// copy the serach char from the client buff 
+        memcpy(&serch_char, (uint8_t *)client_buff , sizeof(ble_char_struct_t));
         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
 
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
@@ -88,27 +93,23 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.char_disc_rsp.count; i++)
             {
                 //// match the characteristic type first 
-                if(p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i].uuid.type !=  serach_char.characterstic.uuid.type)
+                if(p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i].uuid.type !=  serch_char.characterstic.uuid.type)
                 {
                     continue;
                 }
                 ///// serach for the uuid
-                if (p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i].uuid.uuid == serach_char.characterstic.uuid.uuid)
+                if (p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i].uuid.uuid == serch_char.characterstic.uuid.uuid)
                 {
                     /// found the uuid, change the gatt status
                     gatt_status = ble_client_ok;
-
                     /// copy the content to buffer
-                    // memcpy(u8(p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i]), u8(msg_buff), sizeof(ble_char_struct_t));
+                    memcpy((uint8_t *)client_buff, (uint8_t *)&p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i], sizeof(ble_char_struct_t));
                     /// exit from the loop
                     break;
                 }
             }
         }
-        else
-        {
-            // memset(u8(msg_buff), 0, sizeof(msg_buff));
-        }
+        task_notify(gatt_status);
 
         //// send the task notification
     }
