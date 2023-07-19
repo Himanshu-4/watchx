@@ -103,7 +103,6 @@ void ble_common_task_pre_init(void *param)
 /// @param param 
 static void ble_client_task_init_process(void *param)
 {
-    delay(10000);
     uint32_t err =0;
     uint16_t conn_handle = ble_gap_get_conn_handle(device_index);
 
@@ -122,6 +121,8 @@ static void ble_client_task_init_process(void *param)
     err = gatt_client_add_timeout_callback(conn_handle, ble_client_timeout_handler, NULL);
     NRF_ASSERT(err);
 
+    /// @todo find why we have to give a delay here 
+    // delay(2000);
        //// set the gatt server mtu 
     err = gatt_client_set_server_mtu(conn_handle, BLE_GATT_SERVER_RX_MTU );
     NRF_ASSERT(err);

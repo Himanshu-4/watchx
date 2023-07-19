@@ -29,4 +29,5 @@ uint32_t  ble_peer_device_init(uint16_t conn_handle)
     NRF_LOG_INFO("re %d,ha %x,%x",err, gap_srv.ble_service.handle_range.start_handle,
     gap_srv.ble_service.handle_range.end_handle);
 
+    return err;
 }

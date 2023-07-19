@@ -3,7 +3,6 @@
 #include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "message_buffer.h"
 ///////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 /////////// extern variables
@@ -11,7 +10,16 @@
 
 extern volatile ble_client_struct client_struct[BLE_NO_OF_CLIENT_SUPPORTED];
 
-extern volatile MessageBufferHandle_t client_msg_buff_handle;
+extern volatile uint8_t client_buff[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
+
+extern volatile xTaskHandle client_taskhandle;
+
+/////////// @ref define a refernce functions that are using tas notification 
+
+#define task_notify(x)  \
+if(client_taskhandle != NULL)   \
+{xTaskNotify(client_taskhandle, x, eSetValueWithOverwrite );}     \
+
 
 void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 {
@@ -37,10 +45,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             if(gatt_status == BLE_GATT_STATUS_SUCCESS)
             {
 
-            //// send the msg 
-            xMessageBufferSend(client_msg_buff_handle, &p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0]
-            ,s(ble_gattc_service_t), pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME));
-            
+           
             NRF_LOG_INFO("s%d,%x,%d,%d", p_ble_evt->evt.gattc_evt.gatt_status, p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.uuid,
              p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.start_handle,
             p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.end_handle);
@@ -48,8 +53,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 
             else 
             {
-            xMessageBufferSend(client_msg_buff_handle, &gatt_status
-                ,s(gatt_status), pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME));
+                NRF_LOG_ERROR("gatt eer");
             }
 
 
@@ -301,7 +305,8 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
     {
         uint16_t status = p_ble_evt->evt.gattc_evt.gatt_status;
-        xMessageBufferSend(client_msg_buff_handle, &status, sizeof(status), pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME));
+        /// give the task notification 
+        task_notify(status);
         //// print the mtu set by server
         NRF_LOG_WARNING("RX MTU %d", p_ble_evt->evt.gattc_evt.params.exchange_mtu_rsp.server_rx_mtu);
     }

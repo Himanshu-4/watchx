@@ -6,8 +6,6 @@
 #include "semphr.h"
 #include "task.h"
 
-#include "message_buffer.h"
-
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -46,11 +44,9 @@ volatile ble_client_struct client_struct[BLE_NO_OF_CLIENT_SUPPORTED] = {0};
 /////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////                                                 
-static uint8_t client_msg_buff_storage[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
+volatile uint8_t client_buff[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
 
-static StaticMessageBuffer_t client_msg_Buff_struct;
-
-volatile MessageBufferHandle_t client_msg_buff_handle =NULL;
+volatile xTaskHandle client_taskhandle;
 
 //////////////////////////////////////////////////////////////////////////
 /////////////////////// static variables  ////////////////////////////////
@@ -64,14 +60,8 @@ uint32_t gatt_client_pre_init(void)
     ble_client_semphr_handle = xSemaphoreCreateMutexStatic(&ble_client_semphr_buffer);
   }
 
-  //// init the msg buffer   
-  // client_msg_buff_handle = xMessageBufferCreateStatic( BLE_CLIENT_MESSAGE_BUFFER_SIZE,
-  //                                                client_msg_buff_storage,
-  //                                                &client_msg_Buff_struct );
-
-    
-  client_msg_buff_handle = xMessageBufferCreate(BLE_CLIENT_MESSAGE_BUFFER_SIZE);
-  /// set the client conn handle 
+  
+ /// set the client conn handle 
   for(uint8_t i=0; i<BLE_NO_OF_CLIENT_SUPPORTED; i++)
   {
     client_struct[i].conn_handle = BLE_CONN_HANDLE_INVALID;
@@ -139,8 +129,9 @@ init_the_client:
 
   ret_code = ble_client_ok;
 
-  /// reset the message buffer 
-  xMessageBufferReset(client_msg_buff_handle);
+  
+  memset((uint8_t *) client_buff, 0, sizeof(client_buff));
+  client_taskhandle = NULL;
 
 return_mech:
   xSemaphoreGive(ble_client_semphr_handle);
@@ -190,6 +181,8 @@ deinit_the_client:
   client_struct[index].conn_handle = BLE_CONN_HANDLE_INVALID;
   client_struct[index].client_inited = 0;
 
+  memset((uint8_t *)client_buff, 0, sizeof(client_buff));
+
   ret_code = ble_client_ok;
 
 return_mech:
@@ -201,7 +194,7 @@ return_mech:
 /// @param conn_hand
 /// @param mtu
 /// @return succ/failure of function
-uint32_t gatt_client_set_server_mtu(uint16_t conn_hand, uint16_t mtu)
+uint32_t gatt_client_set_server_mtu(uint16_t conn_handle, uint16_t mtu)
 {
     // take the semaphore
   if (xSemaphoreTake(ble_client_semphr_handle, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
@@ -209,29 +202,52 @@ uint32_t gatt_client_set_server_mtu(uint16_t conn_hand, uint16_t mtu)
     return ble_client_err_timeout;
   }
 
+    uint8_t index =0;
+    
   uint32_t err = ble_client_ok;
 
-  err = sd_ble_gattc_exchange_mtu_request(conn_hand, mtu);
+    for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
+  {
+    if (client_struct[i].conn_handle == conn_handle)
+    {
+      index = i;
+      IS_CLIENT_INITED(client_struct[i]);
+      goto request_mtu;
+    }
+  }
+
+  err = ble_client_err_conn_handle_not_found;
+  goto return_mech;
+
+  request_mtu:
+  
+  //// get the task handle 
+  client_taskhandle = xTaskGetCurrentTaskHandle();
+
+  err = sd_ble_gattc_exchange_mtu_request(conn_handle , mtu);
 
   if (err != nrf_OK)
   {
     NRF_LOG_ERROR("client_mtu exch err");
+    goto return_mech;
   }
 
-  uint16_t rsp =0;
-  /// wait for the msg from msg buffe r
-  err = xMessageBufferReceive(client_msg_buff_handle, &rsp, sizeof(rsp), pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME) );
-
-  if(err == 0)
+  if( xTaskNotifyWait(0, U32_MAX, &err, pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME)) != pdPASS)
+  {
+    err = ble_client_err_timeout;
+    goto return_mech;
+  }
+  
+  if(err != 0)
   {
     err = ble_client_err_timeout;
     goto return_mech;
   }
 
-  err = rsp;
 
   return_mech:
-  xMessageBufferReset(client_msg_buff_handle);
+  // nullify the tas handle 
+  client_taskhandle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }
@@ -431,38 +447,25 @@ uint32_t gatt_client_discover_service(uint16_t conn_handle, ble_service_struct_t
 
 discover_Data:
 
+  client_taskhandle = xTaskGetCurrentTaskHandle();
   //// call the serach service function
   err = sd_ble_gattc_primary_services_discover(conn_handle, BLE_SEARCH_START_HANDLE, &service_struct->ble_service.uuid);
 
   if (err != nrf_OK)
   {
+    
+    // err = ble_client_err_srvc_not_found;
     goto return_mech;
   }
 
-  ble_service_struct_t temp_Struct;
-  /// recievet the msg from the handler 
-  err = xMessageBufferReceive(client_msg_buff_handle, &temp_Struct, sizeof(ble_service_struct_t),  pdMS_TO_TICKS(BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME));
-
-  /// timeout occures 
-  if(err ==0)
+  
+  else 
   {
     service_struct->ble_service.handle_range.start_handle = BLE_GATT_CLIENT_HANDLE_NONE;
     service_struct->ble_service.handle_range.end_handle = BLE_GATT_CLIENT_HANDLE_NONE;
     err = ble_client_err_timeout;
-    goto return_mech;
-  }  
+  }
 
-  if(err != sizeof(ble_service_struct_t))
-  {
-    /// copy the data 
-    service_struct->ble_service.handle_range.start_handle = temp_Struct.ble_service.handle_range.start_handle; 
-    service_struct->ble_service.handle_range.end_handle= temp_Struct.ble_service.handle_range.end_handle;
-    err = ble_client_ok;
-  }
-  else
-  {
-    err = ble_client_err_srvc_not_found;
-  }
 
 return_mech:
   xSemaphoreGive(ble_client_semphr_handle);

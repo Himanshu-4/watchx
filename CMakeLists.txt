@@ -600,8 +600,8 @@ target_include_directories(ble_library PUBLIC SYSTEM
   
         )
 
-target_link_libraries(ble_library 
-                freertos_lib)
+# target_link_libraries(ble_library 
+#                 freertos_lib)
 
 ##############################################################################
 ###########################################################################################3
