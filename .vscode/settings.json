@@ -14,7 +14,8 @@
         "nrf_pwm.h": "c",
         "spi.c": "c",
         "kernel_time.h": "c",
-        "message_buffer.h": "c"
+        "message_buffer.h": "c",
+        "ble_peer_info.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator":"MinGW Makefiles",

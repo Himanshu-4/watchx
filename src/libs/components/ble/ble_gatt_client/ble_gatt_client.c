@@ -769,7 +769,7 @@ server_operation:
   if (err != nrf_OK)
   {
     /// log the erroor
-    NRF_LOG_ERROR("read %d", err);
+    NRF_LOG_ERROR("read %x", err);
     err = ble_client_err_read_op_failed;
   }
   else 
@@ -834,6 +834,7 @@ server_operation:
 
   if (err != nrf_OK)
   {
+    NRF_LOG_ERROR("desc wr");
     goto return_mech;
   }
 
@@ -854,6 +855,7 @@ server_operation:
 }
 
 return_mech:
+client_taskhandle = NULL;
   xSemaphoreGive(ble_client_semphr_handle);
   return err;
 }

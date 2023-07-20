@@ -48,9 +48,9 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
                 memcpy(u8(client_buff) , &p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0] , sizeof(ble_service_struct_t));
                 /// notify tabout the task 
 
-            NRF_LOG_INFO("s%d,%x,%d,%d,%d", p_ble_evt->evt.gattc_evt.gatt_status, p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.uuid,
-             p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.type ,p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.start_handle,
-            p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.end_handle);
+            // NRF_LOG_INFO("s%d,%x,%d,%d,%d", p_ble_evt->evt.gattc_evt.gatt_status, p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.uuid,
+            //  p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.type ,p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.start_handle,
+            // p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.end_handle);
             }
 
             else 
@@ -172,6 +172,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             /// copy the content
             memcpy(u8_ptr client_buff, u8_ptr &p_ble_evt->evt.gattc_evt.params.read_rsp.data[0], MIN_OF(sizeof(client_buff), p_ble_evt->evt.gattc_evt.params.read_rsp.len));
         }
+       
         task_notify(gatt_status);
     }
     break;
