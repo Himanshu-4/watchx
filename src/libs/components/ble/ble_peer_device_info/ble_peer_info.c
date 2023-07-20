@@ -67,6 +67,12 @@ uint32_t  ble_peer_device_init(uint16_t conn_handle)
         .characterstic.uuid.uuid =BLE_UUID_GATT_CHARACTERISTIC_SERVICE_CHANGED
     };
 
+    
+    ble_char_desc_struct_t srvc_char_desc =
+    {
+        .descriptor.uuid.type = BLE_UUID_TYPE_BLE,
+        .descriptor.uuid.uuid = BLE_UUID_DESCRIPTOR_CLIENT_CHAR_CONFIG,
+    };
 
 
     
@@ -97,6 +103,18 @@ uint32_t  ble_peer_device_init(uint16_t conn_handle)
     srvc_chg.characterstic.uuid.type, srvc_chg.characterstic.char_props.indicate, 
     srvc_chg.characterstic.char_props.read, srvc_chg.characterstic.char_props.write,
     srvc_chg.characterstic.char_props.notify);
+
     
+    // discover the char descriptor 
+    err = gatt_client_discover_char_desc(conn_handle , &srvc_chg, &srvc_char_desc);
+    NRF_ASSERT(err);
+
+        uint16_t notifval=0;
+    // read the descriptoer value 
+    err = gattc_client_char_desc_read(conn_handle,&srvc_char_desc, u8_ptr &notifval, sizeof(notifval) );
+    NRF_ASSERT(err);
+
+    NRF_LOG_INFO("%d n",notifval);
+
     return err;
 }

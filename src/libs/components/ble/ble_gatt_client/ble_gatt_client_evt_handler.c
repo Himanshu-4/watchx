@@ -100,8 +100,8 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
                 ///// serach for the uuid
                 if (p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i].uuid.uuid == serch_char.characterstic.uuid.uuid)
                 {
-                    /// found the uuid, change the gatt status
                     gatt_status = ble_client_ok;
+                    /// found the uuid, change the gatt status
                     /// copy the content to buffer
                     memcpy((uint8_t *)client_buff, (uint8_t *)&p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i], sizeof(ble_char_struct_t));
                     /// exit from the loop
@@ -123,7 +123,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 
         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
 
-        // memcpy(u8(search_desc), u8(msg_buff), sizeof(ble_char_desc_struct_t));
+        memcpy((uint8_t *)&search_desc, (uint8_t *)client_buff, sizeof(ble_char_desc_struct_t));
 
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
         {
@@ -136,23 +136,16 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
                 ///// serach for the uuid
                 if (p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i].uuid.uuid == search_desc.descriptor.uuid.uuid)
                 {
-                    /// found the uuid, change the gatt status
                     gatt_status = ble_client_ok;
-
+                    /// found the uuid, change the gatt status
                     /// copy the content to buffer
-                    // memcpy(u8(p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i]), u8(msg_buff), sizeof(ble_char_desc_struct_t));
+                    memcpy( u8_ptr client_buff, u8_ptr &p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i], sizeof(ble_char_desc_struct_t));
                     /// exit from the loop
                     break;
                 }
             }
         }
-        else
-        {
-            // memset(u8(msg_buff), 0, sizeof(msg_buff));
-        }
-
-        //// send the task notification
-        // xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
+        task_notify(gatt_status);
     }
     break;
 
@@ -177,10 +170,9 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
         {
             /// copy the content
-            // memcpy(u8(msg_buff), u8(p_ble_evt->evt.gattc_evt.params.read_rsp.data[0]), MIN_OF(sizeof(msg_buff), p_ble_evt->evt.gattc_evt.params.read_rsp.len));
+            memcpy(u8_ptr client_buff, u8_ptr &p_ble_evt->evt.gattc_evt.params.read_rsp.data[0], MIN_OF(sizeof(client_buff), p_ble_evt->evt.gattc_evt.params.read_rsp.len));
         }
-
-        // xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
+        task_notify(gatt_status);
     }
     break;
 
@@ -202,13 +194,8 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     {
         //// based on the gatt status we have to send then gatt notificatin
         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
+        task_notify(gatt_status);
 
-        if (gatt_status == BLE_GATT_STATUS_SUCCESS)
-        {
-            NRF_LOG_INFO("w succ");
-        }
-
-        // xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
     }
     break;
 
@@ -217,13 +204,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     {
         //// based on the gatt status we have to send then gatt notificatin
         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
-
-        if (gatt_status == BLE_GATT_STATUS_SUCCESS)
-        {
-            NRF_LOG_INFO("wcmd succ");
-        }
-
-        // xTaskNotify(ble_client_task_handle, gatt_status, eSetValueWithOverwrite);
+        task_notify(gatt_status);
     }
     break;
 

@@ -59,6 +59,8 @@
 
 #define u8(x) ((uint8_t *)&(x))
 
+#define u8_ptr (uint8_t *)
+
 ///////////// get the size of the buffer of uint32_t  from uint8_t buff
 #define buff_size8_to_32(size) (((size)/4) + (((size)%4)==0?(0):(1)) )
 
