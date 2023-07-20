@@ -134,16 +134,11 @@ static void ble_client_task_init_process(void *param)
     //// init the ancs , ams ,device info and other device functionality 
     /// init the apple ancs, ams task , current time task  
     // err = ble_ams_init(conn_handle);
-    // NRF_ASSERT(err);
+    NRF_ASSERT(err);
 
-    // err = ble_ancs_init(conn_handle);
-    // NRF_ASSERT(err);
+    err = ble_ancs_init(conn_handle);
+    NRF_ASSERT(err);
 
-    // err = ble_time_init(conn_handle);
-    // NRF_ASSERT(err);
-
-    // err = ble_peer_device_info_init(conn_handle);
-    // NRF_ASSERT(err);
 }
 
 

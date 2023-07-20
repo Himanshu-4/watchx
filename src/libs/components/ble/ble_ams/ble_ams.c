@@ -172,7 +172,7 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     /// init the kernel memory here 
     kernel_mem_init(&ble_ams_mem_inst ,ble_ams_mem_pool, BLE_AMS_MEM_SIZE, &ble_ams_memory_mutex ,BLE_AMS_MUTEX_TIMEOUT );
 
-    if ((conn_handle == BLE_CONN_HANDLE_INVALID) || (conn_handle == 0))
+    if ((conn_handle == BLE_CONN_HANDLE_INVALID))
         return nrf_ERR_INVALID_PARAM;
 
     uint32_t err = 0;
@@ -216,12 +216,12 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_char, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc);
     NRF_ASSERT(err);
 
-    uint8_t notif_en_data = NOTIFICATION_ENABLED;
+    uint16_t notif_en_data = NOTIFICATION_ENABLED;
     /// now here suscribe for the notification for the gatt char
     /// suscribe the gatt notication of remote cmd and entity update char
-    err = gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_desc, &notif_en_data, sizeof(notif_en_data));
+    err = gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_desc, u8_ptr &notif_en_data, sizeof(notif_en_data));
     NRF_ASSERT(err);
-    err = gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc, &notif_en_data, sizeof(notif_en_data));
+    err = gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc,u8_ptr &notif_en_data, sizeof(notif_en_data));
     NRF_ASSERT(err);
 
     //// clear the cmd supported  values

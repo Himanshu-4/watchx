@@ -84,6 +84,15 @@ uint32_t  ble_peer_device_init(uint16_t conn_handle)
     device_name.characterstic.handle_value,
     device_name.characterstic.char_props.read,device_name.characterstic.char_props.write 
     );
+
+    delay(100);
+    char dev_name[50];
+
+    // try to read device name 
+    err = gatt_client_char_read(conn_handle, &device_name, u8_ptr dev_name, sizeof(dev_name) );
+    NRF_ASSERT(err);
+
+    NRF_LOG_WARNING("%s",dev_name);
     
     err = gatt_client_discover_chars(conn_handle, &gap_srv, &device_appr);
     NRF_ASSERT(err);
@@ -110,6 +119,17 @@ uint32_t  ble_peer_device_init(uint16_t conn_handle)
     NRF_ASSERT(err);
 
         uint16_t notifval=0;
+    // read the descriptoer value 
+    err = gattc_client_char_desc_read(conn_handle,&srvc_char_desc, u8_ptr &notifval, sizeof(notifval) );
+    NRF_ASSERT(err);
+
+    NRF_LOG_INFO("%d n",notifval);
+
+    notifval = INDICATION_ENABLED;
+    ///try to write the notification 
+    err= gattc_client_char_desc_write(conn_handle, &srvc_char_desc , u8_ptr &notifval, sizeof(notifval) );
+    NRF_ASSERT(err);
+
     // read the descriptoer value 
     err = gattc_client_char_desc_read(conn_handle,&srvc_char_desc, u8_ptr &notifval, sizeof(notifval) );
     NRF_ASSERT(err);
