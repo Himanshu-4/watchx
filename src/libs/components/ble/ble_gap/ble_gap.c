@@ -1,6 +1,7 @@
 
 #include "ble_gap_func.h"
 
+#include "uECC.h"
 ////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -313,7 +314,7 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
         .mitm = 1,
         .oob =0,
         .keypress =0,
-        .lesc = 0,
+        .lesc = 1,
         ////// define the key size 
         .max_key_size = 16,
         .min_key_size = 7,
@@ -390,18 +391,31 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
 
 };
 
+
+
+static int default_RNG(uint8_t *dest, unsigned size) 
+{
+    // make sure to call nrf_crypto_init and nrf_crypto_rng_init first
+    ret_code_t ret_code = nrf_crypto_rng_vector_generate(dest, size);
+    return (ret_code == NRF_SUCCESS) ? 1 : 0;
+}
+
+
 volatile uint8_t ble_gap_security_param_index =0;
 
+/// @brief this function is used to init the security procedure 
+/// @param conn_handle 
+/// @param sec_param_type 
 void ble_gap_security_init(uint16_t conn_handle , uint8_t sec_param_type )
 {
     uint32_t ret_code = 0;
     ble_gap_security_param_index = sec_param_type;
 
     ret_code = sd_ble_gap_authenticate(conn_handle, &gap_sec_param[sec_param_type] );
-    // check_assrt(ret_code, "gap sec param");
-    // NRF_LOG_WARNING("%d",ret_code);
     NRF_ASSERT(ret_code);
 
+
+    /// this will exit when the crypto operations are completed and link is autheticated 
 
 }
 

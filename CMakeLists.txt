@@ -372,9 +372,53 @@ target_include_directories(freertos_lib PUBLIC SYSTEM
 
 
      
-    
-# ############################################################################################################################################
 
+##################################################################################################################################################################
+############################################################################################################################################################################
+##############################################################################################################################################################################
+##########################################################   Build the micro ecc crypto   ##################################################################################
+
+file(GLOB crypto_files  
+${CMAKE_PROJECT_DIR}/watchx_lib_ext/micro-ecc/*.c
+)
+
+
+# source file 
+set(CRYPTO_ECC_DH_SRC 
+        ${crypto_files}        
+)
+
+set(CRYPTO_ECDH_INCLUDE 
+${CMAKE_PROJECT_DIR}/watchx_lib_ext/micro-ecc
+)
+
+
+add_library(crypto_eccdh STATIC 
+            ${CRYPTO_ECC_DH_SRC}
+            )
+
+
+
+target_compile_definitions(crypto_eccdh PRIVATE
+        ${COMMON_DEFINES}   
+ 
+)
+
+target_compile_options(crypto_eccdh PRIVATE
+           ${COMMON_C_FLAGS}
+           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fomit-frame-pointer>
+           $<$<COMPILE_LANGUAGE:CXX>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti -fomit-frame-pointer>
+           $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp>
+             )
+
+
+target_include_directories(crypto_eccdh PUBLIC SYSTEM 
+           ${CRYPTO_ECDH_INCLUDE}
+           ${CMAKE_SOURCE_DIR}/config
+           )
+
+
+     
 
 ##################################################################################################################################################################
 ############################################################################################################################################################################
@@ -595,8 +639,10 @@ target_compile_options(ble_library PRIVATE
 target_include_directories(ble_library PUBLIC SYSTEM 
     ${BLE_LIB_INCLUDE_DIR}
     ${SDK_INCLUDE_DIR}
-    ${FREERTOS_INCLUDE}
-
+    ${FREERTOS_INCLUDE} 
+    
+    # crypto library implementation 
+    ${CRYPTO_ECDH_INCLUDE}
   
         )
 
@@ -770,6 +816,7 @@ target_link_libraries(${EXECUTABLE}
                        ble_library
                        nrf_sdk_libs 
                        watchx_kernel_lib
+                       crypto_eccdh
                 #        nimble_ble_stack
                 #        gpio_lib # no library gpio_lib so cmake discard it 
                         )
