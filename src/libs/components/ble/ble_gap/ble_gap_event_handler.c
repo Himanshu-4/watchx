@@ -1,46 +1,31 @@
 ////////// include the gap security params
 #include "ble_gap_func.h"
 
-extern volatile ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp];
-
-extern volatile uint8_t advertisement_state;
-
-extern volatile uint8_t ble_gap_security_param_index;
 
 extern const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported];
 
-uint8_t passkey[6] = {1, 2, 3};
+/// @brief the advertisement state of the device  
+extern volatile uint8_t  ble_advertisement_State;
 
-ble_gap_enc_key_t dev_enc_key1;
+extern volatile ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 
-ble_gap_enc_key_t dev_enc_key2;
+// ble_gap_enc_key_t dev_enc_key1;
 
-/// @brief  32 bytes key
-ble_gap_lesc_dhkey_t my_dhkey;
+// ble_gap_enc_key_t dev_enc_key2;
 
-ble_gap_lesc_p256_pk_t public_key_device =
-    {{0x20, 0xb0, 0x03, 0xd2, 0xf2, 0x97, 0xbe, 0x2c, 0x5e, 0x2c, 0x83, 0xa7, 0xe9, 0xf9, 0xa5, 0xb9, 0xef, 0xf4, 0x91, 0x11, 0xac, 0xf4, 0xfd, 0xdb,
-      0xcc, 0x03, 0x01, 0x48, 0x0e, 0x35, 0x9d, 0xe6}};
 
-ble_gap_id_key_t ble_id =
-    {
+// ble_gap_sec_keyset_t key_Set = {
+//     /// owner key distribuition
+//     .keys_own.p_enc_key = &dev_enc_key1,
+//     .keys_own.p_id_key = NULL,
+//     .keys_own.p_pk = &public_key_device,
+//     .keys_own.p_sign_key = NULL,
 
-};
-
-ble_gap_lesc_p256_pk_t public_key_peer;
-
-ble_gap_sec_keyset_t key_Set = {
-    /// owner key distribuition
-    .keys_own.p_enc_key = &dev_enc_key1,
-    .keys_own.p_id_key = NULL,
-    .keys_own.p_pk = &public_key_device,
-    .keys_own.p_sign_key = NULL,
-
-    ///// peer key distribution
-    .keys_peer.p_enc_key = NULL,
-    .keys_peer.p_id_key = NULL,
-    .keys_peer.p_pk = &public_key_peer,
-    .keys_peer.p_sign_key = NULL};
+//     ///// peer key distribution
+//     .keys_peer.p_enc_key = NULL,
+//     .keys_peer.p_id_key = NULL,
+//     .keys_peer.p_pk = &public_key_peer,
+//     .keys_peer.p_sign_key = NULL};
 
 
 
@@ -98,7 +83,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         ////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////
 
-        advertisement_state = false;
+        ble_advertisement_State = false;
     }
     break;
 
@@ -180,7 +165,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_ADV_SET_TERMINATED:
     {
         NRF_LOG_WARNING("adv set trm");
-        advertisement_state = false;
+        ble_advertisement_State = false;
     }
     break;
 

@@ -5,34 +5,6 @@
 
 #include "system.h"
 
-////////// do have to perform bonfing
-#define BLE_GAP_SEC_PARAM_BOND 1
-
-//// no io capabilites of the device
-#define BLE_GAP_SEC_PARAM_IO_CAPS BLE_GAP_IO_CAPS_NONE
-
-////////// disable the generation of keypress notification
-#define BLE_GAP_SEC_PARAM_KEYPRESS 0
-
-///// the low energy secure connection is a ble 5.0 security feature
-#define BLE_GAP_SEC_PARAM_LESC_SUPPORT 0
-
-///// we dont need man in middle attack protection for now
-#define BLE_GAP_SEC_PARAM_MITM 0
-
-/// the device have no out of band support
-#define BLE_GAP_SEC_PARAM_OOB_SUPPORT 0
-
-/////// the key size
-#define BLE_GAP_SEC_PARAM_MAX_KEY_SIZE 7
-#define BLE_GAP_SEC_PARAM_MIN_KEY_SIZE 16
-
-#define BLE_GAP_SEC_PARAM_LTK 1
-#define BLE_GAP_SEC_PARAM_IRK 0
-
-#define BLE_GAP_SEC_PARAM_DERV_LINK_FROM_LTK 1
-#define BLE_GAP_SEC_PARAM_CONN_SIGNATURE_RESOLVING_KEY 0
-
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
@@ -55,21 +27,6 @@
 #define SLAVE_LATENCY  BLE_CONNECTION_SLAVE_LATENCY                            
 #define CONN_SUP_TIMEOUT MSEC_TO_UNITS(BLE_CONNECTION_SUPERVISION_TIMEOUT, UNIT_10_MS)  /**< Connection supervisory time-out (4 seconds). */
 
-
-// #define FIRST_CONN_PARAMS_UPDATE_DELAY 5000 /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
-// #define NEXT_CONN_PARAMS_UPDATE_DELAY 30000 /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
-// #define MAX_CONN_PARAMS_UPDATE_COUNT 3      /**< Number of attempts before giving up the connection parameter negotiation. */
-
-// #define SEC_PARAM_BOND 0                               /**< Perform bonding. */
-// #define SEC_PARAM_MITM 0                               /**< Man In The Middle protection not required. */
-// #define SEC_PARAM_LESC 0                               /**< LE Secure Connections not enabled. */
-// #define SEC_PARAM_KEYPRESS 0                           /**< Keypress notifications not enabled. */
-// #define SEC_PARAM_IO_CAPABILITIES BLE_GAP_IO_CAPS_NONE /**< No I/O capabilities. */
-// #define SEC_PARAM_OOB 0                                /**< Out Of Band data not available. */
-// #define SEC_PARAM_MIN_KEY_SIZE 7                       /**< Minimum encryption key size. */
-// #define SEC_PARAM_MAX_KEY_SIZE 16                      /**< Maximum encryption key size. */
-
-// #define DEAD_BEEF 0xDEADBEEF /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 
 
@@ -114,22 +71,16 @@ enum _BLE_GAP_SECURITY_PARAMS_TYPE_
 
 };
 
-typedef void (*ble_gap_procdeure_callbacks)(void *param , ble_gap_evt_t const  * gap_evt);
-
-/// @brief this is to add the callback to the particular callback 
-/// @param callback_type 
-/// @param callbacks 
-void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks);
-
-
-/// @brief this is to remove the gap callbacks 
-/// @param callback_type
-void ble_gap_remove_callback(uint8_t callback_type);
-
-/// @brief this is to set a connection handle to a particular index 
+/// @brief this is to init the gap instance for the connection 
+/// @param conn_handle 
 /// @param index 
-/// @return the connection handle of particular index 
-uint32_t ble_gap_set_conn_handle(uint8_t * index , uint16_t conn_handle);
+/// @return succ/failure 
+uint32_t ble_gap_instance_init(uint16_t conn_handle, uint8_t *index );
+
+/// @brief this is to deinit the gap instnace for this conn handle 
+/// @param conn_handle 
+/// @return succ/failure 
+uint32_t ble_gap_instance_deinit(uint16_t conn_handle);
 
 /// @brief this is to get the connection handle of the connected device 
 /// @param  index of the device 
@@ -137,14 +88,29 @@ uint32_t ble_gap_set_conn_handle(uint8_t * index , uint16_t conn_handle);
 uint16_t ble_gap_get_conn_handle(uint8_t index );
 
 
-/// @brief this function is used to remove the connection handle from the global array list 
-/// @param connection handle 
-uint8_t ble_gap_remove_conn_handle(uint16_t conn_handle);
+typedef void (*ble_gap_procdeure_callbacks)(void *param , ble_gap_evt_t const  * gap_evt);
+
+/// @brief this is to add the callback to the particular callback 
+/// @param index 
+/// @param callback_type 
+/// @param callbacks 
+void ble_gap_add_callback(uint8_t index, uint8_t callback_type, ble_gap_procdeure_callbacks callbacks);
+
+
+/// @brief this is to remove the gap callbacks 
+/// @param index
+/// @param callback_type
+void ble_gap_remove_callback(uint8_t index , uint8_t callback_type);
 
 
 /// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
 /// @param conn_handle
 void ble_gap_disconnect(uint16_t conn_handle);
+
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 /// @brief this function is used to advertise the ble device
 /// @param  void
@@ -166,10 +132,40 @@ void ble_gap_delete_bonds(void);
 /////////////////////////// function declarations ///////////////////////////////
 
 /// @brief init the gap security procedure
-/// @param conn_handle
+/// @param index 
 /// @param sec_param_type 
-void ble_gap_security_init(uint16_t conn_handle, uint8_t sec_param_type);
+void ble_gap_security_init(uint8_t index, uint8_t sec_param_type);
 
+
+
+typedef PACKED_STRUCT _BLE_GAP_FUNCTION_INSTANCE_
+{
+    /// @brief the connection handle of the index 
+    uint16_t ble_gap_conn_handle;
+
+    /// @brief  the callbacks associated with this conn handle 
+    ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp];
+    
+    /// @brief security index to use in the conn handle 
+    uint8_t ble_gap_security_param_index;
+
+    /// @brief  keyset of the device 
+    ble_gap_lesc_p256_pk_t public_key_device;
+    ble_gap_lesc_dhkey_t private_key_device;
+
+    /// @brief keyset of the peer
+    ble_gap_lesc_p256_pk_t public_key_peer;
+    ble_gap_lesc_dhkey_t private_key_peer;
+    
+
+    ble_gap_sec_keyset_t key_set;    
+
+    /// @brief  32 bytes shared secret 
+    // ble_gap_lesc_dhkey_t peer_dhkey;
+
+
+    //// this is to init the gap function instnaces 
+}ble_gap_inst_Struct_t;
 
 
 
