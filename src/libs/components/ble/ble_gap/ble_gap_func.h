@@ -160,8 +160,9 @@ void ble_gap_delete_bonds(void);
 
 /// @brief init the gap security procedure
 /// @param index 
-/// @param sec_param_type 
-void ble_gap_security_init(uint8_t index, uint8_t sec_param_type);
+/// @param sec_param_type
+/// @return succ/failure  
+uint32_t ble_gap_security_init(uint8_t index, uint8_t sec_param_type);
 
 
 
