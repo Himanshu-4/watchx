@@ -45,8 +45,11 @@ enum _BLE_GAP_RELATED_ERRORS_
     ble_gap_err_conn_handle_invalid,
 
     ble_gap_err_max_Device_limit_reached,
-
     ble_gap_err_device_index_invalid ,
+
+    ble_gap_err_instance_already_inited,
+    ble_gap_err_instnace_init_falied,
+    ble_gap_err_instnace_not_inited
 
 };
 /////////////////////////////////////////////////////////////////
@@ -71,16 +74,15 @@ enum _BLE_GAP_SECURITY_PARAMS_TYPE_
 
 };
 
-/// @brief this is to init the gap instance for the connection 
-/// @param conn_handle 
+/// @brief this is to init the gap instance for the connection  
 /// @param index 
 /// @return succ/failure 
-uint32_t ble_gap_instance_init(uint16_t conn_handle, uint8_t *index );
+uint32_t ble_gap_instance_init(uint8_t index );
 
 /// @brief this is to deinit the gap instnace for this conn handle 
-/// @param conn_handle 
+/// @param index 
 /// @return succ/failure 
-uint32_t ble_gap_instance_deinit(uint16_t conn_handle);
+uint32_t ble_gap_instance_deinit(uint8_t index);
 
 /// @brief this is to get the connection handle of the connected device 
 /// @param  index of the device 
@@ -88,19 +90,21 @@ uint32_t ble_gap_instance_deinit(uint16_t conn_handle);
 uint16_t ble_gap_get_conn_handle(uint8_t index );
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////   callback regarding functions 
+
 typedef void (*ble_gap_procdeure_callbacks)(void *param , ble_gap_evt_t const  * gap_evt);
 
 /// @brief this is to add the callback to the particular callback 
-/// @param index 
 /// @param callback_type 
 /// @param callbacks 
-void ble_gap_add_callback(uint8_t index, uint8_t callback_type, ble_gap_procdeure_callbacks callbacks);
+void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks);
 
 
 /// @brief this is to remove the gap callbacks 
-/// @param index
 /// @param callback_type
-void ble_gap_remove_callback(uint8_t index , uint8_t callback_type);
+void ble_gap_remove_callback( uint8_t callback_type);
 
 
 /// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
@@ -140,12 +144,12 @@ void ble_gap_security_init(uint8_t index, uint8_t sec_param_type);
 
 typedef PACKED_STRUCT _BLE_GAP_FUNCTION_INSTANCE_
 {
+    /// @brief this is a flag to make sure that gap instnace is inited 
+    uint8_t ble_gap_instnace_inited;
+
     /// @brief the connection handle of the index 
     uint16_t ble_gap_conn_handle;
 
-    /// @brief  the callbacks associated with this conn handle 
-    ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp];
-    
     /// @brief security index to use in the conn handle 
     uint8_t ble_gap_security_param_index;
 

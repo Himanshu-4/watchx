@@ -13,42 +13,35 @@
 
 extern const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported];
 
-extern void ble_advertise_pre_inti(void);
+extern void ble_advertise_pre_init(void);
 
 ///////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////  global variables here 
+
+  /// @brief  the callbacks associated with this conn handle 
+volatile ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp] = {NULL};
+    
 
 /// define the instance here 
 
 volatile ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 
 
-
-///////////// this is to store the connection handle 
-// static volatile uint16_t ble_gap_conn_handles[BLE_GAP_MAX_NO_OF_DEVICES] = {BLE_CONN_HANDLE_INVALID};
-// = {BLE_CONN_HANDLE_INVALID};
-
 /// @brief this is to init the gap instance for the connection 
 /// @param conn_handle 
 /// @param index 
 /// @return succ/failure 
-uint32_t ble_gap_instance_init(uint16_t conn_handle, uint8_t *index )
+uint32_t ble_gap_instance_init( uint8_t index )
 {
     uint32_t ret = nrf_ERR_OUT_OF_MEM;
   ///// search for the 0 connection handle 
-    //// serach for the connection handle 
-    for(uint8_t i = 0; i< BLE_GAP_MAX_NO_OF_DEVICES; i++)
-    {
-        if(gap_inst[i].ble_gap_conn_handle == BLE_CONN_HANDLE_INVALID)
+
+        if(gap_inst[index].ble_gap_conn_handle != BLE_CONN_HANDLE_INVALID)
         {
-            gap_inst[i].ble_gap_conn_handle  = conn_handle;
-            *index = i+1;
-            ret = nrf_OK;
-            goto return_mech;
+            return 
         }
     }
 
-    *index = 0;
 
 return_mech:
     return ret;
@@ -57,7 +50,7 @@ return_mech:
 /// @brief this is to deinit the gap instnace for this conn handle 
 /// @param conn_handle 
 /// @return succ/failure 
-uint32_t ble_gap_instance_deinit(uint16_t conn_handle)
+uint32_t ble_gap_instance_deinit(uint8_t index)
 {
     uint8_t ret = ble_gap_err_conn_handle_invalid;
     uint8_t index =0;
@@ -75,7 +68,7 @@ uint32_t ble_gap_instance_deinit(uint16_t conn_handle)
     goto return_mech;
 
 nullify:
-memset(&gap_inst[index] , 0, sizeof(ble_gap_inst_Struct_t));
+memset( (uint8_t *) &gap_inst[index] , 0, sizeof(ble_gap_inst_Struct_t));
 gap_inst[index].ble_gap_conn_handle =  BLE_CONN_HANDLE_INVALID;
 
 
@@ -94,6 +87,24 @@ uint16_t ble_gap_get_conn_handle(uint8_t index )
         return BLE_CONN_HANDLE_INVALID;
     }
     return gap_inst[index -1].ble_gap_conn_handle;
+}
+
+/// @brief this function is to set the connection handle of that index 
+/// @param index 
+/// @param conn_handle 
+/// @return 
+uint32_t ble_gap_set_conn_handle(uint8_t index, uint16_t conn_handle)
+{
+
+}
+
+/// @brief 
+/// @param index 
+/// @return 
+uint32_t ble_gap_remove_conn_handle(uint8_t index)
+{
+
+
 }
 
 /// @brief this will return a valid index based on the conn handle 
@@ -124,11 +135,8 @@ uint8_t ble_gap_get_gap_index(uint16_t conn_handle)
 /// @param callback_type 
 /// @param conn_handle 
 /// @param callbacks 
-void ble_gap_add_callback(uint8_t index, uint8_t callback_type, ble_gap_procdeure_callbacks callbacks)
+void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks)
 {
-
-    if(index >= BLE_GAP_MAX_NO_OF_DEVICES)return ;
-    
     if(callback_type > ble_gap_max_callback_supp) return ;
         //// add the callback 
         gap_inst[index].GAP_Callbacks[callback_type] = callbacks;
@@ -137,13 +145,12 @@ void ble_gap_add_callback(uint8_t index, uint8_t callback_type, ble_gap_procdeur
 
 /// @brief this is to remove the gap callbacks 
 /// @param callback_type
-void ble_gap_remove_callback(uint8_t index, uint8_t callback_type)
+void ble_gap_remove_callback( uint8_t callback_type)
 {
-    if(index >= BLE_GAP_MAX_NO_OF_DEVICES)return ;
     if(callback_type > ble_gap_max_callback_supp) return ;
     ///// this is to set the callback 
         //// add the callback 
-        gap_inst[index].GAP_Callbacks[callback_type] = NULL;
+    GAP_Callbacks[callback_type] = NULL;
     
 }
 
@@ -154,8 +161,7 @@ void ble_gap_remove_callback(uint8_t index, uint8_t callback_type)
 /// @param conn_handle
 void ble_gap_disconnect(uint16_t conn_handle)
 {
-    /////////// just disconnect the device from the master 
-
+    /////////// just disconnect the device from the master
     sd_ble_gap_disconnect(conn_handle ,BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION );
 }
 
@@ -199,7 +205,7 @@ void ble_gap_pre_init(void)
 
     for(int i=0; i<BLE_MAX_DEVICE_SUPPORTED; i++)
     {
-        memset(&gap_inst[i] , 0, sizeof(ble_gap_inst_Struct_t));
+        memset(u8_ptr &gap_inst[i] , 0, sizeof(ble_gap_inst_Struct_t));
     }
 
     for(int i=0; i<BLE_MAX_DEVICE_SUPPORTED; i++)

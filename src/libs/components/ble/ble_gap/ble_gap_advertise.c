@@ -130,7 +130,7 @@ static void advertising_init(void)
 
 /// @brief this function would be called in gap_pre_init
 /// @param  void 
-void ble_advertise_pre_inti(void)
+void ble_advertise_pre_init(void)
 {
     gap_service_init();
     advertising_init();

@@ -4,9 +4,13 @@
 
 extern const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported];
 
+/// @brief callbacks for the BLE GAP events 
+extern volatile ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp];
+ 
 /// @brief the advertisement state of the device  
 extern volatile uint8_t  ble_advertisement_State;
 
+/// @brief ble gap instance for multidevice 
 extern volatile ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 
 // ble_gap_enc_key_t dev_enc_key1;
