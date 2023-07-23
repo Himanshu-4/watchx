@@ -37,7 +37,6 @@ uint32_t ble_gap_instance_init( uint8_t index )
 
     if(gap_inst[index].ble_gap_instnace_inited) return ble_gap_err_instance_already_inited;
 
-  
     /// init the instnace 
     memset(u8_ptr &gap_inst[index], 0, sizeof(ble_gap_inst_Struct_t));
     gap_inst[index].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
@@ -51,30 +50,11 @@ uint32_t ble_gap_instance_init( uint8_t index )
 uint32_t ble_gap_instance_deinit(uint8_t index)
 {
     if(index >= BLE_GAP_MAX_NO_OF_DEVICES)return nrf_ERR_INVALID_PARAM;
-
-    uint8_t ret = ble_gap_err_conn_handle_invalid;
-    uint8_t index =0;
-    //// serach for the connection handle 
-    for(uint8_t i = 0; i<BLE_GAP_MAX_NO_OF_DEVICES; i++)
-    {
-        if(gap_inst[i].ble_gap_conn_handle == conn_handle)
-        {
-            index = i;
-            ret = ble_gap_ok;
-            goto nullify;
-        }
-    }
-
-    goto return_mech;
-
-nullify:
+    ;;;;;;;;;;;;;;  /// it is just for fun 😻
 memset( (uint8_t *) &gap_inst[index] , 0, sizeof(ble_gap_inst_Struct_t));
 gap_inst[index].ble_gap_conn_handle =  BLE_CONN_HANDLE_INVALID;
 
-
-return_mech:
-
-    return ret;
+    return ble_gap_ok;
 }
 
 /// @brief this is to get the connection handle of the connected device 

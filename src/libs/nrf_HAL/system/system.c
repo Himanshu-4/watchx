@@ -506,7 +506,7 @@ void check_assrt(uint32_t cond, const char *str_print, uint32_t line )
 {
     if (cond != 0)
     {
-        printf(BRED "%d %s->%d\r\n" ANSI_RESET,line, str_print, cond);
+        printf(BRED "%d %s->%d\r\n",line, str_print, cond);
         delay(1000);
     }
 }
