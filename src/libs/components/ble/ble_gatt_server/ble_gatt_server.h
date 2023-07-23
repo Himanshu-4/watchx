@@ -18,6 +18,14 @@
 #define BATT_SVC_BATT_CUSTOM_DATA_CHAR_MAX_LEN 30
 
 
+enum _BLE_GATT_SERVER_ERRORS_
+{
+    ble_gatt_server_ok =0x00,
+
+    ble_gatt_op_timeout = NRF_BLE_GATT_SERVER_ERR_BASE,
+    
+};
+
 /// @brief preinit the gatt server 
 /// @param  void 
 void ble_gatt_server_pre_init(void);

@@ -189,6 +189,15 @@ uint32_t  ble_gap_stop_advertise(void)
 }
 
 
+/// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
+/// @param conn_handle
+void ble_gap_disconnect(uint16_t conn_handle)
+{
+    /////////// just disconnect the device from the master
+    sd_ble_gap_disconnect(conn_handle ,BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION );
+}
+
+
 
 
 

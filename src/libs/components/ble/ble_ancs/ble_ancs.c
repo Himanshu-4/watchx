@@ -192,7 +192,7 @@ uint32_t ble_ancs_get_total_nuid(void)
     }
 
 
-    return ble_ancs_op_ok;
+    return ble_ancs_ok;
 }
 
 /// @brief to get the notification meta data 
@@ -207,7 +207,7 @@ uint32_t ble_ancs_get_notif_meta_data(uint32_t uid, ble_ancs_notif_metadata_stru
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief this function is to read the notification uid characteristic
@@ -221,7 +221,7 @@ uint32_t ble_ancs_read_ancs_nuid_char(uint16_t index , uint32_t *nuid )
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief to remove that particular uid from cache and iphone 
@@ -235,7 +235,7 @@ uint32_t ble_ancs_remove_nuid(uint32_t nuid)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief to clear the data recvd in the nuid like title, msg , msg size ,etc 
@@ -249,7 +249,7 @@ uint32_t ble_ancs_clear_nuid(uint32_t nuid)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief this func must be called before reading the notification attributes 
@@ -264,7 +264,7 @@ uint32_t ble_ancs_fetch_notif_data(uint32_t uid , uint8_t fetch_level)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 //// below functions are only operation when you called above function firsst
@@ -283,7 +283,7 @@ uint32_t ble_ancs_get_notif_time(uint32_t nuid, kernel_time_struct_t *ancs_time)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief to get the notification date from the notification uid 
@@ -298,7 +298,7 @@ uint32_t ble_ancs_get_notif_date(uint32_t nuid, kernel_date_struct_t *ancs_date)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief get the time differnce between the current time and when the notification recieved 
@@ -313,7 +313,7 @@ uint32_t ble_ancs_get_notif_rcvd_time(uint32_t nuid, kernel_time_struct_t * noti
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief get the title string  of the notification 
@@ -328,7 +328,7 @@ uint32_t ble_ancs_get_notif_title(uint32_t uid, const char * title)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief get the subtitle of the notif string 
@@ -343,7 +343,7 @@ uint32_t ble_ancs_get_notif_subtitle(uint32_t uid, const char *subtitle)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief get the msg string of the notif 
@@ -358,7 +358,7 @@ uint32_t ble_ancs_get_notif_msg(uint32_t uid, const char * notif_msg)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief get the msg size of the notification 
@@ -373,7 +373,7 @@ uint32_t ble_ancs_get_notif_msg_size(uint32_t uid  , uint32_t *size)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 /// @brief get the action that can be oerformed on that particular notif
@@ -388,7 +388,7 @@ uint32_t ble_ancs_get_notif_aciton(uint32_t nuid, uint32_t *actions)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 
@@ -406,7 +406,7 @@ uint32_t ble_ancs_perform_notif_Action(uint32_t nuid, uint8_t action)
     }
 
 
-    return ble_ancs_op_ok; 
+    return ble_ancs_ok; 
 }
 
 

@@ -7,6 +7,18 @@
 //////////////////////////////////////////////////////////////////////////////
 ////////////// this is the config file for the ble related things 
 
+///////// define the error bases 
+#define NRF_BLE_GAP_ERR_BASE (NRF_BLE_ERR_BASE + 0x00UL)
+
+#define NRF_BLE_GATT_CLIENT_ERR_BASE (NRF_BLE_ERR_BASE + 0x20UL)
+
+#define NRF_BLE_GATT_SERVER_ERR_BASE (NRF_BLE_ERR_BASE + 0x40UL)
+
+#define NRF_BLE_AMS_ERR_BASE (NRF_BLE_ERR_BASE + 0x60UL)
+
+#define NRF_BLE_ANCS_ERR_BASE (NRF_BLE_ERR_BASE + 0x70UL)
+
+#define NRF_BLE_PEER_DEV_ERR_BASE (NRF_BLE_ERR_BASE + 0x80UL)
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //======================= BLE COMMON  CONFIG =============================================

@@ -28,7 +28,7 @@ enum _CLIENT_ERR_CODE_
 {
     ble_client_ok = 0x00,
     /// @brief not found related error code
-    ble_client_err_conn_handle_not_found,
+    ble_client_err_conn_handle_not_found = NRF_BLE_GATT_CLIENT_ERR_BASE,
     ble_client_err_srvc_not_found,
     ble_client_err_char_not_found,
     ble_client_err_desc_not_found,

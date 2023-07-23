@@ -24,8 +24,8 @@
 
 enum _BLE_ANCS_ERR_CODES_
 {
-    ble_ancs_op_ok,
-    ble_ancs_err_not_intited,
+    ble_ancs_ok = 0x00 ,
+    ble_ancs_err_not_intited = NRF_BLE_ANCS_ERR_BASE,
     ble_ancs_err_unknown_cmd_id,
 
     /// @brief uid specific erros 

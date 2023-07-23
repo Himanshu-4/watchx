@@ -33,18 +33,16 @@ volatile ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 /// @return succ/failure 
 uint32_t ble_gap_instance_init( uint8_t index )
 {
-    uint32_t ret = nrf_ERR_OUT_OF_MEM;
-  ///// search for the 0 connection handle 
+    if(index >= BLE_GAP_MAX_NO_OF_DEVICES) return nrf_ERR_INVALID_PARAM;
 
-        if(gap_inst[index].ble_gap_conn_handle != BLE_CONN_HANDLE_INVALID)
-        {
-            return 
-        }
-    }
+    if(gap_inst[index].ble_gap_instnace_inited) return ble_gap_err_instance_already_inited;
 
+  
+    /// init the instnace 
+    memset(u8_ptr &gap_inst[index], 0, sizeof(ble_gap_inst_Struct_t));
+    gap_inst[index].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
 
-return_mech:
-    return ret;
+    return nrf_OK;   
 }
 
 /// @brief this is to deinit the gap instnace for this conn handle 
@@ -52,6 +50,8 @@ return_mech:
 /// @return succ/failure 
 uint32_t ble_gap_instance_deinit(uint8_t index)
 {
+    if(index >= BLE_GAP_MAX_NO_OF_DEVICES)return nrf_ERR_INVALID_PARAM;
+
     uint8_t ret = ble_gap_err_conn_handle_invalid;
     uint8_t index =0;
     //// serach for the connection handle 
@@ -77,7 +77,7 @@ return_mech:
     return ret;
 }
 
-    /// @brief this is to get the connection handle of the connected device 
+/// @brief this is to get the connection handle of the connected device 
 /// @param  index of the device 
 /// @return the conection handle , 
 uint16_t ble_gap_get_conn_handle(uint8_t index )
@@ -139,7 +139,7 @@ void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks cal
 {
     if(callback_type > ble_gap_max_callback_supp) return ;
         //// add the callback 
-        gap_inst[index].GAP_Callbacks[callback_type] = callbacks;
+    GAP_Callbacks[callback_type] = callbacks;
     
 }
 
@@ -155,15 +155,6 @@ void ble_gap_remove_callback( uint8_t callback_type)
 }
 
 
-
-
-/// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
-/// @param conn_handle
-void ble_gap_disconnect(uint16_t conn_handle)
-{
-    /////////// just disconnect the device from the master
-    sd_ble_gap_disconnect(conn_handle ,BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION );
-}
 
 
 
@@ -197,7 +188,7 @@ static int random_number_gen(uint8_t *dest, unsigned size)
 /// @return succ/failure 
 void ble_gap_pre_init(void)
 {
-    ble_advertise_pre_inti();
+    ble_advertise_pre_init();
     /// set the eng function 
     uECC_set_rng(random_number_gen);
 

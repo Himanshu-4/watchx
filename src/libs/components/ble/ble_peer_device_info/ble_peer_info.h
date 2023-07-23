@@ -16,6 +16,13 @@
 #define BLE_UUID_CHAR_CURRENT_TIME  0x2A2B
 #define BLE_UUID_CHAR_LOCAL_TIME    0x2A0F
 
+enum _BLE_PEER_DEVICE_INFO_ERRORS_
+{
+    ble_peer_dev_ok =0x00,
+    ble_peer_dev_info_op_timeout = NRF_BLE_PEER_DEV_ERR_BASE,
+    
+};
+
 
 /// @brief this is to init the ble peer device info 
 /// @param conn_handle 

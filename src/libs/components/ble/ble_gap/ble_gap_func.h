@@ -39,7 +39,7 @@ enum _BLE_GAP_RELATED_ERRORS_
 {
     ble_gap_ok = 0x00,
 
-    ble_gap_err_timeout,
+    ble_gap_err_timeout = NRF_BLE_GAP_ERR_BASE,
 
     /// error regarding conn handle 
     ble_gap_err_conn_handle_invalid,
@@ -74,6 +74,12 @@ enum _BLE_GAP_SECURITY_PARAMS_TYPE_
 
 };
 
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+///////// define the ble gap instnace inits and deinit flags 
+#define BLE_GAP_INSTANCE_INITED 1
+#define BLE_GAP_INSTNACE_DEINITED 0
+
 /// @brief this is to init the gap instance for the connection  
 /// @param index 
 /// @return succ/failure 
@@ -88,6 +94,23 @@ uint32_t ble_gap_instance_deinit(uint8_t index);
 /// @param  index of the device 
 /// @return the conection handle , 
 uint16_t ble_gap_get_conn_handle(uint8_t index );
+
+/// @brief this function is to set the connection handle of that index 
+/// @param index 
+/// @param conn_handle 
+/// @return 
+uint32_t ble_gap_set_conn_handle(uint8_t index, uint16_t conn_handle);
+
+
+/// @brief this is to remove the connection handle 
+/// @param index 
+/// @return 
+uint32_t ble_gap_remove_conn_handle(uint8_t index);
+
+/// @brief this will return a valid index based on the conn handle 
+/// @param conn_handle 
+/// @return index 
+uint8_t ble_gap_get_gap_index(uint16_t conn_handle);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////

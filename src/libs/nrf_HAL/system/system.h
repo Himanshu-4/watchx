@@ -103,10 +103,16 @@ extern void delay_microsec(uint16_t delay_time);
 #define __NAKED __attribute__((naked))
 
 
+/// @brief this is the defination if err base in various components 
+#define NRF_SYSTEM_ERR_BASE 0x00UL
+#define NRF_BLE_ERR_BASE 0x20UL
+#define NRF_KERNEL_ERR_BASE 0x100UL
+#define NRF_APPS_ERR_BASE 0x200UL 
+
 /// errors for the anonymus  enum
 enum _NRF_ERROR_TYPES_
 {
-    nrf_OK = 0x00UL,
+    nrf_OK = 0x00UL + NRF_SYSTEM_ERR_BASE,
     nrf_ERR_TIMEOUT,
     nrf_clock_init_failed,
     nrf_ERR_OCCURED,
