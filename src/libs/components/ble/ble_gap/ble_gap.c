@@ -30,7 +30,7 @@ extern void ble_advertise_pre_init(void);
 //////////////////////////////////////  global variables here
 
 /// @brief  the callbacks associated with this conn handle
-volatile ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp] = {NULL};
+volatile ble_gap_callback_struct_t GAP_Callbacks[ble_gap_max_callback_supp] = {NULL};
 
 /// define the instance here
 
@@ -51,8 +51,16 @@ uint32_t ble_gap_instance_init(uint8_t index)
     gap_inst[index].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
 
     gap_inst[index].ble_gap_instnace_inited = BLE_GAP_INSTANCE_INITED;
-    
-    return nrf_OK;
+
+    /// get the curve specific data 
+    const struct uECC_Curve_t * lesc_pairing_curve = uECC_secp256r1();
+    /// also we have to generate the keypair and stored it into the structure 
+    uint32_t ret = uECC_make_key(u8_ptr gap_inst[index].public_key_device.pk , u8_ptr gap_inst[index].private_key_device.key,
+    lesc_pairing_curve);
+
+    NRF_ASSERT(ret);
+
+    return ret;
 }
 
 /// @brief this is to deinit the gap instnace for this conn handle
@@ -144,12 +152,13 @@ uint16_t ble_gap_get_conn_handle(uint8_t index)
 /// @param callback_type
 /// @param conn_handle
 /// @param callbacks
-void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks)
+void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks , void * param)
 {
     if (callback_type > ble_gap_max_callback_supp)
         return;
     //// add the callback
-    GAP_Callbacks[callback_type] = callbacks;
+    GAP_Callbacks[callback_type].callback = callbacks;
+    GAP_Callbacks[callback_type].callback_param = param;
 }
 
 /// @brief this is to remove the gap callbacks
@@ -160,7 +169,8 @@ void ble_gap_remove_callback(uint8_t callback_type)
         return;
     ///// this is to set the callback
     //// add the callback
-    GAP_Callbacks[callback_type] = NULL;
+    GAP_Callbacks[callback_type].callback = NULL;
+    GAP_Callbacks[callback_type].callback_param = NULL;
 }
 
 static int random_number_gen(uint8_t *dest, unsigned size)
@@ -219,13 +229,13 @@ uint32_t ble_gap_security_init(uint8_t index, uint8_t sec_param_type)
     CHECK_INIT(index);
 
     if (gap_inst[index].ble_gap_conn_handle == BLE_CONN_HANDLE_INVALID)
-        return;
+        return ble_gap_err_conn_handle_invalid;
 
-    uint32_t ret_code = 0;
     gap_inst[index].ble_gap_security_param_index = sec_param_type;
 
-    ret_code = sd_ble_gap_authenticate(gap_inst[index].ble_gap_conn_handle, &gap_sec_param[sec_param_type]);
+    uint32_t ret_code = sd_ble_gap_authenticate(gap_inst[index].ble_gap_conn_handle, &gap_sec_param[sec_param_type]);
     NRF_ASSERT(ret_code);
 
     /// this will exit when the crypto operations are completed and link is autheticated
+    return ble_gap_ok;
 }

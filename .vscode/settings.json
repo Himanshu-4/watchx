@@ -16,7 +16,9 @@
         "kernel_time.h": "c",
         "message_buffer.h": "c",
         "ble_peer_info.h": "c",
-        "ble_gap_func.h": "c"
+        "ble_gap_func.h": "c",
+        "*.inc": "c",
+        "uecc.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator":"MinGW Makefiles",

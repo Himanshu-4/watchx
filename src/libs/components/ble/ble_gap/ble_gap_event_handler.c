@@ -1,35 +1,20 @@
 ////////// include the gap security params
 #include "ble_gap_func.h"
 
+//////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////// externs vars 
 
 extern const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported];
 
 /// @brief callbacks for the BLE GAP events 
-extern volatile ble_gap_procdeure_callbacks GAP_Callbacks[ble_gap_max_callback_supp];
+extern volatile ble_gap_callback_struct_t GAP_Callbacks[ble_gap_max_callback_supp];
  
 /// @brief the advertisement state of the device  
 extern volatile uint8_t  ble_advertisement_State;
 
 /// @brief ble gap instance for multidevice 
 extern volatile ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
-
-// ble_gap_enc_key_t dev_enc_key1;
-
-// ble_gap_enc_key_t dev_enc_key2;
-
-
-// ble_gap_sec_keyset_t key_Set = {
-//     /// owner key distribuition
-//     .keys_own.p_enc_key = &dev_enc_key1,
-//     .keys_own.p_id_key = NULL,
-//     .keys_own.p_pk = &public_key_device,
-//     .keys_own.p_sign_key = NULL,
-
-//     ///// peer key distribution
-//     .keys_peer.p_enc_key = NULL,
-//     .keys_peer.p_id_key = NULL,
-//     .keys_peer.p_pk = &public_key_peer,
-//     .keys_peer.p_sign_key = NULL};
 
 
 
@@ -64,25 +49,16 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         sd_ble_gap_conn_param_update(conn_handle,
                                      &device_preferd_conn_params);
 
-        uint8_t index = 10;
-        // set the connection handle
-        ble_gap_set_conn_handle(&index, conn_handle);
+            delay(50);
 
-        /////// only call the callback when we have a valid index
-        if (index <= BLE_GAP_MAX_NO_OF_DEVICES)
-        {
             // call the callback
-            if (GAP_Callbacks[ble_gap_evt_connected] != NULL)
+            if (GAP_Callbacks[ble_gap_evt_connected].callback != NULL)
             {
                 ////// pass the index to the callback
-                GAP_Callbacks[ble_gap_evt_connected](&index, &p_ble_evt->evt.gap_evt);
+                GAP_Callbacks[ble_gap_evt_connected].callback(
+                GAP_Callbacks[ble_gap_evt_connected].callback_param , &p_ble_evt->evt.gap_evt);
             }
-        }
-        else
-        {
-            ///////// disconnect the device
-            ble_gap_disconnect(conn_handle);
-        }
+ 
         ////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////
@@ -100,9 +76,10 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         if (ble_gap_ok == ble_gap_remove_conn_handle(conn_handle))
         {
             /// only call the callback for a valid conn hadnle
-            if (GAP_Callbacks[ble_gap_evt_disconnected] != NULL)
+            if (GAP_Callbacks[ble_gap_evt_disconnected].callback != NULL)
             {
-                GAP_Callbacks[ble_gap_evt_disconnected](NULL, &p_ble_evt->evt.gap_evt);
+                GAP_Callbacks[ble_gap_evt_disconnected].callback(
+                GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
             }
         }
     }
@@ -113,8 +90,6 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         NRF_LOG_INFO("PHYurequest.");
         ble_gap_phys_t const phys =
             {
-                // .rx_phys = BLE_GAP_PHY_AUTO,
-                // .tx_phys = BLE_GAP_PHY_AUTO,
                 .rx_phys = BLE_GAP_PHY_2MBPS,
                 .tx_phys = BLE_GAP_PHY_2MBPS};
         err_code = sd_ble_gap_phy_update(conn_handle, &phys);
@@ -156,7 +131,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_DATA_LENGTH_UPDATE:
     {
-        // NRF_LOG_INFO("dl updated");
+        NRF_LOG_INFO("dlupdated");
     }
     break;
 
@@ -181,7 +156,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_CONN_PARAM_UPDATE:
     {
-        // NRF_LOG_INFO("con prm udted");
+        NRF_LOG_INFO("conprm udted");
     }
     break;
 
@@ -192,13 +167,20 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
         ////// call the callback
 
-        if (GAP_Callbacks[ble_gap_evt_timeout] != NULL)
+        if (GAP_Callbacks[ble_gap_evt_timeout].callback != NULL)
         {
-            GAP_Callbacks[ble_gap_evt_timeout]((void *)&conn_handle, &p_ble_evt->evt.gap_evt);
+            GAP_Callbacks[ble_gap_evt_timeout].callback(
+            GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
         }
     }
     break;
 
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////
@@ -267,9 +249,10 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         // get the dhkey
         NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
 
-        err_code = sd_ble_gap_lesc_dhkey_reply(conn_handle, &my_dhkey);
+        // err_code = sd_ble_gap_lesc_dhkey_reply(conn_handle, &my_dhkey);
     }
     break;
+
 
     case BLE_GAP_EVT_AUTH_STATUS:
     {
@@ -282,9 +265,10 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         NRF_LOG_WARNING("GAP_EVT_CONN_SEC_UPDATE");
 
         /// call the callback
-        if (GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt] != NULL)
+        if (GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback != NULL)
         {
-            GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt](NULL, &p_ble_evt->evt.gap_evt);
+            GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback(
+            GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
         }
     }
     break;

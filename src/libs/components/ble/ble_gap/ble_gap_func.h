@@ -119,10 +119,17 @@ uint8_t ble_gap_get_gap_index(uint16_t conn_handle);
 
 typedef void (*ble_gap_procdeure_callbacks)(void *param , ble_gap_evt_t const  * gap_evt);
 
+typedef PACKED_STRUCT _BLE_GAP_CALLBACK_TYPES_
+{
+    ble_gap_procdeure_callbacks callback;
+    void * callback_param; 
+}ble_gap_callback_struct_t;
+
+
 /// @brief this is to add the callback to the particular callback 
 /// @param callback_type 
 /// @param callbacks 
-void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks);
+void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks, void *param);
 
 
 /// @brief this is to remove the gap callbacks 
