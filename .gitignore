@@ -1,4 +1,4 @@
-/build
-/nRF5_SDK_17
-/examples
+/build/
+/nRF5_SDK_17/
+/examples/
 /watchx_lib_ext/
