@@ -1,4 +1,5 @@
 /build/
 /nRF5_SDK_17/
 /examples/
-/watchx_lib_ext/
+# /watchx_lib_ext/micro-ecc
+/watchx_lib_ext/micro-ecc/

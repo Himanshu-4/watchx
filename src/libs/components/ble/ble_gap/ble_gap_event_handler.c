@@ -202,9 +202,15 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
                      p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.link, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.enc,
                      p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign,
                      p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link);
-
-        err_code = sd_ble_gap_sec_params_reply(conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[ble_gap_security_param_index], &key_Set);
+        
+        /// get the index from the connection handle 
+        uint8_t index = ble_gap_get_gap_index(conn_handle);
+        /// check for a valid index 
+        if(index < BLE_GAP_MAX_NO_OF_DEVICES)
+        {
+        err_code = sd_ble_gap_sec_params_reply(conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], &gap_inst[index].key_set);
         NRF_ASSERT(err_code);
+        }
     }
     break;
 
