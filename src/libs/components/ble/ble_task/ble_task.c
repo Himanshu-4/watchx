@@ -26,7 +26,7 @@ static volatile uint8_t client_task  = suspend;
 ////////////////////////////////////////////////////////////////////
 ///////////////////// global variables here 
 
-static uint8_t device_index = 0;
+#define BLE_GAP_DEVICE_INDEX 0
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -78,16 +78,21 @@ static xTaskHandle ble_common_Task_handle = NULL;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void ble_common_task_pre_init(void *param)
+void ble_task_pre_init(void *param)
 {
+    UNUSED_PARAMETER(param);
     // ble_common_Task_handle = xTaskCreateStatic(ble_common_task, BLE_COMMON_TASK_NAME, BLE_COMMON_TASK_STACK_DEPTH, param, BLE_COMMON_TASK_PRIORITY, ble_common_Task_Stack_buffer , &ble_common_Task_buffer );
     
     // NRF_ASSERT_HANDLE(ble_common_Task_handle);
     // vTaskSuspend(ble_common_Task_handle);
 
     ///// add the callbacks for the gap  
-    ble_gap_add_callback(ble_gap_evt_connected,ble_device_connected_callback );
-    ble_gap_add_callback(ble_gap_evt_disconnected ,ble_device_disconnected_callback );  
+    ble_gap_add_callback(ble_gap_evt_connected,ble_device_connected_callback , NULL);
+    ble_gap_add_callback(ble_gap_evt_disconnected ,ble_device_disconnected_callback, NULL );  
+
+    /// init a gap instance 
+    ble_gap_instance_init(BLE_GAP_DEVICE_INDEX);
+    // NRF_ASSERT(err_code);
 
     ///@todo add the callback for the security procedure complete 
 }
@@ -104,9 +109,9 @@ void ble_common_task_pre_init(void *param)
 static void ble_client_task_init_process(void *param)
 {
     uint32_t err =0;
-    uint16_t conn_handle = ble_gap_get_conn_handle(device_index);
+    uint16_t conn_handle = ble_gap_get_conn_handle(BLE_GAP_DEVICE_INDEX);
 
-    NRF_LOG_INFO("ind %dc %x",device_index, conn_handle);
+    NRF_LOG_INFO("chdl %x", conn_handle);
     /// init the ble client 
     NRF_LOG_INFO("cinit %d", gatt_client_init(conn_handle));
     NRF_ASSERT(err);
@@ -207,17 +212,10 @@ static void ble_common_task(void *param)
 static void ble_device_connected_callback(void *param , ble_gap_evt_t const  * gap_evt)
 {
     uint32_t err =0;
-    /// get the device index from the callback 
-    device_index = *(uint8_t *)param;
 
-    if(device_index == 0)
-    {
-        NRF_LOG_ERROR("invlid index");
-        return ;
-    }
-
-    //////// start the encrytption pro
-    uint16_t conn_handle = ble_gap_get_conn_handle(device_index);
+    //////// set the connection handle 
+    err =  ble_gap_set_conn_handle(BLE_GAP_DEVICE_INDEX, gap_evt->conn_handle);
+    NRF_ASSERT(err);
 
     // NRF_LOG_INFO("i %dconha %x",device_index,conn_handle);
 

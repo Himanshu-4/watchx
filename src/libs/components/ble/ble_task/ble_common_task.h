@@ -7,7 +7,7 @@
 
 /// @brief this is to init the ble common task in static memory 
 /// @param param 
-void ble_common_task_pre_init(void *param);
+void ble_task_pre_init(void *param);
 
 
 

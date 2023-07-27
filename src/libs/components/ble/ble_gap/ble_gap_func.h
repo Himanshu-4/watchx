@@ -29,6 +29,9 @@
 
 
 
+/// @brief this function is used to generate the key pair value 
+/// @param  void 
+void ble_gap_genreate_keypair(void);
 
 /// @brief preinit the gap so that it can the BLE GAP properly
 /// @param  void 
@@ -173,7 +176,7 @@ uint32_t ble_gap_security_init(uint8_t index, uint8_t sec_param_type);
 
 
 
-typedef PACKED_STRUCT _BLE_GAP_FUNCTION_INSTANCE_
+typedef struct _BLE_GAP_FUNCTION_INSTANCE_
 {
     /// @brief this is a flag to make sure that gap instnace is inited 
     uint8_t ble_gap_instnace_inited;
@@ -184,7 +187,7 @@ typedef PACKED_STRUCT _BLE_GAP_FUNCTION_INSTANCE_
     /// @brief security index to use in the conn handle 
     uint8_t ble_gap_security_param_index;
 
-    /// @brief  keyset of the device 
+ 
     ble_gap_lesc_p256_pk_t public_key_device;
     ble_gap_lesc_dhkey_t private_key_device;
 
@@ -197,6 +200,7 @@ typedef PACKED_STRUCT _BLE_GAP_FUNCTION_INSTANCE_
 
     /// @brief  32 bytes shared secret 
     // ble_gap_lesc_dhkey_t peer_dhkey;
+
 
 
     //// this is to init the gap function instnaces 

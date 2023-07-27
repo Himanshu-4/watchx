@@ -1,7 +1,8 @@
 #ifndef _GATT_SERVER_H_
 #define _GATT_SERVER_H_
 
-
+#include "ble_config.h"
+#include "system.h"
 
 
 /////////////////////////////////////////////////////////////////////////

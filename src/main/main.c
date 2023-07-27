@@ -81,7 +81,7 @@ static void ble_functionalities_init(void)
     ble_ams_pre_init();
 
     ////// init the common task
-    ble_common_task_pre_init(NULL);
+    ble_task_pre_init(NULL);
 }
 
 int main()
@@ -97,6 +97,8 @@ int main()
 
     ////////////////////////////////////
     NRF_LOG_INFO("starting aPP");
+
+    ble_gap_genreate_keypair();
 
     ble_functionalities_init();
     /// init nvs
@@ -157,9 +159,9 @@ void general_task_function(void *param)
     UNUSED_VARIABLE(param);
 
     uint8_t ret = 0;
-
     for (;;)
     {
+    
         ///// check for the button events and print it
         uint8_t evt = nrf_get_btn_evtq();
         if (evt != 0)

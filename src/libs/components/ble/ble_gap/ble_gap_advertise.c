@@ -139,14 +139,14 @@ void ble_advertise_pre_init(void)
 
 
 /// @brief this saves the advertisement state 
-volatile uint8_t advertisement_state = false;
+volatile uint8_t ble_advertisement_State = false;
 
 
 uint32_t ble_gap_start_advertise(void)
 {
     NRF_LOG_WARNING("starting adv");
 
-    if(advertisement_state == true)
+    if(ble_advertisement_State == true)
     {
         return nrf_ERR_INVALID_STATE;
     }
@@ -158,7 +158,7 @@ uint32_t ble_gap_start_advertise(void)
 
         if(err_code == nrf_OK)
         {
-            advertisement_state = true;
+            ble_advertisement_State = true;
         }        
         return err_code;
     }
@@ -169,7 +169,7 @@ uint32_t ble_gap_start_advertise(void)
 
 uint32_t  ble_gap_stop_advertise(void)
 {
-    if(advertisement_state == false)
+    if(ble_advertisement_State == false)
     {
         return nrf_ERR_INVALID_STATE;
     }
@@ -180,7 +180,7 @@ uint32_t  ble_gap_stop_advertise(void)
 
         if(ret_code == nrf_OK)
         {
-            advertisement_state = false;
+            ble_advertisement_State = false;
         }
         return ret_code;
     }

@@ -504,7 +504,7 @@ void error_handler(uint32_t code, char const  *function )
 
 void check_assrt(uint32_t cond, const char *str_print, uint32_t line )
 {
-    if (cond != 0)
+    if ((cond) != 0)
     {
         printf(BRED "%d %s->%d\r\n",line, str_print, cond);
         delay(1000);

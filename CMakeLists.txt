@@ -484,6 +484,9 @@ list(APPEND
         # nrf rtc library
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/rtc/nrf_rtc.c 
 
+        # nrf random number genrator 
+        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/rng/nrf_rng.c
+
     )
 
 list(APPEND 
@@ -518,6 +521,9 @@ list(APPEND
 
         # nrf real time counter library 
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/rtc 
+
+        # nrf random number genrator 
+        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/rng
 
         # contains the startup scripts 
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/startup

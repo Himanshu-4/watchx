@@ -1,6 +1,8 @@
 ////////// include the gap security params
 #include "ble_gap_func.h"
 
+#include "uECC.h"
+
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////// externs vars 
@@ -11,10 +13,10 @@ extern const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supp
 extern volatile ble_gap_callback_struct_t GAP_Callbacks[ble_gap_max_callback_supp];
  
 /// @brief the advertisement state of the device  
-extern volatile uint8_t  ble_advertisement_State;
+extern volatile uint8_t  ble_advertisement_State; 
 
 /// @brief ble gap instance for multidevice 
-extern volatile ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
+extern ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 
 
 
@@ -208,7 +210,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         /// check for a valid index 
         if(index < BLE_GAP_MAX_NO_OF_DEVICES)
         {
-        err_code = sd_ble_gap_sec_params_reply(conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], &gap_inst[index].key_set);
+        err_code = sd_ble_gap_sec_params_reply(conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *) &gap_inst[index].key_set);
         NRF_ASSERT(err_code);
         }
     }
@@ -255,7 +257,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         // get the dhkey
         NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
 
-        // err_code = sd_ble_gap_lesc_dhkey_reply(conn_handle, &my_dhkey);
+        
     }
     break;
 
@@ -288,4 +290,41 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     default:
         break;
     }
+}
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// static functions here //////////////////////////////////////////////////
+
+static uint32_t nrf_start_dhkey_calculation(uint16_t conn_handle)
+{
+    /// get the index from the conn handle 
+
+    static ble_gap_lesc_dhkey_t peer_dhkey;
+    uint32_t err_code =0;
+
+      /// get the index from the connection handle 
+        uint8_t index = ble_gap_get_gap_index(conn_handle);
+        /// check for a valid index 
+        if(index >= BLE_GAP_MAX_NO_OF_DEVICES)
+        {
+            return ble_gap_err_device_index_invalid;
+        }
+    
+    //// first check that is the public key of peer is valid or not 
+    err_code = uECC_valid_public_key(gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
+    NRF_ASSERT(err_code);
+
+    /// compute here the shared secret from our private key and peer public key 
+    err_code = uECC_shared_secret( u8_ptr gap_inst[index].public_key_peer.pk ,u8_ptr gap_inst[index].private_key_device.key, 
+    peer_dhkey.key , uECC_secp256r1());
+    NRF_ASSERT(err_code);
+
+    err_code = sd_ble_gap_lesc_dhkey_reply(conn_handle, &peer_dhkey);
+        NRF_ASSERT(err_code);
 }
