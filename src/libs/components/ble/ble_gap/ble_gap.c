@@ -5,14 +5,23 @@
 
 #include "nrf_ran_gen.h"
 
+///// define here the key pair
 
+// static uint8_t public_key_device[BLE_GAP_LESC_P256_PK_LEN] = {0};
 
-///// define here the key pair 
+// static uint8_t private_key_device[BLE_GAP_LESC_DHKEY_LEN] = {0};
 
-static uint8_t public_key[BLE_GAP_LESC_P256_PK_LEN] = {0};
+/// @brief keyset of the device
+static ble_gap_lesc_p256_pk_t public_key_device;
+static uint8_t private_key_device[32];
 
-static uint8_t private_key[BLE_GAP_LESC_DHKEY_LEN] = {0};
+/// @brief keyset of the peer
+static ble_gap_lesc_p256_pk_t public_key_peer;
+static uint8_t private_key_peer[32];
 
+/// @brief encryption keys
+static ble_gap_enc_key_t device_en_keys;
+static ble_gap_enc_key_t peer_en_keys;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -22,13 +31,12 @@ static uint8_t private_key[BLE_GAP_LESC_DHKEY_LEN] = {0};
 /// @brief check for valid index if not then return with err
 #define CHECK_INDEX(x)                  \
     if (x >= BLE_GAP_MAX_NO_OF_DEVICES) \
-    return nrf_ERR_INVALID_PARAM    \
+    return nrf_ERR_INVALID_PARAM
 
 //// check for instnace init
 #define CHECK_INIT(x)                                                   \
     if (gap_inst[x].ble_gap_instnace_inited != BLE_GAP_INSTANCE_INITED) \
-    return ble_gap_err_instnace_not_inited  \
-
+    return ble_gap_err_instnace_not_inited
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -41,46 +49,79 @@ extern void ble_advertise_pre_init(void);
 ///////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////  global variables here
 
-
 /// @brief  the callbacks associated with this conn handle
 volatile ble_gap_callback_struct_t GAP_Callbacks[ble_gap_max_callback_supp] = {{NULL}};
 
 /// define the instance here
 
- ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES] = {0};
+ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES] = {0};
 
 /// @brief this is to init the gap instance for the connection
 /// @param conn_handle
 /// @param index
 /// @return succ/failure
-uint32_t ble_gap_instance_init(uint8_t index)
+uint32_t ble_gap_instance_init(uint8_t index, uint8_t pairing_type)
 {
     CHECK_INDEX(index);
     if (gap_inst[index].ble_gap_instnace_inited)
         return ble_gap_err_instance_already_inited;
 
     /// init the instnace
-    memset(u8_ptr &gap_inst[index], 0, sizeof(ble_gap_inst_Struct_t));
+    memset(u8_ptr & gap_inst[index], 0, sizeof(ble_gap_inst_Struct_t));
     gap_inst[index].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
 
     gap_inst[index].ble_gap_instnace_inited = BLE_GAP_INSTANCE_INITED;
+    gap_inst[index].ble_gap_pairing_type = pairing_type;
 
-    uint32_t ret =0;
 
-    /// when done store the keys pointer in keyset 
+    if (pairing_type == PAIRING_TYPE_LEGACY)
+    {
+        /// when done store the keys pointer in keyset
+        /// store the device keys
+        gap_inst[index].key_set.keys_own.p_pk = &public_key_device;
+        gap_inst[index].private_key_device = private_key_device;
 
-    /// copy the key pair 
-    memcpy(gap_inst[index].public_key_device.pk, public_key,BLE_GAP_LESC_P256_PK_LEN );
-    memcpy(gap_inst[index].private_key_device.key,  private_key, BLE_GAP_LESC_DHKEY_LEN);
+        gap_inst[index].key_set.keys_own.p_enc_key = &device_en_keys;
+        gap_inst[index].key_set.keys_own.p_id_key = NULL;
+        gap_inst[index].key_set.keys_own.p_sign_key = NULL;
 
-    gap_inst[index].key_set.keys_own.p_pk = (ble_gap_lesc_p256_pk_t *)  gap_inst[index].public_key_device.pk;
-    gap_inst[index].key_set.keys_peer.p_pk = (ble_gap_lesc_p256_pk_t *) gap_inst[index].public_key_peer.pk;
-    
-    /// check for a valid public key 
-    ret = uECC_valid_public_key(gap_inst[index].key_set.keys_own.p_pk->pk ,uECC_secp256r1());
-    NRF_ASSERT(ret);
+        //// store the peer keys
+        gap_inst[index].key_set.keys_peer.p_pk = NULL;
+        gap_inst[index].private_key_peer = NULL;
 
-    return ret;
+        gap_inst[index].key_set.keys_peer.p_enc_key = &peer_en_keys;
+        gap_inst[index].key_set.keys_peer.p_id_key = NULL;
+        gap_inst[index].key_set.keys_peer.p_sign_key = NULL;
+
+    }
+
+    else
+    {
+        /// when done store the keys pointer in keyset
+        /// store the device keys
+        gap_inst[index].key_set.keys_own.p_pk = &public_key_device;
+        gap_inst[index].private_key_device = private_key_device;
+
+        gap_inst[index].key_set.keys_own.p_enc_key = &device_en_keys;
+        gap_inst[index].key_set.keys_own.p_id_key = NULL;
+        gap_inst[index].key_set.keys_own.p_sign_key = NULL;
+
+        //// store the peer keys
+        gap_inst[index].key_set.keys_peer.p_pk = &public_key_peer;
+        gap_inst[index].private_key_peer = private_key_peer;
+
+        gap_inst[index].key_set.keys_peer.p_enc_key = &peer_en_keys;
+        gap_inst[index].key_set.keys_peer.p_id_key = NULL;
+        gap_inst[index].key_set.keys_peer.p_sign_key = NULL;
+
+        /// check for a valid public key
+        uint8_t ret = uECC_valid_public_key(gap_inst[index].key_set.keys_own.p_pk->pk, uECC_secp256r1());
+        if (ret != 1)
+        {
+            NRF_LOG_ERROR("public inv");
+        }
+    }
+    return ble_gap_ok;
 }
 
 /// @brief this is to deinit the gap instnace for this conn handle
@@ -89,14 +130,20 @@ uint32_t ble_gap_instance_init(uint8_t index)
 uint32_t ble_gap_instance_deinit(uint8_t index)
 {
     CHECK_INDEX(index);
-    {;;;;;;}
-     /// it is just here  for fun 😻😁🤦‍♀️🤦
+    {
+        ;
+        ;
+        ;
+        ;
+        ;
+        ;
+    }
+    /// it is just here  for fun 😻😁🤦‍♀️🤦
     memset((uint8_t *)&gap_inst[index], 0, sizeof(ble_gap_inst_Struct_t));
     gap_inst[index].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
 
     return ble_gap_ok;
 }
-
 
 /// @brief this function is to set the connection handle of that index
 /// @param index
@@ -116,7 +163,7 @@ uint32_t ble_gap_set_conn_handle(uint8_t index, uint16_t conn_handle)
 /// @param index
 /// @return
 uint32_t ble_gap_remove_conn_handle(uint8_t index)
-{    
+{
     CHECK_INDEX(index);
     CHECK_INIT(index);
     /// set the connection handle
@@ -152,7 +199,7 @@ uint16_t ble_gap_get_conn_handle(uint8_t index)
     }
 
     // check if instnace is inited
-    if (gap_inst[index].ble_gap_instnace_inited != BLE_GAP_INSTANCE_INITED)
+    if (gap_inst[index].ble_gap_instnace_inited == BLE_GAP_INSTANCE_INITED)
     {
         return gap_inst[index].ble_gap_conn_handle;
     }
@@ -167,7 +214,7 @@ uint16_t ble_gap_get_conn_handle(uint8_t index)
 /// @param callback_type
 /// @param conn_handle
 /// @param callbacks
-void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks , void * param)
+void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks, void *param)
 {
     if (callback_type > ble_gap_max_callback_supp)
         return;
@@ -187,7 +234,6 @@ void ble_gap_remove_callback(uint8_t callback_type)
     GAP_Callbacks[callback_type].callback = NULL;
     GAP_Callbacks[callback_type].callback_param = NULL;
 }
-
 
 /// @brief preinit the gap so that it can the BLE GAP properly
 /// @param  void
@@ -229,7 +275,20 @@ uint32_t ble_gap_security_init(uint8_t index, uint8_t sec_param_type)
     return ble_gap_ok;
 }
 
+/// @brief this function is to generate a pairing key for legacy pairing
+/// @param  void
+void ble_gap_genrate_legacy_keypair(void)
+{
+    nrf_rng_init();
 
+    nrf_rng_fill_buff(public_key_device.pk, sizeof(public_key_device));
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////// this function have to be modified in lesc pairing 
 
 static int random_number_gen(uint8_t *dest, unsigned size)
 {
@@ -237,19 +296,24 @@ static int random_number_gen(uint8_t *dest, unsigned size)
     return (ret == nrf_OK)?(1):(0);
 }
 
-
-/// @brief this function is used to generate the key pair value 
-/// @param  void 
-void ble_gap_genreate_keypair(void)
+/// @brief this function is used to generate the key pair value
+/// @param  void
+void ble_gap_genreate_lesc_keypair(void)
 {
     nrf_rng_init();
     /// set the rng function
     uECC_set_rng(random_number_gen);
 
-    /// genertate the key pair 
-    uint8_t ret = uECC_make_key(public_key, private_key ,uECC_secp256r1());
+    /// genertate the key pair
+    uint8_t ret = uECC_make_key(public_key_device.pk, private_key_device ,uECC_secp256r1());
     if(ret !=1)
     {
         NRF_LOG_ERROR("keyfailed %d",ret);
+    }
+    /// check for a valid public key
+    ret = uECC_valid_public_key(public_key_device.pk ,uECC_secp256r1());
+    if(ret !=1)
+    {
+        NRF_LOG_ERROR("public inv");
     }
 }

@@ -5,22 +5,34 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////// externs vars 
+///////////////////////////////////////////////////// externs vars
 
 extern const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported];
 
-/// @brief callbacks for the BLE GAP events 
+/// @brief callbacks for the BLE GAP events
 extern volatile ble_gap_callback_struct_t GAP_Callbacks[ble_gap_max_callback_supp];
- 
-/// @brief the advertisement state of the device  
-extern volatile uint8_t  ble_advertisement_State; 
 
-/// @brief ble gap instance for multidevice 
+/// @brief the advertisement state of the device
+extern volatile uint8_t ble_advertisement_State;
+
+/// @brief ble gap instance for multidevice
 extern ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 
+//////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////// static declarations here
 
+static volatile uint16_t conn_handle = 0;
 
-static volatile uint16_t conn_handle =0;
+/// @brief this is to start the dhkey calculation
+/// @param conn_handle
+/// @return err code
+static uint32_t nrf_start_dhkey_calculation(uint16_t conn_handle);
+
+/// @brief this function is used to load the peripheral keys and reply to the phone
+/// @param conn_handle
+/// @return
+static uint32_t nrf_load_peripheral_keys(ble_evt_t const *p_ble_evt);
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -51,16 +63,16 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         sd_ble_gap_conn_param_update(conn_handle,
                                      &device_preferd_conn_params);
 
-            delay(50);
+        delay(50);
 
-            // call the callback
-            if (GAP_Callbacks[ble_gap_evt_connected].callback != NULL)
-            {
-                ////// pass the index to the callback
-                GAP_Callbacks[ble_gap_evt_connected].callback(
-                GAP_Callbacks[ble_gap_evt_connected].callback_param , &p_ble_evt->evt.gap_evt);
-            }
- 
+        // call the callback
+        if (GAP_Callbacks[ble_gap_evt_connected].callback != NULL)
+        {
+            ////// pass the index to the callback
+            GAP_Callbacks[ble_gap_evt_connected].callback(
+                GAP_Callbacks[ble_gap_evt_connected].callback_param, &p_ble_evt->evt.gap_evt);
+        }
+
         ////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////
@@ -81,7 +93,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
             if (GAP_Callbacks[ble_gap_evt_disconnected].callback != NULL)
             {
                 GAP_Callbacks[ble_gap_evt_disconnected].callback(
-                GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
+                    GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
             }
         }
     }
@@ -172,17 +184,14 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         if (GAP_Callbacks[ble_gap_evt_timeout].callback != NULL)
         {
             GAP_Callbacks[ble_gap_evt_timeout].callback(
-            GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
+                GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
         }
     }
     break;
 
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////
@@ -204,14 +213,14 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
                      p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.link, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.enc,
                      p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign,
                      p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link);
-        
-        /// get the index from the connection handle 
+
+        /// get the index from the connection handle
         uint8_t index = ble_gap_get_gap_index(conn_handle);
-        /// check for a valid index 
-        if(index < BLE_GAP_MAX_NO_OF_DEVICES)
+        /// check for a valid index
+        if (index < BLE_GAP_MAX_NO_OF_DEVICES)
         {
-        err_code = sd_ble_gap_sec_params_reply(conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *) &gap_inst[index].key_set);
-        NRF_ASSERT(err_code);
+            err_code = sd_ble_gap_sec_params_reply(conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *)&gap_inst[index].key_set);
+            NRF_ASSERT(err_code);
         }
     }
     break;
@@ -219,6 +228,22 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_SEC_INFO_REQUEST:
     {
         NRF_LOG_WARNING("GAP_EVT_SEC_INFO_REQUEST");
+
+        /// log the security info
+        NRF_LOG_INFO("add %d,t %d,ediv %d,rnad %d,if %x",
+                     p_ble_evt->evt.gap_evt.params.sec_info_request.peer_addr.addr_id_peer,
+                     p_ble_evt->evt.gap_evt.params.sec_info_request.peer_addr.addr_type,
+                     p_ble_evt->evt.gap_evt.params.sec_info_request.master_id.ediv,
+                     p_ble_evt->evt.gap_evt.params.sec_info_request.master_id.rand[2],
+                     // the omfp required
+                     ((p_ble_evt->evt.gap_evt.params.sec_info_request.enc_info << 2) |
+                      (p_ble_evt->evt.gap_evt.params.sec_info_request.id_info << 1) |
+                      (p_ble_evt->evt.gap_evt.params.sec_info_request.sign_info)));
+    
+
+        delay(100);
+        nrf_load_peripheral_keys(&p_ble_evt);
+    
     }
     break;
 
@@ -255,16 +280,9 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         NRF_LOG_WARNING("GAP_EVT_LESC_DHKEY_REQUEST");
 
         // get the dhkey
-        NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
+        // NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
 
-        
-    }
-    break;
-
-
-    case BLE_GAP_EVT_AUTH_STATUS:
-    {
-        NRF_LOG_WARNING("GAP_EVT_AUTH_STATUS");
+        nrf_start_dhkey_calculation(conn_handle);
     }
     break;
 
@@ -272,12 +290,66 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     {
         NRF_LOG_WARNING("GAP_EVT_CONN_SEC_UPDATE");
 
+        /// log about the security status
+        NRF_LOG_INFO("%d,%d,%d", p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.sm,
+                     p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.lv, p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.encr_key_size);
         /// call the callback
         if (GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback != NULL)
         {
             GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback(
-            GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
+                GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
         }
+    }
+    break;
+
+    case BLE_GAP_EVT_AUTH_STATUS:
+    {
+        NRF_LOG_WARNING("GAP_EVT_AUTH_STATUS");
+        delay(100);
+        NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2%x,ko %x,kp %x",
+                     p_ble_evt->evt.gap_evt.params.auth_status.auth_status,
+                     p_ble_evt->evt.gap_evt.params.auth_status.error_src,
+                     p_ble_evt->evt.gap_evt.params.auth_status.bonded,
+                     p_ble_evt->evt.gap_evt.params.auth_status.lesc,
+
+                     //// the sm1 level
+                     ((p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv1 << 3) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv2 << 2) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv3 << 1) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv4)),
+
+                     /// sm2 level
+                     ((p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv1 << 3) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv2 << 2) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv3 << 1) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv4)),
+
+                     /// kdist owner
+                     ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.enc << 3) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.id << 2) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.link << 1) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.sign)),
+
+                     /// kdist peer
+                     ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.enc << 3) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.id << 2) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.link << 1) |
+                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.sign)));
+
+        delay(200);
+        printf("\r\n");
+        // show the ltk of peer and device
+        for (int i = 0; i < BLE_GAP_SEC_KEY_LEN; i++)
+        {
+            printf("%d ", gap_inst[0].key_set.keys_own.p_enc_key->enc_info.ltk[i]);
+        }
+        printf("\r\n");
+        for (int i = 0; i < BLE_GAP_SEC_KEY_LEN; i++)
+        {
+
+            printf("%d ", gap_inst[0].key_set.keys_peer.p_enc_key->enc_info.ltk[i]);
+        }
+        printf("\r\n");
     }
     break;
 
@@ -292,39 +364,73 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     }
 }
 
-
-
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// static functions here //////////////////////////////////////////////////
 
+/// @brief this function is used to load the peripheral keys and reply to the phone
+/// @param conn_handle
+/// @return
+static uint32_t nrf_load_peripheral_keys(ble_evt_t const *p_ble_evt)
+{
+    uint32_t err_code = 0;
+
+    /// get the index
+    uint8_t index = ble_gap_get_gap_index(p_ble_evt->evt.gap_evt.conn_handle);
+
+    if (index < BLE_MAX_DEVICE_SUPPORTED)
+    {
+        ble_gap_enc_info_t peer_en_info =
+            {
+                .auth = 1,
+                .lesc = 0,
+                .ltk_len = gap_inst[index].key_set.keys_peer.p_enc_key->enc_info.ltk_len,
+            };
+
+            // copy the keys 
+            memcpy(peer_en_info.ltk, gap_inst[index].key_set.keys_peer.p_enc_key->enc_info.ltk,gap_inst[index].key_set.keys_peer.p_enc_key->enc_info.ltk_len );
+        err_code = sd_ble_gap_sec_info_reply(p_ble_evt->evt.gap_evt.conn_handle, &peer_en_info, NULL, NULL);
+        NRF_ASSERT(err_code);
+    }
+}
+
+/// @brief this is to start the dhkey calculation
+/// @param conn_handle
+/// @return err code
 static uint32_t nrf_start_dhkey_calculation(uint16_t conn_handle)
 {
-    /// get the index from the conn handle 
+    /// get the index from the conn handle
+    uint32_t err_code = 0;
+    static ble_gap_lesc_dhkey_t peer_dh_key;
 
-    static ble_gap_lesc_dhkey_t peer_dhkey;
-    uint32_t err_code =0;
+    /// get the index from the connection handle
+    uint8_t index = ble_gap_get_gap_index(conn_handle);
+    /// check for a valid index
+    if (index >= BLE_GAP_MAX_NO_OF_DEVICES)
+    {
+        return ble_gap_err_device_index_invalid;
+    }
+    NRF_LOG_INFO("index is %d", index);
 
-      /// get the index from the connection handle 
-        uint8_t index = ble_gap_get_gap_index(conn_handle);
-        /// check for a valid index 
-        if(index >= BLE_GAP_MAX_NO_OF_DEVICES)
-        {
-            return ble_gap_err_device_index_invalid;
-        }
-    
-    //// first check that is the public key of peer is valid or not 
+    //// first check that is the public key of peer is valid or not
     err_code = uECC_valid_public_key(gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
+    if (err_code != 1)
+    {
+        NRF_LOG_ERROR("invalid peer public key");
+    }
+    NRF_LOG_INFO("valid pub key");
+
+    /// compute here the shared secret from our private key and peer public key
+    err_code = uECC_shared_secret(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, u8_ptr gap_inst[index].private_key_device,
+                                  peer_dh_key.key, uECC_secp256r1());
+    if (err_code != 1)
+    {
+        NRF_LOG_ERROR("invalid shared secret");
+    }
+    NRF_LOG_INFO("done shared secret");
+
+    err_code = sd_ble_gap_lesc_dhkey_reply(conn_handle, &peer_dh_key);
     NRF_ASSERT(err_code);
 
-    /// compute here the shared secret from our private key and peer public key 
-    err_code = uECC_shared_secret( u8_ptr gap_inst[index].public_key_peer.pk ,u8_ptr gap_inst[index].private_key_device.key, 
-    peer_dhkey.key , uECC_secp256r1());
-    NRF_ASSERT(err_code);
-
-    err_code = sd_ble_gap_lesc_dhkey_reply(conn_handle, &peer_dhkey);
-        NRF_ASSERT(err_code);
+    return err_code;
 }

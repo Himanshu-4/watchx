@@ -213,7 +213,7 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
         .mitm = 1,
         .oob =0,
         .keypress =0,
-        .lesc = 1,
+        .lesc = 0,
         ////// define the key size 
         .max_key_size = 16,
         .min_key_size = 7,

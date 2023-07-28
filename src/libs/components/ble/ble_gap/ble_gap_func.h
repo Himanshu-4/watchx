@@ -31,7 +31,11 @@
 
 /// @brief this function is used to generate the key pair value 
 /// @param  void 
-void ble_gap_genreate_keypair(void);
+void ble_gap_genreate_lesc_keypair(void);
+
+/// @brief this function is to generate a pairing key for legacy pairing 
+/// @param  void 
+void ble_gap_genrate_legacy_keypair(void);
 
 /// @brief preinit the gap so that it can the BLE GAP properly
 /// @param  void 
@@ -83,10 +87,13 @@ enum _BLE_GAP_SECURITY_PARAMS_TYPE_
 #define BLE_GAP_INSTANCE_INITED 1
 #define BLE_GAP_INSTNACE_DEINITED 0
 
+#define PAIRING_TYPE_LEGACY 1
+#define PAIRING_TYPE_LESC 2
+
 /// @brief this is to init the gap instance for the connection  
 /// @param index 
 /// @return succ/failure 
-uint32_t ble_gap_instance_init(uint8_t index );
+uint32_t ble_gap_instance_init(uint8_t index , uint8_t pairing_type );
 
 /// @brief this is to deinit the gap instnace for this conn handle 
 /// @param index 
@@ -185,23 +192,14 @@ typedef struct _BLE_GAP_FUNCTION_INSTANCE_
     uint16_t ble_gap_conn_handle;
 
     /// @brief security index to use in the conn handle 
+    uint8_t ble_gap_pairing_type; //// this is to switch bw legacy and lesc pairing 
     uint8_t ble_gap_security_param_index;
-
- 
-    ble_gap_lesc_p256_pk_t public_key_device;
-    ble_gap_lesc_dhkey_t private_key_device;
-
-    /// @brief keyset of the peer
-    ble_gap_lesc_p256_pk_t public_key_peer;
-    ble_gap_lesc_dhkey_t private_key_peer;
-    
 
     ble_gap_sec_keyset_t key_set;    
 
     /// @brief  32 bytes shared secret 
-    // ble_gap_lesc_dhkey_t peer_dhkey;
-
-
+    uint8_t * private_key_peer;
+    uint8_t * private_key_device;
 
     //// this is to init the gap function instnaces 
 }ble_gap_inst_Struct_t;
