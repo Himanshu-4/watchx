@@ -248,7 +248,7 @@ static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  
     gatt_client_deinit( gap_evt->conn_handle);
 
 
-    NRF_LOG_WARNING("deinit %x",gap_evt->conn_handle);
+    // NRF_LOG_WARNING("deinit %x",gap_evt->conn_handle);
 
     client_task = suspend;
 

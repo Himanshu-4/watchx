@@ -89,7 +89,7 @@ uint32_t ble_gap_instance_init(uint8_t index, uint8_t pairing_type)
         gap_inst[index].key_set.keys_peer.p_pk = NULL;
         gap_inst[index].private_key_peer = NULL;
 
-        gap_inst[index].key_set.keys_peer.p_enc_key = &peer_en_keys;
+        gap_inst[index].key_set.keys_peer.p_enc_key = NULL;
         gap_inst[index].key_set.keys_peer.p_id_key = NULL;
         gap_inst[index].key_set.keys_peer.p_sign_key = NULL;
 

@@ -124,11 +124,11 @@
 
 //////////////////////// ble connection param config 
 
-#define BLE_MIN_CONNECTION_INTERVAL 30 //// in terms of milliseconds 
-#define BLE_MAX_CONNECTION_INTERVAL 80 ////// in terms of millisec
+#define BLE_MIN_CONNECTION_INTERVAL 80 //// in terms of milliseconds 
+#define BLE_MAX_CONNECTION_INTERVAL 500 ////// in terms of millisec
 
 // these packets the masters chooses to skip without risking connection /**< Slave latency. */ slave can 
-#define BLE_CONNECTION_SLAVE_LATENCY 4 
+#define BLE_CONNECTION_SLAVE_LATENCY 0
 
 #define BLE_CONNECTION_SUPERVISION_TIMEOUT 4000
 

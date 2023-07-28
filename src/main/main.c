@@ -176,7 +176,7 @@ void general_task_function(void *param)
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
-
+                NRF_LOG_WARNING("er %d", nvs_erase_partition());
             }
         }
         delay(100);

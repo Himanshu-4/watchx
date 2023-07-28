@@ -3,6 +3,8 @@
 
 #include "uECC.h"
 
+#include "nvs.h"
+
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////// externs vars
@@ -24,6 +26,8 @@ extern ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 
 static volatile uint16_t conn_handle = 0;
 
+static ble_gap_addr_t connected_peer_addr = {0};
+
 /// @brief this is to start the dhkey calculation
 /// @param conn_handle
 /// @return err code
@@ -32,7 +36,15 @@ static uint32_t nrf_start_dhkey_calculation(uint16_t conn_handle);
 /// @brief this function is used to load the peripheral keys and reply to the phone
 /// @param conn_handle
 /// @return
-static uint32_t nrf_load_peripheral_keys(ble_evt_t const *p_ble_evt);
+static void nrf_load_peripheral_keys(ble_evt_t const *p_ble_evt);
+
+/// @brief this function is used to handle the security parameter request
+/// @param p_ble_evt
+static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt);
+
+/// @brief this function is handle the authentication status of the data 
+/// @param p_ble_evt 
+static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt);
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -63,8 +75,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         sd_ble_gap_conn_param_update(conn_handle,
                                      &device_preferd_conn_params);
 
-        delay(50);
-
+        memcpy(&connected_peer_addr, &p_ble_evt->evt.gap_evt.params.connected.peer_addr, sizeof(connected_peer_addr));
         // call the callback
         if (GAP_Callbacks[ble_gap_evt_connected].callback != NULL)
         {
@@ -83,7 +94,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_DISCONNECTED:
     {
-        NRF_LOG_ERROR("dct %d", p_ble_evt->evt.gap_evt.params.disconnected.reason);
+        NRF_LOG_ERROR("dct %x", p_ble_evt->evt.gap_evt.params.disconnected.reason);
         // after disconnecting
 
         /// remove the connection handle
@@ -202,26 +213,18 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     {
         NRF_LOG_WARNING("GAP_EVT_SEC_PARAMS_REQUEST");
 
-        delay(100);
         /// show the ble gpa security param by central
-        NRF_LOG_INFO("%x,%x,%x,%x,%x,%x|| %d,%d ||%x,%x,%x,%x ||%x,%x,%x,%x", p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.bond,
-                     p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.mitm, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.lesc,
-                     p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.keypress, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.io_caps,
-                     p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.oob, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.min_key_size,
-                     p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.max_key_size, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.enc,
-                     p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.sign,
-                     p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.link, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.enc,
-                     p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign,
-                     p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link);
+        // NRF_LOG_INFO("%x,%x,%x,%x,%x,%x|| %d,%d ||%x,%x,%x,%x ||%x,%x,%x,%x", p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.bond,
+        //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.mitm, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.lesc,
+        //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.keypress, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.io_caps,
+        //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.oob, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.min_key_size,
+        //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.max_key_size, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.enc,
+        //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.sign,
+        //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.link, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.enc,
+        //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign,
+        //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link);
 
-        /// get the index from the connection handle
-        uint8_t index = ble_gap_get_gap_index(conn_handle);
-        /// check for a valid index
-        if (index < BLE_GAP_MAX_NO_OF_DEVICES)
-        {
-            err_code = sd_ble_gap_sec_params_reply(conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *)&gap_inst[index].key_set);
-            NRF_ASSERT(err_code);
-        }
+        nrf_handle_security_param_request(p_ble_evt);
     }
     break;
 
@@ -239,11 +242,8 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
                      ((p_ble_evt->evt.gap_evt.params.sec_info_request.enc_info << 2) |
                       (p_ble_evt->evt.gap_evt.params.sec_info_request.id_info << 1) |
                       (p_ble_evt->evt.gap_evt.params.sec_info_request.sign_info)));
-    
 
-        delay(100);
-        nrf_load_peripheral_keys(&p_ble_evt);
-    
+        nrf_load_peripheral_keys(p_ble_evt);
     }
     break;
 
@@ -305,51 +305,39 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_AUTH_STATUS:
     {
         NRF_LOG_WARNING("GAP_EVT_AUTH_STATUS");
-        delay(100);
-        NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2%x,ko %x,kp %x",
-                     p_ble_evt->evt.gap_evt.params.auth_status.auth_status,
-                     p_ble_evt->evt.gap_evt.params.auth_status.error_src,
-                     p_ble_evt->evt.gap_evt.params.auth_status.bonded,
-                     p_ble_evt->evt.gap_evt.params.auth_status.lesc,
 
-                     //// the sm1 level
-                     ((p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv1 << 3) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv2 << 2) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv3 << 1) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv4)),
+        // NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2%x,ko %x,kp %x",
+        //              p_ble_evt->evt.gap_evt.params.auth_status.auth_status,
+        //              p_ble_evt->evt.gap_evt.params.auth_status.error_src,
+        //              p_ble_evt->evt.gap_evt.params.auth_status.bonded,
+        //              p_ble_evt->evt.gap_evt.params.auth_status.lesc,
 
-                     /// sm2 level
-                     ((p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv1 << 3) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv2 << 2) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv3 << 1) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv4)),
+        //              //// the sm1 level
+        //              ((p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv1 << 3) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv2 << 2) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv3 << 1) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv4)),
 
-                     /// kdist owner
-                     ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.enc << 3) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.id << 2) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.link << 1) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.sign)),
+        //              /// sm2 level
+        //              ((p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv1 << 3) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv2 << 2) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv3 << 1) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv4)),
 
-                     /// kdist peer
-                     ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.enc << 3) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.id << 2) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.link << 1) |
-                      (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.sign)));
+        //              /// kdist owner
+        //              ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.enc << 3) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.id << 2) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.link << 1) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.sign)),
 
-        delay(200);
-        printf("\r\n");
-        // show the ltk of peer and device
-        for (int i = 0; i < BLE_GAP_SEC_KEY_LEN; i++)
-        {
-            printf("%d ", gap_inst[0].key_set.keys_own.p_enc_key->enc_info.ltk[i]);
-        }
-        printf("\r\n");
-        for (int i = 0; i < BLE_GAP_SEC_KEY_LEN; i++)
-        {
-
-            printf("%d ", gap_inst[0].key_set.keys_peer.p_enc_key->enc_info.ltk[i]);
-        }
-        printf("\r\n");
+        //              /// kdist peer
+        //              ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.enc << 3) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.id << 2) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.link << 1) |
+        //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.sign)));
+    
+    nrf_handle_authentication_status(p_ble_evt);
+        
     }
     break;
 
@@ -371,7 +359,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 /// @brief this function is used to load the peripheral keys and reply to the phone
 /// @param conn_handle
 /// @return
-static uint32_t nrf_load_peripheral_keys(ble_evt_t const *p_ble_evt)
+static void nrf_load_peripheral_keys(ble_evt_t const *p_ble_evt)
 {
     uint32_t err_code = 0;
 
@@ -382,17 +370,75 @@ static uint32_t nrf_load_peripheral_keys(ble_evt_t const *p_ble_evt)
     {
         ble_gap_enc_info_t peer_en_info =
             {
-                .auth = 1,
-                .lesc = 0,
-                .ltk_len = gap_inst[index].key_set.keys_peer.p_enc_key->enc_info.ltk_len,
+                .auth = gap_inst[index].key_set.keys_own.p_enc_key->enc_info.auth,
+                .lesc = gap_inst[index].key_set.keys_own.p_enc_key->enc_info.lesc,
+                .ltk_len = gap_inst[index].key_set.keys_own.p_enc_key->enc_info.ltk_len,
             };
 
-            // copy the keys 
-            memcpy(peer_en_info.ltk, gap_inst[index].key_set.keys_peer.p_enc_key->enc_info.ltk,gap_inst[index].key_set.keys_peer.p_enc_key->enc_info.ltk_len );
+        //// now we can store the pairing key
+        uint32_t uid = (connected_peer_addr.addr[0] |
+                        (connected_peer_addr.addr[1] << 1) | (connected_peer_addr.addr[2] << 2) |
+                        (connected_peer_addr.addr[3] << 3));
+        /// get the data from uid
+        err_code = nvs_read_data(uid, peer_en_info.ltk, peer_en_info.ltk_len);
+        if (err_code != nrf_OK)
+        {
+            NRF_LOG_ERROR("keys %d", err_code);
+            return err_code;
+        }
+
+        ///// reply the security peer
         err_code = sd_ble_gap_sec_info_reply(p_ble_evt->evt.gap_evt.conn_handle, &peer_en_info, NULL, NULL);
         NRF_ASSERT(err_code);
     }
 }
+
+/// @brief this function is used to handle the security parameter request
+/// @param p_ble_evt
+static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
+{
+    uint32_t err_code = 0;
+
+    /// check for existing keys and delete it
+
+    //// now we can store the pairing key
+    uint32_t uid = (connected_peer_addr.addr[0] |
+                    (connected_peer_addr.addr[1] << 1) | (connected_peer_addr.addr[2] << 2) |
+                    (connected_peer_addr.addr[3] << 3));
+
+    err_code = nvs_delete_data(uid);
+    if (err_code != nrf_OK)
+    {
+        NRF_LOG_ERROR("del %d", err_code);
+    }
+    /// get the index from the connection handle
+    uint8_t index = ble_gap_get_gap_index(conn_handle);
+    /// check for a valid index
+    if (index < BLE_GAP_MAX_NO_OF_DEVICES)
+    {
+        err_code = sd_ble_gap_sec_params_reply(conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *)&gap_inst[index].key_set);
+        NRF_ASSERT(err_code);
+    }
+}
+
+/// @brief this function is handle the authentication status of the data 
+/// @param p_ble_evt 
+static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
+{
+    /// get the index from the conn handle
+        uint8_t index = ble_gap_get_gap_index(conn_handle);
+
+        if (index < BLE_MAX_DEVICE_SUPPORTED)
+        {
+            //// now we can store the pairing key
+            uint32_t uid = (connected_peer_addr.addr[0] |
+                            (connected_peer_addr.addr[1] << 1) | (connected_peer_addr.addr[2] << 2) |
+                            (connected_peer_addr.addr[3] << 3));
+
+            nvs_add_data(uid, gap_inst[index].key_set.keys_own.p_enc_key->enc_info.ltk, gap_inst[index].key_set.keys_own.p_enc_key->enc_info.ltk_len);
+        }
+}
+
 
 /// @brief this is to start the dhkey calculation
 /// @param conn_handle

@@ -144,9 +144,7 @@ volatile uint8_t ble_advertisement_State = false;
 
 uint32_t ble_gap_start_advertise(void)
 {
-    NRF_LOG_WARNING("starting adv");
-
-    if(ble_advertisement_State == true)
+      if(ble_advertisement_State == true)
     {
         return nrf_ERR_INVALID_STATE;
     }
@@ -159,6 +157,7 @@ uint32_t ble_gap_start_advertise(void)
         if(err_code == nrf_OK)
         {
             ble_advertisement_State = true;
+            NRF_LOG_WARNING("starting adv");
         }        
         return err_code;
     }
@@ -181,6 +180,7 @@ uint32_t  ble_gap_stop_advertise(void)
         if(ret_code == nrf_OK)
         {
             ble_advertisement_State = false;
+            NRF_LOG_WARNING("stop advertise");
         }
         return ret_code;
     }
@@ -226,7 +226,7 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
 
         /// define the key distribuition about peer 
         //// this need not be valid , provided by peer after all 
-        .kdist_peer.enc = 1, 
+        .kdist_peer.enc = 0, 
         .kdist_peer.id =0, 
         .kdist_peer.sign =0,
         .kdist_peer.link =0,// 1 is not supported by sd 

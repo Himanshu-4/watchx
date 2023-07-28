@@ -476,6 +476,7 @@ list(APPEND
 
         # non volatile storage library for handling flash write operations
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/nvs/nvs.c
+        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/nvs/nvs_ota.c
     
         # these are the startup files to start the arm cortex m4 core 
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/startup/gcc_startup_nrf52.S 
