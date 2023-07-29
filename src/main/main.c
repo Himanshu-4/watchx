@@ -98,8 +98,6 @@ int main()
     ////////////////////////////////////
     NRF_LOG_INFO("starting aPP");
 
-    ble_gap_genrate_legacy_keypair();
-
     ble_functionalities_init();
     /// init nvs
     nvs_flash_init(NVS_FLASH_OPERATION_TIMEOUT);
@@ -172,11 +170,14 @@ void general_task_function(void *param)
             else if (evt == NRF_BUTTON_DOWN_EVT)
             {
                 NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
-
+              
+    
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
-                NRF_LOG_WARNING("er %d", nvs_erase_partition());
+              
+    
+                // NRF_LOG_WARNING("er %d", nvs_erase_partition());
             }
         }
         delay(100);

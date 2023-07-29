@@ -37,7 +37,7 @@ void adc_init(void);
 void adc_deinit(void);
 
 /// @brief specify the ADC resolution
-enum
+enum _ADC_RESOLUTION_
 {
     ADC_RESOLUTION_8bit = 0,
     ADC_RESOLUTION_10bit,
@@ -51,7 +51,7 @@ enum
                                 (10UL):((x==ADC_RESOLUTION_12bit)?(12UL):(14UL))))
 
 
-enum
+enum _ADC_OVERSAMPLING_
 {
     ADC_NO_OVERSAMPLING= 0,
     ADC_OVER_2x,
@@ -76,19 +76,19 @@ typedef struct __PACKED
     uint8_t adc_trigger_mode;
     uint16_t adc_sampling_rate;
 
-} adc_sample_cfg;
+} adc_sample_cfg_struct_t;
 
 typedef struct __PACKED
 {
     uint8_t adc_resolution;
     uint8_t adc_oversamplnig;
-    adc_sample_cfg sample_cfg;
+    adc_sample_cfg_struct_t sample_cfg;
     /// @brief the ram buffer for easy DMA
 
     uint32_t *ram_buff_ptr; // the addr of the buffer 
     uint16_t ram_buff_size; // specify the amount to be transfered in words (4 byte) format
 
-} my_adc_config;
+} adc_config_struct_t;
 
 /***
  * @name adc_config
@@ -96,7 +96,7 @@ typedef struct __PACKED
  * @return errorcodes if any
  * @brief configure the adc module accordingly , like the ram buffer allotment, oversampling and adc parameters
  */
-uint8_t adc_config(const my_adc_config *);
+uint8_t adc_config(const adc_config_struct_t *);
 
 // define the adc channel number
 enum
@@ -200,7 +200,7 @@ typedef struct __PACKED
     uint8_t adc_diff_mode;
     uint8_t adc_resolution;
 
-} adc_channel_prop_config;
+} adc_channel_prop_config_struct_t;
 
 typedef struct __PACKED
 {
@@ -210,9 +210,9 @@ typedef struct __PACKED
     uint8_t neg_sel_pin;
     uint8_t adc_acq_time;
     uint8_t adc_burst_mode; // this is the oversampling control
-    const adc_channel_prop_config *chnl_config;
+    const adc_channel_prop_config_struct_t *chnl_config;
 
-} my_adc_channel_config;
+} adc_channel_config_struct_t;
 
 /*****
  * @name adc_channel_config
@@ -220,7 +220,7 @@ typedef struct __PACKED
  * @param[2] my_adc_channel_config
  * @brief configure a adc channel with single ended
  */
-void adc_channel_config(uint8_t, const my_adc_channel_config *);
+void adc_channel_config(uint8_t, const adc_channel_config_struct_t *);
 
 enum
 {
@@ -398,7 +398,7 @@ bool adc_check_busy(void);
  * @brief the adc characteristics are stored in static variable used by this function
  * and is init at the adc_config function
  */
-float adc_get_voltage(uint16_t, const adc_channel_prop_config *);
+float adc_get_voltage(uint16_t, const adc_channel_prop_config_struct_t *);
 ////////////``````````````````````````````````````````````````````````````````````````````````````
 ///````````````````````````````````````````````````````````````````````````````````````````````````````
 // Oversampling configuration. OVERSAMPLE should not be combined with SCAN. The RESOLUTION is

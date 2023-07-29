@@ -226,7 +226,7 @@ void adc_deinit(void)
 }
 
 /// @brief config the ADC module according to the configuration
-uint8_t adc_config(const my_adc_config *adc_cfg)
+uint8_t adc_config(const adc_config_struct_t *adc_cfg)
 {
     if ((adc_cfg->sample_cfg.adc_sampling_rate < 80) || (adc_cfg->sample_cfg.adc_sampling_rate > 2047))
         return nrf_ERR_INVALID_PARAM;
@@ -248,7 +248,7 @@ uint8_t adc_config(const my_adc_config *adc_cfg)
 }
 
 /// @brief adc channel configuration
-void adc_channel_config(uint8_t channel_no, const my_adc_channel_config *adc_chn_cfg)
+void adc_channel_config(uint8_t channel_no, const adc_channel_config_struct_t *adc_chn_cfg)
 {
     // configure the ADC pins
     NRF_SAADC->CH[channel_no].PSELP = adc_chn_cfg->pos_sel_pin;
@@ -409,7 +409,7 @@ FORCE_INLINE bool adc_check_busy(void)
     return NRF_SAADC->STATUS;
 }
 
-FORCE_INLINE float adc_get_voltage(uint16_t adc_digi_out, const adc_channel_prop_config *chn_cfg)
+FORCE_INLINE float adc_get_voltage(uint16_t adc_digi_out, const adc_channel_prop_config_struct_t *chn_cfg)
 {
     // the adc_digi_out is a 2's complement , we have to remove the complement
     int val = 0;

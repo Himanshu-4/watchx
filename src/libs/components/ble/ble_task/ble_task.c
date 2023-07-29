@@ -149,6 +149,7 @@ static void ble_client_task_init_process(void *param)
 }
 
 
+
 static void ble_client_task_deinit_process(void *param)
 {
     ////////// call the deinit process of the above init process     

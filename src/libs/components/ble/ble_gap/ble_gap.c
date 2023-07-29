@@ -5,7 +5,6 @@
 
 #include "nrf_ran_gen.h"
 
-///// define here the key pair
 
 // static uint8_t public_key_device[BLE_GAP_LESC_P256_PK_LEN] = {0};
 
@@ -279,9 +278,9 @@ uint32_t ble_gap_security_init(uint8_t index, uint8_t sec_param_type)
 /// @param  void
 void ble_gap_genrate_legacy_keypair(void)
 {
-    nrf_rng_init();
+    // nrf_rng_init();
 
-    nrf_rng_fill_buff(public_key_device.pk, sizeof(public_key_device));
+    // nrf_rng_fill_buff(public_key_device.pk, sizeof(public_key_device));
 }
 
 
@@ -292,8 +291,23 @@ void ble_gap_genrate_legacy_keypair(void)
 
 static int random_number_gen(uint8_t *dest, unsigned size)
 {
-    uint8_t ret = nrf_rng_fill_buff(dest, size);
-    return (ret == nrf_OK)?(1):(0);
+        uint8_t size;
+                     sd_rand_application_pool_capacity_get(&size);
+                NRF_LOG_INFO("po %d",size);
+                sd_rand_application_bytes_available_get(&size);
+                NRF_LOG_INFO("by %d",size);
+
+                uint8_t buff[32];
+
+                NRF_LOG_INFO("%d", sd_rand_application_vector_get(buff, 32));
+                for (int  i = 0; i < 32; i++)
+                {
+                    printf("%d", buff[i]);
+                }
+                printf("\r\n");
+
+    // uint8_t ret = nrf_rng_fill_buff(dest, size);
+    // return (ret == nrf_OK)?(1):(0);
 }
 
 /// @brief this function is used to generate the key pair value
