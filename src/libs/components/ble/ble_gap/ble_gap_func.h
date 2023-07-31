@@ -29,13 +29,6 @@
 
 
 
-/// @brief this function is used to generate the key pair value 
-/// @param  void 
-void ble_gap_genreate_lesc_keypair(void);
-
-/// @brief this function is to generate a pairing key for legacy pairing 
-/// @param  void 
-void ble_gap_genrate_legacy_keypair(void);
 
 /// @brief preinit the gap so that it can the BLE GAP properly
 /// @param  void 
@@ -179,7 +172,7 @@ void ble_gap_delete_bonds(void);
 /// @param index 
 /// @param sec_param_type
 /// @return succ/failure  
-uint32_t ble_gap_security_init(uint8_t index, uint8_t sec_param_type);
+uint32_t ble_gap_security_init(uint8_t index);
 
 
 

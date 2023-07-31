@@ -91,7 +91,7 @@ void ble_task_pre_init(void *param)
     ble_gap_add_callback(ble_gap_evt_disconnected ,ble_device_disconnected_callback, NULL );  
 
     /// init a gap instance 
-    ble_gap_instance_init(BLE_GAP_DEVICE_INDEX, PAIRING_TYPE_LEGACY);
+    ble_gap_instance_init(BLE_GAP_DEVICE_INDEX, PAIRING_TYPE_LESC);
 
     ///@todo add the callback for the security procedure complete 
 }
@@ -136,7 +136,7 @@ static void ble_client_task_init_process(void *param)
     // NRF_ASSERT(err);
 
     /// start the pairing process 
-    err = ble_gap_security_init(BLE_GAP_DEVICE_INDEX, ble_gap_security_param1);
+    err = ble_gap_security_init(BLE_GAP_DEVICE_INDEX);
     NRF_ASSERT(err);
     //// init the ancs , ams ,device info and other device functionality 
     /// init the apple ancs, ams task , current time task  
