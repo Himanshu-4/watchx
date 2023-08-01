@@ -2,6 +2,9 @@
 
 #include "ble_gatt_client.h"
 
+/// @brief this contains the 
+static ble_peer_device_info_struct_t peer_dev_info;
+
 /// @brief this is to init the ble peer device info
 /// @param conn_handle
 /// @return succ/failure of the function
@@ -318,5 +321,89 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     
     NRF_LOG_WARNING("%s", dev_name);
     
+
+    peer_dev_info.ble_peer_Device_inited =1;
+    peer_dev_info.conn_handle = conn_handle;
+
     return err;
+}
+
+
+/// @brief to get the time information from the iphone 
+/// @param conn_handle 
+/// @param time 
+/// @return succ/failure of the fun 
+uint32_t ble_peer_get_Time_info(uint16_t conn_handle , kernel_time_struct_t * time)
+{
+
+}
+
+/// @brief to get the date information from the iphone 
+/// @param conn_handle 
+/// @param date 
+/// @return succ/failure 
+uint32_t ble_peer_get_date_info(uint16_t conn_handle, kernel_date_struct_t *date)
+{
+
+}
+
+/// @brief to get the battery information from the iphone 
+/// @param conn_handle 
+/// @param batt_soc 
+/// @return succ/failure of fun
+uint32_t ble_peer_get_battery_info(uint16_t conn_handle, uint8_t * batt_soc)
+{
+
+}
+
+/// @brief to get the device name of the bluetooth
+/// @param conn_handle 
+/// @param device_name 
+/// @return succ/failure of function 
+uint32_t ble_peer_get_device_name(uint16_t conn_handle, char *device_name)
+{
+
+}
+
+
+/// @brief to get the servie changed indication notification 
+/// @param conn_handle 
+/// @return service changed indication 
+uint8_t ble_peer_get_service_change_ind(uint16_t conn_handle)
+{
+
+}
+
+
+
+/// @brief Device indication handler 
+/// @param param 
+/// @param evt 
+void ble_peer_Device_indication_handler(ble_gattc_evt_t const *evt)
+{
+    /// handle the gatt service change indication 
+    if (evt->params.hvx.handle == peer_dev_info.gatt.ble_Gatt_srvc_cgd_char_handle)
+    {
+        /* code */
+    }
+
+     
+}
+
+/// @brief Device notification handler 
+/// @param param 
+/// @param evt 
+void ble_peer_Device_notification_handler( ble_gattc_evt_t const *evt)
+{
+    /// handle the notification from time and batt profile
+    if(evt->params.hvx.handle == peer_dev_info.batt_val.ble_battery_level_char_handle)
+    {
+
+    }
+    else if(evt->params.hvx.handle == peer_dev_info.dev_time.ble_dev_time_info_char_handle)
+    {
+        
+    }
+
+
 }

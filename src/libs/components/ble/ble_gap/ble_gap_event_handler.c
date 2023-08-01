@@ -31,7 +31,7 @@ static ble_gap_addr_t connected_peer_addr = {0};
 /// @brief this is to start the dhkey calculation
 /// @param conn_handle
 /// @return err code
-static uint32_t nrf_start_dhkey_calculation(uint16_t conn_handle);
+static uint32_t nrf_start_dhkey_calculation(ble_evt_t const *p_ble_evt);
 
 /// @brief this function is used to load the peripheral keys and reply to the phone
 /// @param conn_handle
@@ -262,7 +262,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         // get the dhkey
         // NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
 
-        nrf_start_dhkey_calculation(conn_handle);
+        nrf_start_dhkey_calculation(p_ble_evt);
     }
     break;
 
@@ -310,16 +310,16 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 /// @param p_ble_evt
 static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
 {
-    /// show the ble gpa security param by central
-    // NRF_LOG_INFO("%x,%x,%x,%x,%x,%x|| %d,%d ||%x,%x,%x,%x ||%x,%x,%x,%x", p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.bond,
-    //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.mitm, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.lesc,
-    //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.keypress, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.io_caps,
-    //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.oob, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.min_key_size,
-    //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.max_key_size, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.enc,
-    //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.sign,
-    //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.link, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.enc,
-    //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign,
-    //              p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link);
+    // show the ble gpa security param by central
+    NRF_LOG_INFO("%x,%x,%x,%x,%x,%x|| %d,%d ||%x,%x,%x,%x ||%x,%x,%x,%x", p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.bond,
+                 p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.mitm, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.lesc,
+                 p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.keypress, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.io_caps,
+                 p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.oob, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.min_key_size,
+                 p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.max_key_size, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.enc,
+                 p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.sign,
+                 p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.link, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.enc,
+                 p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign,
+                 p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link);
 
     uint32_t err_code = 0;
 
@@ -336,12 +336,16 @@ static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
     //     NRF_LOG_ERROR("del %d", err_code);
     // }
     /// get the index from the connection handle
-    uint8_t index = ble_gap_get_gap_index(conn_handle);
+    uint8_t index = ble_gap_get_gap_index(p_ble_evt->evt.gap_evt.conn_handle);
     /// check for a valid index
     if (index < BLE_GAP_MAX_NO_OF_DEVICES)
     {
-        err_code = sd_ble_gap_sec_params_reply(conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *)&gap_inst[index].key_set);
+        err_code = sd_ble_gap_sec_params_reply(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *)&gap_inst[index].key_set);
         NRF_ASSERT(err_code);
+    }
+    else 
+    {
+        NRF_LOG_ERROR("max index");
     }
 }
 
@@ -451,7 +455,7 @@ static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
 /// @brief this is to start the dhkey calculation
 /// @param conn_handle
 /// @return err code
-static uint32_t nrf_start_dhkey_calculation(uint16_t conn_handle)
+static uint32_t nrf_start_dhkey_calculation(ble_evt_t const *p_ble_evt)
 {
     /// get the index from the conn handle
     uint32_t err_code = 0;
@@ -464,24 +468,24 @@ static uint32_t nrf_start_dhkey_calculation(uint16_t conn_handle)
     {
         return ble_gap_err_device_index_invalid;
     }
-    NRF_LOG_INFO("index is %d", index);
 
     //// first check that is the public key of peer is valid or not
-    err_code = uECC_valid_public_key(gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
-    if (err_code != 1)
-    {
-        NRF_LOG_ERROR("invalid peer public key");
-    }
-    NRF_LOG_INFO("valid pub key");
-
+    // err_code = uECC_valid_public_key(gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
+    // err_code = uECC_valid_public_key(p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk, uECC_secp256r1());
+    // if (err_code != 1)
+    // {
+    //     NRF_LOG_ERROR("inv peer pub key");
+    //     return nrf_ERR_OPERATION_FAILED;
+    // }
+   
     /// compute here the shared secret from our private key and peer public key
     err_code = uECC_shared_secret(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, u8_ptr gap_inst[index].private_key_device,
                                   peer_dh_key.key, uECC_secp256r1());
     if (err_code != 1)
     {
-        NRF_LOG_ERROR("invalid shared secret");
+        NRF_LOG_ERROR("inv dh key");
+        return nrf_ERR_OPERATION_FAILED;
     }
-    NRF_LOG_INFO("done shared secret");
 
     err_code = sd_ble_gap_lesc_dhkey_reply(conn_handle, &peer_dh_key);
     NRF_ASSERT(err_code);

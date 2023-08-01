@@ -209,8 +209,8 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
     [ble_gap_security_param1]=
     {
         .bond = 1,
-        .io_caps = BLE_GAP_IO_CAPS_KEYBOARD_DISPLAY,
-        .mitm = 1,
+        .io_caps = BLE_GAP_IO_CAPS_DISPLAY_YESNO,
+        .mitm = 0,
         .oob =0,
         .keypress =0,
         .lesc = 1,
@@ -226,8 +226,8 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
 
         /// define the key distribuition about peer 
         //// this need not be valid , provided by peer after all 
-        .kdist_peer.enc = 0, 
-        .kdist_peer.id =0, 
+        .kdist_peer.enc = 1, 
+        .kdist_peer.id =1, 
         .kdist_peer.sign =0,
         .kdist_peer.link =0,// 1 is not supported by sd 
 
@@ -239,7 +239,7 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
         
         .bond = 1,
         .io_caps = BLE_GAP_IO_CAPS_NONE,
-        .mitm = 0,
+        .mitm = 1,
         .oob =0,
         .keypress =0,
         .lesc = 0,

@@ -402,6 +402,6 @@ const char * ble_ancs_get_catg_string(uint8_t cat_id);
 /// @brief this the callback handler for the apple ancs events 
 /// @param param 
 /// @param evt 
-void ble_ancs_client_event_handler(void *param ,ble_gattc_evt_t *evt);
+void ble_ancs_client_event_handler(void *param ,ble_gattc_evt_t const *evt);
 
 #endif

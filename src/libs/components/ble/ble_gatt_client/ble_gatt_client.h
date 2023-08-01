@@ -141,7 +141,7 @@ uint32_t gatt_client_discover_char_desc(uint16_t conn_hand , ble_char_struct_t *
 
 
 /// @brief this the typedef to add callback for the gatt notification
-typedef void (*gatt_client_notif_callbaclk)(void *param, ble_gattc_evt_t *evt );
+typedef void (*gatt_client_notif_callbaclk)(void *param, ble_gattc_evt_t const *evt );
 
 /// @brief this is to add the notification callback for the notification
 /// @note this function will be called inside the ble event handler task of the sd , which have a higher priority 
@@ -153,7 +153,7 @@ typedef void (*gatt_client_notif_callbaclk)(void *param, ble_gattc_evt_t *evt );
 uint32_t gatt_client_add_notif_callback(uint16_t conn_hand, gatt_client_notif_callbaclk callback , void *param);
 
 /// @brief this the typedef to add callback for the gatt indication
-typedef void (*gatt_client_indc_callbaclk)(void *param,  ble_gattc_evt_t *evt);
+typedef void (*gatt_client_indc_callbaclk)(void *param,  ble_gattc_evt_t const  *evt);
 
 /// @brief this is to add the indication callback to the client handlers
 /// @note this function will be called inside the ble event handler task of the sd , which have a higher priority 

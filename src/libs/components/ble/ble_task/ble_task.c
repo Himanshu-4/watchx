@@ -46,7 +46,12 @@ static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  
 /// @brief handle value notification handle 
 /// @param param 
 /// @param evt 
-static void ble_task_handle_value_notification(void *param, ble_gattc_evt_t *evt );
+static void ble_task_handle_value_notification(void *param, ble_gattc_evt_t const *evt );
+
+/// @brief handle value indication 
+/// @param param 
+/// @param evt 
+static void ble_task_handle_value_indication(void *param, ble_gattc_evt_t const *evt );
 
 /// @brief this function is called when there is an error triggered 
 /// @param param 
@@ -117,6 +122,9 @@ static void ble_client_task_init_process(void *param)
 
     //// assign the callback for that connection 
     err= gatt_client_add_notif_callback(conn_handle, ble_task_handle_value_notification, NULL);
+    NRF_ASSERT(err);
+
+    err = gatt_client_add_indication_callback(conn_handle ,ble_task_handle_value_indication , NULL);
     NRF_ASSERT(err);
 
     err = gatt_client_add_err_handler_callback(conn_handle , ble_client_error_handler , NULL );
@@ -209,6 +217,21 @@ static void ble_common_task(void *param)
 
 
 
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+
 /// @brief   device connected callback 
 /// @param param 
 /// @param gap_evt
@@ -260,15 +283,35 @@ static void ble_device_disconnected_callback(void *param , ble_gap_evt_t const  
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////// ble handle task notification 
-static void ble_task_handle_value_notification(void *param, ble_gattc_evt_t *evt )
+
+/// @brief handle the ble notification 
+/// @param param 
+/// @param evt 
+static void ble_task_handle_value_notification(void *param, ble_gattc_evt_t const  *evt )
 {
+    ///////////// these callbacks are gonna run in the softdevice event handler 
     /// the param is null for now , can be updated in future 
     UNUSED_PARAMETER(param);
 
-    ///////////// these callbacks are gonna run in the softdevice event handler 
+    /// handle the peer device notification 
+    ble_peer_Device_notification_handler(evt);
+    
+    /// ble ams client handler 
     ble_ams_client_event_handler(param, evt);
+
+   /// handle the ancs client  
     ble_ancs_client_event_handler(param , evt);
     
+}
+
+/// @brief handle the ble indication 
+/// @param param 
+/// @param evt 
+static void ble_task_handle_value_indication(void *param,ble_gattc_evt_t const *evt )
+{
+    UNUSED_PARAMETER(param);
+
+    ble_peer_Device_indication_handler(evt);
 }
 
 /// @brief this function is called when there is an error triggered 
