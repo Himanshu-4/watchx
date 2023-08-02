@@ -122,6 +122,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 //======================= BLE GAP CONFIG =============================================
 
+/////////////////// ble gap api specific 
+
+#define BLE_GAP_API_MUTEX_TIMEOUT 300
+
+#define BLE_GAP_API_TASK_NOTIF_TIMEOUT 1000
+
+////////////////////////////////////////////////
+/// this is used for cryptographic operations 
+
+#define BLE_GAP_RANDOM_NUM_GEN_WAIT_TIME_MSEC 5
+
+#define BLE_GAP_RANDOM_NUM_GEN_RETIRES 5
+
 //////////////////////// ble connection param config 
 
 #define BLE_MIN_CONNECTION_INTERVAL 50 //// in terms of milliseconds 
@@ -142,6 +155,8 @@
 //======================= BLE GATT server CONFIG =============================================
 
 #define BLE_GATT_SERVER_RX_MTU 250
+
+
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //======================= BLE GATT client CONFIG =============================================
@@ -155,6 +170,8 @@
 #define BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME 1000
 
 #define BLE_CLIENT_MESSAGE_BUFFER_SIZE 200
+
+
 //////////////////////////////////////////////////////////////////////////////////////
 //============================================================================================
 //======================= BLE ADDITIONAL  CONFIGs =============================================

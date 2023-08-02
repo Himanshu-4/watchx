@@ -20,6 +20,10 @@ extern volatile uint8_t ble_advertisement_State;
 /// @brief ble gap instance for multidevice
 extern ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 
+
+/// @brief this is to get the task handle
+extern volatile xTaskHandle ble_gap_taskhandle;
+
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////// static declarations here
@@ -28,10 +32,7 @@ static volatile uint16_t conn_handle = 0;
 
 static ble_gap_addr_t connected_peer_addr = {0};
 
-/// @brief this is to start the dhkey calculation
-/// @param conn_handle
-/// @return err code
-static uint32_t nrf_start_dhkey_calculation(ble_evt_t const *p_ble_evt);
+
 
 /// @brief this function is used to load the peripheral keys and reply to the phone
 /// @param conn_handle
@@ -262,7 +263,11 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         // get the dhkey
         // NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
 
-        nrf_start_dhkey_calculation(p_ble_evt);
+        // give the task notification to function security param init 
+        if(ble_gap_taskhandle != NULL)
+        {
+            xTaskNotify(ble_gap_taskhandle,0 , eSetValueWithoutOverwrite);
+        }
     }
     break;
 
@@ -450,45 +455,4 @@ static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
         //     NRF_LOG_ERROR("addk %d",err);
         // }
     }
-}
-
-/// @brief this is to start the dhkey calculation
-/// @param conn_handle
-/// @return err code
-static uint32_t nrf_start_dhkey_calculation(ble_evt_t const *p_ble_evt)
-{
-    /// get the index from the conn handle
-    uint32_t err_code = 0;
-    static ble_gap_lesc_dhkey_t peer_dh_key;
-
-    /// get the index from the connection handle
-    uint8_t index = ble_gap_get_gap_index(conn_handle);
-    /// check for a valid index
-    if (index >= BLE_GAP_MAX_NO_OF_DEVICES)
-    {
-        return ble_gap_err_device_index_invalid;
-    }
-
-    //// first check that is the public key of peer is valid or not
-    // err_code = uECC_valid_public_key(gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
-    // err_code = uECC_valid_public_key(p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk, uECC_secp256r1());
-    // if (err_code != 1)
-    // {
-    //     NRF_LOG_ERROR("inv peer pub key");
-    //     return nrf_ERR_OPERATION_FAILED;
-    // }
-   
-    /// compute here the shared secret from our private key and peer public key
-    err_code = uECC_shared_secret(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, u8_ptr gap_inst[index].private_key_device,
-                                  peer_dh_key.key, uECC_secp256r1());
-    if (err_code != 1)
-    {
-        NRF_LOG_ERROR("inv dh key");
-        return nrf_ERR_OPERATION_FAILED;
-    }
-
-    err_code = sd_ble_gap_lesc_dhkey_reply(conn_handle, &peer_dh_key);
-    NRF_ASSERT(err_code);
-
-    return err_code;
 }

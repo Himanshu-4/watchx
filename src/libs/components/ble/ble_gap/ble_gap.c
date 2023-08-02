@@ -5,6 +5,24 @@
 
 #include "nrf_ran_gen.h"
 
+//// make a mutex for encryption process
+#include "semphr.h"
+#include "task.h"
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+/////////////////////// static variables  ////////////////////////////////
+////////// create a mutex for the functions
+
+// use semaphore spi handle
+static SemaphoreHandle_t ble_gap_mutex_handle;
+
+// these are used to create a semaphore buffer
+static StaticSemaphore_t ble_gap_semphr_buffer = {0};
+
+/// @brief this is to get the task handle and
+volatile xTaskHandle ble_gap_taskhandle;
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -19,6 +37,16 @@
 #define CHECK_INIT(x)                                                   \
     if (gap_inst[x].ble_gap_instnace_inited != BLE_GAP_INSTANCE_INITED) \
     return ble_gap_err_instnace_not_inited
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////// function declarations here
+
+/// @brief this is to start the dhkey calculation
+/// @param conn_handle
+/// @return err code
+static uint32_t nrf_start_dhkey_calculation(uint8_t index);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,13 +114,13 @@ static void ble_gap_genreate_lesc_keypair(uint8_t index)
 {
 
     /// genertate the key pair
-    uint8_t ret = uECC_make_key(gap_inst[index].key_set.keys_own.p_pk->pk , gap_inst[index].private_key_device ,  uECC_secp256r1());
+    uint8_t ret = uECC_make_key(gap_inst[index].key_set.keys_own.p_pk->pk, gap_inst[index].private_key_device, uECC_secp256r1());
     if (ret != 1)
     {
         NRF_LOG_ERROR("keyfailed %d", ret);
     }
     /// check for a valid public key
-    ret = uECC_valid_public_key(gap_inst[index].key_set.keys_own.p_pk->pk,  uECC_secp256r1());
+    ret = uECC_valid_public_key(gap_inst[index].key_set.keys_own.p_pk->pk, uECC_secp256r1());
     if (ret != 1)
     {
         NRF_LOG_ERROR("public inv");
@@ -301,14 +329,13 @@ static int random_number_gen(uint8_t *dest, unsigned size)
             goto random_num_avial;
         }
     }
-    /// failed to get random numbers 
+    /// failed to get random numbers
     return 0;
 
 random_num_avial:
     /// we can have to add A DELAY FUNCTION TO WAIT FOR SOFTDEVICE TO PUT SOME random number here
     uint8_t ret = sd_rand_application_vector_get(dest, size);
     return (ret == nrf_OK) ? (1) : (0);
-
 }
 
 /// @brief preinit the gap so that it can the BLE GAP properly
@@ -333,6 +360,15 @@ void ble_gap_pre_init(void)
     {
         gap_inst[i].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
     }
+
+    /// create the mutex for gap handlers
+    ble_gap_mutex_handle = xSemaphoreCreateMutexStatic(&ble_gap_semphr_buffer);
+
+    if (ble_gap_mutex_handle == NULL)
+    {
+        NRF_LOG_ERROR("null gap mutex");
+    }
+    xSemaphoreGive(ble_gap_mutex_handle);
 }
 
 /// @brief this function is used to init the security procedure
@@ -346,6 +382,12 @@ uint32_t ble_gap_security_init(uint8_t index)
     if (gap_inst[index].ble_gap_conn_handle == BLE_CONN_HANDLE_INVALID)
         return ble_gap_err_conn_handle_invalid;
 
+    //// take the mutex
+    if (xSemaphoreTake(ble_gap_mutex_handle, BLE_GAP_API_MUTEX_TIMEOUT) != pdPASS)
+    {
+        return ble_gap_err_mutex_not_avial;
+    }
+
     if (gap_inst[index].ble_gap_pairing_type == PAIRING_TYPE_LESC)
     {
         ble_gap_genreate_lesc_keypair(index);
@@ -354,10 +396,80 @@ uint32_t ble_gap_security_init(uint8_t index)
     {
         ble_gap_genrate_legacy_keypair(index);
     }
-    /// this will exit when the crypto operations are completed and link is autheticated
+
+    //// return code
+    uint32_t ret = 0;
+
+    /// get the task handle and wait for notification
+    ble_gap_taskhandle = xTaskGetCurrentTaskHandle();
+
+    /// send an authentication request to the peer device
+    ret = sd_ble_gap_authenticate(gap_inst[index].ble_gap_conn_handle, &gap_sec_param[gap_inst[index].ble_gap_security_param_index]);
+    NRF_ASSERT(ret);
+    if (ret != nrf_OK)
+    {
+        goto return_mech;
+    }
+
+    /// wait from the notification about the dhkey request
+    if( xTaskNotifyWait(0, U32_MAX, &ret , BLE_GAP_API_TASK_NOTIF_TIMEOUT) != pdPASS)
+    {
+        ret = ble_gap_err_timeout;
+        goto return_mech;
+    }
+
+    /// check for the return 
+    if(ret != nrf_OK)
+    {
+        goto return_mech;
+    }
+
+    nrf_start_dhkey_calculation(index);
+
     
-      uint32_t ret_code = sd_ble_gap_authenticate(gap_inst[index].ble_gap_conn_handle, &gap_sec_param[gap_inst[index].ble_gap_security_param_index]);
-    NRF_ASSERT(ret_code);
-    
-    return ble_gap_ok;
+//// return mechanism 
+return_mech:
+    /// nullify the task handle
+    ble_gap_taskhandle = NULL;
+
+    /// give back the mutex
+    xSemaphoreGive(ble_gap_mutex_handle);
+
+    return ret;
+}
+
+
+
+/// @brief this is to start the dhkey calculation
+/// @param conn_handle
+/// @return err code
+static uint32_t nrf_start_dhkey_calculation(uint8_t index)
+{
+    /// get the index from the conn handle
+    uint32_t err_code = 0;
+    static ble_gap_lesc_dhkey_t peer_dh_key;
+
+
+    // first check that is the public key of peer is valid or not
+    // err_code = uECC_valid_public_key(gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
+    err_code = uECC_valid_public_key(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
+    if (err_code != 1)
+    {
+        NRF_LOG_ERROR("inv peer pub key");
+        return nrf_ERR_OPERATION_FAILED;
+    }
+   
+    /// compute here the shared secret from our private key and peer public key
+    err_code = uECC_shared_secret(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, u8_ptr gap_inst[index].private_key_device,
+                                  peer_dh_key.key, uECC_secp256r1());
+    if (err_code != 1)
+    {
+        NRF_LOG_ERROR("inv dh key");
+        return nrf_ERR_OPERATION_FAILED;
+    }
+
+    err_code = sd_ble_gap_lesc_dhkey_reply(gap_inst[index].ble_gap_conn_handle, &peer_dh_key);
+    NRF_ASSERT(err_code);
+
+    return err_code;
 }
