@@ -268,6 +268,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
                             client_struct[i].client_notif_handler(client_struct[i].client_notif_hand_param, (ble_gattc_evt_t *) &p_ble_evt->evt.gattc_evt);
                         }
                     }
+                    
 
                     else
                     {

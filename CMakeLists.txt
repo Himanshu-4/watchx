@@ -158,76 +158,7 @@ set(LINKER_FLAGS
 ############################################################## set the SDK libs and startup file for the NRF52
 # specify the source files 
 set( SDK_SRC_FILES
-
-# ${NRF_SDK_DIR}/components/boards/boards.c 
-
-# # build the softdevice specific files
-# ${NRF_SDK_DIR}/components/softdevice/common/nrf_sdh_ble.c
-# ${NRF_SDK_DIR}/components/softdevice/common/nrf_sdh_soc.c
-# ${NRF_SDK_DIR}/components/softdevice/common/nrf_sdh.c
-# sdk libraries 
-#  for sttring error handling 
-# nrf string error libs
-# ${NRF_SDK_DIR}/components/libraries/strerror/nrf_strerror.c
-# nordic section iterator for handling sections 
-# ${NRF_SDK_DIR}/components/libraries/experimental_section_vars/nrf_section_iter.c
-
-# # nordic log module 
-# ${NRF_SDK_DIR}/components/libraries/log/src/nrf_log_frontend.c 
-# ${NRF_SDK_DIR}/components/libraries/log/src/nrf_log_str_formatter.c 
-
-  # std libs library 
-# ${NRF_SDK_DIR}/components/libraries/button/app_button.c 
-
-# util platform error handler , gcc error handler 
-# ${NRF_SDK_DIR}/components/libraries/util/app_error.c 
-# ${NRF_SDK_DIR}/components/libraries/util/app_error_handler_gcc.c 
-# ${NRF_SDK_DIR}/components/libraries/util/app_error_weak.c 
-# ${NRF_SDK_DIR}/components/libraries/util/app_util_platform.c 
-# ${NRF_SDK_DIR}/components/libraries/util/nrf_assert.c 
-# ${NRF_SDK_DIR}/components/libraries/timer/app_timer_freertos.c 
-# ${NRF_SDK_DIR}/components/libraries/atomic/nrf_atomic.c 
-# ${NRF_SDK_DIR}/components/libraries/memobj/nrf_memobj.c 
-# ${NRF_SDK_DIR}/components/libraries/ringbuf/nrf_ringbuf.c 
-# ${NRF_SDK_DIR}/components/libraries/strerror/nrf_strerror.c 
-# ${NRF_SDK_DIR}/components/libraries/balloc/nrf_balloc.c 
-# ${NRF_SDK_DIR}/components/boards/boards.c 
-# contains the 
-# ${NRF_SDK_DIR}/components/drivers_nrf/nrf_soc_nosd/nrf_nvic.c 
-# ${NRF_SDK_DIR}/components/drivers_nrf/nrf_soc_nosd/nrf_soc.c 
-
-
-# integration library for the clock and power modules 
-
-# the nrf clcok hal for the clock inits
-# ${NRF_SDK_DIR}/integration/nrfx/legacy/nrf_drv_clock.c
-# ${NRF_SDK_DIR}/modules/nrfx/drivers/src/nrfx_clock.c 
-
-# # nrf power driver for power regulation system 
-# ${NRF_SDK_DIR}/integration/nrfx/legacy/nrf_drv_power.c
-# ${NRF_SDK_DIR}/modules/nrfx/drivers/src/nrfx_power.c 
-
-# build the driver library for the uart 
-# ${NRF_SDK_DIR}/integration/nrfx/legacy/nrf_drv_uart.c
-# ${NRF_SDK_DIR}/modules/nrfx/drivers/src/nrfx_uart.c 
-
-
-# ${NRF_SDK_DIR}/modules/nrfx/soc/nrfx_atomic.c 
-# build the file for power init 
-# include the nrf uart peripheral driver 
-
-# ${NRF_SDK_DIR}/modules/nrfx/drivers/src/nrfx_gpiote.c 
-
-# segger RTT support 
-# ${NRF_SDK_DIR}/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c
-# ${NRF_SDK_DIR}/external/segger_rtt/SEGGER_RTT.c
-# ${NRF_SDK_DIR}/external/segger_rtt/SEGGER_RTT_printf.c
-
-# the file printf format library 
-# ${NRF_SDK_DIR}/external/fprintf/nrf_fprintf.c 
-# ${NRF_SDK_DIR}/external/fprintf/nrf_fprintf_format.c 
-# the source file of your project
-        
+        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/startup/gcc_startup_nrf52.S
 )
 
       
@@ -237,22 +168,12 @@ set(SDK_INCLUDE_DIR
       ${NRF_SDK_DIR}/external/freertos/include 
       ${CMAKE_PROJECT_DIR}/src/config
 
-      ###################################
-#       ${NRF_SDK_DIR}/components/libraries/strerror
-
       ##########################################################################3
       ############################################################################
       ########################  these are the includes when using a softdevice 
 # #       include the softdevice s132  headers 
       ${NRF_SDK_DIR}/components/softdevice/s132/headers/nrf52
-      ${NRF_SDK_DIR}/components/softdevice/s132/headers
-        #include the common headers for the softdevice 
-        # ${NRF_SDK_DIR}/components/softdevice/common 
-
-      # include the  experimental section variables used to define vars in particular ram section 
-#       ${NRF_SDK_DIR}/components/libraries/experimental_section_vars
-
-    
+      ${NRF_SDK_DIR}/components/softdevice/s132/headers    
 
 # arm math library ffor the computation of the floats, and math operations
         ${NRF_SDK_DIR}/components/toolchain/cmsis/dsp/Include
@@ -260,23 +181,6 @@ set(SDK_INCLUDE_DIR
       
       # this contains the app error handlers 
       ${NRF_SDK_DIR}/components/libraries/util 
-#       ${NRF_SDK_DIR}/components/libraries/balloc 
-#       ${NRF_SDK_DIR}/components/libraries/ringbuf 
-#       ${NRF_SDK_DIR}/components/libraries/bsp 
-#       ${NRF_SDK_DIR}/components/libraries/log cd
-#       ${NRF_SDK_DIR}/components/libraries/button 
-#       ${NRF_SDK_DIR}/components/libraries/timer 
-#       ${NRF_SDK_DIR}/components/libraries/strerror 
-#       ${NRF_SDK_DIR}/components/libraries/atomic 
-#       ${NRF_SDK_DIR}/components/libraries/memobj 
-#       ${NRF_SDK_DIR}/components/libraries/experimental_section_vars 
-
-# this contains the log library structure for the nrf
-#       ${NRF_SDK_DIR}/components/libraries/log/src 
-#       ${NRF_SDK_DIR}/components/libraries/log
-#       ${NRF_SDK_DIR}/components/libraries/delay
-#       ${NRF_SDK_DIR}/components/boards 
-#       ${NRF_SDK_DIR}/components/drivers_nrf/nrf_soc_nosd 
 
       ${NRF_SDK_DIR}/components/toolchain/cmsis/include 
       
@@ -371,8 +275,6 @@ target_include_directories(freertos_lib PUBLIC SYSTEM
             )
 
 
-     
-
 ##################################################################################################################################################################
 ############################################################################################################################################################################
 ##############################################################################################################################################################################
@@ -432,120 +334,36 @@ target_compile_options(crypto_eccdh PRIVATE
 
 target_include_directories(crypto_eccdh PUBLIC SYSTEM 
            ${CRYPTO_ECDH_INCLUDE}
-           ${CMAKE_SOURCE_DIR}/config
            )
-
-
-     
 
 ##################################################################################################################################################################
 ############################################################################################################################################################################
 ##############################################################################################################################################################################
 ##########################################################   Build the SDK stdlib files   ##################################################################################
+
+file(GLOB_RECURSE nrf_hal_libs_srcs 
+        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/*.c 
+)
+
+
+foreach(hal_libs ${nrf_hal_libs_srcs})
+
+get_filename_component(hal_libs ${hal_libs} DIRECTORY)
+
+list(APPEND SDK_INCLUDE_DIR ${hal_libs})
+endforeach(hal_libs ${nrf_hal_libs_srcs})
+
+message("NRF HAL library directory")
+
+list(REMOVE_DUPLICATES SDK_INCLUDE_DIR)
+foreach(srcs ${SDK_INCLUDE_DIR})
+message(${srcs})
+endforeach(srcs ${SDK_INCLUDE_DIR})
+
+
 list(APPEND 
     SDK_SRC_FILES
-    # gpio related library , also gpio task and events 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/gpio/gpio.c
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/gpio/gpiote.c 
-    
-    # the I2c library for the nrf
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/i2c/i2c.c
-    # create the thread safe API
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/i2c/i2c_thread_safe.c
-    
-    # spi library for the nrf52 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi.c
-    # spi thread safe library for using with retos enviournment 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi_thread_safe.c
-    
-    # system related library 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/system/system.c 
-    # implement the low level system calls 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/system/sys_calls.c
-    # implement the mem management of heap
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/system/sysmem.c
-
-    # the timer related libraries 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/timer/timer.c 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/timer/nrf_time.c 
-    
-    # uart related libraries 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/uart/uart_drv.c
-    # uart logging library for log the serial data using ring buffer, thread safe API
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/uart/uart_logs.c
-    
-    #ppi related libraries  
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/ppi/ppi.c
-
-    # pwm related lib 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/pwm/nrf_pwm.c 
-
-    # adc related library 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/adc/adc.c
-    
-    # watchdog timer API 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/watchdog/watchdog.c
-    
-    # the block protection API
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/bprot/bprot.c 
-    
-    # flash accesss API to read write flash
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/flash/flash_write.c 
-
-        # non volatile storage library for handling flash write operations
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/nvs/nvs.c
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/nvs/nvs_ota.c
-    
-        # these are the startup files to start the arm cortex m4 core 
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/startup/gcc_startup_nrf52.S 
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/startup/system_nrf52.c 
-
-        # nrf rtc library
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/rtc/nrf_rtc.c 
-
-        # nrf random number genrator 
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/rng/nrf_rng.c
-
-    )
-
-list(APPEND 
-    SDK_INCLUDE_DIR 
-           # gpio related library , also gpio task and events 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/gpio
-    # the I2c library for the nrf
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/i2c
-    # spi library for the nrf52 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi
-    # system related library 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/system 
-    # the timer related libraries 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/timer  
-    # uart related libraries 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/uart
-        #ppi related libraries  
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/ppi
-     # pwm related lib 
-     ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/pwm
-
-    # adc related library 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/adc
-    # watchdog timer API 
-    ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/watchdog
-        # the block protection API
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/bprot 
-        # flash accesss API to read write flash
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/flash 
-        # non volatile storage library 
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/nvs
-
-        # nrf real time counter library 
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/rtc 
-
-        # nrf random number genrator 
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/rng
-
-        # contains the startup scripts 
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/startup
+        ${nrf_hal_libs_srcs}
     )
 
 
@@ -586,58 +404,38 @@ list(APPEND
 # this contains the all ble  related files 
 
 
-file(GLOB ble_nordic_files 
-${PROJECT_BLE_FOLDER}/ble_ams/*.c 
-
-${PROJECT_BLE_FOLDER}/ble_ancs/*.c 
-
-${PROJECT_BLE_FOLDER}/ble_gap/*.c 
-
-${PROJECT_BLE_FOLDER}/ble_gatt_client/*.c 
-
-${PROJECT_BLE_FOLDER}/ble_gatt_server/*.c
-
-${PROJECT_BLE_FOLDER}/ble_stack_init/*.c
-
-${PROJECT_BLE_FOLDER}/ble_task/*.c 
-
-${PROJECT_BLE_FOLDER}/ble_peer_device_info/*.c 
+file(GLOB_RECURSE ble_nordic_files 
+        ${PROJECT_BLE_FOLDER}/*/*.c 
 )
 
+# this contains the directories of the ble library 
+set(BLE_LIB_INCLUDE_DIR)
 
-    # deifne the external libraries for the sensors ans peropheral that connect with nrf52
+foreach(ble_sources ${ble_nordic_files})
+
+get_filename_component(dirname ${ble_sources} DIRECTORY)
+
+list(APPEND BLE_LIB_INCLUDE_DIR ${dirname})
+endforeach(ble_sources ${ble_nordic_files})
+
+
+message("BLE library directories are ")
+
+# remove the duplicates directory from the includes 
+list(REMOVE_DUPLICATES BLE_LIB_INCLUDE_DIR)
+
+# print the direcotries 
+foreach(srcs ${BLE_LIB_INCLUDE_DIR})
+
+message(${srcs})
+
+endforeach(srcs ${BLE_LIB_INCLUDE_DIR})
+
+
 set(BLE_LIBS_SRC
         # this is the ble stack init files 
         ${ble_nordic_files}
         )
-
-set(BLE_LIB_INCLUDE_DIR
-        # the  libraries header file paths 
-  
-        # here ancs services headress  be found        
-        ${PROJECT_BLE_FOLDER}/ble_ancs
-        # here the ams service can be found 
-        ${PROJECT_BLE_FOLDER}/ble_ams
-         # gap related headers here 
-         ${PROJECT_BLE_FOLDER}/ble_gap
-         # gatt client related headers  here 
-         ${PROJECT_BLE_FOLDER}/ble_gatt_client
-         
-         # gatt server related headers  here 
-         ${PROJECT_BLE_FOLDER}/ble_gatt_server
-
-        # ble common library for the ble_config header file 
-        ${PROJECT_BLE_FOLDER}/ble_stack_init
-
-        # the ble task folder 
-        ${PROJECT_BLE_FOLDER}/ble_task
-        
-
-        # peer device info library , can get the name of peer device 
-        ${PROJECT_BLE_FOLDER}/ble_peer_device_info
-
-        )
-
 
 
         # make a library of external 
@@ -646,11 +444,8 @@ ${BLE_LIBS_SRC}
 )
 
 
-
 target_compile_definitions(ble_library PRIVATE
     ${COMMON_DEFINES}   
-#     ${NIMBLE_STACK_DEFINES}
-
 )
 
 target_compile_options(ble_library PRIVATE
@@ -685,81 +480,31 @@ target_include_directories(ble_library PUBLIC SYSTEM
 
         # this is kernel task files 
         file ( GLOB watchx_kernel_files 
-        ${PROJECT_KERNEL_FOLDER}/kernel_task/*.c 
-
-        # sleep handle related to the device sleep  
-        ${PROJECT_KERNEL_FOLDER}/sleep_handles/*.c 
-        
-        # kernel time management 
-        ${PROJECT_KERNEL_FOLDER}/time_manager/*.c 
-
-        # kernel memory management file 
-        ${PROJECT_KERNEL_FOLDER}/memory_manager/*.c 
+        ${PROJECT_KERNEL_FOLDER}/*/*.c 
+        ${PROJECT_KERNEL_FOLDER}/*/*/*.c
         )
 
-#    this contains Kernel  devices  drivers  
+set(WATCH_KERNEL_INCLUDE_DIR)
 
-        # this is accelrometer related  files 
-        file ( GLOB kernel_Device_drivers 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/accelrometer/*.c 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/battery/*.c 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/button/*.c 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/buzzer/*.c 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/display/*.c 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/led/*.c 
-        )
-     
+foreach(watchxkernel_srcs ${watchx_kernel_files})
 
-        set(kernel_device_drivers_files 
-        ${kernel_Device_drivers}
-        )
+get_filename_component(dirname ${watchxkernel_srcs} DIRECTORY)
 
+list(APPEND WATCH_KERNEL_INCLUDE_DIR ${dirname})
+endforeach(watchxkernel_srcs ${watchx_kernel_files})
 
-    # deifne the external libraries for the sensors ans peropheral that connect with nrf52
-set(EXTERNAL_DEVICES_INCLUDE_DIR
-        # this is accelrometer related  files 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/accelrometer 
+# remove the duplicates directory from the includes 
+list(REMOVE_DUPLICATES WATCH_KERNEL_INCLUDE_DIR)
 
-        # battery related 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/battery
-
-        # button related
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/button
-
-        # buzzer related 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/buzzer 
-
-        #display related 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/display 
-
-        # led relted 
-        ${PROJECT_KERNEL_FOLDER}/device_drivers/led 
-        )
-
+message("the watchx kernel dir")
+# display the content 
+foreach(srcs ${WATCH_KERNEL_INCLUDE_DIR})
+message(${srcs})
+endforeach(srcs ${WATCH_KERNEL_INCLUDE_DIR})
 
 set( WATCHX_KERNEL_SRC 
       ${watchx_kernel_files}
-        ${kernel_device_drivers_files}
         )
-
-
-    # deifne the external libraries for the sensors ans peropheral that connect with nrf52
-set(WATCH_KERNEL_INCLUDE_DIR
-        # kernel task related files  
-        ${PROJECT_KERNEL_FOLDER}/kernel_task 
-
-        # kernel sleep handles 
-        ${PROJECT_KERNEL_FOLDER}/sleep_handles
-
-        # kernel time related 
-        ${PROJECT_KERNEL_FOLDER}/time_manager
-
-        # kernel memory manager 
-        ${PROJECT_KERNEL_FOLDER}/memory_manager
-
-        ${EXTERNAL_DEVICES_INCLUDE_DIR}
-        )
-
 
         # make a library of external that are connected to the nrf52 
 add_library(watchx_kernel_lib  STATIC 

@@ -408,35 +408,35 @@ static void nrf_handle_security_info_request(ble_evt_t const *p_ble_evt)
 static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
 {
 
-    // NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2%x,ko %x,kp %x",
-    //              p_ble_evt->evt.gap_evt.params.auth_status.auth_status,
-    //              p_ble_evt->evt.gap_evt.params.auth_status.error_src,
-    //              p_ble_evt->evt.gap_evt.params.auth_status.bonded,
-    //              p_ble_evt->evt.gap_evt.params.auth_status.lesc,
+    NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2%x,ko %x,kp %x",
+                 p_ble_evt->evt.gap_evt.params.auth_status.auth_status,
+                 p_ble_evt->evt.gap_evt.params.auth_status.error_src,
+                 p_ble_evt->evt.gap_evt.params.auth_status.bonded,
+                 p_ble_evt->evt.gap_evt.params.auth_status.lesc,
 
-    //              //// the sm1 level
-    //              ((p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv1 << 3) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv2 << 2) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv3 << 1) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv4)),
+                 //// the sm1 level
+                 ((p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv1 << 3) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv2 << 2) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv3 << 1) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv4)),
 
-    //              /// sm2 level
-    //              ((p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv1 << 3) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv2 << 2) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv3 << 1) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv4)),
+                 /// sm2 level
+                 ((p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv1 << 3) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv2 << 2) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv3 << 1) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv4)),
 
-    //              /// kdist owner
-    //              ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.enc << 3) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.id << 2) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.link << 1) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.sign)),
+                 /// kdist owner
+                 ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.enc << 3) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.id << 2) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.link << 1) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.sign)),
 
-    //              /// kdist peer
-    //              ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.enc << 3) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.id << 2) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.link << 1) |
-    //               (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.sign)));
+                 /// kdist peer
+                 ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.enc << 3) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.id << 2) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.link << 1) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.sign)));
 
     uint32_t err = 0;
     /// get the index from the conn handle
