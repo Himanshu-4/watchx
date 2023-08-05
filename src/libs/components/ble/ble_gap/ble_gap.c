@@ -323,7 +323,8 @@ static int random_number_gen(uint8_t *dest, unsigned size)
         if (size >= bytes_avial)
         {
             // delay(BLE_GAP_RANDOM_NUM_GEN_WAIT_TIME_MSEC);
-            delay(3);
+            delay(4);
+            NRF_LOG_INFO("%d",i);
         }
         else
         {
