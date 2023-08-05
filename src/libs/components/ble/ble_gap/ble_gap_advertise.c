@@ -209,7 +209,7 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
     [ble_gap_security_param1]=
     {
         .bond = 1,
-        .io_caps = BLE_GAP_IO_CAPS_DISPLAY_YESNO,
+        .io_caps = BLE_GAP_IO_CAPS_KEYBOARD_DISPLAY,
         .mitm = 1,
         .oob =0,
         .keypress =0,
@@ -220,14 +220,14 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
 
         ///// define the key distribution 
         .kdist_own.enc = 1, // LTK and Master identification 
-        .kdist_own.id = 0, // identity resolving key 
+        .kdist_own.id = 1, // identity resolving key 
         .kdist_own.sign = 0, // connection signature resolving key 
         .kdist_own.link = 0, // 1 is not supported by sd 
 
         /// define the key distribuition about peer 
         //// this need not be valid , provided by peer after all 
         .kdist_peer.enc = 1, 
-        .kdist_peer.id = 0, 
+        .kdist_peer.id = 1, 
         .kdist_peer.sign =0,
         .kdist_peer.link =0,// 1 is not supported by sd 
 
@@ -238,7 +238,7 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
     {
         
         .bond = 1,
-        .io_caps = BLE_GAP_IO_CAPS_NONE,
+        .io_caps = BLE_GAP_IO_CAPS_KEYBOARD_DISPLAY,
         .mitm = 1,
         .oob =0,
         .keypress =0,
@@ -249,14 +249,14 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
 
         ///// define the key distribution 
         .kdist_own.enc = 1, // LTK and Master identification 
-        .kdist_own.id = 0, // identity resolving key 
+        .kdist_own.id = 1, // identity resolving key 
         .kdist_own.sign = 0, // connection signature resolving key 
         .kdist_own.link = 0,
 
         /// define the key distribuition about peer 
         //// this need not be valid , provided by peer after all 
         .kdist_peer.enc = 1, 
-        .kdist_peer.id =0, 
+        .kdist_peer.id =1, 
         .kdist_peer.sign =0,
         .kdist_peer.link =0,
     },

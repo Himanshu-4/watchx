@@ -117,13 +117,13 @@ static void ble_gap_genreate_lesc_keypair(uint8_t index)
     uint8_t ret = uECC_make_key(gap_inst[index].key_set.keys_own.p_pk->pk, gap_inst[index].private_key_device, uECC_secp256r1());
     if (ret != 1)
     {
-        NRF_LOG_ERROR("keyfailed %d", ret);
+        NRF_LOG_ERROR("mkey");
     }
     /// check for a valid public key
     ret = uECC_valid_public_key(gap_inst[index].key_set.keys_own.p_pk->pk, uECC_secp256r1());
     if (ret != 1)
     {
-        NRF_LOG_ERROR("public inv");
+        NRF_LOG_ERROR("pbk_dev");
     }
 }
 
@@ -322,7 +322,8 @@ static int random_number_gen(uint8_t *dest, unsigned size)
         sd_rand_application_bytes_available_get(&bytes_avial);
         if (size >= bytes_avial)
         {
-            delay(BLE_GAP_RANDOM_NUM_GEN_WAIT_TIME_MSEC);
+            // delay(BLE_GAP_RANDOM_NUM_GEN_WAIT_TIME_MSEC);
+            delay(3);
         }
         else
         {
@@ -330,6 +331,7 @@ static int random_number_gen(uint8_t *dest, unsigned size)
         }
     }
     /// failed to get random numbers
+    NRF_LOG_ERROR("random fail");
     return 0;
 
 random_num_avial:
@@ -424,9 +426,24 @@ uint32_t ble_gap_security_init(uint8_t index)
         goto return_mech;
     }
 
-    nrf_start_dhkey_calculation(index);
+   ret =  nrf_start_dhkey_calculation(index);
 
-    
+    if(ret != nrf_OK)
+    {
+        ret = ble_gap_err_dh_key_cal_failed;
+        goto return_mech;
+    }
+    /// wait for the notification from the connection security update event 
+    if(xTaskNotifyWait(0,U32_MAX, &ret, BLE_GAP_API_TASK_NOTIF_TIMEOUT) != pdPASS)
+    {
+        ret = ble_gap_err_timeout;
+        goto return_mech;
+    }
+    else 
+    {
+        NRF_LOG_INFO("succ conn");
+    }
+
 //// return mechanism 
 return_mech:
     /// nullify the task handle
@@ -447,7 +464,7 @@ static uint32_t nrf_start_dhkey_calculation(uint8_t index)
 {
     /// get the index from the conn handle
     uint32_t err_code = 0;
-    static ble_gap_lesc_dhkey_t peer_dh_key;
+    ble_gap_lesc_dhkey_t peer_dh_key;
 
 
     // first check that is the public key of peer is valid or not
@@ -455,7 +472,7 @@ static uint32_t nrf_start_dhkey_calculation(uint8_t index)
     err_code = uECC_valid_public_key(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
     if (err_code != 1)
     {
-        NRF_LOG_ERROR("inv peer pub key");
+        NRF_LOG_ERROR("peerkey");
         return nrf_ERR_OPERATION_FAILED;
     }
    
@@ -464,7 +481,7 @@ static uint32_t nrf_start_dhkey_calculation(uint8_t index)
                                   peer_dh_key.key, uECC_secp256r1());
     if (err_code != 1)
     {
-        NRF_LOG_ERROR("inv dh key");
+        NRF_LOG_ERROR("dhkey");
         return nrf_ERR_OPERATION_FAILED;
     }
 

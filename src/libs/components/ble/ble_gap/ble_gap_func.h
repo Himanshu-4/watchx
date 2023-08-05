@@ -52,7 +52,9 @@ enum _BLE_GAP_RELATED_ERRORS_
 
     ble_gap_err_instance_already_inited,
     ble_gap_err_instnace_init_falied,
-    ble_gap_err_instnace_not_inited
+    ble_gap_err_instnace_not_inited,
+
+    ble_gap_err_dh_key_cal_failed
 
 };
 /////////////////////////////////////////////////////////////////

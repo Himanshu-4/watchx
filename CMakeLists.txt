@@ -302,17 +302,17 @@ add_library(crypto_eccdh STATIC
 
 
 set(CRYPTO_ECCDH_COMPILE_DEFS_FOR_C
-        -DuECC_ENABLE_VLI_API=0
+        -DuECC_ENABLE_VLI_API=1
         -DuECC_OPTIMIZATION_LEVEL=3
-        -DuECC_SQUARE_FUNC=0
+        -DuECC_SQUARE_FUNC=1
         -DuECC_SUPPORT_COMPRESSED_POINT=0
         -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
         )
 
 set(CRYPTO_ECCDH_COMPILE_DEFS_FOR_ASM
- -DuECC_ENABLE_VLI_API=0
+ -DuECC_ENABLE_VLI_API=1
  -DuECC_OPTIMIZATION_LEVEL=3
- -DuECC_SQUARE_FUNC=0
+ -DuECC_SQUARE_FUNC=1
  -DuECC_SUPPORT_COMPRESSED_POINT=0
  -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
         )
@@ -326,7 +326,7 @@ target_compile_definitions(crypto_eccdh PRIVATE
 
 target_compile_options(crypto_eccdh PRIVATE
            ${COMMON_C_FLAGS}
-           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fomit-frame-pointer -Os -g3 >
+           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fomit-frame-pointer >
            $<$<COMPILE_LANGUAGE:CXX>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti -fomit-frame-pointer>
            $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp>
              )

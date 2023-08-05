@@ -20,7 +20,6 @@ extern volatile uint8_t ble_advertisement_State;
 /// @brief ble gap instance for multidevice
 extern ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 
-
 /// @brief this is to get the task handle
 extern volatile xTaskHandle ble_gap_taskhandle;
 
@@ -31,8 +30,6 @@ extern volatile xTaskHandle ble_gap_taskhandle;
 static volatile uint16_t conn_handle = 0;
 
 static ble_gap_addr_t connected_peer_addr = {0};
-
-
 
 /// @brief this function is used to load the peripheral keys and reply to the phone
 /// @param conn_handle
@@ -46,6 +43,10 @@ static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt);
 /// @brief this function is handle the authentication status of the data
 /// @param p_ble_evt
 static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt);
+
+/// @brief this funtion is to handle the paskkey display event
+/// @param p_ble_evt
+static void nrf_handle_passkey_display_Evt(ble_evt_t const *p_ble_evt);
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -232,16 +233,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_PASSKEY_DISPLAY:
     {
         NRF_LOG_WARNING("GAP_EVT_PASSKEY_DISPLAY");
-
-        // /// get the passkkey
-        // NRF_LOG_INFO("%d", p_ble_evt->evt.gap_evt.params.passkey_display.match_request);
-
-        // // memcpy(passkey, p_ble_evt->evt.gap_evt.params.passkey_display.passkey, sizeof(passkey));
-        // if (p_ble_evt->evt.gap_evt.params.passkey_display.match_request)
-        // {
-        //     err_code = sd_ble_gap_auth_key_reply(conn_handle, BLE_GAP_AUTH_KEY_TYPE_PASSKEY, NULL);
-        //     NRF_ASSERT(err_code);
-        // }
+        nrf_handle_passkey_display_Evt(p_ble_evt);
     }
     break;
 
@@ -263,10 +255,10 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         // get the dhkey
         // NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
 
-        // give the task notification to function security param init 
-        if(ble_gap_taskhandle != NULL)
+        // give the task notification to function security param init
+        if (ble_gap_taskhandle != NULL)
         {
-            xTaskNotify(ble_gap_taskhandle,0 , eSetValueWithoutOverwrite);
+            xTaskNotify(ble_gap_taskhandle, 0, eSetValueWithoutOverwrite);
         }
     }
     break;
@@ -284,6 +276,12 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         {
             GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback(
                 GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
+        }
+
+        /// after running the function notify the task
+        if (ble_gap_taskhandle != NULL)
+        {
+            xTaskNotify(ble_gap_taskhandle, 0, eSetValueWithoutOverwrite);
         }
     }
     break;
@@ -348,7 +346,7 @@ static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
         err_code = sd_ble_gap_sec_params_reply(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *)&gap_inst[index].key_set);
         NRF_ASSERT(err_code);
     }
-    else 
+    else
     {
         NRF_LOG_ERROR("max index");
     }
@@ -454,5 +452,23 @@ static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
         // {
         //     NRF_LOG_ERROR("addk %d",err);
         // }
+    }
+}
+
+/// @brief this funtion is to handle the paskkey display event
+/// @param p_ble_evt
+static void nrf_handle_passkey_display_Evt(ble_evt_t const *p_ble_evt)
+{
+    uint16_t conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+
+    /// check that match request is present or not
+    if (p_ble_evt->evt.gap_evt.params.passkey_display.match_request == 1)
+    {
+        uint32_t err = sd_ble_gap_auth_key_reply(conn_handle, BLE_GAP_AUTH_KEY_TYPE_PASSKEY, NULL);
+        
+    }
+    else
+    {
+        NRF_LOG_ERROR("no match");
     }
 }

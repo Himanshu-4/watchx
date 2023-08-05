@@ -143,9 +143,11 @@ static void ble_client_task_init_process(void *param)
     // err = ble_peer_device_init(conn_handle);
     // NRF_ASSERT(err);
 
+    delay(100);
     /// start the pairing process 
     err = ble_gap_security_init(BLE_GAP_DEVICE_INDEX);
-    NRF_ASSERT(err);
+    NRF_LOG_INFO("bg,%d",err);
+    // NRF_ASSERT(err);
     //// init the ancs , ams ,device info and other device functionality 
     /// init the apple ancs, ams task , current time task  
     // err = ble_ams_init(conn_handle);
@@ -163,7 +165,7 @@ static void ble_client_task_deinit_process(void *param)
     ////////// call the deinit process of the above init process     
     uint32_t err =0;
 
-       
+    NRF_LOG_ERROR("task deinit");
     //// deinit the ancs , ams ,device info and other device functionality 
     
     /// deinit the apple ancs, ams task 
@@ -204,7 +206,7 @@ static void ble_common_task(void *param)
         }
 
 
-        delay(10000);
+        delay(1000);
 
 
     }
