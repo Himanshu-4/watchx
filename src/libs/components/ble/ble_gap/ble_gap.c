@@ -1,9 +1,9 @@
 
 #include "ble_gap_func.h"
 
-#include "uECC.h"
-
 #include "nrf_ran_gen.h"
+
+#include "tinycrypt/ecc_dh.h"
 
 //// make a mutex for encryption process
 #include "semphr.h"
@@ -38,7 +38,6 @@ volatile xTaskHandle ble_gap_taskhandle;
     if (gap_inst[x].ble_gap_instnace_inited != BLE_GAP_INSTANCE_INITED) \
     return ble_gap_err_instnace_not_inited
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////// function declarations here
 
@@ -48,6 +47,11 @@ volatile xTaskHandle ble_gap_taskhandle;
 static uint32_t nrf_start_dhkey_calculation(uint8_t index);
 
 
+/// @brief random number generator function used to genrate entropy 
+/// @param dest 
+/// @param size 
+/// @return success or failure 
+static int random_number_gen(uint8_t *dest, unsigned size);
 //////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////// extern here
@@ -103,8 +107,11 @@ static ble_gap_id_key_t peer_id_keys;
 /// @param  void
 static void ble_gap_genrate_legacy_keypair(uint8_t index)
 {
-    // nrf_rng_init();
+    /// generate the legacy temporary pairing key
 
+    random_number_gen(gap_inst[index].key_set.keys_own.p_pk->pk,
+    sizeof(gap_inst[index].key_set.keys_own.p_pk->pk) );
+    // nrf_rng_init();
     // nrf_rng_fill_buff(public_key_device.pk, sizeof(public_key_device));
 }
 
@@ -114,17 +121,17 @@ static void ble_gap_genreate_lesc_keypair(uint8_t index)
 {
 
     /// genertate the key pair
-    uint8_t ret = uECC_make_key(gap_inst[index].key_set.keys_own.p_pk->pk, gap_inst[index].private_key_device, uECC_secp256r1());
-    if (ret != 1)
-    {
-        NRF_LOG_ERROR("mkey");
-    }
-    /// check for a valid public key
-    ret = uECC_valid_public_key(gap_inst[index].key_set.keys_own.p_pk->pk, uECC_secp256r1());
-    if (ret != 1)
-    {
-        NRF_LOG_ERROR("pbk_dev");
-    }
+    // uint8_t ret = uECC_make_key(gap_inst[index].key_set.keys_own.p_pk->pk, gap_inst[index].private_key_device, uECC_secp256r1());
+    // if (ret != 1)
+    // {
+    //     NRF_LOG_ERROR("mkey");
+    // }
+    // /// check for a valid public key
+    // ret = uECC_valid_public_key(gap_inst[index].key_set.keys_own.p_pk->pk, uECC_secp256r1());
+    // if (ret != 1)
+    // {
+    //     NRF_LOG_ERROR("pbk_dev");
+    // }
 }
 
 //==========================================================================================================
@@ -308,38 +315,6 @@ void ble_gap_remove_callback(uint8_t callback_type)
     GAP_Callbacks[callback_type].callback_param = NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////// this function have to be modified in lesc pairing
-
-static int random_number_gen(uint8_t *dest, unsigned size)
-{
-    uint8_t bytes_avial = 0;
-
-    /// do a for loop here
-    for (uint8_t i = 0; i < BLE_GAP_RANDOM_NUM_GEN_RETIRES; i++)
-    {
-        sd_rand_application_bytes_available_get(&bytes_avial);
-        if (size >= bytes_avial)
-        {
-            // delay(BLE_GAP_RANDOM_NUM_GEN_WAIT_TIME_MSEC);
-            delay(4);
-            NRF_LOG_INFO("%d",i);
-        }
-        else
-        {
-            goto random_num_avial;
-        }
-    }
-    /// failed to get random numbers
-    NRF_LOG_ERROR("random fail");
-    return 0;
-
-random_num_avial:
-    /// we can have to add A DELAY FUNCTION TO WAIT FOR SOFTDEVICE TO PUT SOME random number here
-    uint8_t ret = sd_rand_application_vector_get(dest, size);
-    return (ret == nrf_OK) ? (1) : (0);
-}
 
 /// @brief preinit the gap so that it can the BLE GAP properly
 /// @param  void
@@ -349,7 +324,7 @@ void ble_gap_pre_init(void)
     ble_advertise_pre_init();
 
     /// set the rng function
-    uECC_set_rng(random_number_gen);
+    // uECC_set_rng(random_number_gen);
 
     //// the pool capacity of the Random number is 64
     /// instantize the gap instance
@@ -391,15 +366,6 @@ uint32_t ble_gap_security_init(uint8_t index)
         return ble_gap_err_mutex_not_avial;
     }
 
-    if (gap_inst[index].ble_gap_pairing_type == PAIRING_TYPE_LESC)
-    {
-        ble_gap_genreate_lesc_keypair(index);
-    }
-    else
-    {
-        ble_gap_genrate_legacy_keypair(index);
-    }
-
     //// return code
     uint32_t ret = 0;
 
@@ -414,38 +380,48 @@ uint32_t ble_gap_security_init(uint8_t index)
         goto return_mech;
     }
 
-    /// wait from the notification about the dhkey request
-    if( xTaskNotifyWait(0, U32_MAX, &ret , BLE_GAP_API_TASK_NOTIF_TIMEOUT) != pdPASS)
+    //// switch between the lesc and legacy keypair algorithms
+    if (gap_inst[index].ble_gap_pairing_type == PAIRING_TYPE_LESC)
     {
-        ret = ble_gap_err_timeout;
-        goto return_mech;
+        ble_gap_genreate_lesc_keypair(index);
+
+        /// wait from the notification about the dhkey request
+        if (xTaskNotifyWait(0, U32_MAX, &ret, BLE_GAP_API_TASK_NOTIF_TIMEOUT) != pdPASS)
+        {
+            ret = ble_gap_err_timeout;
+            goto return_mech;
+        }
+
+        /// check for the return
+        if (ret != nrf_OK)
+        {
+            goto return_mech;
+        }
+
+        ret = nrf_start_dhkey_calculation(index);
+
+        if (ret != nrf_OK)
+        {
+            ret = ble_gap_err_dh_key_cal_failed;
+            goto return_mech;
+        }
+        /// wait for the notification from the connection security update event
+        if (xTaskNotifyWait(0, U32_MAX, &ret, BLE_GAP_API_TASK_NOTIF_TIMEOUT) != pdPASS)
+        {
+            ret = ble_gap_err_timeout;
+            goto return_mech;
+        }
+        else
+        {
+            NRF_LOG_INFO("succ conn");
+        }
+    }
+    else
+    {
+        ble_gap_genrate_legacy_keypair(index);
     }
 
-    /// check for the return 
-    if(ret != nrf_OK)
-    {
-        goto return_mech;
-    }
-
-   ret =  nrf_start_dhkey_calculation(index);
-
-    if(ret != nrf_OK)
-    {
-        ret = ble_gap_err_dh_key_cal_failed;
-        goto return_mech;
-    }
-    /// wait for the notification from the connection security update event 
-    if(xTaskNotifyWait(0,U32_MAX, &ret, BLE_GAP_API_TASK_NOTIF_TIMEOUT) != pdPASS)
-    {
-        ret = ble_gap_err_timeout;
-        goto return_mech;
-    }
-    else 
-    {
-        NRF_LOG_INFO("succ conn");
-    }
-
-//// return mechanism 
+//// return mechanism
 return_mech:
     /// nullify the task handle
     ble_gap_taskhandle = NULL;
@@ -456,8 +432,6 @@ return_mech:
     return ret;
 }
 
-
-
 /// @brief this is to start the dhkey calculation
 /// @param conn_handle
 /// @return err code
@@ -467,27 +441,64 @@ static uint32_t nrf_start_dhkey_calculation(uint8_t index)
     uint32_t err_code = 0;
     ble_gap_lesc_dhkey_t peer_dh_key;
 
+    // // first check that is the public key of peer is valid or not
+    // // err_code = uECC_valid_public_key(gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
+    // err_code = uECC_valid_public_key(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
+    // if (err_code != 1)
+    // {
+    //     NRF_LOG_ERROR("peerkey");
+    //     return nrf_ERR_OPERATION_FAILED;
+    // }
 
-    // first check that is the public key of peer is valid or not
-    // err_code = uECC_valid_public_key(gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
-    err_code = uECC_valid_public_key(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
-    if (err_code != 1)
-    {
-        NRF_LOG_ERROR("peerkey");
-        return nrf_ERR_OPERATION_FAILED;
-    }
-   
-    /// compute here the shared secret from our private key and peer public key
-    err_code = uECC_shared_secret(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, u8_ptr gap_inst[index].private_key_device,
-                                  peer_dh_key.key, uECC_secp256r1());
-    if (err_code != 1)
-    {
-        NRF_LOG_ERROR("dhkey");
-        return nrf_ERR_OPERATION_FAILED;
-    }
+    // /// compute here the shared secret from our private key and peer public key
+    // err_code = uECC_shared_secret(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, u8_ptr gap_inst[index].private_key_device,
+    //                               peer_dh_key.key, uECC_secp256r1());
+    // if (err_code != 1)
+    // {
+    //     NRF_LOG_ERROR("dhkey");
+    //     return nrf_ERR_OPERATION_FAILED;
+    // }
 
     err_code = sd_ble_gap_lesc_dhkey_reply(gap_inst[index].ble_gap_conn_handle, &peer_dh_key);
     NRF_ASSERT(err_code);
 
     return err_code;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////// this function have to be modified in lesc pairing
+
+/// @brief random number generator function used to genrate entropy 
+/// @param dest 
+/// @param size 
+/// @return success or failure 
+static int random_number_gen(uint8_t *dest, unsigned size)
+{
+    uint8_t bytes_avial = 0;
+
+    /// do a for loop here
+    for (uint8_t i = 0; i < BLE_GAP_RANDOM_NUM_GEN_RETIRES; i++)
+    {
+        sd_rand_application_bytes_available_get(&bytes_avial);
+        if (size >= bytes_avial)
+        {
+            // delay(BLE_GAP_RANDOM_NUM_GEN_WAIT_TIME_MSEC);
+            delay(4);
+            NRF_LOG_INFO("%d", i);
+        }
+        else
+        {
+            goto random_num_avial;
+        }
+    }
+    /// failed to get random numbers
+    NRF_LOG_ERROR("random fail");
+    return 0;
+
+random_num_avial:
+    /// we can have to add A DELAY FUNCTION TO WAIT FOR SOFTDEVICE TO PUT SOME random number here
+    uint8_t ret = sd_rand_application_vector_get(dest, size);
+    return (ret == nrf_OK) ? (1) : (0);
 }

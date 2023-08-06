@@ -96,7 +96,7 @@ void ble_task_pre_init(void *param)
     ble_gap_add_callback(ble_gap_evt_disconnected ,ble_device_disconnected_callback, NULL );  
 
     /// init a gap instance 
-    ble_gap_instance_init(BLE_GAP_DEVICE_INDEX, PAIRING_TYPE_LESC);
+    ble_gap_instance_init(BLE_GAP_DEVICE_INDEX, PAIRING_TYPE_LEGACY);
 
     ///@todo add the callback for the security procedure complete 
 }
@@ -117,7 +117,7 @@ static void ble_client_task_init_process(void *param)
 
     NRF_LOG_INFO("chdl %x", conn_handle);
     /// init the ble client 
-    NRF_LOG_INFO("cinit %d", gatt_client_init(conn_handle));
+    err = gatt_client_init(conn_handle);
     NRF_ASSERT(err);
 
     //// assign the callback for that connection 
@@ -133,7 +133,14 @@ static void ble_client_task_init_process(void *param)
     err = gatt_client_add_timeout_callback(conn_handle, ble_client_timeout_handler, NULL);
     NRF_ASSERT(err);
 
-    /// @todo find why we have to give a delay here 
+    /// @note this function will wait for the security procedure to finish and then proceed .
+    delay(100);
+    /// start the pairing process 
+    err = ble_gap_security_init(BLE_GAP_DEVICE_INDEX);
+    NRF_ASSERT(err);
+
+
+     /// @todo find why we have to give a delay here 
     // delay(2000);
        //// set the gatt server mtu 
     // err = gatt_client_set_server_mtu(conn_handle, BLE_GATT_SERVER_RX_MTU );
@@ -143,11 +150,7 @@ static void ble_client_task_init_process(void *param)
     // err = ble_peer_device_init(conn_handle);
     // NRF_ASSERT(err);
 
-    delay(100);
-    /// start the pairing process 
-    err = ble_gap_security_init(BLE_GAP_DEVICE_INDEX);
-    NRF_LOG_INFO("bg,%d",err);
-    // NRF_ASSERT(err);
+
     //// init the ancs , ams ,device info and other device functionality 
     /// init the apple ancs, ams task , current time task  
     // err = ble_ams_init(conn_handle);

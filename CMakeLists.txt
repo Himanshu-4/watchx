@@ -280,51 +280,38 @@ target_include_directories(freertos_lib PUBLIC SYSTEM
 ##############################################################################################################################################################################
 ##########################################################   Build the micro ecc crypto   ##################################################################################
 
-file(GLOB crypto_files  
-${CMAKE_PROJECT_DIR}/watchx_lib_ext/micro-ecc/*.c
+file(GLOB tiny_crypto_files  
+${CMAKE_PROJECT_DIR}/watchx_lib_ext/tinycrypt-master/tinycrypt-master/lib/source/*.c
 )
 
 
 # source file 
-set(CRYPTO_ECC_DH_SRC 
-        ${crypto_files}        
+set(TINY_CRYPTO_SOURCE 
+        ${tiny_crypto_files}        
 )
 
-set(CRYPTO_ECDH_INCLUDE 
-${CMAKE_PROJECT_DIR}/watchx_lib_ext/micro-ecc
+set(TINY_CRYPTO_INC 
+${CMAKE_PROJECT_DIR}/watchx_lib_ext/tinycrypt-master/tinycrypt-master/lib/include
 )
 
 
-add_library(crypto_eccdh STATIC 
-            ${CRYPTO_ECC_DH_SRC}
+add_library(tiny_Crypto STATIC 
+            ${TINY_CRYPTO_SOURCE}
             )
 
 
 
-set(CRYPTO_ECCDH_COMPILE_DEFS_FOR_C
-        -DuECC_ENABLE_VLI_API=1
-        -DuECC_OPTIMIZATION_LEVEL=3
-        -DuECC_SQUARE_FUNC=1
-        -DuECC_SUPPORT_COMPRESSED_POINT=0
-        -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
-        )
-
-set(CRYPTO_ECCDH_COMPILE_DEFS_FOR_ASM
- -DuECC_ENABLE_VLI_API=1
- -DuECC_OPTIMIZATION_LEVEL=3
- -DuECC_SQUARE_FUNC=1
- -DuECC_SUPPORT_COMPRESSED_POINT=0
- -DuECC_VLI_NATIVE_LITTLE_ENDIAN=1
-        )
-
-
-target_compile_definitions(crypto_eccdh PRIVATE
-        ${COMMON_DEFINES}   
-        $<$<COMPILE_LANGUAGE:C>: ${CRYPTO_ECCDH_COMPILE_DEFS}>
-        $<$<COMPILE_LANGUAGE:ASM>: ${CRYPTO_ECCDH_COMPILE_DEFS_FOR_ASM} >
+set(TINY_CRYPTO_COMPILE_DEFS 
 )
 
-target_compile_options(crypto_eccdh PRIVATE
+
+target_compile_definitions(tiny_Crypto PRIVATE
+        ${COMMON_DEFINES}   
+        $<$<COMPILE_LANGUAGE:C>: ${TINY_CRYPTO_COMPILE_DEFS}>
+        $<$<COMPILE_LANGUAGE:ASM>: ${TINY_CRYPTO_COMPILE_DEFS} >
+)
+
+target_compile_options(tiny_Crypto PRIVATE
            ${COMMON_C_FLAGS}
            $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fomit-frame-pointer >
            $<$<COMPILE_LANGUAGE:CXX>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti -fomit-frame-pointer>
@@ -332,8 +319,8 @@ target_compile_options(crypto_eccdh PRIVATE
              )
 
 
-target_include_directories(crypto_eccdh PUBLIC SYSTEM 
-           ${CRYPTO_ECDH_INCLUDE}
+target_include_directories(tiny_Crypto PUBLIC SYSTEM 
+           ${TINY_CRYPTO_INC}
            )
 
 ##################################################################################################################################################################
@@ -462,7 +449,7 @@ target_include_directories(ble_library PUBLIC SYSTEM
     ${FREERTOS_INCLUDE} 
     
     # crypto library implementation 
-    ${CRYPTO_ECDH_INCLUDE}
+    ${TINY_CRYPTO_INC}
   
         )
 
@@ -586,7 +573,7 @@ target_link_libraries(${EXECUTABLE}
                        ble_library
                        nrf_sdk_libs 
                        watchx_kernel_lib
-                       crypto_eccdh
+                       tiny_Crypto
                 #        nimble_ble_stack
                 #        gpio_lib # no library gpio_lib so cmake discard it 
                         )
