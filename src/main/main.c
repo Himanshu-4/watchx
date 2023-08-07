@@ -175,8 +175,7 @@ void general_task_function(void *param)
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
-              
-    
+              ble_gap_print_keys(0);
                 // NRF_LOG_WARNING("er %d", nvs_erase_partition());
             }
         }

@@ -238,8 +238,8 @@ const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported]
     {
         
         .bond = 1,
-        .io_caps = BLE_GAP_IO_CAPS_KEYBOARD_DISPLAY,
-        .mitm = 1,
+        .io_caps = BLE_GAP_IO_CAPS_NONE,
+        .mitm = 0,
         .oob =0,
         .keypress =0,
         .lesc = 0,

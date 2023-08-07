@@ -133,7 +133,7 @@
 
 #define BLE_GAP_RANDOM_NUM_GEN_WAIT_TIME_MSEC 5
 
-#define BLE_GAP_RANDOM_NUM_GEN_RETIRES 5
+#define BLE_GAP_RANDOM_NUM_GEN_RETIRES 10
 
 //////////////////////// ble connection param config 
 
