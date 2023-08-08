@@ -99,6 +99,11 @@ int _close(int file)
 	return -1;
 }
 
+//  error: 'struct stat' declared inside parameter list will not be visible outside of this definition or declaration [-Werror]
+//   103 | int _fstat(int file, struct stat *st
+// this is needed to resolve above error
+
+struct stat *st;
 
 int _fstat(int file, struct stat *st)
 {

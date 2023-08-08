@@ -16,6 +16,8 @@
 #include "nrf52_bitfields.h"
 #include "nrf52832_peripherals.h"
 
+#include "app_util_platform.h"
+
 ////////// include the ARM  CMSIS files for core related operations
 #include "cmsis_gcc.h"
 #include "core_cm4.h"
@@ -23,13 +25,6 @@
 /// include sysconfig file
 #include "sys_config.h"
 
-#if defined(FREERTOS_ENV)
-
-#include "FreeRTOSConfig.h"
-#include "FreeRTOS.h"
-#include "task.h"
-
-#endif
 
 
 

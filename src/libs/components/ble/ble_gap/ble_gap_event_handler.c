@@ -1,6 +1,10 @@
 ////////// include the gap security params
 #include "ble_gap_func.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+#include  "queue.h"
+
 #include "nvs.h"
 
 //////////////////////////////////////////////////////////////////////////////////

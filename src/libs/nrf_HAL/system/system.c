@@ -1,6 +1,9 @@
 #include "system.h"
 #include "ansii_color_codes.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+
 /*****
  * @name power_regultiaon init
  * @param void

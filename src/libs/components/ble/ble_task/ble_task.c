@@ -15,6 +15,9 @@
 #include "ble_ancs.h"
 #include "ble_peer_info.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+
 ///////////////////////////////////////////////////////////////////////
 //// this will resume the callback 
 #define resume 0x10

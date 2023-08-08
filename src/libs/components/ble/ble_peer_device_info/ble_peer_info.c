@@ -2,6 +2,10 @@
 
 #include "ble_gatt_client.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+
 /// @brief this contains the 
 static ble_peer_device_info_struct_t peer_dev_info;
 

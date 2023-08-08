@@ -7,7 +7,6 @@
 
 //////// include the freertos related functions 
 #include "FreeRTOS.h"
-#include "FreeRTOSConfig.h"
 #include "queue.h"
 #include "semphr.h"
 

@@ -2,6 +2,12 @@
 #define _KERNEL_MEM_MANAGER_H_
 
 #include "system.h"
+
+/// include the freertos file 
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+
 #include "semphr.h"
 
 #define KERNEL_MEM_SECTION __section(".kernel_mem_data")

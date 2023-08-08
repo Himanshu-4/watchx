@@ -3,8 +3,6 @@
 
 #include "ble_softdevice_init.h"
 
-#include "system.h"
-
 
 
 

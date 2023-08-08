@@ -23,7 +23,8 @@
         "nrf_rng.h": "c",
         "*.tcc": "c",
         "nrf_ran_gen.h": "c",
-        "nvs.h": "c"
+        "nvs.h": "c",
+        "ble_config.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator":"MinGW Makefiles",

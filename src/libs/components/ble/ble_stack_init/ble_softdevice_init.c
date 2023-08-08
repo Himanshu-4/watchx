@@ -7,6 +7,8 @@
 
 #include "ble_config.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
 
 ///////////////// define the ram configuration here //////////////////////////
 ////////////////// this is defined by the compiler 

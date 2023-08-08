@@ -36,6 +36,8 @@
 //// include the kernel mem manager
 #include "memory_manager/kernel_mem_manager.h"
 
+/// include the kernel task 
+#include "kernel_task/kernel_task.h"
 
 #include "message_buffer.h"
 
@@ -92,8 +94,9 @@ int main()
         APP_ERROR_HANDLER(nrf_ERR_OPERATION_FAILED);
     }
 
-    // // install all the communication drivers /// 
-    driver_install();
+    
+    /// init the kernel task preinit
+    Kernel_task_preinit();
 
     ////////////////////////////////////
     NRF_LOG_INFO("starting aPP");
