@@ -3,7 +3,8 @@
 
 #include "nrf_ran_gen.h"
 
-#include "tinycrypt/ecc_dh.h"
+// #include "tinycrypt/ecc_dh.h"
+#include "uECC.h"
 
 //// make a mutex for encryption process
 #include "semphr.h"
@@ -147,18 +148,18 @@ static void ble_gap_genrate_legacy_keypair(uint8_t index)
 static void ble_gap_genreate_lesc_keypair(uint8_t index)
 {
 
-    /// genertate the key pair
-    // uint8_t ret = uECC_make_key(gap_inst[index].key_set.keys_own.p_pk->pk, gap_inst[index].private_key_device, uECC_secp256r1());
-    // if (ret != 1)
-    // {
-    //     NRF_LOG_ERROR("mkey");
-    // }
-    // /// check for a valid public key
-    // ret = uECC_valid_public_key(gap_inst[index].key_set.keys_own.p_pk->pk, uECC_secp256r1());
-    // if (ret != 1)
-    // {
-    //     NRF_LOG_ERROR("pbk_dev");
-    // }
+    //genertate the key pair
+    uint8_t ret = uECC_make_key(gap_inst[index].key_set.keys_own.p_pk->pk, gap_inst[index].private_key_device, uECC_secp256r1());
+    if (ret != 1)
+    {
+        NRF_LOG_ERROR("mkey");
+    }
+    /// check for a valid public key
+    ret = uECC_valid_public_key(gap_inst[index].key_set.keys_own.p_pk->pk, uECC_secp256r1());
+    if (ret != 1)
+    {
+        NRF_LOG_ERROR("pbk_dev");
+    }
 }
 
 
@@ -171,23 +172,23 @@ static uint32_t nrf_start_dhkey_calculation(uint8_t index)
     uint32_t err_code = 0;
     ble_gap_lesc_dhkey_t peer_dh_key;
 
-    // // first check that is the public key of peer is valid or not
-    // // err_code = uECC_valid_public_key(gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
-    // err_code = uECC_valid_public_key(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
-    // if (err_code != 1)
-    // {
-    //     NRF_LOG_ERROR("peerkey");
-    //     return nrf_ERR_OPERATION_FAILED;
-    // }
+    // first check that is the public key of peer is valid or not
+    // err_code = uECC_valid_public_key(gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
+    err_code = uECC_valid_public_key(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, uECC_secp256r1());
+    if (err_code != 1)
+    {
+        NRF_LOG_ERROR("peerkey");
+        return nrf_ERR_OPERATION_FAILED;
+    }
 
-    // /// compute here the shared secret from our private key and peer public key
-    // err_code = uECC_shared_secret(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, u8_ptr gap_inst[index].private_key_device,
-    //                               peer_dh_key.key, uECC_secp256r1());
-    // if (err_code != 1)
-    // {
-    //     NRF_LOG_ERROR("dhkey");
-    //     return nrf_ERR_OPERATION_FAILED;
-    // }
+    /// compute here the shared secret from our private key and peer public key
+    err_code = uECC_shared_secret(u8_ptr gap_inst[index].key_set.keys_peer.p_pk->pk, u8_ptr gap_inst[index].private_key_device,
+                                  peer_dh_key.key, uECC_secp256r1());
+    if (err_code != 1)
+    {
+        NRF_LOG_ERROR("dhkey");
+        return nrf_ERR_OPERATION_FAILED;
+    }
 
     err_code = sd_ble_gap_lesc_dhkey_reply(gap_inst[index].ble_gap_conn_handle, &peer_dh_key);
     NRF_ASSERT(err_code);
@@ -210,7 +211,7 @@ void ble_gap_pre_init(void)
     ble_advertise_pre_init();
 
     /// set the rng function
-    // uECC_set_rng(random_number_gen);
+    uECC_set_rng(random_number_gen);
 
     //// the pool capacity of the Random number is 64
     /// instantize the gap instance

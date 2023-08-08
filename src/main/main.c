@@ -92,7 +92,7 @@ int main()
         APP_ERROR_HANDLER(nrf_ERR_OPERATION_FAILED);
     }
 
-    // // install all the communication drivers
+    // // install all the communication drivers /// 
     driver_install();
 
     ////////////////////////////////////

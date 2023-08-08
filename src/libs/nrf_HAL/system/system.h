@@ -32,13 +32,6 @@
 #endif
 
 
-//// include the driver file from the nrfx driver API
-// #include "nrfx_power.h"
-// #include "nrf_drv_power.h"
-// #include "nrf_drv_clock.h"
-
-// #include "nrfx_clock.h"
-// #include "nrfx_power.h"
 
 #define SET 1
 #define RESET 0
@@ -149,17 +142,6 @@ enum _NRF_ERROR_TYPES_
  */
 bool sys_init(void);
 
-/**
- * @name driver_install
- * @brief used to intall the i2c , spi , uart drivers
- */
-void driver_install(void);
-
-/**
- * @name driver_uninstall
- * @brief used to uninstall all the drivers like SPI, I2c and UART
- */
-void driver_uninstall(void);
 
 /*****
  * @name system_soft_reset
