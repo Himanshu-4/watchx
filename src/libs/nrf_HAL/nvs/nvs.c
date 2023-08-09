@@ -130,7 +130,7 @@ static uint32_t nvs_get_size_of_data(uint32_t addr, uint32_t uid)
 }
 
 /// @brief this function gives the size of stored nvs data in terms of words
-/// @param  void
+/// @param  addr
 /// @return size in terms of words
 static uint16_t nvs_get_size_of_stored_data(uint32_t addr)
 {
@@ -138,10 +138,10 @@ static uint16_t nvs_get_size_of_stored_data(uint32_t addr)
     uint32_t *ptr = (uint32_t *)addr;
     uint32_t len = 0;
 
-    if (ptr[NVS_STRUCT_SOD] != START_OF_DATA)
-    {
-        goto return_len;
-    }
+    // if (ptr[NVS_STRUCT_SOD] != START_OF_DATA)
+    // {
+    //     goto return_len;
+    // }
 
     while (ptr[NVS_STRUCT_SOD] == START_OF_DATA)
     {
@@ -149,7 +149,6 @@ static uint16_t nvs_get_size_of_stored_data(uint32_t addr)
         ptr += ptr[NVS_STRUCT_LEN];
     }
 
-return_len:
     return len;
 }
 
@@ -631,6 +630,15 @@ uint32_t nvs_add_data(uint32_t uid, uint8_t *buff, uint16_t size)
 uint32_t nvs_get_size_data(uint32_t uid)
 {
     return nvs_get_size_of_data(NVS_PARTITION_START_ADDR, uid) * 4;
+}
+
+
+/// @brief this function is used to get the pointer value or location of data 
+/// @param uid 
+/// @return null if err / pointer value is success
+void * nvs_get_data_pointer(uint32_t uid)
+{
+
 }
 
 /// @brief func to read the data from the flash

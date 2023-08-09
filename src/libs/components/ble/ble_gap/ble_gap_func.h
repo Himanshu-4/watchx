@@ -155,10 +155,13 @@ void ble_gap_disconnect(uint16_t conn_handle);
 /////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
-/// @brief this function is used to advertise the ble device
-/// @param  void
-/// @return succ/failure of the function 
-uint32_t  ble_gap_start_advertise(void);
+#define BLE_ADVERTISE_WITH_FAST_PAIR 10
+#define BLE_ADVERTISE_WITHOUT_FAST_PAIR 20
+
+/// @brief this function is used to start a ble advertisement 
+/// @param type 
+/// @return succ/failure 
+uint32_t ble_gap_start_advertise(uint8_t type);
 
 /// @brief this is to stop the advertisement process 
 /// @param  void 

@@ -3,7 +3,7 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
-#include  "queue.h"
+#include "queue.h"
 
 #include "nvs.h"
 
@@ -31,8 +31,6 @@ extern volatile xTaskHandle ble_gap_taskhandle;
 
 static volatile uint16_t conn_handle = 0;
 
-static ble_gap_addr_t connected_peer_addr = {0};
-
 /// @brief this function is used to load the peripheral keys and reply to the phone
 /// @param conn_handle
 /// @return
@@ -49,6 +47,14 @@ static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt);
 /// @brief this funtion is to handle the paskkey display event
 /// @param p_ble_evt
 static void nrf_handle_passkey_display_Evt(ble_evt_t const *p_ble_evt);
+
+/// @brief this function is used to handle the connection security update process
+/// @param p_ble_evt
+static void nrf_handle_conn_security_update(ble_evt_t const *p_ble_evt);
+
+/// @brief this function is used to handle the dh key reqquest
+/// @param p_ble_evt
+static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt);
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +86,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
                                      &device_preferd_conn_params);
 
         delay(50);
-        memcpy(&connected_peer_addr, &p_ble_evt->evt.gap_evt.params.connected.peer_addr, sizeof(connected_peer_addr));
+
         // call the callback
         if (GAP_Callbacks[ble_gap_evt_connected].callback != NULL)
         {
@@ -220,58 +226,49 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
     {
-        NRF_LOG_WARNING("GAP_EVT_SEC_PARAMS_REQUEST");
+        NRF_LOG_WARNING("SEC_PARAMS_REQUEST");
         nrf_handle_security_param_request(p_ble_evt);
     }
     break;
 
     case BLE_GAP_EVT_SEC_INFO_REQUEST:
     {
-        NRF_LOG_WARNING("GAP_EVT_SEC_INFO_REQUEST");
+        NRF_LOG_WARNING("SEC_INFO_REQUEST");
         nrf_handle_security_info_request(p_ble_evt);
     }
     break;
 
     case BLE_GAP_EVT_PASSKEY_DISPLAY:
     {
-        NRF_LOG_WARNING("GAP_EVT_PASSKEY_DISPLAY");
+        NRF_LOG_WARNING("PASSKEY_DISPLAY");
         nrf_handle_passkey_display_Evt(p_ble_evt);
     }
     break;
 
     case BLE_GAP_EVT_KEY_PRESSED:
     {
-        NRF_LOG_WARNING("GAP_EVT_KEY_PRESSED");
+        NRF_LOG_WARNING("KEY_PRESSED");
     }
     break;
 
     case BLE_GAP_EVT_AUTH_KEY_REQUEST:
     {
-        NRF_LOG_WARNING("GAP_EVT_AUTH_KEY_REQUEST");
+        NRF_LOG_WARNING("AUTH_KEY_REQUEST");
     }
     break;
 
     case BLE_GAP_EVT_LESC_DHKEY_REQUEST:
     {
-        NRF_LOG_WARNING("GAP_EVT_LESC_DHKEY_REQUEST");
-        // get the dhkey
-        // NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
-
-        // give the task notification to function security param init
-        if (ble_gap_taskhandle != NULL)
-        {
-            xTaskNotify(ble_gap_taskhandle, 0, eSetValueWithoutOverwrite);
-        }
+        NRF_LOG_WARNING("LESC_DHKEY_REQUEST");
+        nrf_handle_lesc_dhkey_request(p_ble_evt);
     }
     break;
 
     case BLE_GAP_EVT_CONN_SEC_UPDATE:
     {
-        NRF_LOG_WARNING("GAP_EVT_CONN_SEC_UPDATE");
+        NRF_LOG_WARNING("CONN_SEC_UPDATE");
 
-        /// log about the security status
-        NRF_LOG_INFO("%d,%d,%d", p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.sm,
-                     p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.lv, p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.encr_key_size);
+        nrf_handle_conn_security_update(p_ble_evt);
 
         /// call the callback
         if (GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback != NULL)
@@ -279,18 +276,12 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
             GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback(
                 GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
         }
-
-        /// after running the function notify the task
-        if (ble_gap_taskhandle != NULL)
-        {
-            xTaskNotify(ble_gap_taskhandle, 0, eSetValueWithoutOverwrite);
-        }
     }
     break;
 
     case BLE_GAP_EVT_AUTH_STATUS:
     {
-        NRF_LOG_WARNING("GAP_EVT_AUTH_STATUS");
+        NRF_LOG_WARNING("AUTH_STATUS");
 
         nrf_handle_authentication_status(p_ble_evt);
     }
@@ -298,7 +289,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_SEC_REQUEST:
     {
-        NRF_LOG_WARNING("GAP_EVT_SEC_REQUEST");
+        NRF_LOG_WARNING("SEC_REQUEST");
     }
     break;
 
@@ -307,9 +298,13 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////// static functions here //////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// static functions definations  here //////////////////////////////////////////////////
 
 /// @brief this function is used to handle the security parameter request
 /// @param p_ble_evt
@@ -408,7 +403,7 @@ static void nrf_handle_security_info_request(ble_evt_t const *p_ble_evt)
 static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
 {
 
-    NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2%x,ko %x,kp %x",
+    NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2 %x,ko %x,kp %x",
                  p_ble_evt->evt.gap_evt.params.auth_status.auth_status,
                  p_ble_evt->evt.gap_evt.params.auth_status.error_src,
                  p_ble_evt->evt.gap_evt.params.auth_status.bonded,
@@ -467,10 +462,38 @@ static void nrf_handle_passkey_display_Evt(ble_evt_t const *p_ble_evt)
     if (p_ble_evt->evt.gap_evt.params.passkey_display.match_request == 1)
     {
         uint32_t err = sd_ble_gap_auth_key_reply(conn_handle, BLE_GAP_AUTH_KEY_TYPE_PASSKEY, NULL);
-        
     }
     else
     {
         NRF_LOG_ERROR("no match");
+    }
+}
+
+/// @brief this function is used to handle the connection security update process
+/// @param p_ble_evt
+static void nrf_handle_conn_security_update(ble_evt_t const *p_ble_evt)
+{
+    /// after running the function notify the task
+    if (ble_gap_taskhandle != NULL)
+    {
+        xTaskNotify(ble_gap_taskhandle, 0, eSetValueWithoutOverwrite);
+    }
+
+    /// log about the security status
+    NRF_LOG_INFO("%d,%d,%d", p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.sm,
+                 p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.lv, p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.encr_key_size);
+}
+
+/// @brief this function is used to handle the dh key reqquest
+/// @param p_ble_evt
+static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt)
+{
+    // get the dhkey
+    // NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
+
+    // give the task notification to function security param init
+    if (ble_gap_taskhandle != NULL)
+    {
+        xTaskNotify(ble_gap_taskhandle, 0, eSetValueWithoutOverwrite);
     }
 }

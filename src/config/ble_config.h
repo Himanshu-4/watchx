@@ -122,6 +122,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 //======================= BLE GAP CONFIG =============================================
 
+/// @brief define how many bond information can be stored 
+#define BLE_GAP_MAX_BOND_USERS_STORED 8
+
 /////////////////// ble gap api specific 
 
 #define BLE_GAP_API_MUTEX_TIMEOUT 300

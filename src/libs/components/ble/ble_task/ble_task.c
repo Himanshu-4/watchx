@@ -99,7 +99,7 @@ void ble_task_pre_init(void *param)
     ble_gap_add_callback(ble_gap_evt_disconnected ,ble_device_disconnected_callback, NULL );  
 
     /// init a gap instance 
-    ble_gap_instance_init(BLE_GAP_DEVICE_INDEX, PAIRING_TYPE_LEGACY);
+    ble_gap_instance_init(BLE_GAP_DEVICE_INDEX, PAIRING_TYPE_LESC);
 
     ///@todo add the callback for the security procedure complete 
 }
@@ -208,7 +208,7 @@ static void ble_common_task(void *param)
 
         if(*callback_resume  == suspend )
         {
-            break;
+            goto destroy_task;
         }
 
 
@@ -217,6 +217,8 @@ static void ble_common_task(void *param)
 
     }
         
+
+destroy_task:
     ///// call the deinit function , the param may be diffenrt 
     ble_client_task_deinit_process(NULL);
     ///// should never reach here 

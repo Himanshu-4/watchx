@@ -4,6 +4,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+/// include the nvs lib 
+#include "nvs.h"
+
 /////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 //  ////////////    below are function and methods for advertising part only 
@@ -144,7 +147,10 @@ void ble_advertise_pre_init(void)
 volatile uint8_t ble_advertisement_State = false;
 
 
-uint32_t ble_gap_start_advertise(void)
+/// @brief this function is used to start a ble advertisement 
+/// @param type 
+/// @return succ/failure 
+uint32_t ble_gap_start_advertise(uint8_t type)
 {
       if(ble_advertisement_State == true)
     {
@@ -152,14 +158,35 @@ uint32_t ble_gap_start_advertise(void)
     }
     if (adv_conn_handle != BLE_GAP_ADV_SET_HANDLE_NOT_SET)
     {
-        uint32_t err_code = NRF_SUCCESS;
-        err_code = sd_ble_gap_adv_start(adv_conn_handle, NRF_SOFTDEVICE_DEFAULT_CONFIG_TAG);
-        // check_assrt(err_code, "ble_gap_adv_start");
+    
+        if(type == BLE_ADVERTISE_WITH_FAST_PAIR)
+        {
+            /// fetch the data from the nvs about the irk and addresses 
+            static ble_gap_id_key_t * ble_gap_stored_data_ids[BLE_GAP_MAX_BOND_USERS_STORED];
 
+            /// start searchong for the storedbonds and get their handles 
+            for (uint8_t i = 1; i <= BLE_GAP_MAX_BOND_USERS_STORED; i++)
+            {
+                uint32_t ret = nvs_read_data()
+                nvs_
+            }
+            
+
+        }
+        else 
+        {
+            //// clear the list if present 
+        }
+    
+       uint32_t err_code = sd_ble_gap_adv_start(adv_conn_handle, NRF_SOFTDEVICE_DEFAULT_CONFIG_TAG);
         if(err_code == nrf_OK)
         {
             ble_advertisement_State = true;
             NRF_LOG_WARNING("starting adv");
+        }
+        else 
+        {
+            NRF_LOG_ERROR("adv failed");
         }        
         return err_code;
     }

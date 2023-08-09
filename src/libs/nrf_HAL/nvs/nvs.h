@@ -91,6 +91,10 @@ uint32_t nvs_read_data(uint32_t uid, uint8_t *buff , uint16_t size);
 /// @return return size in bytes of data , 0 if uid is absent  
 uint32_t nvs_get_size_data(uint32_t uid);
 
+/// @brief this function is used to get the pointer value or location of data 
+/// @param uid 
+/// @return null if err / pointer value is success
+void * nvs_get_data_pointer(uint32_t uid);
 
 /// @brief used to modify the data of that uid to the new data 
 /// @param uid 
