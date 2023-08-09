@@ -292,14 +292,14 @@ uint32_t ble_gap_instance_init(uint8_t index, uint8_t pairing_type)
         gap_inst[index].private_key_device = private_key_device;
 
         gap_inst[index].key_set.keys_own.p_enc_key = &device_en_keys;
-        gap_inst[index].key_set.keys_own.p_id_key = &device_id_keys;
+        gap_inst[index].key_set.keys_own.p_id_key = NULL;
         gap_inst[index].key_set.keys_own.p_sign_key = NULL;
 
         //// store the peer keys
         gap_inst[index].key_set.keys_peer.p_pk = &public_key_peer;
-        gap_inst[index].private_key_peer = private_key_peer;
+        gap_inst[index].private_key_peer = NULL;
 
-        gap_inst[index].key_set.keys_peer.p_enc_key = &peer_en_keys;
+        gap_inst[index].key_set.keys_peer.p_enc_key = NULL;
         gap_inst[index].key_set.keys_peer.p_id_key = &peer_id_keys;
         gap_inst[index].key_set.keys_peer.p_sign_key = NULL;
 

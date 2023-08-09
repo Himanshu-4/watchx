@@ -162,20 +162,29 @@ uint32_t ble_gap_start_advertise(uint8_t type)
         if(type == BLE_ADVERTISE_WITH_FAST_PAIR)
         {
             /// fetch the data from the nvs about the irk and addresses 
-            static ble_gap_id_key_t * ble_gap_stored_data_ids[BLE_GAP_MAX_BOND_USERS_STORED];
+            static ble_gap_id_key_t const *  ble_gap_stored_data_ids[BLE_GAP_MAX_BOND_USERS_STORED];
 
-            /// start searchong for the storedbonds and get their handles 
+            uint8_t total_id_present =0;
+
+            // start searchong for the storedbonds and get their handles 
             for (uint8_t i = 1; i <= BLE_GAP_MAX_BOND_USERS_STORED; i++)
             {
-                uint32_t ret = nvs_read_data()
-                nvs_
+                if(nvs_get_data_pointer(i) == NULL)
+                {
+                    break;
+                }
+                ble_gap_stored_data_ids[i] = nvs_get_data_pointer(i);
+                total_id_present += 1;
             }
             
-
+            // display here about total stored bonds 
+            NRF_LOG_INFO("stored no %d",total_id_present);
+            sd_ble_gap_device_identities_set(ble_gap_stored_data_ids, NULL, total_id_present);
         }
         else 
         {
             //// clear the list if present 
+            sd_ble_gap_device_identities_set(NULL, NULL, 0);
         }
     
        uint32_t err_code = sd_ble_gap_adv_start(adv_conn_handle, NRF_SOFTDEVICE_DEFAULT_CONFIG_TAG);

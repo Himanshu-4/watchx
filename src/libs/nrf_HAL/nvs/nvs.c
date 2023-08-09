@@ -167,6 +167,25 @@ static uint32_t *nvs_get_ptr_last_loction(uint32_t addr)
     return ptr;
 }
 
+/// @brief this function is to get the location of data from the uid 
+/// @param addr 
+/// @param uid 
+/// @return pointer location 
+static uint32_t * nvs_get_uid_pointer(uint32_t addr, uint32_t uid)
+{
+    uint32_t *ptr = (uint32_t *)addr;
+    
+    while (ptr[NVS_STRUCT_SOD] == START_OF_DATA)
+    {
+        if(ptr[NVS_STRUCT_UID] == uid)
+        {
+            return &ptr[NVS_STRUCT_DATA];
+        }
+        ptr += ptr[NVS_STRUCT_LEN];
+    }
+
+    return NULL;
+}
 // /// @brief this is to switch the next link of the last data to link present than link absent
 // /// @param buff
 // /// @param size
@@ -589,14 +608,13 @@ uint32_t nvs_flash_init(uint32_t timeout)
         return nrf_ERR_OUT_OF_MEM;
     }
 
-    ///// give the mutex at starting
-    xSemaphoreGive(nvs_mutex_handle);
-
     
     nvs_op_timeout = timeout;
     //// switch the global flag
     nvs_init = true;
 
+    ///// give the mutex at starting
+    xSemaphoreGive(nvs_mutex_handle);
     return nrf_OK;
 }
 
@@ -638,6 +656,21 @@ uint32_t nvs_get_size_data(uint32_t uid)
 /// @return null if err / pointer value is success
 void * nvs_get_data_pointer(uint32_t uid)
 {
+    if (!nvs_init)
+    {
+        return NULL;
+    }
+
+    if (xSemaphoreTake(nvs_mutex_handle, pdMS_TO_TICKS(nvs_op_timeout)) != pdPASS)
+    {
+        return NULL;
+    }
+
+    uint32_t *ptr =  nvs_get_uid_pointer(NVS_PARTITION_START_ADDR,uid);
+
+    ///// give the mutex at starting
+    xSemaphoreGive(nvs_mutex_handle);
+    return ptr;
 
 }
 

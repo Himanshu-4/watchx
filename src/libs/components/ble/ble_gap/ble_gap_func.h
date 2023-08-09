@@ -146,11 +146,6 @@ void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks cal
 void ble_gap_remove_callback( uint8_t callback_type);
 
 
-/// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
-/// @param conn_handle
-void ble_gap_disconnect(uint16_t conn_handle);
-
-
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -172,10 +167,21 @@ uint32_t  ble_gap_stop_advertise(void);
 /// @param  void 
 void ble_gap_delete_bonds(void);
 
+/// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
+/// @param conn_handle
+void ble_gap_disconnect(uint16_t conn_handle);
+
 //////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////// function declarations ///////////////////////////////
+
+/// @brief  this is the stucture that is used to store the bond information of peer device  
+typedef PACKED_STRUCT _BLE_GAP_STORED_BOND_INFO_STRUCT_
+{
+    ble_gap_id_key_t peer_id_info;
+    ble_gap_enc_key_t dev_enc_key;
+}ble_gap_store_bond_info_struct_t;
 
 /// @brief init the gap security procedure
 /// @param index 
@@ -184,7 +190,7 @@ void ble_gap_delete_bonds(void);
 uint32_t ble_gap_security_init(uint8_t index);
 
 
-
+/// @brief this is the structure of gap instnace used by differnt functions of gap lib
 typedef struct _BLE_GAP_FUNCTION_INSTANCE_
 {
     /// @brief this is a flag to make sure that gap instnace is inited 
