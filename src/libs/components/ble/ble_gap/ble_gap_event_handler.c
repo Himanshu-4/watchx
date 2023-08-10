@@ -56,6 +56,8 @@ static void nrf_handle_conn_security_update(ble_evt_t const *p_ble_evt);
 /// @param p_ble_evt
 static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt);
 
+extern ble_evt_t * p_ble_Gap_evt;
+
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////// ble gpa event handler
@@ -63,6 +65,8 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 {
     
     uint32_t err_code = 0;
+    p_ble_Gap_evt = (ble_evt_t  * )p_ble_evt;
+
     switch (p_ble_evt->header.evt_id)
     {
     //////////////////////////////////////////////////////////////////////////////////////
@@ -444,3 +448,63 @@ static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt)
         xTaskNotify(ble_gap_taskhandle, 0, eSetValueWithoutOverwrite);
     }
 }
+
+
+
+/// @brief this function is handle the authentication status of the data
+/// @param p_ble_evt
+static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
+{
+
+    NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2 %x,ko %x,kp %x",
+                 p_ble_evt->evt.gap_evt.params.auth_status.auth_status,
+                 p_ble_evt->evt.gap_evt.params.auth_status.error_src,
+                 p_ble_evt->evt.gap_evt.params.auth_status.bonded,
+                 p_ble_evt->evt.gap_evt.params.auth_status.lesc,
+
+                 //// the sm1 level
+                 ((p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv1 << 3) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv2 << 2) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv3 << 1) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv4)),
+
+                 /// sm2 level
+                 ((p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv1 << 3) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv2 << 2) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv3 << 1) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv4)),
+
+                 /// kdist owner
+                 ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.enc << 3) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.id << 2) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.link << 1) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.sign)),
+
+                 /// kdist peer
+                 ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.enc << 3) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.id << 2) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.link << 1) |
+                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.sign)));
+
+    /// get the index from the conn handle
+    uint8_t index = ble_gap_get_gap_index(p_ble_evt->evt.gap_evt.conn_handle);
+
+    /// make sure we dont overconnect like to cross the max concurrent device limit 
+    if (index < BLE_MAX_DEVICE_SUPPORTED)
+    {
+        // create a new instnace for bond structure 
+        ble_gap_store_bond_info_struct_t new_Device_bond_info = {0};
+        /// copy the bond info 
+        memcpy( &new_Device_bond_info.peer_id_info, gap_inst[index].key_set.keys_peer.p_id_key, sizeof(ble_gap_id_key_t));
+        memcpy(&new_Device_bond_info.dev_enc_key, gap_inst[index].key_set.keys_own.p_enc_key, sizeof(ble_gap_enc_key_t));
+        
+        uint8_t total_uid_presnt = nvs_Get_total_no_of_uid();
+
+        uint32_t err = nvs_add_data(++total_uid_presnt, u8_ptr &new_Device_bond_info ,sizeof(new_Device_bond_info)); 
+        if(err != nrf_OK)
+        {
+            NRF_LOG_ERROR("add nvs %d",err);
+        }
+    }
+}
+

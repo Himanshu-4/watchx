@@ -164,8 +164,9 @@ uint32_t ble_gap_start_advertise(uint8_t type);
 uint32_t  ble_gap_stop_advertise(void);
 
 /// @brief this function will delete all the bonds 
-/// @param  void 
-void ble_gap_delete_bonds(void);
+/// @param  void
+/// @return succ/failure  
+uint32_t ble_gap_delete_bonds(void);
 
 /// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
 /// @param conn_handle

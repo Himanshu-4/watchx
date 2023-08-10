@@ -2,56 +2,65 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "semphr.h"
+
+// #include "tinycrypt/ecc_dh.h"
+#include "uECC.h"
+
+#include "nvs.h"
+
+////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////  Macro GAP related functions  implimented here
+
+/// @brief check for valid index if not then return with err
+#define CHECK_INDEX(x)                  \
+    if (x >= BLE_GAP_MAX_NO_OF_DEVICES) \
+    return nrf_ERR_INVALID_PARAM
+
+//// check for instnace init
+#define CHECK_INIT(x)                                                   \
+    if (gap_inst[x].ble_gap_instnace_inited != BLE_GAP_INSTANCE_INITED) \
+    return ble_gap_err_instnace_not_inited
+
+//==========================================================================================================
+///=============================== extern variable here ===================================================
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// define the instance here
+extern ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
+
+// use mutex handle
+extern SemaphoreHandle_t ble_gap_mutex_handle;
+
+extern const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported];
+
+//==========================================================================================================
+///=============================== GLOBAL variable here ===================================================
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+volatile ble_evt_t * p_ble_Gap_evt = NULL;
+
+/// @brief this is to get the task handle and
+volatile xTaskHandle ble_gap_taskhandle;
+
+//==========================================================================================================
+///=============================== function declarations  here ===================================================
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// @note the softdevice random pool is 64 bytes only we have to split the transaction into 32 bit 
+/// @brief random number generator function used to genrate entropy
+/// @param dest
+/// @param size
+/// @return success or failure
+int random_number_gen(uint8_t *dest, unsigned size);
 //==========================================================================================================
 ///=============================== static function here ===================================================
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////// keypair generaion function
-
-/// @note the softdevice random pool is 64 bytes only we have to split the transaction into 32 bit 
-
-/// @brief random number generator function used to genrate entropy
-/// @param dest
-/// @param size
-/// @return success or failure
-int random_number_gen(uint8_t *dest, unsigned size)
-{
-    uint8_t split_no = ((size)/16) + (((size)%16)==0?(0):(1));
-    uint8_t bytes_avial = 0;
-    uint8_t index =0;
-
-         /// do a retreies here to check softdevice for radnom number 
-    for (uint8_t i = 0; i < BLE_GAP_RANDOM_NUM_GEN_RETIRES; i++)
-    {
-        /// check that if we are done with giving all the data 
-        if(index >= split_no)
-        {
-            return 1;
-        }
-
-        /// check for avialable radnom bytes in softdevice buffer  
-        sd_rand_application_bytes_available_get(&bytes_avial);
-        if ( bytes_avial <= 16)
-        {
-            delay(BLE_GAP_RANDOM_NUM_GEN_WAIT_TIME_MSEC);
-            continue;
-        }
-        
-        /// get the data from softdevice random buffer 
-        uint8_t ret = sd_rand_application_vector_get((dest + (index *16)), (((size)%16)==0?(16):((size)%16)));
-        if(ret != nrf_OK)
-        {
-            continue;
-        }
-        /// increment the index 
-        index++;
-    }
-
-    /// failed to get random numbers
-    NRF_LOG_ERROR("random fail");
-    return  0;
-}
 
 
 /// @brief this function is to generate a pairing key for legacy pairing
@@ -119,6 +128,57 @@ static uint32_t nrf_start_dhkey_calculation(uint8_t index)
     return err_code;
 }
 
+
+//==========================================================================================================
+///=============================== function definations here ===================================================
+//////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+/// @note the softdevice random pool is 64 bytes only we have to split the transaction into 32 bit 
+
+/// @brief random number generator function used to genrate entropy
+/// @param dest
+/// @param size
+/// @return success or failure
+int random_number_gen(uint8_t *dest, unsigned size)
+{
+    uint8_t split_no = ((size)/16) + (((size)%16)==0?(0):(1));
+    uint8_t bytes_avial = 0;
+    uint8_t index =0;
+
+         /// do a retreies here to check softdevice for radnom number 
+    for (uint8_t i = 0; i < BLE_GAP_RANDOM_NUM_GEN_RETIRES; i++)
+    {
+        /// check that if we are done with giving all the data 
+        if(index >= split_no)
+        {
+            return 1;
+        }
+
+        /// check for avialable radnom bytes in softdevice buffer  
+        sd_rand_application_bytes_available_get(&bytes_avial);
+        if ( bytes_avial <= 16)
+        {
+            delay(BLE_GAP_RANDOM_NUM_GEN_WAIT_TIME_MSEC);
+            continue;
+        }
+        
+        /// get the data from softdevice random buffer 
+        uint8_t ret = sd_rand_application_vector_get((dest + (index *16)), (((size)%16)==0?(16):((size)%16)));
+        if(ret != nrf_OK)
+        {
+            continue;
+        }
+        /// increment the index 
+        index++;
+    }
+
+    /// failed to get random numbers
+    NRF_LOG_ERROR("random fail");
+    return  0;
+}
 
 
 
@@ -206,64 +266,37 @@ return_mech:
 }
 
 
-/// @brief this function is handle the authentication status of the data
-/// @param p_ble_evt
-static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
+
+/// @brief this function will delete all the bonds 
+/// @param  void 
+/// @return succ/fialure 
+uint32_t ble_gap_delete_bonds(void)
 {
-
-    NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2 %x,ko %x,kp %x",
-                 p_ble_evt->evt.gap_evt.params.auth_status.auth_status,
-                 p_ble_evt->evt.gap_evt.params.auth_status.error_src,
-                 p_ble_evt->evt.gap_evt.params.auth_status.bonded,
-                 p_ble_evt->evt.gap_evt.params.auth_status.lesc,
-
-                 //// the sm1 level
-                 ((p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv1 << 3) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv2 << 2) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv3 << 1) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv4)),
-
-                 /// sm2 level
-                 ((p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv1 << 3) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv2 << 2) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv3 << 1) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv4)),
-
-                 /// kdist owner
-                 ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.enc << 3) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.id << 2) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.link << 1) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.sign)),
-
-                 /// kdist peer
-                 ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.enc << 3) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.id << 2) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.link << 1) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.sign)));
-
-    /// get the index from the conn handle
-    uint8_t index = ble_gap_get_gap_index(p_ble_evt->evt.gap_evt.conn_handle);
-
-    /// make sure we dont overconnect like to cross the max concurrent device limit 
-    if (index < BLE_MAX_DEVICE_SUPPORTED)
+    
+    //// take the mutex
+    if (xSemaphoreTake(ble_gap_mutex_handle, BLE_GAP_API_MUTEX_TIMEOUT) != pdPASS)
     {
-        // create a new instnace for bond structure 
-        ble_gap_store_bond_info_struct_t new_Device_bond_info = {0};
-        /// copy the bond info 
-        memcpy( &new_Device_bond_info.peer_id_info, gap_inst[index].key_set.keys_peer.p_id_key, sizeof(ble_gap_id_key_t));
-        memcpy(&new_Device_bond_info.dev_enc_key, gap_inst[index].key_set.keys_own.p_enc_key, sizeof(ble_gap_enc_key_t));
-        
-        uint8_t total_uid_presnt = nvs_Get_total_no_of_uid();
-
-        uint32_t err = nvs_add_data(++total_uid_presnt, u8_ptr &new_Device_bond_info ,sizeof(new_Device_bond_info)); 
-        if(err != nrf_OK)
-        {
-            NRF_LOG_ERROR("add nvs %d",err);
-        }
+        return ble_gap_err_mutex_not_avial;
     }
+
+    uint32_t ret =0;
+    
+    /// check how many uids present 
+    ret  = nvs_Get_total_no_of_uid();
+    if(ret != 0)
+    {
+        NRF_LOG_WARNING("eraseing partition");
+        ret = nvs_erase_partition();
+    }
+        
+    /// give back the mutex
+    xSemaphoreGive(ble_gap_mutex_handle);
+
+    return ret;
 }
 
 
+/// @todo modify the function according to your need 
 
 /// @brief this function will print you the keys that are stored only for debugging purpose  
 /// @param index 
@@ -368,10 +401,7 @@ uint32_t ble_gap_print_keys(uint8_t index)
    }
    printf("\r\n");
 
-    
-
-    
-    
+   
     /// give back the mutex
     xSemaphoreGive(ble_gap_mutex_handle);
 }

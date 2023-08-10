@@ -164,17 +164,14 @@ uint32_t ble_gap_start_advertise(uint8_t type)
             /// fetch the data from the nvs about the irk and addresses 
             static ble_gap_id_key_t const *  ble_gap_stored_data_ids[BLE_GAP_MAX_BOND_USERS_STORED];
 
-            uint8_t total_id_present =0;
+            uint8_t total_id_present = nvs_Get_total_no_of_uid();
+
+            ///// ids starting from 0
 
             // start searchong for the storedbonds and get their handles 
-            for (uint8_t i = 1; i <= BLE_GAP_MAX_BOND_USERS_STORED; i++)
+            for (uint8_t i = 0; i < total_id_present; i++)
             {
-                if(nvs_get_data_pointer(i) == NULL)
-                {
-                    break;
-                }
                 ble_gap_stored_data_ids[i] = nvs_get_data_pointer(i);
-                total_id_present += 1;
             }
             
             // display here about total stored bonds 

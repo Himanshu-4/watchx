@@ -17,19 +17,13 @@
 /////////////////////// static variables  ////////////////////////////////
 ////////// create a mutex for the functions
 
-// use semaphore spi handle
-static SemaphoreHandle_t ble_gap_mutex_handle;
-
-// these are used to create a semaphore buffer
-static StaticSemaphore_t ble_gap_semphr_buffer = {0};
-
-/// @brief this is to get the task handle and
-volatile xTaskHandle ble_gap_taskhandle;
+// use mutex handle
+SemaphoreHandle_t ble_gap_mutex_handle;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////   GAP related functions  implimented here
+//////////////////////////  Macro GAP related functions  implimented here
 
 /// @brief check for valid index if not then return with err
 #define CHECK_INDEX(x)                  \
@@ -48,13 +42,11 @@ volatile xTaskHandle ble_gap_taskhandle;
 
 extern const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported];
 
-
 /// @brief EXtern functions  
 
 extern void ble_advertise_pre_init(void);
 
 extern int random_number_gen(uint8_t *dest, unsigned size);
-
 
 //==========================================================================================================
 ///=============================== Global variables here ===================================================
@@ -96,6 +88,7 @@ static ble_gap_id_key_t peer_id_keys;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////
 
+
 /// @brief preinit the gap so that it can the BLE GAP properly
 /// @param  void
 /// @return succ/failure
@@ -118,6 +111,9 @@ void ble_gap_pre_init(void)
     {
         gap_inst[i].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
     }
+
+    // create a mutex for thread saftey 
+    static StaticSemaphore_t ble_gap_semphr_buffer = {0};
 
     /// create the mutex for gap handlers
     ble_gap_mutex_handle = xSemaphoreCreateMutexStatic(&ble_gap_semphr_buffer);
