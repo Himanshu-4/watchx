@@ -167,6 +167,20 @@ static uint32_t *nvs_get_ptr_last_loction(uint32_t addr)
     return ptr;
 }
 
+static uint16_t nvs_get_total_uid_present(uint32_t addr)
+{
+    uint32_t *ptr = (uint32_t *)addr;
+
+    uint16_t total_uids =0;
+    while (ptr[NVS_STRUCT_SOD] == START_OF_DATA)
+    {
+        ptr += ptr[NVS_STRUCT_LEN];
+        total_uids++;
+    }
+
+    return total_uids;
+}
+
 /// @brief this function is to get the location of data from the uid 
 /// @param addr 
 /// @param uid 
@@ -674,6 +688,14 @@ void * nvs_get_data_pointer(uint32_t uid)
 
 }
 
+/// @brief this function is used to get the total no of uid presnet 
+/// @param  void 
+/// @return total no of uid present 
+uint16_t nvs_Get_total_no_of_uid(void)
+{
+    return nvs_get_total_uid_present(NVS_PARTITION_START_ADDR);
+}
+
 /// @brief func to read the data from the flash
 /// @param uid
 /// @param buff
@@ -756,7 +778,6 @@ uint32_t nvs_modify_data(uint32_t uid, uint8_t *buff, uint16_t size)
     {
     case NRF_EVT_FLASH_OPERATION_SUCCESS:
     {
-        NRF_LOG_INFO("fs");
         if (nvs_task_handle != NULL)
         {
             xTaskNotify(nvs_task_handle, FLASH_OP_SUCESS, eSetValueWithOverwrite);
@@ -766,7 +787,7 @@ uint32_t nvs_modify_data(uint32_t uid, uint8_t *buff, uint16_t size)
 
     case NRF_EVT_FLASH_OPERATION_ERROR:
     {
-        NRF_LOG_INFO("ff");
+        NRF_LOG_ERROR("flash oper");
         if (nvs_task_handle != NULL)
         {
             xTaskNotify(nvs_task_handle, FLASH_OP_FAILED, eSetValueWithOverwrite);

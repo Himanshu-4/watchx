@@ -61,7 +61,7 @@ static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt);
 ///////////////////////////////////////////////////// ble gpa event handler
 void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 {
-
+    
     uint32_t err_code = 0;
     switch (p_ble_evt->header.evt_id)
     {
@@ -398,59 +398,6 @@ static void nrf_handle_security_info_request(ble_evt_t const *p_ble_evt)
     }
 }
 
-/// @brief this function is handle the authentication status of the data
-/// @param p_ble_evt
-static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
-{
-
-    NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2 %x,ko %x,kp %x",
-                 p_ble_evt->evt.gap_evt.params.auth_status.auth_status,
-                 p_ble_evt->evt.gap_evt.params.auth_status.error_src,
-                 p_ble_evt->evt.gap_evt.params.auth_status.bonded,
-                 p_ble_evt->evt.gap_evt.params.auth_status.lesc,
-
-                 //// the sm1 level
-                 ((p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv1 << 3) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv2 << 2) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv3 << 1) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm1_levels.lv4)),
-
-                 /// sm2 level
-                 ((p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv1 << 3) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv2 << 2) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv3 << 1) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.sm2_levels.lv4)),
-
-                 /// kdist owner
-                 ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.enc << 3) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.id << 2) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.link << 1) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_own.sign)),
-
-                 /// kdist peer
-                 ((p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.enc << 3) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.id << 2) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.link << 1) |
-                  (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.sign)));
-
-    uint32_t err = 0;
-    /// get the index from the conn handle
-    uint8_t index = ble_gap_get_gap_index(conn_handle);
-
-    if (index < BLE_MAX_DEVICE_SUPPORTED)
-    {
-        // //// now we can store the pairing key
-        // uint32_t uid = (connected_peer_addr.addr[0] |
-        //                 (connected_peer_addr.addr[1] << 1) | (connected_peer_addr.addr[2] << 2) |
-        //                 (connected_peer_addr.addr[3] << 3));
-
-        // err =nvs_add_data(uid, gap_inst[index].key_set.keys_own.p_enc_key->enc_info.ltk, gap_inst[index].key_set.keys_own.p_enc_key->enc_info.ltk_len);
-        // if(err != nrf_OK)
-        // {
-        //     NRF_LOG_ERROR("addk %d",err);
-        // }
-    }
-}
 
 /// @brief this funtion is to handle the paskkey display event
 /// @param p_ble_evt
