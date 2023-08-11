@@ -4,8 +4,6 @@
 #include "ble_softdevice_init.h"
 
 
-
-
 ///////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +50,10 @@ enum _BLE_GAP_RELATED_ERRORS_
     ble_gap_err_instnace_init_falied,
     ble_gap_err_instnace_not_inited,
 
-    ble_gap_err_dh_key_cal_failed
+    /// @brief  security related errors
+    ble_gap_err_dh_key_cal_failed,
+    ble_gap_err_security_init_failed,
+    ble_gap_err_bond_info_not_found,
 
 };
 /////////////////////////////////////////////////////////////////
@@ -118,9 +119,6 @@ uint32_t ble_gap_remove_conn_handle(uint8_t index);
 /// @return index 
 uint8_t ble_gap_get_gap_index(uint16_t conn_handle);
 
-/// @brief this function will print you the keys that are stored only for debugging purpose  
-/// @param index 
-uint32_t ble_gap_print_keys(uint8_t index);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,9 +147,10 @@ void ble_gap_remove_callback( uint8_t callback_type);
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
+////////////////////////// advertisement related functions /////////////////////////
 
-#define BLE_ADVERTISE_WITH_FAST_PAIR 10
-#define BLE_ADVERTISE_WITHOUT_FAST_PAIR 20
+#define BLE_ADVERTISE_WITH_FAST_PAIR 10UL
+#define BLE_ADVERTISE_WITHOUT_FAST_PAIR 20UL
 
 /// @brief this function is used to start a ble advertisement 
 /// @param type 
@@ -163,11 +162,6 @@ uint32_t ble_gap_start_advertise(uint8_t type);
 /// @return succ/failure of the function
 uint32_t  ble_gap_stop_advertise(void);
 
-/// @brief this function will delete all the bonds 
-/// @param  void
-/// @return succ/failure  
-uint32_t ble_gap_delete_bonds(void);
-
 /// @brief this is to disconnect the device and also remove the connection handle from the connected device array 
 /// @param conn_handle
 void ble_gap_disconnect(uint16_t conn_handle);
@@ -175,10 +169,20 @@ void ble_gap_disconnect(uint16_t conn_handle);
 //////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////// function declarations ///////////////////////////////
+/////////////////////////// security related function  ///////////////////////////////
+
+/// @brief security events that softdevice will notify the ble task 
+enum _BLE_GAP_SECURITY_PROCEDURE_FLOW_
+{
+    BLE_SECEVT_SEC_PARAM_REQ =1,
+    BLE_SECEVT_SEC_INFO_REQ,
+    BLE_SECEVT_LESC_DHKEY_REQ,
+    BLE_SECEVT_CONN_SEC_UPDATE,
+    BLE_SECEVT_AUTH_STATUS
+};
 
 /// @brief  this is the stucture that is used to store the bond information of peer device  
-typedef PACKED_STRUCT _BLE_GAP_STORED_BOND_INFO_STRUCT_
+typedef struct _BLE_GAP_STORED_BOND_INFO_STRUCT_
 {
     ble_gap_id_key_t peer_id_info;
     ble_gap_enc_key_t dev_enc_key;
@@ -189,6 +193,15 @@ typedef PACKED_STRUCT _BLE_GAP_STORED_BOND_INFO_STRUCT_
 /// @param sec_param_type
 /// @return succ/failure  
 uint32_t ble_gap_security_init(uint8_t index);
+
+/// @brief this function will delete all the bonds 
+/// @param  void
+/// @return succ/failure  
+uint32_t ble_gap_delete_bonds(void);
+
+/// @brief this function will print you the keys that are stored only for debugging purpose  
+/// @param index 
+uint32_t ble_gap_print_keys(uint8_t index);
 
 
 /// @brief this is the structure of gap instnace used by differnt functions of gap lib

@@ -118,7 +118,6 @@ static void ble_client_task_init_process(void *param)
     uint32_t err =0;
     uint16_t conn_handle = ble_gap_get_conn_handle(BLE_GAP_DEVICE_INDEX);
 
-    NRF_LOG_INFO("chdl %x", conn_handle);
     /// init the ble client 
     err = gatt_client_init(conn_handle);
     NRF_ASSERT(err);
@@ -171,7 +170,9 @@ static void ble_client_task_deinit_process(void *param)
     ////////// call the deinit process of the above init process     
     uint32_t err =0;
 
+    delay(100);
     NRF_LOG_ERROR("task deinit");
+    delay(100);
     //// deinit the ancs , ams ,device info and other device functionality 
     
     /// deinit the apple ancs, ams task 

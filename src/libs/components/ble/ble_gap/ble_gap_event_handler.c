@@ -25,6 +25,8 @@ extern ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 /// @brief this is to get the task handle
 extern volatile xTaskHandle ble_gap_taskhandle;
 
+/// @brief this is used to store the pointer to a gap event 
+extern volatile ble_evt_t * ble_gap_Evt;
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////// static declarations here
@@ -56,7 +58,15 @@ static void nrf_handle_conn_security_update(ble_evt_t const *p_ble_evt);
 /// @param p_ble_evt
 static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt);
 
-extern ble_evt_t * p_ble_Gap_evt;
+//////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////// macro functions 
+
+#define task_notify(x)              \
+if (ble_gap_taskhandle != NULL)         \
+    {                                       \
+        xTaskNotify(ble_gap_taskhandle, x  , eSetValueWithOverwrite);    \
+    }           \
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +75,6 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 {
     
     uint32_t err_code = 0;
-    p_ble_Gap_evt = (ble_evt_t  * )p_ble_evt;
 
     switch (p_ble_evt->header.evt_id)
     {
@@ -77,20 +86,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     {
         // NRF_LOG_INFO("connected");
         conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
-        static const ble_gap_conn_params_t device_preferd_conn_params =
-            {
-                .min_conn_interval = MIN_CONN_INTERVAL,
-                .max_conn_interval = MAX_CONN_INTERVAL,
-                .slave_latency = SLAVE_LATENCY,
-                .conn_sup_timeout = CONN_SUP_TIMEOUT
-
-            };
-        // init the connection parameter update request
-        sd_ble_gap_conn_param_update(conn_handle,
-                                     &device_preferd_conn_params);
-
-        delay(50);
-
+    
         // call the callback
         if (GAP_Callbacks[ble_gap_evt_connected].callback != NULL)
         {
@@ -194,7 +190,19 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST:
     {
-        NRF_LOG_INFO("conn parm update req");
+        NRF_LOG_INFO("connparm updatereq");
+        const ble_gap_conn_params_t device_preferd_conn_params =
+            {
+                .min_conn_interval = MIN_CONN_INTERVAL,
+                .max_conn_interval = MAX_CONN_INTERVAL,
+                .slave_latency = SLAVE_LATENCY,
+                .conn_sup_timeout = CONN_SUP_TIMEOUT
+
+            };
+        // init the connection parameter update request
+        sd_ble_gap_conn_param_update(conn_handle,
+                                     &device_preferd_conn_params);
+
     }
     break;
 
@@ -271,15 +279,14 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     case BLE_GAP_EVT_CONN_SEC_UPDATE:
     {
         NRF_LOG_WARNING("CONN_SEC_UPDATE");
-
         nrf_handle_conn_security_update(p_ble_evt);
 
         /// call the callback
-        if (GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback != NULL)
-        {
-            GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback(
-                GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
-        }
+        // if (GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback != NULL)
+        // {
+        //     GAP_Callbacks[ble_gap_evt_sec_procedure_cmpt].callback(
+        //         GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
+        // }
     }
     break;
 
@@ -351,6 +358,9 @@ static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
     {
         NRF_LOG_ERROR("max index");
     }
+
+    //// notify the task about that a new bond formation is started 
+    task_notify(BLE_SECEVT_SEC_PARAM_REQ);
 }
 
 /// @brief this function is used to load the peripheral keys and reply to the phone
@@ -358,7 +368,7 @@ static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
 /// @return
 static void nrf_handle_security_info_request(ble_evt_t const *p_ble_evt)
 {
-
+    ble_gap_Evt = ( ble_evt_t *)p_ble_evt;
     /// log the security info
     NRF_LOG_INFO("add %d,t %d,ediv %d,rnad %d,if %x",
                  p_ble_evt->evt.gap_evt.params.sec_info_request.peer_addr.addr_id_peer,
@@ -370,36 +380,8 @@ static void nrf_handle_security_info_request(ble_evt_t const *p_ble_evt)
                   (p_ble_evt->evt.gap_evt.params.sec_info_request.id_info << 1) |
                   (p_ble_evt->evt.gap_evt.params.sec_info_request.sign_info)));
 
-    uint32_t err_code = 0;
-
-    /// get the index
-    uint8_t index = ble_gap_get_gap_index(p_ble_evt->evt.gap_evt.conn_handle);
-
-    if (index < BLE_MAX_DEVICE_SUPPORTED)
-    {
-        ble_gap_enc_info_t peer_en_info =
-            {
-                .auth = gap_inst[index].key_set.keys_own.p_enc_key->enc_info.auth,
-                .lesc = gap_inst[index].key_set.keys_own.p_enc_key->enc_info.lesc,
-                .ltk_len = gap_inst[index].key_set.keys_own.p_enc_key->enc_info.ltk_len,
-            };
-
-        //// now we can store the pairing key
-        // uint32_t uid = (connected_peer_addr.addr[0] |
-        //                 (connected_peer_addr.addr[1] << 1) | (connected_peer_addr.addr[2] << 2) |
-        //                 (connected_peer_addr.addr[3] << 3));
-        // /// get the data from uid
-        // err_code = nvs_read_data(uid, peer_en_info.ltk, peer_en_info.ltk_len);
-        // if (err_code != nrf_OK)
-        // {
-        //     NRF_LOG_ERROR("keys read %d", err_code);
-        //     return err_code;
-        // }
-
-        ///// reply the security peer
-        err_code = sd_ble_gap_sec_info_reply(p_ble_evt->evt.gap_evt.conn_handle, &peer_en_info, NULL, NULL);
-        NRF_ASSERT(err_code);
-    }
+    /// notify the task about that peer is already bonded and want the ltk
+    task_notify(BLE_SECEVT_SEC_INFO_REQ);
 }
 
 
@@ -425,14 +407,11 @@ static void nrf_handle_passkey_display_Evt(ble_evt_t const *p_ble_evt)
 static void nrf_handle_conn_security_update(ble_evt_t const *p_ble_evt)
 {
     /// after running the function notify the task
-    if (ble_gap_taskhandle != NULL)
-    {
-        xTaskNotify(ble_gap_taskhandle, 0, eSetValueWithoutOverwrite);
-    }
-
     /// log about the security status
     NRF_LOG_INFO("%d,%d,%d", p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.sm,
                  p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.lv, p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.encr_key_size);
+
+    // task_notify(BLE_SECEVT_CONN_SEC_UPDATE);
 }
 
 /// @brief this function is used to handle the dh key reqquest
@@ -442,11 +421,8 @@ static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt)
     // get the dhkey
     // NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
 
-    // give the task notification to function security param init
-    if (ble_gap_taskhandle != NULL)
-    {
-        xTaskNotify(ble_gap_taskhandle, 0, eSetValueWithoutOverwrite);
-    }
+    // notify the task that the device is suceesfully bonded 
+    task_notify(BLE_SECEVT_LESC_DHKEY_REQ);
 }
 
 
@@ -486,25 +462,6 @@ static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
                   (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.link << 1) |
                   (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.sign)));
 
-    /// get the index from the conn handle
-    uint8_t index = ble_gap_get_gap_index(p_ble_evt->evt.gap_evt.conn_handle);
-
-    /// make sure we dont overconnect like to cross the max concurrent device limit 
-    if (index < BLE_MAX_DEVICE_SUPPORTED)
-    {
-        // create a new instnace for bond structure 
-        ble_gap_store_bond_info_struct_t new_Device_bond_info = {0};
-        /// copy the bond info 
-        memcpy( &new_Device_bond_info.peer_id_info, gap_inst[index].key_set.keys_peer.p_id_key, sizeof(ble_gap_id_key_t));
-        memcpy(&new_Device_bond_info.dev_enc_key, gap_inst[index].key_set.keys_own.p_enc_key, sizeof(ble_gap_enc_key_t));
-        
-        uint8_t total_uid_presnt = nvs_Get_total_no_of_uid();
-
-        uint32_t err = nvs_add_data(++total_uid_presnt, u8_ptr &new_Device_bond_info ,sizeof(new_Device_bond_info)); 
-        if(err != nrf_OK)
-        {
-            NRF_LOG_ERROR("add nvs %d",err);
-        }
-    }
+    task_notify(BLE_SECEVT_AUTH_STATUS);
 }
 

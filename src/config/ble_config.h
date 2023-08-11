@@ -129,7 +129,7 @@
 
 #define BLE_GAP_API_MUTEX_TIMEOUT 300
 
-#define BLE_GAP_API_TASK_NOTIF_TIMEOUT 3000
+#define BLE_GAP_API_TASK_NOTIF_TIMEOUT 2000
 
 ////////////////////////////////////////////////
 /// this is used for cryptographic operations 
