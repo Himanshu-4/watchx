@@ -321,6 +321,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 /// @param p_ble_evt
 static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
 {
+    delay(10);
     // show the ble gpa security param by central
     NRF_LOG_INFO("%x,%x,%x,%x,%x,%x|| %d,%d ||%x,%x,%x,%x ||%x,%x,%x,%x", p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.bond,
                  p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.mitm, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.lesc,
@@ -331,33 +332,6 @@ static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
                  p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_own.link, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.enc,
                  p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign,
                  p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link);
-
-    uint32_t err_code = 0;
-
-    /// check for existing keys and delete it
-
-    // //// now we can store the pairing key
-    // uint32_t uid = (connected_peer_addr.addr[0] |
-    //                 (connected_peer_addr.addr[1] << 1) | (connected_peer_addr.addr[2] << 2) |
-    //                 (connected_peer_addr.addr[3] << 3));
-
-    // err_code = nvs_delete_data(uid);
-    // if (err_code != nrf_OK)
-    // {
-    //     NRF_LOG_ERROR("del %d", err_code);
-    // }
-    /// get the index from the connection handle
-    uint8_t index = ble_gap_get_gap_index(p_ble_evt->evt.gap_evt.conn_handle);
-    /// check for a valid index
-    if (index < BLE_GAP_MAX_NO_OF_DEVICES)
-    {
-        err_code = sd_ble_gap_sec_params_reply(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *)&gap_inst[index].key_set);
-        NRF_ASSERT(err_code);
-    }
-    else
-    {
-        NRF_LOG_ERROR("max index");
-    }
 
     //// notify the task about that a new bond formation is started 
     task_notify(BLE_SECEVT_SEC_PARAM_REQ);
@@ -411,7 +385,7 @@ static void nrf_handle_conn_security_update(ble_evt_t const *p_ble_evt)
     NRF_LOG_INFO("%d,%d,%d", p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.sm,
                  p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.lv, p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.encr_key_size);
 
-    // task_notify(BLE_SECEVT_CONN_SEC_UPDATE);
+    task_notify(BLE_SECEVT_CONN_SEC_UPDATE);
 }
 
 /// @brief this function is used to handle the dh key reqquest
@@ -426,13 +400,23 @@ static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt)
 }
 
 
+/**@brief GAP connection security modes.
+ *
+ * Security Mode 0 Level 0: No access permissions at all (this level is not defined by the Bluetooth Core specification).\n
+ * Security Mode 1 Level 1: No security is needed (aka open link).\n
+ * Security Mode 1 Level 2: Encrypted link required, MITM protection not necessary.\n
+ * Security Mode 1 Level 3: MITM protected encrypted link required.\n
+ * Security Mode 1 Level 4: LESC MITM protected encrypted link using a 128-bit strength encryption key required.\n
+ * Security Mode 2 Level 1: Signing or encryption required, MITM protection not necessary.\n
+ * Security Mode 2 Level 2: MITM protected signing required, unless link is MITM protected encrypted.\n
+ */
 
 /// @brief this function is handle the authentication status of the data
 /// @param p_ble_evt
 static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
 {
 
-    NRF_LOG_INFO("au %d,e %d,b %d,l %d,s1 %x,s2 %x,ko %x,kp %x",
+    NRF_LOG_INFO("au %x,e %d,b %d,l %d,s1 %x,s2 %x,ko %x,kp %x",
                  p_ble_evt->evt.gap_evt.params.auth_status.auth_status,
                  p_ble_evt->evt.gap_evt.params.auth_status.error_src,
                  p_ble_evt->evt.gap_evt.params.auth_status.bonded,

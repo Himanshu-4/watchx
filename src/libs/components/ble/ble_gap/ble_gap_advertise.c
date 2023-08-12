@@ -162,7 +162,7 @@ uint32_t ble_gap_start_advertise(uint8_t type)
         if(type == BLE_ADVERTISE_WITH_FAST_PAIR)
         {
             /// fetch the data from the nvs about the irk and addresses 
-            static ble_gap_id_key_t const *  ble_gap_stored_data_ids[BLE_GAP_MAX_BOND_USERS_STORED];
+            static ble_gap_id_key_t const *  ble_gap_stored_data_ids[BLE_GAP_MAX_BOND_USERS_STORED] = {NULL};
 
             uint8_t total_id_present = nvs_Get_total_no_of_uid();
 

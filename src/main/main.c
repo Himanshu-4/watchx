@@ -170,7 +170,7 @@ void general_task_function(void *param)
                 // NRF_LOG_INFO("%d", nvs_add_data(uid, data_buff , min_Size + uid ));
                 // NRF_LOG_WARNING("pointer %x",nvs_get_data_pointer(uid));
                 //// start the advertise
-                NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITHOUT_FAST_PAIR));
+                NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
             }
             else if (evt == NRF_BUTTON_DOWN_EVT)
             {
