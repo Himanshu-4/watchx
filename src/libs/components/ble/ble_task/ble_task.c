@@ -136,7 +136,6 @@ static void ble_client_task_init_process(void *param)
     NRF_ASSERT(err);
 
     /// @note this function will wait for the security procedure to finish and then proceed .
-    delay(1000);
     /// start the pairing process 
     err = ble_gap_security_init(BLE_GAP_DEVICE_INDEX);
     NRF_ASSERT(err);

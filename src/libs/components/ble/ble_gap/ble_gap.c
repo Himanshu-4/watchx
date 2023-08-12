@@ -466,12 +466,13 @@ uint32_t ble_gap_security_init(uint8_t index)
         return ble_gap_err_mutex_not_avial;
     }
 
+    /// get the task handle and wait for notification
+    ble_gap_taskhandle = xTaskGetCurrentTaskHandle();
+
     //// return code
     uint32_t ret = 0;
     uint32_t notif_value = 0;
 
-    /// get the task handle and wait for notification
-    ble_gap_taskhandle = xTaskGetCurrentTaskHandle();
 
     /// first we have to genrate the keypair then we can think
 
@@ -488,7 +489,7 @@ uint32_t ble_gap_security_init(uint8_t index)
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    /// send an authentication request to the peer device
+    //// send an authentication request to the peer device
     ret = sd_ble_gap_authenticate(gap_inst[index].ble_gap_conn_handle, &gap_sec_param[gap_inst[index].ble_gap_security_param_index]);
     if (ret != nrf_OK)
     {
@@ -496,18 +497,19 @@ uint32_t ble_gap_security_init(uint8_t index)
         goto return_mech;
     }
 
-    /// wait for the notification from the gap handler
+    /// wait for the notification from the gap event handler
     if (xTaskNotifyWait(0, U32_MAX, &notif_value, BLE_GAP_API_TASK_NOTIF_TIMEOUT) != pdPASS)
     {
         ret = ble_gap_err_timeout;
+        NRF_LOG_ERROR("task handle");
         goto return_mech;
     }
 
     /// check the notifcation value that if a new bond formation is required
     if (notif_value == BLE_SECEVT_SEC_PARAM_REQ)
     {
-     
-        ret  = sd_ble_gap_sec_params_reply(gap_inst[index].ble_gap_conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *)&gap_inst[index].key_set);
+
+        ret = sd_ble_gap_sec_params_reply(gap_inst[index].ble_gap_conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *)&gap_inst[index].key_set);
         NRF_ASSERT(ret);
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -565,30 +567,30 @@ uint32_t ble_gap_security_init(uint8_t index)
             NRF_LOG_INFO("bond stored");
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // //// now store the bond information
-        // uint8_t uid_to_store = nvs_Get_total_no_of_uid();
+        ////////////////////////////////////////////////////////////////////////////////////////
+        //// now store the bond information
+        uint8_t uid_to_store = nvs_Get_total_no_of_uid();
 
-        // if (uid_to_store >= BLE_GAP_MAX_BOND_USERS_STORED)
-        // {
-        //     NRF_LOG_ERROR("no more bonds can be stored ");
-        //     ble_gap_disconnect(gap_inst[index].ble_gap_conn_handle);
-        //     gap_inst[index].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
-        //     NRF_LOG_INFO("please delte some bonds ");
-        //     goto return_mech;
-        // }
+        if (uid_to_store >= BLE_GAP_MAX_BOND_USERS_STORED)
+        {
+            NRF_LOG_ERROR("no more bonds can be stored ");
+            ble_gap_disconnect(gap_inst[index].ble_gap_conn_handle);
+            gap_inst[index].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
+            NRF_LOG_INFO("please delte some bonds ");
+            goto return_mech;
+        }
 
-        // ble_gap_store_bond_info_struct_t new_bond = {0};
+        ble_gap_store_bond_info_struct_t new_bond = {0};
 
-        // /// copy the bond info
-        // memcpy(&new_bond.dev_enc_key, gap_inst[index].key_set.keys_own.p_enc_key, sizeof(ble_gap_enc_key_t));
-        // memcpy(&new_bond.peer_id_info, gap_inst[index].key_set.keys_peer.p_id_key, sizeof(ble_gap_id_key_t));
+        /// copy the bond info
+        memcpy(&new_bond.dev_enc_key, gap_inst[index].key_set.keys_own.p_enc_key, sizeof(ble_gap_enc_key_t));
+        memcpy(&new_bond.peer_id_info, gap_inst[index].key_set.keys_peer.p_id_key, sizeof(ble_gap_id_key_t));
 
-        // ret = nvs_add_data(++uid_to_store, u8_ptr & new_bond, sizeof(new_bond));
-        // if (ret != nrf_OK)
-        // {
-        //     NRF_LOG_ERROR("add bondpair %d", ret);
-        // }
+        ret = nvs_add_data(++uid_to_store, u8_ptr & new_bond, sizeof(new_bond));
+        if (ret != nrf_OK)
+        {
+            NRF_LOG_ERROR("add bondpair %d", ret);
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -597,14 +599,13 @@ uint32_t ble_gap_security_init(uint8_t index)
     //// check that is  the peer already bonded
     else if (notif_value == BLE_SECEVT_SEC_INFO_REQ)
     {
-
         /// scan throught the differnt bonds stored and match the eddiv and rand
         if (ble_gap_Evt != NULL)
         {
             //// find the rand and ediv
             /// get the total no of store bond present
             uint8_t total_bond_present = nvs_Get_total_no_of_uid();
-            ble_gap_store_bond_info_struct_t *store_bonds = NULL;
+            ble_gap_store_bond_info_struct_t const *store_bonds = NULL;
 
             for (uint8_t i = 1; i <= total_bond_present; i++)
             {
@@ -623,8 +624,9 @@ uint32_t ble_gap_security_init(uint8_t index)
                         if ((*rand_num_sotred) == (*rand_num_evt))
                         {
                             NRF_LOG_INFO("found bond");
-
-                            ///// reply the security peer
+                            
+                            /// display the
+                            /// reply the security peer
                             ret = sd_ble_gap_sec_info_reply(gap_inst[index].ble_gap_conn_handle, &store_bonds->dev_enc_key.enc_info, &store_bonds->peer_id_info.id_info, NULL);
                             NRF_ASSERT(ret);
 
@@ -644,6 +646,7 @@ uint32_t ble_gap_security_init(uint8_t index)
         if (xTaskNotifyWait(0, U32_MAX, &notif_value, BLE_GAP_API_TASK_NOTIF_TIMEOUT) != pdPASS)
         {
             ret = ble_gap_err_timeout;
+            NRF_LOG_ERROR("bond sharing failed");
             goto return_mech;
         }
         if (notif_value != BLE_SECEVT_CONN_SEC_UPDATE)
@@ -652,16 +655,17 @@ uint32_t ble_gap_security_init(uint8_t index)
             NRF_LOG_ERROR("security init failed");
             goto return_mech;
         }
+
+        NRF_LOG_INFO("LTK exchg succfuly");
     }
 
-
 //// return mechanism
-return_mech :
+return_mech:
     /// nullify the task handle
     ble_gap_taskhandle = NULL;
-/// give back the mutex
-xSemaphoreGive(ble_gap_mutex_handle);
-return ret;
+    /// give back the mutex
+    xSemaphoreGive(ble_gap_mutex_handle);
+    return ret;
 }
 
 /// @brief this function will delete all the bonds
@@ -685,7 +689,6 @@ uint32_t ble_gap_delete_bonds(void)
         NRF_LOG_WARNING("eraseing partition");
         ret = nvs_erase_partition();
     }
-
     /// give back the mutex
     xSemaphoreGive(ble_gap_mutex_handle);
 

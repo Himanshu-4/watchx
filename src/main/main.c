@@ -181,6 +181,7 @@ void general_task_function(void *param)
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
+                NRF_LOG_INFO("delete %d", ble_gap_delete_bonds());
                 //   ble_gap_print_keys(0);
                 // NRF_LOG_INFO ("uid %d",uid);
                 // add the data , get the data pointer

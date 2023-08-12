@@ -321,7 +321,6 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 /// @param p_ble_evt
 static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
 {
-    delay(10);
     // show the ble gpa security param by central
     NRF_LOG_INFO("%x,%x,%x,%x,%x,%x|| %d,%d ||%x,%x,%x,%x ||%x,%x,%x,%x", p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.bond,
                  p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.mitm, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.lesc,
@@ -354,6 +353,7 @@ static void nrf_handle_security_info_request(ble_evt_t const *p_ble_evt)
                   (p_ble_evt->evt.gap_evt.params.sec_info_request.id_info << 1) |
                   (p_ble_evt->evt.gap_evt.params.sec_info_request.sign_info)));
 
+    delay(10);
     /// notify the task about that peer is already bonded and want the ltk
     task_notify(BLE_SECEVT_SEC_INFO_REQ);
 }
