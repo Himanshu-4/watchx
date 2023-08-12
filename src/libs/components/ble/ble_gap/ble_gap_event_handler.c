@@ -333,7 +333,7 @@ static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
                  p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link);
 
     //// notify the task about that a new bond formation is started 
-    task_notify(BLE_SECEVT_SEC_PARAM_REQ);
+    task_notify(BLE_SECEVT_NOTIF_SEC_PARAM_REQ);
 }
 
 /// @brief this function is used to load the peripheral keys and reply to the phone
@@ -343,19 +343,19 @@ static void nrf_handle_security_info_request(ble_evt_t const *p_ble_evt)
 {
     ble_gap_Evt = ( ble_evt_t *)p_ble_evt;
     /// log the security info
-    NRF_LOG_INFO("add %d,t %d,ediv %d,rnad %d,if %x",
-                 p_ble_evt->evt.gap_evt.params.sec_info_request.peer_addr.addr_id_peer,
-                 p_ble_evt->evt.gap_evt.params.sec_info_request.peer_addr.addr_type,
-                 p_ble_evt->evt.gap_evt.params.sec_info_request.master_id.ediv,
-                 p_ble_evt->evt.gap_evt.params.sec_info_request.master_id.rand[2],
-                 // the omfp required
-                 ((p_ble_evt->evt.gap_evt.params.sec_info_request.enc_info << 2) |
-                  (p_ble_evt->evt.gap_evt.params.sec_info_request.id_info << 1) |
-                  (p_ble_evt->evt.gap_evt.params.sec_info_request.sign_info)));
+    // NRF_LOG_INFO("add %d,t %d,ediv %d,rnad %d,if %x",
+    //              p_ble_evt->evt.gap_evt.params.sec_info_request.peer_addr.addr_id_peer,
+    //              p_ble_evt->evt.gap_evt.params.sec_info_request.peer_addr.addr_type,
+    //              p_ble_evt->evt.gap_evt.params.sec_info_request.master_id.ediv,
+    //              p_ble_evt->evt.gap_evt.params.sec_info_request.master_id.rand[2],
+    //              // the omfp required
+    //              ((p_ble_evt->evt.gap_evt.params.sec_info_request.enc_info << 2) |
+    //               (p_ble_evt->evt.gap_evt.params.sec_info_request.id_info << 1) |
+    //               (p_ble_evt->evt.gap_evt.params.sec_info_request.sign_info)));
 
-    delay(10);
+    delay(20);
     /// notify the task about that peer is already bonded and want the ltk
-    task_notify(BLE_SECEVT_SEC_INFO_REQ);
+    task_notify(BLE_SECEVT_NOTIF_SEC_INFO_REQ);
 }
 
 
@@ -382,10 +382,10 @@ static void nrf_handle_conn_security_update(ble_evt_t const *p_ble_evt)
 {
     /// after running the function notify the task
     /// log about the security status
-    NRF_LOG_INFO("%d,%d,%d", p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.sm,
-                 p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.lv, p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.encr_key_size);
+    // NRF_LOG_INFO("%d,%d,%d", p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.sm,
+    //              p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.lv, p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.encr_key_size);
 
-    task_notify(BLE_SECEVT_CONN_SEC_UPDATE);
+    task_notify(BLE_SECEVT_NOTIF_CONN_SEC_UPDATE);
 }
 
 /// @brief this function is used to handle the dh key reqquest
@@ -396,7 +396,7 @@ static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt)
     // NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
 
     // notify the task that the device is suceesfully bonded 
-    task_notify(BLE_SECEVT_LESC_DHKEY_REQ);
+    task_notify(BLE_SECEVT_NOTIF_LESC_DHKEY_REQ);
 }
 
 
@@ -446,6 +446,6 @@ static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
                   (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.link << 1) |
                   (p_ble_evt->evt.gap_evt.params.auth_status.kdist_peer.sign)));
 
-    task_notify(BLE_SECEVT_AUTH_STATUS);
+    task_notify(BLE_SECEVT_NOTIF_AUTH_STATUS);
 }
 

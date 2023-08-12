@@ -174,11 +174,11 @@ void ble_gap_disconnect(uint16_t conn_handle);
 /// @brief security events that softdevice will notify the ble task 
 enum _BLE_GAP_SECURITY_PROCEDURE_FLOW_
 {
-    BLE_SECEVT_SEC_PARAM_REQ =1,
-    BLE_SECEVT_SEC_INFO_REQ,
-    BLE_SECEVT_LESC_DHKEY_REQ,
-    BLE_SECEVT_CONN_SEC_UPDATE,
-    BLE_SECEVT_AUTH_STATUS
+    BLE_SECEVT_NOTIF_SEC_PARAM_REQ =1,
+    BLE_SECEVT_NOTIF_SEC_INFO_REQ,
+    BLE_SECEVT_NOTIF_LESC_DHKEY_REQ,
+    BLE_SECEVT_NOTIF_CONN_SEC_UPDATE,
+    BLE_SECEVT_NOTIF_AUTH_STATUS
 };
 
 /// @brief  this is the stucture that is used to store the bond information of peer device  
@@ -186,6 +186,7 @@ typedef struct _BLE_GAP_STORED_BOND_INFO_STRUCT_
 {
     ble_gap_id_key_t peer_id_info;
     ble_gap_enc_key_t dev_enc_key;
+    ble_gap_irk_t device_irk;
 }ble_gap_store_bond_info_struct_t;
 
 /// @brief init the gap security procedure

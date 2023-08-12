@@ -211,6 +211,7 @@ uint32_t ble_gap_instance_init(uint8_t index, uint8_t pairing_type)
         gap_inst[index].ble_gap_security_param_index = ble_gap_security_param2;
     }
 
+    //// Lesc pairing procedure
     else
     {
         /// when done store the keys pointer in keyset
@@ -219,7 +220,7 @@ uint32_t ble_gap_instance_init(uint8_t index, uint8_t pairing_type)
         gap_inst[index].private_key_device = private_key_device;
 
         gap_inst[index].key_set.keys_own.p_enc_key = &device_en_keys;
-        gap_inst[index].key_set.keys_own.p_id_key = NULL;
+        gap_inst[index].key_set.keys_own.p_id_key = &device_id_keys;
         gap_inst[index].key_set.keys_own.p_sign_key = NULL;
 
         //// store the peer keys
@@ -473,7 +474,6 @@ uint32_t ble_gap_security_init(uint8_t index)
     uint32_t ret = 0;
     uint32_t notif_value = 0;
 
-
     /// first we have to genrate the keypair then we can think
 
     //// switch between the lesc and legacy keypair algorithms
@@ -506,7 +506,7 @@ uint32_t ble_gap_security_init(uint8_t index)
     }
 
     /// check the notifcation value that if a new bond formation is required
-    if (notif_value == BLE_SECEVT_SEC_PARAM_REQ)
+    if (notif_value == BLE_SECEVT_NOTIF_SEC_PARAM_REQ)
     {
 
         ret = sd_ble_gap_sec_params_reply(gap_inst[index].ble_gap_conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &gap_sec_param[gap_inst[index].ble_gap_security_param_index], (ble_gap_sec_keyset_t *)&gap_inst[index].key_set);
@@ -520,7 +520,7 @@ uint32_t ble_gap_security_init(uint8_t index)
             NRF_LOG_ERROR("dh key notif");
             goto return_mech;
         }
-        if (notif_value != BLE_SECEVT_LESC_DHKEY_REQ)
+        if (notif_value != BLE_SECEVT_NOTIF_LESC_DHKEY_REQ)
         {
             ret = ble_gap_err_dh_key_cal_failed;
             NRF_LOG_ERROR("dh key not req by sd");
@@ -542,7 +542,7 @@ uint32_t ble_gap_security_init(uint8_t index)
             ret = ble_gap_err_timeout;
             goto return_mech;
         }
-        if (notif_value != BLE_SECEVT_CONN_SEC_UPDATE)
+        if (notif_value != BLE_SECEVT_NOTIF_CONN_SEC_UPDATE)
         {
             ret = ble_gap_err_security_init_failed;
             NRF_LOG_ERROR("security init failed");
@@ -556,7 +556,7 @@ uint32_t ble_gap_security_init(uint8_t index)
             ret = ble_gap_err_timeout;
             goto return_mech;
         }
-        if (notif_value != BLE_SECEVT_AUTH_STATUS)
+        if (notif_value != BLE_SECEVT_NOTIF_AUTH_STATUS)
         {
             ret = ble_gap_err_security_init_failed;
             NRF_LOG_ERROR("auth status failed");
@@ -585,11 +585,12 @@ uint32_t ble_gap_security_init(uint8_t index)
         /// copy the bond info
         memcpy(&new_bond.dev_enc_key, gap_inst[index].key_set.keys_own.p_enc_key, sizeof(ble_gap_enc_key_t));
         memcpy(&new_bond.peer_id_info, gap_inst[index].key_set.keys_peer.p_id_key, sizeof(ble_gap_id_key_t));
+        memcpy(&new_bond.device_irk.irk, gap_inst[index].key_set.keys_own.p_id_key->id_info.irk , sizeof(ble_gap_irk_t));
 
         ret = nvs_add_data(++uid_to_store, u8_ptr & new_bond, sizeof(new_bond));
         if (ret != nrf_OK)
         {
-            NRF_LOG_ERROR("add bondpair %d", ret);
+            NRF_LOG_WARNING("add bondpair %d", ret);
         }
     }
 
@@ -597,7 +598,7 @@ uint32_t ble_gap_security_init(uint8_t index)
     /////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////
     //// check that is  the peer already bonded
-    else if (notif_value == BLE_SECEVT_SEC_INFO_REQ)
+    else if (notif_value == BLE_SECEVT_NOTIF_SEC_INFO_REQ)
     {
         /// scan throught the differnt bonds stored and match the eddiv and rand
         if (ble_gap_Evt != NULL)
@@ -605,7 +606,7 @@ uint32_t ble_gap_security_init(uint8_t index)
             //// find the rand and ediv
             /// get the total no of store bond present
             uint8_t total_bond_present = nvs_Get_total_no_of_uid();
-            ble_gap_store_bond_info_struct_t const *store_bonds = NULL;
+            ble_gap_store_bond_info_struct_t const * store_bonds = NULL;
 
             for (uint8_t i = 1; i <= total_bond_present; i++)
             {
@@ -624,10 +625,11 @@ uint32_t ble_gap_security_init(uint8_t index)
                         if ((*rand_num_sotred) == (*rand_num_evt))
                         {
                             NRF_LOG_INFO("found bond");
-                            
+
                             /// display the
                             /// reply the security peer
-                            ret = sd_ble_gap_sec_info_reply(gap_inst[index].ble_gap_conn_handle, &store_bonds->dev_enc_key.enc_info, &store_bonds->peer_id_info.id_info, NULL);
+                            ret = sd_ble_gap_sec_info_reply(gap_inst[index].ble_gap_conn_handle, &store_bonds->dev_enc_key.enc_info, 
+                            &store_bonds->device_irk, NULL);
                             NRF_ASSERT(ret);
 
                             /// goto found match and wait for the
@@ -637,6 +639,9 @@ uint32_t ble_gap_security_init(uint8_t index)
                 }
             }
         }
+        /// send the peer that key is missing or not present 
+        ret = sd_ble_gap_sec_info_reply(gap_inst[index].ble_gap_conn_handle, NULL, NULL, NULL);
+        NRF_ASSERT(ret);
         ret = ble_gap_err_bond_info_not_found;
         goto return_mech;
 
@@ -649,7 +654,7 @@ uint32_t ble_gap_security_init(uint8_t index)
             NRF_LOG_ERROR("bond sharing failed");
             goto return_mech;
         }
-        if (notif_value != BLE_SECEVT_CONN_SEC_UPDATE)
+        if (notif_value != BLE_SECEVT_NOTIF_CONN_SEC_UPDATE)
         {
             ret = ble_gap_err_security_init_failed;
             NRF_LOG_ERROR("security init failed");
