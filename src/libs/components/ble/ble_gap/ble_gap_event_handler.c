@@ -25,8 +25,8 @@ extern ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES];
 /// @brief this is to get the task handle
 extern volatile xTaskHandle ble_gap_taskhandle;
 
-/// @brief this is used to store the pointer to a gap event 
-extern volatile ble_evt_t * ble_gap_Evt;
+/// @brief this is used to store the pointer to a gap event
+extern volatile ble_evt_t *ble_gap_Evt;
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////// static declarations here
@@ -60,20 +60,20 @@ static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt);
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////// macro functions 
+///////////////////////////////////////////////////// macro functions
 
-#define task_notify(x)              \
-if (ble_gap_taskhandle != NULL)         \
-    {                                       \
-        xTaskNotify(ble_gap_taskhandle, x  , eSetValueWithOverwrite);    \
-    }           \
+#define task_notify(x)                                              \
+    if (ble_gap_taskhandle != NULL)                                 \
+    {                                                               \
+        xTaskNotify(ble_gap_taskhandle, x, eSetValueWithOverwrite); \
+    }
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////// ble gpa event handler
 void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 {
-    
+
     uint32_t err_code = 0;
 
     switch (p_ble_evt->header.evt_id)
@@ -86,7 +86,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
     {
         // NRF_LOG_INFO("connected");
         conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
-    
+
         // call the callback
         if (GAP_Callbacks[ble_gap_evt_connected].callback != NULL)
         {
@@ -108,19 +108,11 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         NRF_LOG_ERROR("dct %x", p_ble_evt->evt.gap_evt.params.disconnected.reason);
         // after disconnecting
 
-        uint8_t index = ble_gap_get_gap_index(conn_handle);
-        if (index < BLE_MAX_DEVICE_SUPPORTED)
+        /// only call the callback for a valid conn hadnle
+        if (GAP_Callbacks[ble_gap_evt_disconnected].callback != NULL)
         {
-            /// remove the connection handle
-            if (ble_gap_ok == ble_gap_remove_conn_handle(index))
-            {
-                /// only call the callback for a valid conn hadnle
-                if (GAP_Callbacks[ble_gap_evt_disconnected].callback != NULL)
-                {
-                    GAP_Callbacks[ble_gap_evt_disconnected].callback(
-                        GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
-                }
-            }
+            GAP_Callbacks[ble_gap_evt_disconnected].callback(
+                GAP_Callbacks[ble_gap_evt_disconnected].callback_param, &p_ble_evt->evt.gap_evt);
         }
     }
     break;
@@ -202,7 +194,6 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
         // init the connection parameter update request
         sd_ble_gap_conn_param_update(conn_handle,
                                      &device_preferd_conn_params);
-
     }
     break;
 
@@ -332,7 +323,7 @@ static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
                  p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.id, p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.sign,
                  p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_peer.link);
 
-    //// notify the task about that a new bond formation is started 
+    //// notify the task about that a new bond formation is started
     task_notify(BLE_SECEVT_NOTIF_SEC_PARAM_REQ);
 }
 
@@ -341,7 +332,7 @@ static void nrf_handle_security_param_request(ble_evt_t const *p_ble_evt)
 /// @return
 static void nrf_handle_security_info_request(ble_evt_t const *p_ble_evt)
 {
-    ble_gap_Evt = ( ble_evt_t *)p_ble_evt;
+    ble_gap_Evt = (ble_evt_t *)p_ble_evt;
     /// log the security info
     // NRF_LOG_INFO("add %d,t %d,ediv %d,rnad %d,if %x",
     //              p_ble_evt->evt.gap_evt.params.sec_info_request.peer_addr.addr_id_peer,
@@ -357,7 +348,6 @@ static void nrf_handle_security_info_request(ble_evt_t const *p_ble_evt)
     /// notify the task about that peer is already bonded and want the ltk
     task_notify(BLE_SECEVT_NOTIF_SEC_INFO_REQ);
 }
-
 
 /// @brief this funtion is to handle the paskkey display event
 /// @param p_ble_evt
@@ -395,10 +385,9 @@ static void nrf_handle_lesc_dhkey_request(ble_evt_t const *p_ble_evt)
     // get the dhkey
     // NRF_LOG_INFO("%d, %d", p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.oobd_req, p_ble_evt->evt.gap_evt.params.lesc_dhkey_request.p_pk_peer->pk[0]);
 
-    // notify the task that the device is suceesfully bonded 
+    // notify the task that the device is suceesfully bonded
     task_notify(BLE_SECEVT_NOTIF_LESC_DHKEY_REQ);
 }
-
 
 /**@brief GAP connection security modes.
  *
@@ -448,4 +437,3 @@ static void nrf_handle_authentication_status(ble_evt_t const *p_ble_evt)
 
     task_notify(BLE_SECEVT_NOTIF_AUTH_STATUS);
 }
-
