@@ -7,19 +7,19 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 /////////// extern variables
 
-
-extern volatile ble_client_struct client_struct[BLE_NO_OF_CLIENT_SUPPORTED];
-
 extern volatile uint8_t client_buff[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
 
 extern volatile xTaskHandle client_taskhandle;
 
-/////////// @ref define a refernce functions that are using tas notification 
+extern volatile gatt_client_callback_handler gatt_client_callbacks[ble_gatt_client_max_callbacks_supp] = {NULL};
 
-#define task_notify(x)  \
-if(client_taskhandle != NULL)   \
-{xTaskNotify(client_taskhandle, x, eSetValueWithOverwrite );}     \
+/////////// @ref define a refernce functions that are using tas notification
 
+#define task_notify(x)                                             \
+    if (client_taskhandle != NULL)                                 \
+    {                                                              \
+        xTaskNotify(client_taskhandle, x, eSetValueWithOverwrite); \
+    }
 
 void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 {
@@ -39,26 +39,25 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         /**< Primary Service Discovery Response event.          \n See @ref ble_gattc_evt_prim_srvc_disc_rsp_t.          */
     case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP:
     {
-        ///////// check about the gatt status 
-         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
+        ///////// check about the gatt status
+        uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
 
-            if(gatt_status == BLE_GATT_STATUS_SUCCESS)
-            {
-                // copy the content to the client buffer
-                memcpy(u8(client_buff) , &p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0] , sizeof(ble_service_struct_t));
-                /// notify tabout the task 
+        if (gatt_status == BLE_GATT_STATUS_SUCCESS)
+        {
+            // copy the content to the client buffer
+            memcpy(u8(client_buff), &p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0], sizeof(ble_service_struct_t));
+            /// notify tabout the task
 
             // NRF_LOG_INFO("s%d,%x,%d,%d,%d", p_ble_evt->evt.gattc_evt.gatt_status, p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.uuid,
             //  p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.type ,p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.start_handle,
             // p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.end_handle);
-            }
+        }
 
-            else 
-            {
-                NRF_LOG_ERROR("gatt eer");
-            }
-            task_notify(gatt_status);
-
+        else
+        {
+            NRF_LOG_ERROR("gatt eer");
+        }
+        task_notify(gatt_status);
 
         // for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.count; i++)
         // {
@@ -80,8 +79,8 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         /////// the message buffer have the content of serach charcteristic
         ble_char_struct_t serch_char;
 
-        /// copy the serach char from the client buff 
-        memcpy(&serch_char, (uint8_t *)client_buff , sizeof(ble_char_struct_t));
+        /// copy the serach char from the client buff
+        memcpy(&serch_char, (uint8_t *)client_buff, sizeof(ble_char_struct_t));
         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
 
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
@@ -92,8 +91,8 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             /// serach the char with the uuid
             for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.char_disc_rsp.count; i++)
             {
-                //// match the characteristic type first 
-                if(p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i].uuid.type !=  serch_char.characterstic.uuid.type)
+                //// match the characteristic type first
+                if (p_ble_evt->evt.gattc_evt.params.char_disc_rsp.chars[i].uuid.type != serch_char.characterstic.uuid.type)
                 {
                     continue;
                 }
@@ -139,7 +138,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
                     gatt_status = ble_client_ok;
                     /// found the uuid, change the gatt status
                     /// copy the content to buffer
-                    memcpy( u8_ptr client_buff, u8_ptr &p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i], sizeof(ble_char_desc_struct_t));
+                    memcpy(u8_ptr client_buff, u8_ptr & p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i], sizeof(ble_char_desc_struct_t));
                     /// exit from the loop
                     break;
                 }
@@ -170,9 +169,9 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         if (gatt_status == BLE_GATT_STATUS_SUCCESS)
         {
             /// copy the content
-            memcpy(u8_ptr client_buff, u8_ptr &p_ble_evt->evt.gattc_evt.params.read_rsp.data[0], MIN_OF(sizeof(client_buff), p_ble_evt->evt.gattc_evt.params.read_rsp.len));
+            memcpy(u8_ptr client_buff, u8_ptr & p_ble_evt->evt.gattc_evt.params.read_rsp.data[0], MIN_OF(sizeof(client_buff), p_ble_evt->evt.gattc_evt.params.read_rsp.len));
         }
-       
+
         task_notify(gatt_status);
     }
     break;
@@ -196,7 +195,6 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         //// based on the gatt status we have to send then gatt notificatin
         uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
         task_notify(gatt_status);
-
     }
     break;
 
@@ -216,80 +214,49 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     case BLE_GATTC_EVT_HVX:
     {
         // check that if it is a notification or indication
+        //// execute the function only when gatt operation is sucees
+        if (p_ble_evt->evt.gattc_evt.gatt_status != BLE_GATT_STATUS_SUCCESS)
+        {
+            ///// call the error handler
+            if (gatt_client_callbacks[ble_gatt_client_error_callback] != NULL)
+            {
+                gatt_client_callbacks[ble_gatt_client_error_callback](NULL);
+            }
+            break;
+        }
 
         if (p_ble_evt->evt.gattc_evt.params.hvx.type == BLE_GATT_HVX_INDICATION)
         {
-            // call all the timeout handler  code here
-            for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
+            // check handler is not null
+            if (gatt_client_callbacks[ble_gatt_client_indic_callback] != NULL)
             {
-                if (client_struct[i].conn_handle == p_ble_evt->evt.gattc_evt.conn_handle)
-                {
-                    //// execute the function only when gatt operation is sucees
-                    if (p_ble_evt->evt.gattc_evt.gatt_status == BLE_GATT_STATUS_SUCCESS)
-                    {
-                        // check handler is not null
-                        if (client_struct[i].client_ind_handler != NULL)
-                        {
-                            // call the handler funtions with data and len
-                            client_struct[i].client_ind_handler(client_struct[i].client_indi_hand_param,(ble_gattc_evt_t *) &p_ble_evt->evt.gattc_evt);
-                        }
-
-                        /// send the indication confirmation
-                        sd_ble_gattc_hv_confirm(client_struct[i].conn_handle, p_ble_evt->evt.gattc_evt.params.hvx.handle);
-                    }
-                    else
-                    {
-                        ///// call the error handler
-                        if (client_struct[i].client_err_handler != NULL)
-                        {
-                            client_struct[i].client_err_handler(client_struct[i].client_err_hand_param, p_ble_evt->evt.gattc_evt.gatt_status);
-                        }
-                    }
-                    break;
-                }
+                // call the handler funtion
+                gatt_client_callbacks[ble_gatt_client_timeout_callback](p_ble_evt);
             }
+
+            /// send the indication confirmation
+            sd_ble_gattc_hv_confirm(p_ble_evt->evt.gattc_evt.conn_handle, p_ble_evt->evt.gattc_evt.params.hvx.handle);
         }
 
         //////////////// handle the gatt notification
         else
         {
-            // call all the timeout handler  code here
-            for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
-            {
-                if (client_struct[i].conn_handle == p_ble_evt->evt.gattc_evt.conn_handle)
-                {
-                    //// execute the function only when gatt operation is sucees
-                    if (p_ble_evt->evt.gattc_evt.gatt_status == BLE_GATT_STATUS_SUCCESS)
-                    {
-                        // check handler is not null
-                        if (client_struct[i].client_notif_handler != NULL)
-                        {
-                            // call the handler funtions
-                            client_struct[i].client_notif_handler(client_struct[i].client_notif_hand_param, (ble_gattc_evt_t *) &p_ble_evt->evt.gattc_evt);
-                        }
-                    }
-                    
 
-                    else
-                    {
-                        ///// call the error handler
-                        if (client_struct[i].client_err_handler != NULL)
-                        {
-                            client_struct[i].client_err_handler(client_struct[i].client_err_hand_param, p_ble_evt->evt.gattc_evt.gatt_status);
-                        }
-                    }
-                    break;
-                }
+            // check handler is not null
+            if (gatt_client_callbacks[ble_gatt_client_notif_callback] != NULL)
+            {
+                // call the handler funtions
+                gatt_client_callbacks[ble_gatt_client_notif_callback](p_ble_evt);
             }
         }
-    }
-    break;
+
+        break;
 
     /**< Exchange MTU Response event.                       \n See @ref ble_gattc_evt_exchange_mtu_rsp_t.            */
     case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
     {
         uint16_t status = p_ble_evt->evt.gattc_evt.gatt_status;
-        /// give the task notification 
+        /// give the task notification
         task_notify(status);
         //// print the mtu set by server
         NRF_LOG_WARNING("RX MTU %d", p_ble_evt->evt.gattc_evt.params.exchange_mtu_rsp.server_rx_mtu);
@@ -303,20 +270,9 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         sd_ble_gap_disconnect(p_ble_evt->evt.gattc_evt.conn_handle,
                               BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
         // APP_ERROR_CHECK(err_code);
-
-        // call all the timeout handler  code here
-        for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
+        if (gatt_client_callbacks[ble_gatt_client_timeout_callback] != NULL)
         {
-            if (client_struct[i].conn_handle == p_ble_evt->evt.gattc_evt.conn_handle)
-            {
-                // check handler is not null
-                if (client_struct[i].client_timeout_handler != NULL)
-                {
-                    // call the handler funtions
-                    client_struct[i].client_timeout_handler(client_struct[i].client_timeout_hand_param);
-                }
-                break;
-            }
+            gatt_client_callbacks[ble_gatt_client_timeout_callback](NULL);
         }
     }
     break;
@@ -324,4 +280,4 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     default:
         break;
     }
-}
+    }

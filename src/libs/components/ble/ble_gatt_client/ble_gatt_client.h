@@ -93,24 +93,26 @@ uint32_t gatt_client_init(uint16_t conn_handle);
 /// @return succ/failure of function
 uint32_t gatt_client_deinit(uint16_t conn_handle);
 
-typedef void (*gatt_client_timeout_handler)(void *param);
+
+enum _CALLBACK_TYPE_
+{
+    ble_gatt_client_notif_callback =0x00,
+    ble_gatt_client_indic_callback,
+    ble_gatt_client_error_callback,
+    ble_gatt_client_timeout_callback,
+    ble_gatt_client_max_callbacks_supp
+};
+
+/// @brief callback handler type 
+typedef void (*gatt_client_callback_handler)(void *param);
+
 /// @brief this is to add the gatt client timeout callback
-/// @param conn_hand
-/// @param parameter pointer
-/// @param gatt_client_timeout_handler
-/// @return succ/failure of function
-uint32_t gatt_client_add_timeout_callback(uint16_t conn_hand, gatt_client_timeout_handler handler, void *param);
+/// @param gatt_client_callback_handler
+void gatt_client_add_callback(uint8_t callback_type,gatt_client_callback_handler callback);
 
-
-////////////////////////////// add the error handler 
-
-typedef void (*gatt_client_error_handler)(void *param , uint16_t err_code);
-/// @brief this is to call when an errr is occured during gatt operations  
-/// @param conn_handle 
-/// @param parameter pointer
-/// @param handler 
-/// @return succ/failure of the function 
-uint32_t gatt_client_add_err_handler_callback(uint16_t conn_handle, gatt_client_error_handler handler , void *param );
+/// @brief this function is used to remove the callback from the gatt client 
+/// @param callback_type 
+void gatt_client_remove_callback(uint8_t callback_type);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -137,33 +139,6 @@ uint32_t gatt_client_discover_chars(uint16_t conn_hand , ble_service_struct_t * 
 /// @param desc_uuid
 /// @return succ/failure of function
 uint32_t gatt_client_discover_char_desc(uint16_t conn_hand , ble_char_struct_t * char_struct , ble_char_desc_struct_t * desc_struct);
-
-
-
-/// @brief this the typedef to add callback for the gatt notification
-typedef void (*gatt_client_notif_callbaclk)(void *param, ble_gattc_evt_t const *evt );
-
-/// @brief this is to add the notification callback for the notification
-/// @note this function will be called inside the ble event handler task of the sd , which have a higher priority 
-//// and limited stack size please dont use memory intensive  task inside this handler 
-/// @param conn_hand
-/// @param callback
-/// @param pointer_param 
-/// @return succ/failure of function
-uint32_t gatt_client_add_notif_callback(uint16_t conn_hand, gatt_client_notif_callbaclk callback , void *param);
-
-/// @brief this the typedef to add callback for the gatt indication
-typedef void (*gatt_client_indc_callbaclk)(void *param,  ble_gattc_evt_t const  *evt);
-
-/// @brief this is to add the indication callback to the client handlers
-/// @note this function will be called inside the ble event handler task of the sd , which have a higher priority 
-//// and limited stack size please dont use memory intensive  task inside this handler 
-/// @param conn_hand
-/// @param callback
-/// @param pointer_param 
-/// @return succ/failure of function
-uint32_t gatt_client_add_indication_callback(uint16_t conn_hand, gatt_client_indc_callbaclk callback , void *param);
-
 
 /// @brief this is to set the server mtu of the connection handle
 /// @param conn_hand
@@ -237,23 +212,6 @@ typedef PACKED_STRUCT _BLE_CLIENT_DATA_STRUCT_
 
     /// @brief the gatt client connection handle
     uint16_t conn_handle;
-
-    /////////// assign the functions callbacks
-
-    /// @brief the gatt client notification callback
-    gatt_client_notif_callbaclk client_notif_handler;
-    void *client_notif_hand_param;
-
-    /// @brief gatt client indication handler
-    gatt_client_indc_callbaclk client_ind_handler;
-    void *client_indi_hand_param;
-
-    /// @brief the gatt client timeout handler
-    gatt_client_timeout_handler client_timeout_handler;
-    void *client_timeout_hand_param;
-
-    gatt_client_error_handler client_err_handler;
-    void * client_err_hand_param;
 }
 ble_client_struct;
 

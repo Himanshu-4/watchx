@@ -39,7 +39,7 @@ static StaticSemaphore_t ble_client_semphr_buffer;
 //////////////////////////////////////////////////////////////////////////
 /// create a struct buffer for the client handlers
 
-volatile ble_client_struct client_struct[BLE_NO_OF_CLIENT_SUPPORTED] = {0};
+static ble_client_struct client_struct[BLE_NO_OF_CLIENT_SUPPORTED] = {0};
 
 /////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -47,6 +47,8 @@ volatile ble_client_struct client_struct[BLE_NO_OF_CLIENT_SUPPORTED] = {0};
 volatile uint8_t client_buff[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
 
 volatile xTaskHandle client_taskhandle;
+
+volatile gatt_client_callback_handler gatt_client_callbacks[gatt_client_max_callbacks_supp] = {NULL};
 
 //////////////////////////////////////////////////////////////////////////
 /////////////////////// static variables  ////////////////////////////////
@@ -112,18 +114,6 @@ uint32_t gatt_client_init(uint16_t conn_handle)
 
 init_the_client:
 
-  client_struct[index].client_ind_handler = NULL;
-  client_struct[index].client_indi_hand_param = NULL;
-
-  client_struct[index].client_notif_handler = NULL;
-  client_struct[index].client_notif_hand_param = NULL;
-
-  client_struct[index].client_timeout_handler = NULL;
-  client_struct[index].client_timeout_hand_param = NULL;
-
-  client_struct[index].client_err_handler = NULL;
-  client_struct[index].client_err_hand_param = NULL;
-
   client_struct[index].conn_handle = conn_handle;
   client_struct[index].client_inited = BLE_CLIENT_INITED;
 
@@ -165,18 +155,6 @@ uint32_t gatt_client_deinit(uint16_t conn_handle)
   goto return_mech;
 
 deinit_the_client:
-
-  client_struct[index].client_ind_handler = NULL;
-  client_struct[index].client_indi_hand_param = NULL;
-
-  client_struct[index].client_notif_handler = NULL;
-  client_struct[index].client_notif_hand_param = NULL;
-
-  client_struct[index].client_timeout_handler = NULL;
-  client_struct[index].client_timeout_hand_param = NULL;
-
-  client_struct[index].client_err_handler = NULL;
-  client_struct[index].client_err_hand_param = NULL;
 
   client_struct[index].conn_handle = BLE_CONN_HANDLE_INVALID;
   client_struct[index].client_inited = 0;
@@ -249,161 +227,26 @@ return_mech:
 }
 
 /// @brief this is to add the gatt client timeout callback
-/// @param conn_hand
-/// @param gatt_client_timeout_handler
-/// @return succ/failure of function
-uint32_t gatt_client_add_timeout_callback(uint16_t conn_handle, gatt_client_timeout_handler handler, void *param)
+/// @param gatt_client_callback_handler
+void gatt_client_add_callback(uint8_t callback_type,gatt_client_callback_handler callback)
 {
-  uint32_t err = ble_client_ok;
-
-  // take the semaphore
-  if (xSemaphoreTake(ble_client_semphr_handle, BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME) != pdPASS)
+  if(callback_type >= ble_gatt_client_max_callbacks_supp)
   {
-    return ble_client_err_timeout;
+    return ;
   }
+  gatt_client_callbacks[callback_type] = callback;
 
-  uint8_t index = 0;
-  /// add the timeout callback
-  /// serach the client instnace 
-  for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
-  {
-    if (client_struct[i].conn_handle == conn_handle)
-    {
-      index = i;
-      IS_CLIENT_INITED(client_struct[i]);
-      goto init_callback;
-    }
-  }
-  err = ble_client_err_conn_handle_not_found;
-  goto return_mech;
-
-init_callback:
-  client_struct[index].client_timeout_handler = handler;
-  client_struct[index].client_timeout_hand_param = param;
-
-return_mech:
-  xSemaphoreGive(ble_client_semphr_handle);
-  return err;
 }
 
-/// @brief this is to call when an errr is occured during gatt operations
-/// @param conn_handle
-/// @param parameter pointer
-/// @param handler
-/// @return succ/failure of the function
-uint32_t gatt_client_add_err_handler_callback(uint16_t conn_handle, gatt_client_error_handler handler, void *param)
+/// @brief this function is used to remove the callback from the gatt client 
+/// @param callback_type 
+void gatt_client_remove_callback(uint8_t callback_type)
 {
-  uint32_t err = ble_client_ok;
-
-  // take the semaphore
-  if (xSemaphoreTake(ble_client_semphr_handle, (BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
+  if(callback_type >= ble_gatt_client_max_callbacks_supp)
   {
-    return ble_client_err_timeout;
+    return ;
   }
-
-  uint8_t index = 0;
-  /// add the timeout callback
-  /// serach the client instnace 
-  for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
-  {
-    if (client_struct[i].conn_handle == conn_handle)
-    {
-      index = i;
-      IS_CLIENT_INITED(client_struct[i]);
-      goto init_callback;
-    }
-  }
-  err = ble_client_err_conn_handle_not_found;
-  goto return_mech;
-
-init_callback:
-  client_struct[index].client_err_handler = handler;
-  client_struct[index].client_err_hand_param = param;
-
-return_mech:
-  xSemaphoreGive(ble_client_semphr_handle);
-  return err;
-}
-
-/// @brief this is to add the indication callback to the client handlers
-/// @note this function will be called inside the ble event handler task of the sd , which have a higher priority
-//// and limited stack size please dont use memory intensive  task inside this handler
-/// @param conn_hand
-/// @param callback
-/// @return succ/failure of function
-uint32_t gatt_client_add_indication_callback(uint16_t conn_handle, gatt_client_indc_callbaclk handler, void *param)
-{
-  uint32_t err = ble_client_ok;
-
-  // take the semaphore
-  if (xSemaphoreTake(ble_client_semphr_handle, (BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
-  {
-    return ble_client_err_timeout;
-  }
-
-  uint8_t index = 0;
-  /// add the timeout callback
-  /// serach the client instnace 
-  for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
-  {
-    if (client_struct[i].conn_handle == conn_handle)
-    {
-      index = i;
-      IS_CLIENT_INITED(client_struct[i]);
-      goto init_callback;
-    }
-  }
-  err = ble_client_err_conn_handle_not_found;
-  goto return_mech;
-
-init_callback:
-  client_struct[index].client_ind_handler = handler;
-  client_struct[index].client_indi_hand_param = param;
-
-return_mech:
-  xSemaphoreGive(ble_client_semphr_handle);
-  return err;
-}
-
-/// @brief this is to add the notification callback for the notification
-/// @note this function will be called inside the ble event handler task of the sd , which have a higher priority
-//// and limited stack size please dont use memory intensive  task inside this handler
-/// @param conn_hand
-/// @param callback
-/// @param pointer_param
-/// @return succ/failure of function
-uint32_t gatt_client_add_notif_callback(uint16_t conn_handle, gatt_client_notif_callbaclk handler, void *param)
-{
-  uint32_t err = ble_client_ok;
-
-  // take the semaphore
-  if (xSemaphoreTake(ble_client_semphr_handle, (BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
-  {
-    return ble_client_err_timeout;
-  }
-
-  uint8_t index = 0;
-  /// add the timeout callback
-  /// serach the client instnace 
-  for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
-  {
-    if (client_struct[i].conn_handle == conn_handle)
-    {
-      index = i;
-      IS_CLIENT_INITED(client_struct[i]);
-      goto init_callback;
-    }
-  }
-  err = ble_client_err_conn_handle_not_found;
-  goto return_mech;
-
-init_callback:
-  client_struct[index].client_notif_handler = handler;
-  client_struct[index].client_notif_hand_param = param;
-
-return_mech:
-  xSemaphoreGive(ble_client_semphr_handle);
-  return err;
+  gatt_client_callbacks[callback_type] = NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////

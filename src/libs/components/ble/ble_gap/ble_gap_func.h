@@ -92,6 +92,11 @@ enum _BLE_GAP_SECURITY_PARAMS_TYPE_
 /// @return succ/failure 
 uint32_t ble_gap_instance_init(uint8_t index , uint8_t pairing_type );
 
+/// @brief this is to clear  the gap instnace , but dont deinit it 
+/// @param index
+/// @return succ/failure
+uint32_t ble_gap_instance_clear(uint8_t index);
+
 /// @brief this is to deinit the gap instnace for this conn handle 
 /// @param index 
 /// @return succ/failure 
