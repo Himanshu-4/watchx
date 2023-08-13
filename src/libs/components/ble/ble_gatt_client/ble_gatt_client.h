@@ -104,15 +104,15 @@ enum _CALLBACK_TYPE_
 };
 
 /// @brief callback handler type 
-typedef void (*gatt_client_callback_handler)(void *param);
+typedef void (*gatt_client_callback_handler)(ble_evt_t const *p_ble_evt);
 
 /// @brief this is to add the gatt client timeout callback
 /// @param gatt_client_callback_handler
-void gatt_client_add_callback(uint8_t callback_type,gatt_client_callback_handler callback);
+void ble_gatt_client_add_callback(uint8_t callback_type,gatt_client_callback_handler callback);
 
 /// @brief this function is used to remove the callback from the gatt client 
 /// @param callback_type 
-void gatt_client_remove_callback(uint8_t callback_type);
+void ble_gatt_client_remove_callback(uint8_t callback_type);
 
 
 //////////////////////////////////////////////////////////////////////

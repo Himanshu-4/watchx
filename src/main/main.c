@@ -12,34 +12,16 @@
 #include "nrf_time.h"
 #include "nvs.h"
 
-////// include the helper library to help in  managing the device status and error code
-#include "main_helper.h"
-
-/// //////////////// include the ble init routines for init the BLE stack
-#include "ble_softdevice_init.h"
-/////////// include the gap function lib
-#include "ble_gap_func.h"
-////////// include the gatt client module
-#include "ble_gatt_client.h"
-/////// include the gatt server module
-#include "ble_gatt_server.h"
-////// include the ble ancs ///////////////////////////////
-#include "ble_ancs.h"
-////////// include the ams to init the services
-#include "ble_ams.h"
-
-#include "ble_common_task.h"
-
 /////// include the device
 #include "nrf_button.h"
+
+#include "ble_gap_func.h"
 
 //// include the kernel mem manager
 #include "memory_manager/kernel_mem_manager.h"
 
 /// include the kernel task
-#include "kernel_task/kernel_task.h"
-
-#include "message_buffer.h"
+#include "kernel_task.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +32,7 @@ void general_task_function(void *);
 #define genral_task_stack_size 256 // 1KB memory
 #define genral_task_name "gen_task"
 #define genral_task_param NULL
-#define genral_task_priority TASK_PRIORITY_5
+#define genral_task_priority 5
 
 /* Structure that will hold the TCB of the task being created. */
 static StaticTask_t gen_task_buffer;
@@ -67,24 +49,7 @@ xTaskHandle genral_task_handle = NULL; //!< Reference to SoftDevice FreeRTOS tas
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////// defination of main task
 
-static void ble_functionalities_init(void)
-{
-    // init the ble
-    nrf_softdevice_init_and_start();
-    //// init the gatt server
-    ble_gatt_server_pre_init();
-    /// init the gatt client module
-    gatt_client_pre_init();
-    /// pre init the gap
-    ble_gap_pre_init();
-    // init the ble ancs
-    ble_ancs_pre_init();
-    // init the ams service
-    ble_ams_pre_init();
 
-    ////// init the common task
-    ble_task_pre_init(NULL);
-}
 
 int main()
 {
@@ -99,10 +64,6 @@ int main()
 
     ////////////////////////////////////
     NRF_LOG_INFO("starting aPP");
-
-    ble_functionalities_init();
-    /// init nvs
-    nvs_flash_init(NVS_FLASH_OPERATION_TIMEOUT);
 
     ////// init the devices here
     nrf_button_evt_lib_init();
@@ -194,3 +155,8 @@ void general_task_function(void *param)
 
     vTaskDelete(NULL);
 }
+
+
+
+
+

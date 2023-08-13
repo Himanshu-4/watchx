@@ -24,29 +24,3 @@
 /////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// GLOBAL data storage for containers (queue and msg buffers ) //////////////
 
-
-
-void taskdelete(xTaskHandle * handle)
-{
-    if (*handle != NULL)
-    {
-        vTaskDelete(*handle);
-        *handle = NULL;
-    }
-}
-
-/***
- * @name validate_task_handle
- * @param void
- * @note
- */
- void FORCE_INLINE  validate_Task_handle(xTaskHandle handle)
-{
-    if (handle == NULL)
-    {
-        APP_ERROR_HANDLER(nrf_ERR_INVALID_STATE);
-    }
-}
-
-
-

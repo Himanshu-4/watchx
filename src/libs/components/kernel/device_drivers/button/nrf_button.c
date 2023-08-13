@@ -6,7 +6,6 @@
 #include "task.h"
 #include "queue.h"
 
-#include "main_helper.h"
 
 ////////// create the qoueue storage area 
 //////////////////// error code queue data structure 
@@ -43,8 +42,7 @@ void nrf_button_evt_lib_init(void)
                                  ucQueueStorageArea_for_btneventq,
                                  &xstatic_q_for_button_events );
 
-    validate_Task_handle(nrf_btn_evtq_handle);
-    
+
      const my_gpio_cfg nrf_buttons_gpio_type =
     {
         .gpio_dir = GPIO_PIN_DIR_INPUT,

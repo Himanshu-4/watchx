@@ -523,7 +523,7 @@ target_include_directories(ble_library PUBLIC SYSTEM
 # this contains kernel   files 
 
         # this is kernel task files 
-        file ( GLOB watchx_kernel_files 
+file ( GLOB watchx_kernel_files 
         ${PROJECT_KERNEL_FOLDER}/*/*.c 
         ${PROJECT_KERNEL_FOLDER}/*/*/*.c
         )
@@ -589,7 +589,7 @@ target_link_libraries( watchx_kernel_lib
 
 set(PROJECT_FILES
 ${CMAKE_SOURCE_DIR}/main/main.c
-${CMAKE_SOURCE_DIR}/main/main_helper.c
+${CMAKE_SOURCE_DIR}/main/kernel_task.c
 )
 
 set(PROJECT_INCLUDE_DIR

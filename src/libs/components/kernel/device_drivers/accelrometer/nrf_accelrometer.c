@@ -11,8 +11,6 @@
 #include "task.h"
 #include "queue.h"
 
-////// incluede the main helper library 
-#include "main_helper.h"
 
 
 static void nrf_accelrometer_interrupt_handler(void);

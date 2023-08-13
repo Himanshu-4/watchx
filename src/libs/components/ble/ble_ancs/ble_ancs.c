@@ -418,7 +418,7 @@ uint32_t ble_ancs_perform_notif_Action(uint32_t nuid, uint8_t action)
 /// @brief this the callback handler for the apple ancs events
 /// @param param
 /// @param evt
-void ble_ancs_client_event_handler(void *param, ble_gattc_evt_t const *evt)
+void ble_ancs_client_event_handler( ble_gattc_evt_t const *evt)
 {
     /// check for a valid conn handle
     if (evt->conn_handle != ble_ancs_handler.conn_handle)

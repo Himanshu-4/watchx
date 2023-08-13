@@ -435,7 +435,7 @@ uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index, uint8_t *data)
 /// @brief this is the apple media service handler where
 /// @param param
 /// @param ble_evt
-void ble_ams_client_event_handler(void *param, ble_gattc_evt_t const *evt)
+void ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
 {
     /// match the connection handle
     if (evt->conn_handle != ble_ams_handler.conn_handle)

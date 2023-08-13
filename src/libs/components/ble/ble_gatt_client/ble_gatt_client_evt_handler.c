@@ -11,7 +11,7 @@ extern volatile uint8_t client_buff[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
 
 extern volatile xTaskHandle client_taskhandle;
 
-extern volatile gatt_client_callback_handler gatt_client_callbacks[ble_gatt_client_max_callbacks_supp] = {NULL};
+extern volatile gatt_client_callback_handler gatt_client_callbacks[ble_gatt_client_max_callbacks_supp];
 
 /////////// @ref define a refernce functions that are using tas notification
 
@@ -193,8 +193,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     case BLE_GATTC_EVT_WRITE_RSP:
     {
         //// based on the gatt status we have to send then gatt notificatin
-        uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
-        task_notify(gatt_status);
+        task_notify(p_ble_evt->evt.gattc_evt.gatt_status);
     }
     break;
 
@@ -202,8 +201,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     case BLE_GATTC_EVT_WRITE_CMD_TX_COMPLETE:
     {
         //// based on the gatt status we have to send then gatt notificatin
-        uint16_t gatt_status = p_ble_evt->evt.gattc_evt.gatt_status;
-        task_notify(gatt_status);
+        task_notify( p_ble_evt->evt.gattc_evt.gatt_status);
     }
     break;
 
@@ -249,15 +247,14 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
                 gatt_client_callbacks[ble_gatt_client_notif_callback](p_ble_evt);
             }
         }
-
+    }
         break;
 
     /**< Exchange MTU Response event.                       \n See @ref ble_gattc_evt_exchange_mtu_rsp_t.            */
     case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
     {
-        uint16_t status = p_ble_evt->evt.gattc_evt.gatt_status;
         /// give the task notification
-        task_notify(status);
+        task_notify(p_ble_evt->evt.gattc_evt.gatt_status);
         //// print the mtu set by server
         NRF_LOG_WARNING("RX MTU %d", p_ble_evt->evt.gattc_evt.params.exchange_mtu_rsp.server_rx_mtu);
     }
@@ -279,5 +276,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 
     default:
         break;
-    }
-    }
+    }/// end of switch 
+
+}
+

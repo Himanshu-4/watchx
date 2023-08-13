@@ -48,7 +48,7 @@ volatile uint8_t client_buff[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
 
 volatile xTaskHandle client_taskhandle;
 
-volatile gatt_client_callback_handler gatt_client_callbacks[gatt_client_max_callbacks_supp] = {NULL};
+volatile gatt_client_callback_handler gatt_client_callbacks[ble_gatt_client_max_callbacks_supp] = {NULL};
 
 //////////////////////////////////////////////////////////////////////////
 /////////////////////// static variables  ////////////////////////////////
@@ -228,7 +228,7 @@ return_mech:
 
 /// @brief this is to add the gatt client timeout callback
 /// @param gatt_client_callback_handler
-void gatt_client_add_callback(uint8_t callback_type,gatt_client_callback_handler callback)
+void ble_gatt_client_add_callback(uint8_t callback_type,gatt_client_callback_handler callback)
 {
   if(callback_type >= ble_gatt_client_max_callbacks_supp)
   {
@@ -240,7 +240,7 @@ void gatt_client_add_callback(uint8_t callback_type,gatt_client_callback_handler
 
 /// @brief this function is used to remove the callback from the gatt client 
 /// @param callback_type 
-void gatt_client_remove_callback(uint8_t callback_type)
+void ble_gatt_client_remove_callback(uint8_t callback_type)
 {
   if(callback_type >= ble_gatt_client_max_callbacks_supp)
   {

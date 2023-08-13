@@ -1,5 +1,8 @@
 #include "kernel_task.h"
 
+//// include the nvs library 
+#include "nvs.h"
+
 /// include the softdevice
 #include "ble_softdevice_init.h"
 
@@ -50,7 +53,38 @@ static volatile xTaskHandle kernnel_Task_handle = NULL;
 //================================================================================================
 //=================================================================================================
 //==================== function declarations here ======================================================
+
+/// this is the kernel task 
 void kernel_task(void *param);
+
+/// @brief handle the ble notification
+/// @param param
+/// @param evt
+static void ble_task_handle_value_notification(ble_evt_t const *p_ble_evt);
+
+/// @brief handle the ble indication
+/// @param param
+/// @param evt
+static void ble_task_handle_value_indication(ble_evt_t const *p_ble_evt);
+
+/// @brief this function got called when the timeout occured
+/// @param param
+static void ble_client_timeout_handler(ble_evt_t const *p_ble_evt);
+
+/// @brief this function is called when there is an error triggered
+/// @param param
+static void ble_client_error_handler(ble_evt_t const *p_ble_evt);
+
+
+/// @brief   device connected callback
+/// @param param
+/// @param gap_evt
+static void ble_device_connected_callback(void *param, ble_gap_evt_t const *gap_evt);
+
+/// @brief / device disconnected callback
+/// @param param
+/// @param gap_evt
+static void ble_device_disconnected_callback(void *param, ble_gap_evt_t const *gap_evt);
 
 //================================================================================================
 //=================================================================================================
@@ -63,17 +97,34 @@ void Kernel_task_preinit(void)
     /// init the spi,i2c and gpio drivers
     Hardware_drivers_install();
 
+    /// init the ble functionalities of the device 
+    //////////////////////////////////////////////////////////
+    // init the ble stack 
+    nrf_softdevice_init_and_start();
+    //// init the gatt server
+    ble_gatt_server_pre_init();
+    /// init the gatt client module
+    gatt_client_pre_init();
+    /// pre init the gap
+    ble_gap_pre_init();
+    // init the ble ancs
+    ble_ancs_pre_init();
+    // init the ams service
+    ble_ams_pre_init();
+
+    /// init nvs
+    nvs_flash_init(NVS_FLASH_OPERATION_TIMEOUT);
+
     /// define and add  ble related callbacks here
     ///// add the callbacks for the gap
     ble_gap_add_callback(ble_gap_evt_connected, ble_device_connected_callback, NULL);
     ble_gap_add_callback(ble_gap_evt_disconnected, ble_device_disconnected_callback, NULL);
 
-    //// assign the callback for that connection
-    ble_gatt_client_add_callback()
-    gatt_client_add_notif_callback( ble_task_handle_value_notification, NULL);
-    gatt_client_add_indication_callback( ble_task_handle_value_indication, NULL);
-    gatt_client_add_err_handler_callback( ble_client_error_handler, NULL);
-    gatt_client_add_timeout_callback( ble_client_timeout_handler, NULL);
+    //// add the callback for the gatt client 
+    ble_gatt_client_add_callback(ble_gatt_client_notif_callback,ble_task_handle_value_notification);
+    ble_gatt_client_add_callback(ble_gatt_client_indic_callback,ble_task_handle_value_indication);
+    ble_gatt_client_add_callback(ble_gatt_client_error_callback,ble_client_error_handler);
+    ble_gatt_client_add_callback(ble_gatt_client_timeout_callback,ble_client_timeout_handler);
     
 
     /// init a gap instance
@@ -139,8 +190,13 @@ ble_funcs_init:
 /// @brief this is to deinit the ble functionality and go to main loop
 ble_funcs_deinit:
 {
-    gatt_client_deinit(gap_evt->conn_handle);
+    uint32_t err =0;
 
+    uint16_t conn_handle = ble_gap_get_conn_handle(BLE_GAP_DEVICE_INDEX);
+    
+    err = gatt_client_deinit(conn_handle);
+    NRF_ASSERT(err);
+    
     ////////// call the deinit process of the above init process
 
     //// deinit the ancs , ams ,device info and other device functionality
@@ -154,27 +210,31 @@ ble_funcs_deinit:
 
     // err = ble_peer_device_info_deinit();
     // NRF_ASSERT(err);
+
+    ble_gap_instance_clear(BLE_GAP_DEVICE_INDEX);
     goto main_loop;
 }
 
 main_loop:
+kernel_task_state = kernel_state_idle;
     for (;;)
     {
         // check if a switch is requierd
-        if (kernel_task_state != state_idle)
+        if (kernel_task_state != kernel_state_idle)
         {
             switch (kernel_task_state)
             {
             case kernel_state_ble_disconnected:
                 goto ble_funcs_deinit;
-
+            case kernel_state_ble_connected:
+                goto ble_funcs_init;
             default:
                 break;
             }
         }
 
         //// now here it would be only be in a while loop
-        delay(100);
+        delay(200);
     }
 
     //// never reach here
@@ -186,7 +246,7 @@ main_loop:
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
-+*
+
 /// @brief   device connected callback
 /// @param param
 /// @param gap_evt
@@ -208,7 +268,6 @@ static void ble_device_disconnected_callback(void *param, ble_gap_evt_t const *g
 {
     ////// suspend the client task , no need to call here
     /// call the instance clear functions
-    ble_gap_instance_clear(BLE_GAP_DEVICE_INDEX);
 
     kernel_task_state = kernel_state_ble_disconnected;
     // NRF_LOG_WARNING("deinit %x",gap_evt->conn_handle);
@@ -222,51 +281,45 @@ static void ble_device_disconnected_callback(void *param, ble_gap_evt_t const *g
 /// @brief handle the ble notification
 /// @param param
 /// @param evt
-static void ble_task_handle_value_notification(void *param, ble_gattc_evt_t const *evt)
+static void ble_task_handle_value_notification(ble_evt_t const *p_ble_evt)
 {
     ///////////// these callbacks are gonna run in the softdevice event handler
-    /// the param is null for now , can be updated in future
-    UNUSED_PARAMETER(param);
-
     /// handle the peer device notification
-    ble_peer_Device_notification_handler(evt);
-
+    ble_peer_Device_notification_handler(&p_ble_evt->evt.gattc_evt);
     /// ble ams client handler
-    ble_ams_client_event_handler(param, evt);
-
+    ble_ams_client_event_handler(&p_ble_evt->evt.gattc_evt);
     /// handle the ancs client
-    ble_ancs_client_event_handler(param, evt);
+    ble_ancs_client_event_handler(&p_ble_evt->evt.gattc_evt);
 
     //// switch the kernel task state
-    kernel_task_state = kernel_state_ble_recv_notif;
+    kernel_task_state = kernel_state_ble_notif_recv;
 }
 
 /// @brief handle the ble indication
 /// @param param
 /// @param evt
-static void ble_task_handle_value_indication(void *param, ble_gattc_evt_t const *evt)
+static void ble_task_handle_value_indication(ble_evt_t const *p_ble_evt)
 {
-    UNUSED_PARAMETER(param);
 
-    ble_peer_Device_indication_handler(evt);
+    ble_peer_Device_indication_handler(&p_ble_evt->evt.gattc_evt);
 
-    kernel_task_state = kernel_state_ble_recv_indic;
+    kernel_task_state = kernel_state_ble_indic_recv;
 }
 
 /// @brief this function is called when there is an error triggered
 /// @param param
-static void ble_client_error_handler(void *param, uint16_t gatt_status)
+static void ble_client_error_handler(ble_evt_t const *p_ble_evt)
 {
-    UNUSED_PARAMETER(param);
+    UNUSED_PARAMETER(p_ble_evt);
 
-    NRF_LOG_ERROR("err  %x", gatt_status);
+    NRF_LOG_ERROR("err  %x", p_ble_evt->evt.gattc_evt.error_handle);
 }
 
 /// @brief this function got called when the timeout occured
 /// @param param
-static void ble_client_timeout_handler(void *param)
+static void ble_client_timeout_handler(ble_evt_t const *p_ble_evt)
 {
-    UNUSED_PARAMETER(param);
+    UNUSED_PARAMETER(p_ble_evt);
 
     NRF_LOG_ERROR("timeout");
 }
