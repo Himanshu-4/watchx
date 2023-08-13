@@ -221,7 +221,6 @@ typedef struct _BLE_GAP_FUNCTION_INSTANCE_
     ble_gap_sec_keyset_t key_set;    
 
     /// @brief  32 bytes shared secret 
-    uint8_t * private_key_peer;
     uint8_t * private_key_device;
 
     //// this is to init the gap function instnaces 

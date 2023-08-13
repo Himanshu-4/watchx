@@ -64,13 +64,14 @@ volatile ble_gap_callback_struct_t GAP_Callbacks[ble_gap_max_callback_supp] = {{
 /// define the instance here
 volatile ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES] = {0};
 
+/// eencryption keys used
+
 /// @brief keyset of the device
 static ble_gap_lesc_p256_pk_t public_key_device;
 static uint8_t private_key_device[32];
 
 /// @brief keyset of the peer
 static ble_gap_lesc_p256_pk_t public_key_peer;
-static uint8_t private_key_peer[32];
 
 /// @brief encryption keys and identity information for device
 static ble_gap_enc_key_t device_en_keys;
@@ -79,7 +80,6 @@ static ble_gap_id_key_t device_id_keys;
 /// @brief encryption keys and identity information for peer
 static ble_gap_enc_key_t peer_en_keys;
 static ble_gap_id_key_t peer_id_keys;
-
 //==========================================================================================================
 ///=============================== function defination  here ===================================================
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,7 +202,6 @@ uint32_t ble_gap_instance_init(uint8_t index, uint8_t pairing_type)
 
         //// store the peer keys
         gap_inst[index].key_set.keys_peer.p_pk = &public_key_peer;
-        gap_inst[index].private_key_peer = NULL;
 
         gap_inst[index].key_set.keys_peer.p_enc_key = &peer_en_keys;
         gap_inst[index].key_set.keys_peer.p_id_key = &peer_id_keys;
@@ -225,7 +224,6 @@ uint32_t ble_gap_instance_init(uint8_t index, uint8_t pairing_type)
 
         //// store the peer keys
         gap_inst[index].key_set.keys_peer.p_pk = &public_key_peer;
-        gap_inst[index].private_key_peer = NULL;
 
         gap_inst[index].key_set.keys_peer.p_enc_key = NULL;
         gap_inst[index].key_set.keys_peer.p_id_key = &peer_id_keys;
@@ -251,17 +249,13 @@ uint32_t ble_gap_instance_deinit(uint8_t index)
     {
         return ble_gap_err_mutex_not_avial;
     }
-    ///// reset all keys to zero
-    memset((uint8_t *)&gap_inst[index], 0, sizeof(ble_gap_inst_Struct_t));
-    gap_inst[index].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
 
     // make the keys zero
-    memset(&public_key_device, 0, sizeof(public_key_device));
+    memset(public_key_device.pk, 0, sizeof(public_key_device));
     memset(private_key_device, 0, sizeof(private_key_device));
 
     /// @brief keyset of the peer
-    memset(&public_key_peer, 0, sizeof(public_key_device));
-    memset(private_key_peer, 0, sizeof(private_key_device));
+    memset(public_key_peer.pk, 0, sizeof(public_key_peer));
 
     /// @brief encryption keys and identity information for device
     memset(&device_en_keys, 0, sizeof(device_en_keys));
@@ -271,6 +265,44 @@ uint32_t ble_gap_instance_deinit(uint8_t index)
     memset(&peer_en_keys, 0, sizeof(peer_en_keys));
     memset(&peer_id_keys, 0, sizeof(peer_id_keys));
 
+    ///// reset all keys to zero
+    memset((uint8_t *)&gap_inst[index], 0, sizeof(ble_gap_inst_Struct_t));
+    gap_inst[index].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
+
+    /// give back the mutex
+    xSemaphoreGive(ble_gap_mutex_handle);
+    return ble_gap_ok;
+}
+
+/// @brief this is to clear  the gap instnace , but dont deinit it 
+/// @param index
+/// @return succ/failure
+uint32_t ble_gap_instance_clear(uint8_t index)
+{
+    CHECK_INDEX(index);
+
+    //// take the mutex
+    if (xSemaphoreTake(ble_gap_mutex_handle, BLE_GAP_API_MUTEX_TIMEOUT) != pdPASS)
+    {
+        return ble_gap_err_mutex_not_avial;
+    }
+
+    // make the keys zero
+    memset(public_key_device.pk, 0, sizeof(public_key_device));
+    memset(private_key_device, 0, sizeof(private_key_device));
+
+    /// @brief keyset of the peer
+    memset(public_key_peer.pk, 0, sizeof(public_key_peer));
+
+    /// @brief encryption keys and identity information for device
+    memset(&device_en_keys, 0, sizeof(device_en_keys));
+    memset(&device_id_keys, 0, sizeof(device_id_keys));
+
+    /// @brief encryption keys and identity information for peer
+    memset(&peer_en_keys, 0, sizeof(peer_en_keys));
+    memset(&peer_id_keys, 0, sizeof(peer_id_keys));
+
+    gap_inst[index].ble_gap_conn_handle = BLE_CONN_HANDLE_INVALID;
     /// give back the mutex
     xSemaphoreGive(ble_gap_mutex_handle);
     return ble_gap_ok;
@@ -585,7 +617,7 @@ uint32_t ble_gap_security_init(uint8_t index)
         /// copy the bond info
         memcpy(&new_bond.dev_enc_key, gap_inst[index].key_set.keys_own.p_enc_key, sizeof(ble_gap_enc_key_t));
         memcpy(&new_bond.peer_id_info, gap_inst[index].key_set.keys_peer.p_id_key, sizeof(ble_gap_id_key_t));
-        memcpy(&new_bond.device_irk.irk, gap_inst[index].key_set.keys_own.p_id_key->id_info.irk , sizeof(ble_gap_irk_t));
+        memcpy(&new_bond.device_irk.irk, gap_inst[index].key_set.keys_own.p_id_key->id_info.irk, sizeof(ble_gap_irk_t));
 
         ret = nvs_add_data(++uid_to_store, u8_ptr & new_bond, sizeof(new_bond));
         if (ret != nrf_OK)
@@ -606,7 +638,7 @@ uint32_t ble_gap_security_init(uint8_t index)
             //// find the rand and ediv
             /// get the total no of store bond present
             uint8_t total_bond_present = nvs_Get_total_no_of_uid();
-            ble_gap_store_bond_info_struct_t const * store_bonds = NULL;
+            ble_gap_store_bond_info_struct_t const *store_bonds = NULL;
 
             for (uint8_t i = 1; i <= total_bond_present; i++)
             {
@@ -628,8 +660,8 @@ uint32_t ble_gap_security_init(uint8_t index)
 
                             /// display the
                             /// reply the security peer
-                            ret = sd_ble_gap_sec_info_reply(gap_inst[index].ble_gap_conn_handle, &store_bonds->dev_enc_key.enc_info, 
-                            &store_bonds->device_irk, NULL);
+                            ret = sd_ble_gap_sec_info_reply(gap_inst[index].ble_gap_conn_handle, &store_bonds->dev_enc_key.enc_info,
+                                                            &store_bonds->device_irk, NULL);
                             NRF_ASSERT(ret);
 
                             /// goto found match and wait for the
@@ -639,7 +671,7 @@ uint32_t ble_gap_security_init(uint8_t index)
                 }
             }
         }
-        /// send the peer that key is missing or not present 
+        /// send the peer that key is missing or not present
         ret = sd_ble_gap_sec_info_reply(gap_inst[index].ble_gap_conn_handle, NULL, NULL, NULL);
         NRF_ASSERT(ret);
         ret = ble_gap_err_bond_info_not_found;

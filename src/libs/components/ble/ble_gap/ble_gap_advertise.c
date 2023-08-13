@@ -163,7 +163,7 @@ uint32_t ble_gap_start_advertise(uint8_t type)
         {
             /// fetch the data from the nvs about the irk and addresses 
             static ble_gap_id_key_t const *  ble_gap_stored_data_ids[BLE_GAP_MAX_BOND_USERS_STORED] = {NULL};
-            ble_gap_irk_t const * ble_gap_local_irk_stored[BLE_GAP_MAX_BOND_USERS_STORED] = {NULL};
+            static ble_gap_irk_t const * ble_gap_local_irk_stored[BLE_GAP_MAX_BOND_USERS_STORED] = {NULL};
 
             //// we can also use as ble_gap_stored_irk[nvs_get_total_no_of_uid] , but we cant initailise it 
 
@@ -174,8 +174,9 @@ uint32_t ble_gap_start_advertise(uint8_t type)
             // start searchong for the storedbonds and get their handles 
             for (uint8_t i = 1; i <= total_id_present; i++)
             {
-                ble_gap_stored_data_ids[i] = nvs_get_data_pointer(i);
-                ble_gap_local_irk_stored[i] = nvs_get_data_pointer(i);
+                ble_gap_store_bond_info_struct_t * stored_bond =  nvs_get_data_pointer(i);
+                ble_gap_stored_data_ids[i] = &stored_bond->peer_id_info;
+                ble_gap_local_irk_stored[i] = &stored_bond->device_irk;
             }
             
             // display here about total stored bonds 

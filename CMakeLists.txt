@@ -575,7 +575,7 @@ target_include_directories(watchx_kernel_lib PUBLIC SYSTEM
     ${WATCH_KERNEL_INCLUDE_DIR}
     ${SDK_INCLUDE_DIR}
     ${FREERTOS_INCLUDE}
-  
+    ${BLE_LIB_INCLUDE_DIR}
         )
 
 # we have to link this static library 
