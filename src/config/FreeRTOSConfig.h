@@ -260,15 +260,4 @@ extern uint32_t SystemCoreClock;
 #define KERNEL_TASK_PRIORITY 6 //////// task priority of the kernel task 
 
 
-
-/// Nimble ble stack freertos config
-
-// #define LINK_LAYER_STACK_SIZE 250
-
-// #define HOST_LAYER_STACK_SIZE 600
-
-// #define Link_layer_task_priority 6
-
-// #define Host_layer_task_priority 5
-
 #endif

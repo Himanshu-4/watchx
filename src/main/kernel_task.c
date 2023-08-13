@@ -60,20 +60,20 @@ void kernel_task(void *param);
 /// @brief handle the ble notification
 /// @param param
 /// @param evt
-static void ble_task_handle_value_notification(ble_evt_t const *p_ble_evt);
+static void ble_client_handle_value_notification(ble_gattc_evt_t const *p_ble_evt);
 
 /// @brief handle the ble indication
 /// @param param
 /// @param evt
-static void ble_task_handle_value_indication(ble_evt_t const *p_ble_evt);
+static void ble_client_handle_value_indication(ble_gattc_evt_t const *p_ble_evt);
 
 /// @brief this function got called when the timeout occured
 /// @param param
-static void ble_client_timeout_handler(ble_evt_t const *p_ble_evt);
+static void ble_client_timeout_handler(ble_gattc_evt_t const *p_ble_evt);
 
 /// @brief this function is called when there is an error triggered
 /// @param param
-static void ble_client_error_handler(ble_evt_t const *p_ble_evt);
+static void ble_client_error_handler(ble_gattc_evt_t const *p_ble_evt);
 
 /// @brief   device connected callback
 /// @param param
@@ -84,6 +84,11 @@ static void ble_device_connected_callback(void *param, ble_gap_evt_t const *gap_
 /// @param param
 /// @param gap_evt
 static void ble_device_disconnected_callback(void *param, ble_gap_evt_t const *gap_evt);
+
+/// @brief this is the timeout callback for the gap events 
+/// @param param 
+/// @param gap_evt 
+static void ble_gap_timeout_callback(void *param, ble_gap_evt_t const *gap_evt);
 
 //================================================================================================
 //=================================================================================================
@@ -118,10 +123,11 @@ void Kernel_task_preinit(void)
     ///// add the callbacks for the gap
     ble_gap_add_callback(ble_gap_evt_connected, ble_device_connected_callback, NULL);
     ble_gap_add_callback(ble_gap_evt_disconnected, ble_device_disconnected_callback, NULL);
+    ble_gap_add_callback(ble_gap_evt_timeout , ble_gap_timeout_callback,NULL);
 
     //// add the callback for the gatt client
-    ble_gatt_client_add_callback(ble_gatt_client_notif_callback, ble_task_handle_value_notification);
-    ble_gatt_client_add_callback(ble_gatt_client_indic_callback, ble_task_handle_value_indication);
+    ble_gatt_client_add_callback(ble_gatt_client_notif_callback, ble_client_handle_value_notification);
+    ble_gatt_client_add_callback(ble_gatt_client_indic_callback, ble_client_handle_value_indication);
     ble_gatt_client_add_callback(ble_gatt_client_error_callback, ble_client_error_handler);
     ble_gatt_client_add_callback(ble_gatt_client_timeout_callback, ble_client_timeout_handler);
 
@@ -147,15 +153,17 @@ void kernel_task(void *param)
 {
     UNUSED_PARAMETER(param);
 
+    /// global err to store the err of retutrns 
+    uint32_t err = 0;
     /// direct gor to main loop
     goto main_loop;
 
 /// @brief this is to init the ble functionality and then go to main loop
 ble_funcs_init:
 {
-    uint32_t err = 0;
+    
     uint16_t conn_handle = ble_gap_get_conn_handle(BLE_GAP_DEVICE_INDEX);
-    NRF_LOG_INFO("conhan %d",conn_handle);
+    NRF_LOG_INFO("con %d",conn_handle);
 
     /// init the ble client
     err = gatt_client_init(conn_handle);
@@ -172,8 +180,8 @@ ble_funcs_init:
     NRF_ASSERT(err);
 
     /// init the peer device
-    // err = ble_peer_device_init(conn_handle);
-    // NRF_ASSERT(err);
+    err = ble_peer_device_init(conn_handle);
+    NRF_ASSERT(err);
 
     //// init the ancs , ams ,device info and other device functionality
     /// init the apple ancs, ams task , current time task
@@ -188,13 +196,12 @@ ble_funcs_init:
 /// @brief this is to deinit the ble functionality and go to main loop
 ble_funcs_deinit:
 {
-    uint32_t err = 0;
-
     uint16_t conn_handle = ble_gap_get_conn_handle(BLE_GAP_DEVICE_INDEX);
 
     err = gatt_client_deinit(conn_handle);
     NRF_ASSERT(err);
 
+    NRF_LOG_WARNING("disc %d",conn_handle);
     ////////// call the deinit process of the above init process
 
     //// deinit the ancs , ams ,device info and other device functionality
@@ -231,7 +238,7 @@ main_loop:
         }
 
         //// now here it would be only be in a while loop
-        delay(300);
+        delay(100);
     }
 
     //// never reach here
@@ -242,20 +249,19 @@ main_loop:
 ///////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
+////////////////// ble gap callbacks ////////////////////////////////////////////////////
 
 /// @brief   device connected callback
 /// @param param
 /// @param gap_evt
 static void ble_device_connected_callback(void *param, ble_gap_evt_t const *gap_evt)
 {
-    uint32_t err = 0;
+    UNUSED_PARAMETER(param);   
     //////// set the connection handle
-    err = ble_gap_set_conn_handle(BLE_GAP_DEVICE_INDEX, gap_evt->conn_handle);
+    uint32_t err = ble_gap_set_conn_handle(BLE_GAP_DEVICE_INDEX, gap_evt->conn_handle);
     NRF_ASSERT(err);
 
     kernel_task_state = kernel_state_ble_connected;
-    // NRF_LOG_INFO("i %dconha %x",device_index,conn_handle);
 }
 
 /// @brief / device disconnected callback
@@ -263,27 +269,38 @@ static void ble_device_connected_callback(void *param, ble_gap_evt_t const *gap_
 /// @param gap_evt
 static void ble_device_disconnected_callback(void *param, ble_gap_evt_t const *gap_evt)
 {
+    UNUSED_PARAMETER(param);
     kernel_task_state = kernel_state_ble_disconnected;
-    NRF_LOG_ERROR("deinit %x",gap_evt->conn_handle);
+    NRF_LOG_ERROR("dct %x",gap_evt->params.disconnected.reason);
 }
 
+/// @brief this is the timeout callback for the gap events 
+/// @param param 
+/// @param gap_evt 
+static void ble_gap_timeout_callback(void *param, ble_gap_evt_t const *gap_evt)
+{
+    UNUSED_PARAMETER(param);
+    /// disconnect from the peer
+    NRF_LOG_ERROR("gap timeout");
+    ble_gap_disconnect(gap_evt->conn_handle);
+}
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
-/////////////////// ble handle task notification
+/////////////////// ble client callbacks 
 
 /// @brief handle the ble notification
 /// @param param
 /// @param evt
-static void ble_task_handle_value_notification(ble_evt_t const *p_ble_evt)
+static void ble_client_handle_value_notification(ble_gattc_evt_t const *gattc_evt)
 {
     ///////////// these callbacks are gonna run in the softdevice event handler
     /// handle the peer device notification
-    ble_peer_Device_notification_handler(&p_ble_evt->evt.gattc_evt);
+    ble_peer_Device_notification_handler(gattc_evt);
     /// ble ams client handler
-    ble_ams_client_event_handler(&p_ble_evt->evt.gattc_evt);
+    ble_ams_client_event_handler(gattc_evt);
     /// handle the ancs client
-    ble_ancs_client_event_handler(&p_ble_evt->evt.gattc_evt);
+    ble_ancs_client_event_handler(gattc_evt);
 
     //// switch the kernel task state
     kernel_task_state = kernel_state_ble_notif_recv;
@@ -292,26 +309,26 @@ static void ble_task_handle_value_notification(ble_evt_t const *p_ble_evt)
 /// @brief handle the ble indication
 /// @param param
 /// @param evt
-static void ble_task_handle_value_indication(ble_evt_t const *p_ble_evt)
+static void ble_client_handle_value_indication(ble_gattc_evt_t const *gattc_evt)
 {
 
-    ble_peer_Device_indication_handler(&p_ble_evt->evt.gattc_evt);
+    ble_peer_Device_indication_handler(gattc_evt);
 
     kernel_task_state = kernel_state_ble_indic_recv;
 }
 
 /// @brief this function is called when there is an error triggered
 /// @param param
-static void ble_client_error_handler(ble_evt_t const *p_ble_evt)
+static void ble_client_error_handler(ble_gattc_evt_t const *gattc_evt)
 {
-   NRF_LOG_ERROR("err  %x", p_ble_evt->evt.gattc_evt.error_handle);
+   NRF_LOG_ERROR("err  %x", gattc_evt->error_handle );
 }
 
 /// @brief this function got called when the timeout occured
 /// @param param
-static void ble_client_timeout_handler(ble_evt_t const *p_ble_evt)
+static void ble_client_timeout_handler(ble_gattc_evt_t const *gattc_evt)
 {
-    UNUSED_PARAMETER(p_ble_evt);
-
-    NRF_LOG_ERROR("timeout");
+    ble_gap_disconnect(gattc_evt->conn_handle);
+    NRF_LOG_ERROR("gattc timeout %d",gattc_evt->params.timeout.src);
 }
+

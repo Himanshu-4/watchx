@@ -59,7 +59,7 @@ volatile xTaskHandle ble_gap_taskhandle;
 volatile ble_evt_t *ble_gap_Evt;
 
 /// @brief  the callbacks associated with this conn handle
-volatile ble_gap_callback_struct_t GAP_Callbacks[ble_gap_max_callback_supp] = {{NULL}};
+ble_gap_callback_struct_t GAP_Callbacks[ble_gap_max_callback_supp] = {{NULL}};
 
 /// define the instance here
 volatile ble_gap_inst_Struct_t gap_inst[BLE_GAP_MAX_NO_OF_DEVICES] = {0};
@@ -378,7 +378,7 @@ uint16_t ble_gap_get_conn_handle(uint8_t index)
 /// @param callbacks
 void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks callbacks, void *param)
 {
-    if (callback_type > ble_gap_max_callback_supp)
+    if (callback_type >= ble_gap_max_callback_supp)
         return;
     //// add the callback
     GAP_Callbacks[callback_type].callback = callbacks;
@@ -389,7 +389,7 @@ void ble_gap_add_callback(uint8_t callback_type, ble_gap_procdeure_callbacks cal
 /// @param callback_type
 void ble_gap_remove_callback(uint8_t callback_type)
 {
-    if (callback_type > ble_gap_max_callback_supp)
+    if (callback_type >= ble_gap_max_callback_supp)
         return;
     ///// this is to set the callback
     //// add the callback

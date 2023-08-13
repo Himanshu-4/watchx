@@ -36,31 +36,31 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
 
     err = gatt_client_discover_service(conn_handle, &ble_gap_srvc);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("s %x,%x,%x,%x",
-                 ble_gap_srvc.ble_service.uuid.uuid,
-                 ble_gap_srvc.ble_service.uuid.type,
-                 ble_gap_srvc.ble_service.handle_range.start_handle,
-                 ble_gap_srvc.ble_service.handle_range.end_handle);
+    // NRF_LOG_INFO("s %x,%x,%x,%x",
+    //              ble_gap_srvc.ble_service.uuid.uuid,
+    //              ble_gap_srvc.ble_service.uuid.type,
+    //              ble_gap_srvc.ble_service.handle_range.start_handle,
+    //              ble_gap_srvc.ble_service.handle_range.end_handle);
 
     err = gatt_client_discover_chars(conn_handle, &ble_gap_srvc, &gap_char_dev_name);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
-                 gap_char_dev_name.characterstic.uuid.uuid,
-                 gap_char_dev_name.characterstic.uuid.type,
-                 gap_char_dev_name.characterstic.char_props.indicate,
-                 gap_char_dev_name.characterstic.char_props.read,
-                 gap_char_dev_name.characterstic.char_props.write,
-                 gap_char_dev_name.characterstic.char_props.notify);
+    // NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
+    //              gap_char_dev_name.characterstic.uuid.uuid,
+    //              gap_char_dev_name.characterstic.uuid.type,
+    //              gap_char_dev_name.characterstic.char_props.indicate,
+    //              gap_char_dev_name.characterstic.char_props.read,
+    //              gap_char_dev_name.characterstic.char_props.write,
+    //              gap_char_dev_name.characterstic.char_props.notify);
 
     err = gatt_client_discover_chars(conn_handle, &ble_gap_srvc, &gap_char_dev_app);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
-                 gap_char_dev_app.characterstic.uuid.uuid,
-                 gap_char_dev_app.characterstic.uuid.type,
-                 gap_char_dev_app.characterstic.char_props.indicate,
-                 gap_char_dev_app.characterstic.char_props.read,
-                 gap_char_dev_app.characterstic.char_props.write,
-                 gap_char_dev_app.characterstic.char_props.notify);
+    // NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
+    //              gap_char_dev_app.characterstic.uuid.uuid,
+    //              gap_char_dev_app.characterstic.uuid.type,
+    //              gap_char_dev_app.characterstic.char_props.indicate,
+    //              gap_char_dev_app.characterstic.char_props.read,
+    //              gap_char_dev_app.characterstic.char_props.write,
+    //              gap_char_dev_app.characterstic.char_props.notify);
 
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -81,21 +81,21 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
 
     err = gatt_client_discover_service(conn_handle, &ble_gatt_srvc);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("s %x,%x,%x,%x",
-                 ble_gatt_srvc.ble_service.uuid.uuid,
-                 ble_gatt_srvc.ble_service.uuid.type,
-                 ble_gatt_srvc.ble_service.handle_range.start_handle,
-                 ble_gatt_srvc.ble_service.handle_range.end_handle);
+    // NRF_LOG_INFO("s %x,%x,%x,%x",
+    //              ble_gatt_srvc.ble_service.uuid.uuid,
+    //              ble_gatt_srvc.ble_service.uuid.type,
+    //              ble_gatt_srvc.ble_service.handle_range.start_handle,
+    //              ble_gatt_srvc.ble_service.handle_range.end_handle);
 
     err = gatt_client_discover_chars(conn_handle, &ble_gatt_srvc, &gatt_char_srvc_change);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
-                 gatt_char_srvc_change.characterstic.uuid.uuid,
-                 gatt_char_srvc_change.characterstic.uuid.type,
-                 gatt_char_srvc_change.characterstic.char_props.indicate,
-                 gatt_char_srvc_change.characterstic.char_props.read,
-                 gatt_char_srvc_change.characterstic.char_props.write,
-                 gatt_char_srvc_change.characterstic.char_props.notify);
+    // NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
+    //              gatt_char_srvc_change.characterstic.uuid.uuid,
+    //              gatt_char_srvc_change.characterstic.uuid.type,
+    //              gatt_char_srvc_change.characterstic.char_props.indicate,
+    //              gatt_char_srvc_change.characterstic.char_props.read,
+    //              gatt_char_srvc_change.characterstic.char_props.write,
+    //              gatt_char_srvc_change.characterstic.char_props.notify);
 
     // discover the char descriptor
     err = gatt_client_discover_char_desc(conn_handle, &gatt_char_srvc_change, &char_srvc_change_cccd);
@@ -106,7 +106,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     err = gattc_client_char_desc_read(conn_handle, &char_srvc_change_cccd, u8_ptr & notifval, sizeof(notifval));
     NRF_ASSERT(err);
 
-    NRF_LOG_INFO("%d n", notifval);
+    // NRF_LOG_INFO("%d n", notifval);
     notifval = INDICATION_ENABLE;
     /// try to write the notification
     err = gattc_client_char_desc_write(conn_handle, &char_srvc_change_cccd, u8_ptr & notifval, sizeof(notifval));
@@ -116,7 +116,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     err = gattc_client_char_desc_read(conn_handle, &char_srvc_change_cccd, u8_ptr & notifval, sizeof(notifval));
     NRF_ASSERT(err);
 
-    NRF_LOG_INFO("%d n", notifval);
+    // NRF_LOG_INFO("%d n", notifval);
 
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -136,31 +136,31 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
 
     err = gatt_client_discover_service(conn_handle, &ble_device_info_srvc);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("s %x,%x,%x,%x",
-                 ble_device_info_srvc.ble_service.uuid.uuid,
-                 ble_device_info_srvc.ble_service.uuid.type,
-                 ble_device_info_srvc.ble_service.handle_range.start_handle,
-                 ble_device_info_srvc.ble_service.handle_range.end_handle);
+    // NRF_LOG_INFO("s %x,%x,%x,%x",
+    //              ble_device_info_srvc.ble_service.uuid.uuid,
+    //              ble_device_info_srvc.ble_service.uuid.type,
+    //              ble_device_info_srvc.ble_service.handle_range.start_handle,
+    //              ble_device_info_srvc.ble_service.handle_range.end_handle);
 
     err = gatt_client_discover_chars(conn_handle, &ble_device_info_srvc, &dev_info_manufacturer_name_char);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
-                 dev_info_manufacturer_name_char.characterstic.uuid.uuid,
-                 dev_info_manufacturer_name_char.characterstic.uuid.type,
-                 dev_info_manufacturer_name_char.characterstic.char_props.indicate,
-                 dev_info_manufacturer_name_char.characterstic.char_props.read,
-                 dev_info_manufacturer_name_char.characterstic.char_props.write,
-                 dev_info_manufacturer_name_char.characterstic.char_props.notify);
+    // NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
+    //              dev_info_manufacturer_name_char.characterstic.uuid.uuid,
+    //              dev_info_manufacturer_name_char.characterstic.uuid.type,
+    //              dev_info_manufacturer_name_char.characterstic.char_props.indicate,
+    //              dev_info_manufacturer_name_char.characterstic.char_props.read,
+    //              dev_info_manufacturer_name_char.characterstic.char_props.write,
+    //              dev_info_manufacturer_name_char.characterstic.char_props.notify);
 
     err = gatt_client_discover_chars(conn_handle, &ble_device_info_srvc, &dev_info_manufacturer_model_char);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
-                 dev_info_manufacturer_model_char.characterstic.uuid.uuid,
-                 dev_info_manufacturer_model_char.characterstic.uuid.type,
-                 dev_info_manufacturer_model_char.characterstic.char_props.indicate,
-                 dev_info_manufacturer_model_char.characterstic.char_props.read,
-                 dev_info_manufacturer_model_char.characterstic.char_props.write,
-                 dev_info_manufacturer_model_char.characterstic.char_props.notify);
+    // NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
+    //              dev_info_manufacturer_model_char.characterstic.uuid.uuid,
+    //              dev_info_manufacturer_model_char.characterstic.uuid.type,
+    //              dev_info_manufacturer_model_char.characterstic.char_props.indicate,
+    //              dev_info_manufacturer_model_char.characterstic.char_props.read,
+    //              dev_info_manufacturer_model_char.characterstic.char_props.write,
+    //              dev_info_manufacturer_model_char.characterstic.char_props.notify);
 
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -181,21 +181,21 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
 
     err = gatt_client_discover_service(conn_handle, &ble_battery_srvc);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("s %x,%x,%x,%x",
-                 ble_battery_srvc.ble_service.uuid.uuid,
-                 ble_battery_srvc.ble_service.uuid.type,
-                 ble_battery_srvc.ble_service.handle_range.start_handle,
-                 ble_battery_srvc.ble_service.handle_range.end_handle);
+    // NRF_LOG_INFO("s %x,%x,%x,%x",
+    //              ble_battery_srvc.ble_service.uuid.uuid,
+    //              ble_battery_srvc.ble_service.uuid.type,
+    //              ble_battery_srvc.ble_service.handle_range.start_handle,
+    //              ble_battery_srvc.ble_service.handle_range.end_handle);
 
     err = gatt_client_discover_chars(conn_handle, &ble_battery_srvc, &batt_info_batt_level_char);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
-                 batt_info_batt_level_char.characterstic.uuid.uuid,
-                 batt_info_batt_level_char.characterstic.uuid.type,
-                 batt_info_batt_level_char.characterstic.char_props.indicate,
-                 batt_info_batt_level_char.characterstic.char_props.read,
-                 batt_info_batt_level_char.characterstic.char_props.write,
-                 batt_info_batt_level_char.characterstic.char_props.notify);
+    // NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
+    //              batt_info_batt_level_char.characterstic.uuid.uuid,
+    //              batt_info_batt_level_char.characterstic.uuid.type,
+    //              batt_info_batt_level_char.characterstic.char_props.indicate,
+    //              batt_info_batt_level_char.characterstic.char_props.read,
+    //              batt_info_batt_level_char.characterstic.char_props.write,
+    //              batt_info_batt_level_char.characterstic.char_props.notify);
 
     // discover the char descriptor
     err = gatt_client_discover_char_desc(conn_handle, &batt_info_batt_level_char, &batt_level_char_cccd);
@@ -241,31 +241,31 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
 
     err = gatt_client_discover_service(conn_handle, &ble_current_time_srvc);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("s %x,%x,%x,%x",
-                 ble_current_time_srvc.ble_service.uuid.uuid,
-                 ble_current_time_srvc.ble_service.uuid.type,
-                 ble_current_time_srvc.ble_service.handle_range.start_handle,
-                 ble_current_time_srvc.ble_service.handle_range.end_handle);
+    // NRF_LOG_INFO("s %x,%x,%x,%x",
+    //              ble_current_time_srvc.ble_service.uuid.uuid,
+    //              ble_current_time_srvc.ble_service.uuid.type,
+    //              ble_current_time_srvc.ble_service.handle_range.start_handle,
+    //              ble_current_time_srvc.ble_service.handle_range.end_handle);
 
     err = gatt_client_discover_chars(conn_handle, &ble_current_time_srvc, &current_time_value_char);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
-                 current_time_value_char.characterstic.uuid.uuid,
-                 current_time_value_char.characterstic.uuid.type,
-                 current_time_value_char.characterstic.char_props.indicate,
-                 current_time_value_char.characterstic.char_props.read,
-                 current_time_value_char.characterstic.char_props.write,
-                 current_time_value_char.characterstic.char_props.notify);
+    // NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
+    //              current_time_value_char.characterstic.uuid.uuid,
+    //              current_time_value_char.characterstic.uuid.type,
+    //              current_time_value_char.characterstic.char_props.indicate,
+    //              current_time_value_char.characterstic.char_props.read,
+    //              current_time_value_char.characterstic.char_props.write,
+    //              current_time_value_char.characterstic.char_props.notify);
 
     err = gatt_client_discover_chars(conn_handle, &ble_current_time_srvc, &local_time_value_char);
     NRF_ASSERT(err);
-    NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
-                 local_time_value_char.characterstic.uuid.uuid,
-                 local_time_value_char.characterstic.uuid.type,
-                 local_time_value_char.characterstic.char_props.indicate,
-                 local_time_value_char.characterstic.char_props.read,
-                 local_time_value_char.characterstic.char_props.write,
-                 local_time_value_char.characterstic.char_props.notify);
+    // NRF_LOG_INFO("c %x,%d,%d,%d,%d,%d",
+    //              local_time_value_char.characterstic.uuid.uuid,
+    //              local_time_value_char.characterstic.uuid.type,
+    //              local_time_value_char.characterstic.char_props.indicate,
+    //              local_time_value_char.characterstic.char_props.read,
+    //              local_time_value_char.characterstic.char_props.write,
+    //              local_time_value_char.characterstic.char_props.notify);
 
     // discover the char descriptor
     err = gatt_client_discover_char_desc(conn_handle, &current_time_value_char, &current_time_value_cccd);

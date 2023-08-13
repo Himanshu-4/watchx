@@ -105,9 +105,6 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_DISCONNECTED:
     {
-        NRF_LOG_ERROR("dct %x", p_ble_evt->evt.gap_evt.params.disconnected.reason);
-        // after disconnecting
-
         /// only call the callback for a valid conn hadnle
         if (GAP_Callbacks[ble_gap_evt_disconnected].callback != NULL)
         {
@@ -205,11 +202,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
 
     case BLE_GAP_EVT_TIMEOUT:
     {
-        /// disconnect the device and remove the conn handle
-        ble_gap_disconnect(conn_handle);
-
         ////// call the callback
-
         if (GAP_Callbacks[ble_gap_evt_timeout].callback != NULL)
         {
             GAP_Callbacks[ble_gap_evt_timeout].callback(

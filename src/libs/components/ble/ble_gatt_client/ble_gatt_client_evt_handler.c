@@ -11,7 +11,7 @@ extern volatile uint8_t client_buff[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
 
 extern volatile xTaskHandle client_taskhandle;
 
-extern volatile gatt_client_callback_handler gatt_client_callbacks[ble_gatt_client_max_callbacks_supp];
+extern gatt_client_callback_handler gatt_client_callbacks[ble_gatt_client_max_callbacks_supp];
 
 /////////// @ref define a refernce functions that are using tas notification
 
@@ -218,7 +218,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             ///// call the error handler
             if (gatt_client_callbacks[ble_gatt_client_error_callback] != NULL)
             {
-                gatt_client_callbacks[ble_gatt_client_error_callback](NULL);
+                gatt_client_callbacks[ble_gatt_client_error_callback](&p_ble_evt->evt.gattc_evt);
             }
             break;
         }
@@ -229,7 +229,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             if (gatt_client_callbacks[ble_gatt_client_indic_callback] != NULL)
             {
                 // call the handler funtion
-                gatt_client_callbacks[ble_gatt_client_timeout_callback](p_ble_evt);
+                gatt_client_callbacks[ble_gatt_client_indic_callback](&p_ble_evt->evt.gattc_evt);
             }
 
             /// send the indication confirmation
@@ -239,12 +239,11 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
         //////////////// handle the gatt notification
         else
         {
-
             // check handler is not null
             if (gatt_client_callbacks[ble_gatt_client_notif_callback] != NULL)
             {
                 // call the handler funtions
-                gatt_client_callbacks[ble_gatt_client_notif_callback](p_ble_evt);
+                gatt_client_callbacks[ble_gatt_client_notif_callback](&p_ble_evt->evt.gattc_evt);
             }
         }
     }
@@ -253,23 +252,19 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     /**< Exchange MTU Response event.                       \n See @ref ble_gattc_evt_exchange_mtu_rsp_t.            */
     case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
     {
+        NRF_LOG_WARNING("RX MTU %d", p_ble_evt->evt.gattc_evt.params.exchange_mtu_rsp.server_rx_mtu);
         /// give the task notification
         task_notify(p_ble_evt->evt.gattc_evt.gatt_status);
         //// print the mtu set by server
-        NRF_LOG_WARNING("RX MTU %d", p_ble_evt->evt.gattc_evt.params.exchange_mtu_rsp.server_rx_mtu);
     }
     break;
 
     /**< Timeout event.                                     \n See @ref ble_gattc_evt_timeout_t.                     */
     case BLE_GATTC_EVT_TIMEOUT:
-    { // Disconnect on GATT Client timeout event.
-        NRF_LOG_DEBUG("GATT Client Timeout.");
-        sd_ble_gap_disconnect(p_ble_evt->evt.gattc_evt.conn_handle,
-                              BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-        // APP_ERROR_CHECK(err_code);
+    { 
         if (gatt_client_callbacks[ble_gatt_client_timeout_callback] != NULL)
         {
-            gatt_client_callbacks[ble_gatt_client_timeout_callback](NULL);
+            gatt_client_callbacks[ble_gatt_client_timeout_callback](&p_ble_evt->evt.gattc_evt);
         }
     }
     break;

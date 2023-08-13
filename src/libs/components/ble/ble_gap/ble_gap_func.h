@@ -61,10 +61,10 @@ enum _BLE_GAP_RELATED_ERRORS_
 
 enum _BLE_GAP_CALLBACKS_
 {
-    ble_gap_evt_connected,
+    ble_gap_evt_connected = 0,
     ble_gap_evt_disconnected,
     ble_gap_evt_timeout,
-    ble_gap_evt_sec_procedure_cmpt,
+    // ble_gap_evt_sec_procedure_cmpt,
     ble_gap_max_callback_supp
 
 };

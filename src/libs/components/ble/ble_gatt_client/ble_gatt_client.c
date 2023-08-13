@@ -48,7 +48,7 @@ volatile uint8_t client_buff[BLE_CLIENT_MESSAGE_BUFFER_SIZE];
 
 volatile xTaskHandle client_taskhandle;
 
-volatile gatt_client_callback_handler gatt_client_callbacks[ble_gatt_client_max_callbacks_supp] = {NULL};
+gatt_client_callback_handler gatt_client_callbacks[ble_gatt_client_max_callbacks_supp] = {NULL};
 
 //////////////////////////////////////////////////////////////////////////
 /////////////////////// static variables  ////////////////////////////////

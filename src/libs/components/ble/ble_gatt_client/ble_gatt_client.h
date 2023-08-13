@@ -104,7 +104,7 @@ enum _CALLBACK_TYPE_
 };
 
 /// @brief callback handler type 
-typedef void (*gatt_client_callback_handler)(ble_evt_t const *p_ble_evt);
+typedef void (*gatt_client_callback_handler)(ble_gattc_evt_t const *gattc_event);
 
 /// @brief this is to add the gatt client timeout callback
 /// @param gatt_client_callback_handler
