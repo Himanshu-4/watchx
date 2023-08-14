@@ -300,29 +300,11 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     // delay(100);
     char dev_name[50];
 
-    // try to read device name
-    err = gatt_client_char_read(conn_handle, &gap_char_dev_name, u8_ptr dev_name, sizeof(dev_name));
-    NRF_ASSERT(err);
-
-    NRF_LOG_WARNING("%s", dev_name);
-
-    /// read the batt 
+   
     // try to read device name
     err = gatt_client_char_read(conn_handle, &batt_info_batt_level_char, u8_ptr dev_name, sizeof(dev_name));
     NRF_ASSERT(err);
-    
-    NRF_LOG_WARNING("%s", dev_name);
-    
-    delay(100);
-
-    err = gatt_client_char_read(conn_handle, &current_time_value_char, u8_ptr dev_name, sizeof(dev_name));
-    NRF_ASSERT(err);
-    
-    NRF_LOG_WARNING("%s", dev_name);
-    
-     err = gatt_client_char_read(conn_handle, &local_time_value_char, u8_ptr dev_name, sizeof(dev_name));
-    NRF_ASSERT(err);
-    
+        
     NRF_LOG_WARNING("%s", dev_name);
     
 

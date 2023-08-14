@@ -594,11 +594,7 @@ uint32_t ble_gap_security_init(uint8_t index)
             NRF_LOG_ERROR("auth status failed");
             goto return_mech;
         }
-        else
-        {
-            NRF_LOG_INFO("bond stored");
-        }
-
+        
         ////////////////////////////////////////////////////////////////////////////////////////
         //// now store the bond information
         uint8_t uid_to_store = nvs_Get_total_no_of_uid();
@@ -622,7 +618,12 @@ uint32_t ble_gap_security_init(uint8_t index)
         ret = nvs_add_data(++uid_to_store, u8_ptr & new_bond, sizeof(new_bond));
         if (ret != nrf_OK)
         {
-            NRF_LOG_WARNING("add bondpair %d", ret);
+            NRF_LOG_ERROR("add bondpair falied %d", ret);
+        }
+        else 
+        {
+            NRF_LOG_INFO("bond stored");
+        
         }
     }
 
@@ -674,6 +675,7 @@ uint32_t ble_gap_security_init(uint8_t index)
         /// send the peer that key is missing or not present
         ret = sd_ble_gap_sec_info_reply(gap_inst[index].ble_gap_conn_handle, NULL, NULL, NULL);
         NRF_ASSERT(ret);
+        NRF_LOG_ERROR("cant found bond");
         ret = ble_gap_err_bond_info_not_found;
         goto return_mech;
 

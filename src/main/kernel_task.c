@@ -26,7 +26,11 @@
 
 //================================================================================================
 //=================================================================================================
-//==================== Macros variables here ======================================================
+//==================== extern variables here ======================================================
+
+//================================================================================================
+//=================================================================================================
+//==================== Global variables here ======================================================
 
 #define KERNEL_TASK_NAME "Kernel_Task"
 
@@ -38,17 +42,20 @@ static StaticTask_t kernel_Task_TCB;
 static volatile uint8_t kernel_task_state;
 
 /// @brief task handle for the kernel
-static volatile xTaskHandle kernnel_Task_handle = NULL;
+static xTaskHandle kernnel_Task_handle = NULL;
+
+
+//================================================================================================
+//=================================================================================================
+//==================== Macros  here ======================================================
+
+/// @brief this is used to run the kernel task , this is run to completion the kernel_Taskhandle cant be null  
+#define kernel_task_run(x)  \
+kernel_task_state = x;  \
+vTaskResume(kernnel_Task_handle);  \
 
 //// define a index so that we can have a instance of gap
 #define BLE_GAP_DEVICE_INDEX 0
-//================================================================================================
-//=================================================================================================
-//==================== extern variables here ======================================================
-
-//================================================================================================
-//=================================================================================================
-//==================== Global variables here ======================================================
 
 //================================================================================================
 //=================================================================================================
@@ -163,15 +170,19 @@ ble_funcs_init:
 {
     
     uint16_t conn_handle = ble_gap_get_conn_handle(BLE_GAP_DEVICE_INDEX);
-    NRF_LOG_INFO("con %d",conn_handle);
-
-    /// init the ble client
-    err = gatt_client_init(conn_handle);
-    NRF_ASSERT(err);
+    NRF_LOG_INFO("connhand %d",conn_handle);
 
     /// @note this function will wait for the security procedure to finish and then proceed .
     /// start the pairing process
     err = ble_gap_security_init(BLE_GAP_DEVICE_INDEX);
+    NRF_ASSERT(err);
+    if(err != nrf_OK)
+    {
+        goto main_loop;
+    }
+
+    /// init the ble client
+    err = gatt_client_init(conn_handle);
     NRF_ASSERT(err);
 
     /// @todo find why we have to give a delay here
@@ -236,9 +247,8 @@ main_loop:
             /// we can also have some code here for idle situations 
             break;
         }
-
         //// now here it would be only be in a while loop
-        delay(100);
+        vTaskSuspend(NULL);
     }
 
     //// never reach here
@@ -261,7 +271,7 @@ static void ble_device_connected_callback(void *param, ble_gap_evt_t const *gap_
     uint32_t err = ble_gap_set_conn_handle(BLE_GAP_DEVICE_INDEX, gap_evt->conn_handle);
     NRF_ASSERT(err);
 
-    kernel_task_state = kernel_state_ble_connected;
+    kernel_task_run( kernel_state_ble_connected);
 }
 
 /// @brief / device disconnected callback
@@ -270,8 +280,8 @@ static void ble_device_connected_callback(void *param, ble_gap_evt_t const *gap_
 static void ble_device_disconnected_callback(void *param, ble_gap_evt_t const *gap_evt)
 {
     UNUSED_PARAMETER(param);
-    kernel_task_state = kernel_state_ble_disconnected;
     NRF_LOG_ERROR("dct %x",gap_evt->params.disconnected.reason);
+    kernel_task_run(kernel_state_ble_disconnected);
 }
 
 /// @brief this is the timeout callback for the gap events 
@@ -303,7 +313,7 @@ static void ble_client_handle_value_notification(ble_gattc_evt_t const *gattc_ev
     ble_ancs_client_event_handler(gattc_evt);
 
     //// switch the kernel task state
-    kernel_task_state = kernel_state_ble_notif_recv;
+    kernel_task_run( kernel_state_ble_notif_recv);
 }
 
 /// @brief handle the ble indication
@@ -311,10 +321,9 @@ static void ble_client_handle_value_notification(ble_gattc_evt_t const *gattc_ev
 /// @param evt
 static void ble_client_handle_value_indication(ble_gattc_evt_t const *gattc_evt)
 {
-
     ble_peer_Device_indication_handler(gattc_evt);
 
-    kernel_task_state = kernel_state_ble_indic_recv;
+    kernel_task_run( kernel_state_ble_indic_recv);
 }
 
 /// @brief this function is called when there is an error triggered

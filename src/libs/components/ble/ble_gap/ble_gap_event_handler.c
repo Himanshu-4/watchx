@@ -155,6 +155,7 @@ void ble_gap_event_handler(ble_evt_t const *p_ble_evt)
             };
         // NULL is used if the master doesnot support that dl request it store the values  whats actually support by master
         err_code = sd_ble_gap_data_length_update(conn_handle, &gap_dl_update, NULL);
+        NRF_ASSERT(err_code);
     }
     break;
 
@@ -337,7 +338,6 @@ static void nrf_handle_security_info_request(ble_evt_t const *p_ble_evt)
     //               (p_ble_evt->evt.gap_evt.params.sec_info_request.id_info << 1) |
     //               (p_ble_evt->evt.gap_evt.params.sec_info_request.sign_info)));
 
-    delay(20);
     /// notify the task about that peer is already bonded and want the ltk
     task_notify(BLE_SECEVT_NOTIF_SEC_INFO_REQ);
 }
@@ -352,6 +352,7 @@ static void nrf_handle_passkey_display_Evt(ble_evt_t const *p_ble_evt)
     if (p_ble_evt->evt.gap_evt.params.passkey_display.match_request == 1)
     {
         uint32_t err = sd_ble_gap_auth_key_reply(conn_handle, BLE_GAP_AUTH_KEY_TYPE_PASSKEY, NULL);
+        NRF_ASSERT(err);
     }
     else
     {

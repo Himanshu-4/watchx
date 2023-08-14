@@ -239,9 +239,7 @@ void ble_gap_disconnect(uint16_t conn_handle)
 
 
 
-
-
-
+/// @brief security parameters for the gap security procedure 
 const ble_gap_sec_params_t gap_sec_param[ble_gap_security_max_params_supported] 
 =
 {
