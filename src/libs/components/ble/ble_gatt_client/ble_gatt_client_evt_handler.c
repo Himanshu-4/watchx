@@ -51,6 +51,11 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             // NRF_LOG_INFO("s%d,%x,%d,%d,%d", p_ble_evt->evt.gattc_evt.gatt_status, p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.uuid,
             //  p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].uuid.type ,p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.start_handle,
             // p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[0].handle_range.end_handle);
+            //  for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.count; i++)
+            // {
+            //     NRF_LOG_INFO("uuid is %x, type is %d", p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[i].uuid.uuid,
+            //                  p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[i].uuid.type);
+            // }
         }
 
         else
@@ -58,12 +63,6 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             NRF_LOG_ERROR("gatt eer");
         }
         task_notify(gatt_status);
-
-        // for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.count; i++)
-        // {
-        //     NRF_LOG_INFO("uuid is %x, type is %d", p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[i].uuid.uuid,
-        //                  p_ble_evt->evt.gattc_evt.params.prim_srvc_disc_rsp.services[i].uuid.type);
-        // }
     }
     break;
 
@@ -201,7 +200,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
     case BLE_GATTC_EVT_WRITE_CMD_TX_COMPLETE:
     {
         //// based on the gatt status we have to send then gatt notificatin
-        task_notify( p_ble_evt->evt.gattc_evt.gatt_status);
+        task_notify(p_ble_evt->evt.gattc_evt.gatt_status);
     }
     break;
 
@@ -247,7 +246,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             }
         }
     }
-        break;
+    break;
 
     /**< Exchange MTU Response event.                       \n See @ref ble_gattc_evt_exchange_mtu_rsp_t.            */
     case BLE_GATTC_EVT_EXCHANGE_MTU_RSP:
@@ -261,7 +260,7 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 
     /**< Timeout event.                                     \n See @ref ble_gattc_evt_timeout_t.                     */
     case BLE_GATTC_EVT_TIMEOUT:
-    { 
+    {
         if (gatt_client_callbacks[ble_gatt_client_timeout_callback] != NULL)
         {
             gatt_client_callbacks[ble_gatt_client_timeout_callback](&p_ble_evt->evt.gattc_evt);
@@ -271,7 +270,5 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
 
     default:
         break;
-    }/// end of switch 
-
+    } /// end of switch
 }
-

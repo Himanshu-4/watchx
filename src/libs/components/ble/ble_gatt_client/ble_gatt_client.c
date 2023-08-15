@@ -326,6 +326,76 @@ return_mech:
 }
 }
 
+
+/// @brief for searching the gatt server service
+/// @param conn_hand
+/// @param number how many services you want to discover 
+/// @return succ/failure of function
+uint32_t gatt_client_explore_service(uint16_t conn_handle , uint8_t num)
+{
+  
+  uint32_t err = ble_client_ok;
+
+  // take the semaphore
+  if (xSemaphoreTake(ble_client_semphr_handle, (BLE_CLIENT_FUNCTIONS_MUTEX_WAIT_TIME)) != pdPASS)
+  {
+    return ble_client_mutex_not_avialble;
+  }
+
+  /// serach the client instnace 
+  for (uint8_t i = 0; i < BLE_NO_OF_CLIENT_SUPPORTED; i++)
+  {
+    if (client_struct[i].conn_handle == conn_handle)
+    {
+      IS_CLIENT_INITED(client_struct[i]);
+      goto discover_Data;
+    }
+  }
+  err = ble_client_err_conn_handle_not_found;
+  goto return_mech;
+
+discover_Data:
+
+  client_taskhandle = xTaskGetCurrentTaskHandle();
+
+uint16_t start_hand=BLE_SEARCH_START_HANDLE;
+  for(uint8_t i =0; i<num; i++)
+  {
+     err = sd_ble_gattc_primary_services_discover(conn_handle, start_hand, NULL);
+  start_hand += 5;
+  if (err != nrf_OK)
+  {
+    err = ble_client_err_srvc_not_found;
+    goto return_mech;
+  }
+
+  /// wait for the task notifxcation from the callback
+  if (xTaskNotifyWait(0, U32_MAX, &err, BLE_CLIENT_FUNCTIONS_CLIENT_WAIT_TIME) != pdPASS)
+  {
+    err = ble_client_err_timeout;
+    goto return_mech;
+  }
+  else
+  {
+    /// check the err value
+    if (err != nrf_OK)
+    {
+      NRF_LOG_ERROR("srvc disc %d", err);
+      goto return_mech;
+    }
+
+  }
+ 
+  }
+
+return_mech:
+{
+  client_taskhandle = NULL;
+  xSemaphoreGive(ble_client_semphr_handle);
+  return err;
+}
+}
+
 /// @brief to discover the gatt client characteristics of the server, at this time only one by one char discv is avaialble
 /// @param conn_hand
 /// @param service_struct

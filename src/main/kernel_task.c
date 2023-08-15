@@ -194,10 +194,11 @@ ble_funcs_init:
     err = ble_peer_device_init(conn_handle);
     NRF_ASSERT(err);
     
+    // gatt_client_explore_service(conn_handle, 10);
     /// init the apple ams 
     err = ble_ams_init(conn_handle);
     NRF_ASSERT(err);
-    
+
     // err = ble_ancs_init(conn_handle);
     // NRF_ASSERT(err);
 

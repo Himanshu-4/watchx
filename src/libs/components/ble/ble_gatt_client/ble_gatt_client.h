@@ -120,6 +120,13 @@ void ble_gatt_client_remove_callback(uint8_t callback_type);
 //////////////////////////////////////////////////////////////////////
 ///////// this is to discover the att database of the server
 
+
+/// @brief for searching the gatt server service
+/// @param conn_hand
+/// @param number how many services you want to discover 
+/// @return succ/failure of function
+uint32_t gatt_client_explore_service(uint16_t conn_handle , uint8_t num);
+
 /// @brief for searching the gatt server service
 /// @param conn_hand
 /// @param ble_service_struct_t pointer 
