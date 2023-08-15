@@ -356,7 +356,7 @@ void ble_peer_Device_indication_handler(ble_gattc_evt_t const *evt)
 /// @brief Device notification handler 
 /// @param param 
 /// @param evt 
-void ble_peer_Device_notification_handler( ble_gattc_evt_t const *evt)
+bool ble_peer_Device_notification_handler( ble_gattc_evt_t const *evt)
 {
     /// handle the notification from time and batt profile
     if(evt->params.hvx.handle == peer_dev_info.batt_val.ble_battery_level_char_handle)
@@ -370,5 +370,5 @@ void ble_peer_Device_notification_handler( ble_gattc_evt_t const *evt)
         
     }
 
-
+return 0;
 }

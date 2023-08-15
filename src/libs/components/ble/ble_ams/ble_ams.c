@@ -262,14 +262,12 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.handle_decl,
     //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.handle_value);
 
-   
-
-    uint16_t notif_en_data = NOTIFICATION_ENABLE;
+    const uint16_t notif_en_data = NOTIFICATION_ENABLE;
     /// now here suscribe for the notification for the gatt char
     /// suscribe the gatt notication of remote cmd and entity update char
     err = gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_desc, u8_ptr & notif_en_data, sizeof(notif_en_data));
     NRF_ASSERT(err);
-    err = gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_desc, u8_ptr & notif_en_data, sizeof(notif_en_data));
+    err = gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_desc, u8_ptr & notif_en_data, sizeof(notif_en_data));
     NRF_ASSERT(err);
 
     //// clear the cmd supported  values
@@ -483,7 +481,7 @@ uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index, uint8_t *data)
 /// @brief this is the apple media service handler where
 /// @param param
 /// @param ble_evt
-void ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
+bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
 {
     /// match the connection handle
     if (evt->conn_handle != ble_ams_handler.conn_handle)
@@ -495,12 +493,11 @@ void ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
     //// handle the remote cmd char
     if (evt->params.hvx.handle == ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.handle_value)
     {
-        NRF_LOG_INFO("cp remotecmd");
+        NRF_LOG_INFO("cp len %d",evt->params.hvx.len);
         if (evt->params.hvx.len <= 2)
         {
-
             /// based on the length we get err and cmd sets
-            NRF_LOG_ERROR("len %d %d", evt->params.hvx.len, evt->params.hvx.data[0]);
+            NRF_LOG_ERROR("%d %d", evt->params.hvx.len, evt->params.hvx.data[0],evt->params.hvx.data[1]);
         }
         else
         {

@@ -305,16 +305,19 @@ static void ble_gap_timeout_callback(void *param, ble_gap_evt_t const *gap_evt)
 /// @param evt
 static void ble_client_handle_value_notification(ble_gattc_evt_t const *gattc_evt)
 {
+    bool kernel_Task_woken =0;
     ///////////// these callbacks are gonna run in the softdevice event handler
     /// handle the peer device notification
-    ble_peer_Device_notification_handler(gattc_evt);
+    kernel_Task_woken = ble_peer_Device_notification_handler(gattc_evt);
     /// ble ams client handler
-    ble_ams_client_event_handler(gattc_evt);
+    kernel_Task_woken =  ble_ams_client_event_handler(gattc_evt);
     /// handle the ancs client
-    ble_ancs_client_event_handler(gattc_evt);
+    kernel_Task_woken = ble_ancs_client_event_handler(gattc_evt);
 
-    //// switch the kernel task state
+    if(kernel_Task_woken)
+    {//// switch the kernel task state
     kernel_task_run( kernel_state_ble_notif_recv);
+    }
 }
 
 /// @brief handle the ble indication

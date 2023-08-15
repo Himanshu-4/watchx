@@ -125,6 +125,6 @@ void ble_peer_Device_indication_handler(ble_gattc_evt_t const *evt);
 /// @brief
 /// @param param
 /// @param evt
-void ble_peer_Device_notification_handler(ble_gattc_evt_t const *evt);
+bool ble_peer_Device_notification_handler(ble_gattc_evt_t const *evt);
 
 #endif
