@@ -31,7 +31,7 @@ static volatile float track_duration = 1, elapsed_time = 0, playbackrate;
 static volatile uint8_t q_att_index = 0, att_total_items_q = 0, q_att_shuffle_mode, q_att_repeat_mode;
 
 /** @brief 128-bit service UUID for the Apple Media Service. */
-static ble_uuid128_t const ble_apple_media_service_uuid128 =
+static const ble_uuid128_t  ble_apple_media_service_uuid128 =
     {
         .uuid128 =
             {
@@ -40,7 +40,7 @@ static ble_uuid128_t const ble_apple_media_service_uuid128 =
                 0x3a, 0x43, 0x36, 0x0f, 0x2b, 0x50, 0xd3, 0x89}};
 
 /** @brief 128-bit AMS remote command  characteristic UUID. */
-static ble_uuid128_t const ble_ams_remote_command_char_uuid128 =
+static const ble_uuid128_t  ble_ams_remote_command_char_uuid128 =
     {
         .uuid128 =
             {
@@ -49,14 +49,14 @@ static ble_uuid128_t const ble_ams_remote_command_char_uuid128 =
                 0x8a, 0x4a, 0xb1, 0x57, 0xd8, 0x81, 0x3c, 0x9b}};
 
 /**@brief 128-bit ams entity update char characteristics  UUID. */
-static ble_uuid128_t const ble_ams_entity_update_char_uuid128 =
+static const ble_uuid128_t  ble_ams_entity_update_char_uuid128 =
     {
         {// 2F 7C AB CE 80 8D 41 1F 9A 0C BB 92 BA 96 C1 02(writeable with response, notifiable)
          0x02, 0xc1, 0x96, 0xBA, 0x92, 0xBB, 0x0c, 0x9A,
          0x1F, 0x41, 0x8D, 0x80, 0xce, 0xab, 0x7c, 0x2f}};
 
 /**@brief 128-bit ams entity attribute characteristics  UUID. */
-static ble_uuid128_t const ble_ams_entity_attribute_char_uuid128 =
+static const ble_uuid128_t  ble_ams_entity_attribute_char_uuid128 =
     {
         {// C6 B2 F3 8C 23 AB 46 D8 A6 AB A3 A8 70 BB D5 D7 (readable, writeable)
          0xd7, 0xd5, 0xbb, 0x70, 0xa8, 0xa3, 0xab, 0xa6,
@@ -167,15 +167,14 @@ KERNEL_MEM_INSTANTISE(ble_ams_mem_inst, ble_ams_mem_pool ,BLE_AMS_MEM_SIZE , ble
 /// @param  connection_handle 
 uint32_t ble_ams_init(uint16_t conn_handle)
 {
-    NRF_LOG_INFO("ams init");
-
+    
+    uint32_t err = 0;
     /// init the kernel memory here 
     kernel_mem_init(&ble_ams_mem_inst ,ble_ams_mem_pool, BLE_AMS_MEM_SIZE, &ble_ams_memory_mutex ,BLE_AMS_MUTEX_TIMEOUT );
 
     if ((conn_handle == BLE_CONN_HANDLE_INVALID))
         return nrf_ERR_INVALID_PARAM;
 
-    uint32_t err = 0;
     /// it is asssumed that the gatt client module is inited and working succesfully
     ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_DEINITED;
 
@@ -230,14 +229,14 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     /// suscribe for the differnt entity attributes
 
     //// subscribe all the attribute for player entity like playername ,player playbacinfo ,player volume
-    uint8_t entity_id_player[] = {ble_ams_entityid_player, ble_ams_player_attribute_name, ble_ams_player_attribute_playbackinfo, ble_ams_player_attribute_volume};
+    const uint8_t entity_id_player[] = {ble_ams_entityid_player, ble_ams_player_attribute_name, ble_ams_player_attribute_playbackinfo, ble_ams_player_attribute_volume};
 
     //// subscribe all the attribute for the entity  queue like q properties
-    uint8_t entity_id_queue[] = {ble_ams_entityid_queue, ble_ams_queue_attribute_index, // give the q present index
+    const uint8_t entity_id_queue[] = {ble_ams_entityid_queue, ble_ams_queue_attribute_index, // give the q present index
                                  ble_ams_queue_attribute_byte_count, ble_ams_queue_attribute_shuffle_mode, ble_ams_queue_attribute_repeat_mode};
 
     ///// subscribe all the track attributes like name, duration , artist name
-    uint8_t entity_id_track[] = {ble_ams_entityid_Track, ble_ams_track_attribute_artist, ble_ams_track_attribute_album,
+    const uint8_t entity_id_track[] = {ble_ams_entityid_Track, ble_ams_track_attribute_artist, ble_ams_track_attribute_album,
                                  ble_ams_track_attribute_title, ble_ams_track_attribute_duration};
 
     /////// write this to the entty update char

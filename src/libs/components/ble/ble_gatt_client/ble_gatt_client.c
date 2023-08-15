@@ -490,7 +490,7 @@ return_mech:
 /// @param buff
 /// @param size
 /// @return succ/failure of func
-uint32_t gatt_client_char_write(uint16_t conn_handle, ble_char_struct_t *char_struct, uint8_t write_type, uint8_t *buff, uint16_t size)
+uint32_t gatt_client_char_write(uint16_t conn_handle, ble_char_struct_t *char_struct, uint8_t write_type, const uint8_t *buff, uint16_t size)
 {
 
   uint32_t err = ble_client_ok;
@@ -634,7 +634,7 @@ return_mech:
 /// @param buff
 /// @param size
 /// @return succ/Failure of func
-uint32_t gattc_client_char_desc_write(uint16_t conn_handle, ble_char_desc_struct_t *desc_struct, uint8_t *buff, uint16_t size)
+uint32_t gattc_client_char_desc_write(uint16_t conn_handle, ble_char_desc_struct_t *desc_struct, uint8_t const *buff, uint16_t size)
 {
 
   // take the semaphore

@@ -101,22 +101,10 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     err = gatt_client_discover_char_desc(conn_handle, &gatt_char_srvc_change, &char_srvc_change_cccd);
     NRF_ASSERT(err);
 
-    uint16_t notifval = 0;
-    // read the descriptoer value
-    err = gattc_client_char_desc_read(conn_handle, &char_srvc_change_cccd, u8_ptr & notifval, sizeof(notifval));
-    NRF_ASSERT(err);
-
-    // NRF_LOG_INFO("%d n", notifval);
-    notifval = INDICATION_ENABLE;
+    uint16_t notifval = INDICATION_ENABLE;
     /// try to write the notification
     err = gattc_client_char_desc_write(conn_handle, &char_srvc_change_cccd, u8_ptr & notifval, sizeof(notifval));
     NRF_ASSERT(err);
-
-    // read the descriptoer value
-    err = gattc_client_char_desc_read(conn_handle, &char_srvc_change_cccd, u8_ptr & notifval, sizeof(notifval));
-    NRF_ASSERT(err);
-
-    // NRF_LOG_INFO("%d n", notifval);
 
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -201,13 +189,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     err = gatt_client_discover_char_desc(conn_handle, &batt_info_batt_level_char, &batt_level_char_cccd);
     NRF_ASSERT(err);
 
-    uint16_t b_notifval = 0;
-    // read the descriptoer value
-    err = gattc_client_char_desc_read(conn_handle, &batt_level_char_cccd, u8_ptr & b_notifval, sizeof(notifval));
-    NRF_ASSERT(err);
-
-    NRF_LOG_INFO("b-%d", b_notifval);
-    b_notifval = NOTIFICATION_ENABLE;
+    uint16_t b_notifval = NOTIFICATION_ENABLE;
     /// try to write the notification
     err = gattc_client_char_desc_write(conn_handle, &batt_level_char_cccd, u8_ptr & b_notifval, sizeof(notifval));
     NRF_ASSERT(err);
@@ -271,13 +253,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     err = gatt_client_discover_char_desc(conn_handle, &current_time_value_char, &current_time_value_cccd);
     NRF_ASSERT(err);
 
-    uint16_t t_notifval = 0;
-    // read the descriptoer value
-    err = gattc_client_char_desc_read(conn_handle, &current_time_value_cccd, u8_ptr & t_notifval, sizeof(notifval));
-    NRF_ASSERT(err);
-
-    NRF_LOG_INFO("t-%d", t_notifval);
-    t_notifval = NOTIFICATION_ENABLE;
+    uint16_t t_notifval = NOTIFICATION_ENABLE;
     /// try to write the notification
     err = gattc_client_char_desc_write(conn_handle, &current_time_value_cccd, u8_ptr & t_notifval, sizeof(notifval));
     NRF_ASSERT(err);
@@ -302,7 +278,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
 
    
     // try to read device name
-    err = gatt_client_char_read(conn_handle, &batt_info_batt_level_char, u8_ptr dev_name, sizeof(dev_name));
+    err = gatt_client_char_read(conn_handle, &current_time_value_char , u8_ptr dev_name, sizeof(dev_name));
     NRF_ASSERT(err);
         
     NRF_LOG_WARNING("%s", dev_name);
@@ -371,6 +347,7 @@ void ble_peer_Device_indication_handler(ble_gattc_evt_t const *evt)
     if (evt->params.hvx.handle == peer_dev_info.gatt.ble_Gatt_srvc_cgd_char_handle)
     {
         /* code */
+        NRF_LOG_INFO("srvs %d %d",evt->params.hvx.len,evt->params.hvx.data[0]);
     }
 
      
@@ -384,10 +361,12 @@ void ble_peer_Device_notification_handler( ble_gattc_evt_t const *evt)
     /// handle the notification from time and batt profile
     if(evt->params.hvx.handle == peer_dev_info.batt_val.ble_battery_level_char_handle)
     {
+        NRF_LOG_INFO("batt len %d, %d",evt->params.hvx.len,evt->params.hvx.data[0]);
 
     }
     else if(evt->params.hvx.handle == peer_dev_info.dev_time.ble_dev_time_info_char_handle)
     {
+        NRF_LOG_INFO("devtime %d , %d",evt->params.hvx.len,evt->params.hvx.data[0]);
         
     }
 

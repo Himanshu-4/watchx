@@ -168,7 +168,7 @@ uint32_t gatt_client_char_read(uint16_t conn_hand , ble_char_struct_t *char_stru
 /// @param buff
 /// @param size
 /// @return succ/failure of func
-uint32_t gatt_client_char_write(uint16_t conn_hand, ble_char_struct_t *char_struct,  uint8_t write_type, uint8_t *buff, uint16_t size);
+uint32_t gatt_client_char_write(uint16_t conn_hand, ble_char_struct_t *char_struct,  uint8_t write_type, uint8_t const *buff, uint16_t size);
 
 /// @brief this is to write a value to the gatt client descriptor 
 /// @param conn_hand 
@@ -176,7 +176,7 @@ uint32_t gatt_client_char_write(uint16_t conn_hand, ble_char_struct_t *char_stru
 /// @param buff 
 /// @param size 
 /// @return succ/Failure of func 
-uint32_t gattc_client_char_desc_write(uint16_t conn_hand , ble_char_desc_struct_t *desc_struct, uint8_t *buff, uint16_t size);
+uint32_t gattc_client_char_desc_write(uint16_t conn_hand , ble_char_desc_struct_t *desc_struct, uint8_t const *buff, uint16_t size);
 
 /// @brief this to read the char descriptor value 
 /// @param conn_hand 
@@ -186,19 +186,22 @@ uint32_t gattc_client_char_desc_write(uint16_t conn_hand , ble_char_desc_struct_
 /// @return succ/Failure of the func 
 uint32_t gattc_client_char_desc_read(uint16_t conn_hand , ble_char_desc_struct_t *desc_struct, uint8_t *buff, uint16_t size);
 
+
+/// @todo implemntation pending 
+
 /// @brief this is to write a long value to the char
 /// @param conn_hand
 /// @param buff
 /// @param size
 /// @return succ/failure of function
-uint32_t gatt_client_char_long_write(uint16_t conn_hand, ble_char_struct_t *char_struct, uint8_t *buff, uint16_t size);
+uint32_t gatt_client_char_long_write(uint16_t conn_hand, ble_char_struct_t *char_struct, uint8_t const  *buff, uint16_t size);
 
 /// @brief this is to do reliable write to the characteristics of service
 /// @param conn_hand
 /// @param buff
 /// @param size
 /// @return succ/faliure of func
-uint32_t gatt_client_char_reliable_write(uint16_t conn_hand, ble_char_struct_t *char_struct, uint8_t *buff, uint16_t size);
+uint32_t gatt_client_char_reliable_write(uint16_t conn_hand, ble_char_struct_t *char_struct, uint8_t const *buff, uint16_t size);
 
 /////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

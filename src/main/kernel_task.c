@@ -193,11 +193,11 @@ ble_funcs_init:
     /// init the peer device
     err = ble_peer_device_init(conn_handle);
     NRF_ASSERT(err);
-
-    //// init the ancs , ams ,device info and other device functionality
-    /// init the apple ancs, ams task , current time task
-    // err = ble_ams_init(conn_handle);
-    // NRF_ASSERT(err);
+    
+    /// init the apple ams 
+    err = ble_ams_init(conn_handle);
+    NRF_ASSERT(err);
+    
     // err = ble_ancs_init(conn_handle);
     // NRF_ASSERT(err);
 
