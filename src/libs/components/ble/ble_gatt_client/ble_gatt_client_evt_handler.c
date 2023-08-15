@@ -130,7 +130,9 @@ void ble_gatt_client_handler(ble_evt_t const *p_ble_evt)
             /// copy the content to the buffer
             /// serach the char with the uuid
             for (int i = 0; i < p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.count; i++)
-            {
+            {   
+                // NRF_LOG_INFO("deu %x s %x h%x",p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i].uuid.uuid,
+                // search_desc.descriptor.uuid.uuid, p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i].handle );
                 ///// serach for the uuid
                 if (p_ble_evt->evt.gattc_evt.params.desc_disc_rsp.descs[i].uuid.uuid == search_desc.descriptor.uuid.uuid)
                 {

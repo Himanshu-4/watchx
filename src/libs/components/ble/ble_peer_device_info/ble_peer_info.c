@@ -194,11 +194,11 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     err = gattc_client_char_desc_write(conn_handle, &batt_level_char_cccd, u8_ptr & b_notifval, sizeof(notifval));
     NRF_ASSERT(err);
 
-    // read the descriptoer value
-    err = gattc_client_char_desc_read(conn_handle, &batt_level_char_cccd, u8_ptr & b_notifval, sizeof(notifval));
-    NRF_ASSERT(err);
+    // // read the descriptoer value
+    // err = gattc_client_char_desc_read(conn_handle, &batt_level_char_cccd, u8_ptr & b_notifval, sizeof(notifval));
+    // NRF_ASSERT(err);
 
-    NRF_LOG_INFO("b-%d", b_notifval);
+    // NRF_LOG_INFO("b-%d", b_notifval);
 
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -258,11 +258,11 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     err = gattc_client_char_desc_write(conn_handle, &current_time_value_cccd, u8_ptr & t_notifval, sizeof(notifval));
     NRF_ASSERT(err);
 
-    // read the descriptoer value
-    err = gattc_client_char_desc_read(conn_handle, &current_time_value_cccd, u8_ptr & t_notifval, sizeof(notifval));
-    NRF_ASSERT(err);
+    // // read the descriptoer value
+    // err = gattc_client_char_desc_read(conn_handle, &current_time_value_cccd, u8_ptr & t_notifval, sizeof(notifval));
+    // NRF_ASSERT(err);
 
-    NRF_LOG_INFO("t-%d", t_notifval);
+    // NRF_LOG_INFO("t-%d", t_notifval);
 
     /// discover the chars
 
@@ -278,7 +278,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
 
    
     // try to read device name
-    err = gatt_client_char_read(conn_handle, &current_time_value_char , u8_ptr dev_name, sizeof(dev_name));
+    err = gatt_client_char_read(conn_handle, &gap_char_dev_name , u8_ptr dev_name, sizeof(dev_name));
     NRF_ASSERT(err);
         
     NRF_LOG_WARNING("%s", dev_name);

@@ -35,7 +35,7 @@ static SemaphoreHandle_t ble_client_semphr_handle;
 // these are used to create a semaphore buffer
 static StaticSemaphore_t ble_client_semphr_buffer;
 
-#define BLE_GATTC_DESC_DISC_HANDLE_EXTEND 5
+#define BLE_GATTC_DESC_DISC_HANDLE_EXTEND 0x5
 //////////////////////////////////////////////////////////////////////////
 /// create a struct buffer for the client handlers
 
@@ -508,7 +508,7 @@ discover_Data:
   memcpy(u8_ptr client_buff, u8_ptr desc_struct, sizeof(ble_char_desc_struct_t));
   ble_gattc_handle_range_t desc_disc_range;
 
-  desc_disc_range.start_handle = char_struct->characterstic.handle_value;
+  desc_disc_range.start_handle = char_struct->characterstic.handle_value+1;
   desc_disc_range.end_handle = char_struct->characterstic.handle_value + BLE_GATTC_DESC_DISC_HANDLE_EXTEND;
 
   err = sd_ble_gattc_descriptors_discover(conn_handle, &desc_disc_range);
@@ -529,7 +529,7 @@ discover_Data:
   /// check if error or not
   if (err != nrf_OK)
   {
-    err = ble_client_err_desc_not_found;
+    NRF_LOG_ERROR("disc disc %d",err);
     goto copy_null;
   }
     /// copy the content to the structure
