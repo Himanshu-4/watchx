@@ -489,4 +489,7 @@ bool ble_ancs_client_event_handler( ble_gattc_evt_t const *evt)
 
         /// do the respective action based on the uid 
     }
+
+
+    return 0;
 }

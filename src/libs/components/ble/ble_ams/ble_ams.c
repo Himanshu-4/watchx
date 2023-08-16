@@ -475,6 +475,24 @@ uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index, uint8_t *data)
     return nrf_OK;
 }
 
+
+/// @brief this function is used for debugg purpose and to print the apple media info 
+/// @param  void
+void ble_ams_print_media_info(void)
+{
+    /// print the strings first 
+    delay(50);
+    NRF_LOG_INFO("p %s",ble_ams_get_attribute_name(ble_ams_attribute_index_mediaplayer));
+    delay(50);
+    NRF_LOG_INFO("a %s",ble_ams_get_attribute_name(ble_ams_attribute_index_artist_name));
+    delay(50);
+    NRF_LOG_INFO("t %d",ble_ams_get_attribute_name(ble_ams_attribute_index_track_name));
+    delay(50);
+    NRF_LOG_INFO("a %s",ble_ams_get_attribute_name(ble_ams_attribute_index_album_name));
+
+    
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -486,7 +504,8 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
     /// match the connection handle
     if (evt->conn_handle != ble_ams_handler.conn_handle)
     {
-        return;
+        NRF_LOG_ERROR("invalid conn");
+        return 0;
     }
     //// search for the char handle
 
@@ -497,7 +516,7 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
         if (evt->params.hvx.len <= 2)
         {
             /// based on the length we get err and cmd sets
-            NRF_LOG_ERROR("%d %d", evt->params.hvx.len, evt->params.hvx.data[0],evt->params.hvx.data[1]);
+            NRF_LOG_ERROR("%d %d %d", evt->params.hvx.len, evt->params.hvx.data[0],evt->params.hvx.data[1]);
         }
         else
         {
@@ -513,154 +532,170 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
     /// handle the entity update char , here we recieve the differnt entity attributes value
     else if (evt->params.hvx.handle == ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.handle_value)
     {
-        NRF_LOG_INFO("entity upd chr");
+
+        if(evt->params.hvx.len <= BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE)
+        {
+            NRF_LOG_ERROR("eu len %d %d,%d,%d",evt->params.hvx.len,evt->params.hvx.data[0],
+            evt->params.hvx.data[1],evt->params.hvx.data[2]);
+            return 0;
+        }
         ///////// it is assumed that the notification recvd is in the format of the entity_update notif cb @ref __ENTITY_UPDATE_CHAR_NOTIF_CB_FORMAT_
         /// switch between differnt entity id
         uint8_t entity_id = evt->params.hvx.data[ble_ams_index_entity_id];
         uint8_t att_id = evt->params.hvx.data[ble_ams_index_att_id];
-
+        uint8_t trunc = evt->params.hvx.data[ble_ams_index_entity_update_flag];
+        
+        NRF_LOG_INFO("e %d a %d fg %d l %d",entity_id, att_id,trunc,evt->params.hvx.len);
+        delay(200);
+        char str[200];
+        memcpy(str,&evt->params.hvx.data[ble_ams_index_data_value], (evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE) );
+        
+        NRF_LOG_INFO("%s",str);
+        memset(str,0,200);
         uint8_t err = 0;
-
-        switch (entity_id)
-        {
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////
-            ////////////////////////////////////////////////////////////////////////////////////////////////////
-            ////////////////////////////////////////// entity id media player info
-        case ble_ams_entityid_player:
-        {
-            //// switch between the att id
-            switch (att_id)
-            {
-            case ble_ams_player_attribute_name:
-            {
-                uint8_t err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                /// either add it or modify it
-                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
-                {
-                    //// uid already present , have to modify it
-                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                }
-            }
-            break;
-
-            case ble_ams_player_attribute_playbackinfo:
-            {
-                ///
-                ble_ams_seperate_playbackinfo((char *)(char *)&evt->params.hvx.data[ble_ams_index_data_value]);
-            }
-            break;
-
-            case ble_ams_player_attribute_volume:
-            {
-                /// convert the string volume to float
-                player_volume = atof((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
-            }
-            break;
-            default:
-                NRF_LOG_ERROR("unk att id");
-                break;
-            }
-        }
-        break;
-
-            /////////////// ./////////////////////////////////////////////////////////////////////////////////////
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /////////////////////////////////////////////////////// ams entity id queue
-        case ble_ams_entityid_queue:
-        {
-            switch (att_id)
-            {
-            case ble_ams_queue_attribute_index:
-            {
-                q_att_index = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
-            }
-            break;
-            case ble_ams_queue_attribute_byte_count:
-            {
-                att_total_items_q = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
-            }
-            break;
-
-            case ble_ams_queue_attribute_shuffle_mode:
-            {
-                q_att_shuffle_mode = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
-            }
-            break;
-
-            case ble_ams_queue_attribute_repeat_mode:
-            {
-                q_att_repeat_mode = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
-            }
-            break;
-            default:
-                NRF_LOG_ERROR("unk att id");
-                break;
-            }
-        }
-        break;
-
-            //////////////////////////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////
-            ///////////////////////////////////// ams entity id track /////////////////////////////////////////////
-
-        case ble_ams_entityid_Track:
-        {
-            switch (att_id)
-            {
-
-            case ble_ams_track_attribute_artist:
-            {
-                err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                /// either add it or modify it
-                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
-                {
-                    //// uid already present , have to modify it
-                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                }
-            }
-            break;
-            case ble_ams_track_attribute_album:
-            {
-
-                err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                /// either add it or modify it
-                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
-                {
-                    //// uid already present , have to modify it
-                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                }
-            }
-            break;
-            case ble_ams_track_attribute_title:
-            {
-
-                err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                /// either add it or modify it
-                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
-                {
-                    //// uid already present , have to modify it
-                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                }
-            }
-            break;
-            case ble_ams_track_attribute_duration:
-            {
-                track_duration = atof((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
-            }
-            break;
-
-            default:
-                NRF_LOG_ERROR("unk att id");
-                break;
-            }
-        }
-        break;
-
-        default:
-            /// unknown entity id
-            NRF_LOG_ERROR("unknown entity id");
-            break;
-        }
     }
+    //     switch (entity_id)
+    //     {
+
+    //         ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //         ////////////////////////////////////////////////////////////////////////////////////////////////////
+    //         ////////////////////////////////////////// entity id media player info
+    //     case ble_ams_entityid_player:
+    //     {
+    //         //// switch between the att id
+    //         switch (att_id)
+    //         {
+    //         case ble_ams_player_attribute_name:
+    //         {
+    //             uint8_t err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+    //             /// either add it or modify it
+    //             if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+    //             {
+    //                 //// uid already present , have to modify it
+    //                 kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+    //             }
+    //         }
+    //         break;
+
+    //         case ble_ams_player_attribute_playbackinfo:
+    //         {
+    //             ///
+    //             ble_ams_seperate_playbackinfo((char *)(char *)&evt->params.hvx.data[ble_ams_index_data_value]);
+    //         }
+    //         break;
+
+    //         case ble_ams_player_attribute_volume:
+    //         {
+    //             /// convert the string volume to float
+    //             player_volume = atof((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
+    //         }
+    //         break;
+    //         default:
+    //             NRF_LOG_ERROR("unk att id");
+    //             break;
+    //         }
+    //     }
+    //     break;
+
+    //         /////////////// ./////////////////////////////////////////////////////////////////////////////////////
+    //         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //         /////////////////////////////////////////////////////// ams entity id queue
+    //     case ble_ams_entityid_queue:
+    //     {
+    //         switch (att_id)
+    //         {
+    //         case ble_ams_queue_attribute_index:
+    //         {
+    //             q_att_index = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
+    //         }
+    //         break;
+    //         case ble_ams_queue_attribute_byte_count:
+    //         {
+    //             att_total_items_q = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
+    //         }
+    //         break;
+
+    //         case ble_ams_queue_attribute_shuffle_mode:
+    //         {
+    //             q_att_shuffle_mode = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
+    //         }
+    //         break;
+
+    //         case ble_ams_queue_attribute_repeat_mode:
+    //         {
+    //             q_att_repeat_mode = atoi((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
+    //         }
+    //         break;
+    //         default:
+    //             NRF_LOG_ERROR("unk att id");
+    //             break;
+    //         }
+    //     }
+    //     break;
+
+    //         //////////////////////////////////////////////////////////////////////////////////////////////////////
+    //         ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    //         ///////////////////////////////////// ams entity id track /////////////////////////////////////////////
+
+    //     case ble_ams_entityid_Track:
+    //     {
+    //         switch (att_id)
+    //         {
+
+    //         case ble_ams_track_attribute_artist:
+    //         {
+    //             err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+    //             /// either add it or modify it
+    //             if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+    //             {
+    //                 //// uid already present , have to modify it
+    //                 kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+    //             }
+    //         }
+    //         break;
+    //         case ble_ams_track_attribute_album:
+    //         {
+
+    //             err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+    //             /// either add it or modify it
+    //             if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+    //             {
+    //                 //// uid already present , have to modify it
+    //                 kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_album_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+    //             }
+    //         }
+    //         break;
+    //         case ble_ams_track_attribute_title:
+    //         {
+
+    //             err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+    //             /// either add it or modify it
+    //             if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+    //             {
+    //                 //// uid already present , have to modify it
+    //                 kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
+    //             }
+    //         }
+    //         break;
+    //         case ble_ams_track_attribute_duration:
+    //         {
+    //             track_duration = atof((char *)&evt->params.hvx.data[ble_ams_index_data_value]);
+    //         }
+    //         break;
+
+    //         default:
+    //             NRF_LOG_ERROR("unk att id");
+    //             break;
+    //         }
+    //     }
+    //     break;
+
+    //     default:
+    //         /// unknown entity id
+    //         NRF_LOG_ERROR("unknown entity id");
+    //         break;
+    //     }
+    // }
+
+    return 0;
 }

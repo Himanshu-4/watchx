@@ -209,6 +209,10 @@ typedef enum _BLE_AMS_ATTRIBUTES_NAME_INDEX_
 char *ble_ams_get_attribute_name(ble_ams_attribute_name index);
 
 
+/// @brief this function is used for debugg purpose and to print the apple media info 
+/// @param  void
+void ble_ams_print_media_info(void);
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 ///////////// below API are used to exectute the cmd on the media player 

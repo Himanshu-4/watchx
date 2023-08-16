@@ -23,6 +23,7 @@
 /// include the kernel task
 #include "kernel_task.h"
 
+#include "ble_ams.h"
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////// general Task Function decleartions /////////////////////////////////////
@@ -61,12 +62,10 @@ int main()
 
     /// init the kernel task preinit
     Kernel_task_preinit();
-
-    ////////////////////////////////////
-    NRF_LOG_INFO("starting aPP");
-
+    
     ////// init the devices here
     nrf_button_evt_lib_init();
+
 
     /// @todo have to implement the kernel init file
     // watchx_kernel_init();
@@ -120,8 +119,6 @@ void general_task_function(void *param)
     ///// check for the button events and print it
     for (;;)
     {
-
-#define min_Size 4
         uint8_t evt = nrf_get_btn_evtq();
         if (evt != 0)
         {
@@ -142,7 +139,8 @@ void general_task_function(void *param)
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
-                NRF_LOG_INFO("delete %d", ble_gap_delete_bonds());
+                // NRF_LOG_INFO("delete %d", ble_gap_delete_bonds());
+                ble_ams_print_media_info();
                 //   ble_gap_print_keys(0);
                 // NRF_LOG_INFO ("uid %d",uid);
                 // add the data , get the data pointer
