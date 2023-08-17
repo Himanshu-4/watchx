@@ -136,6 +136,7 @@ set(LINKER_FLAGS
         -mcpu=cortex-m4
         -mthumb -mabi=aapcs
         -mfloat-abi=hard -mfpu=fpv4-sp-d16
+        -u _printf_float 
         ${DEBUG_Flags}
         ${RELEASE_Flags}
         -Wl,-Map=${PROJECT_NAME}.map
@@ -147,10 +148,6 @@ set(LINKER_FLAGS
         -lm # link with the math library 
         -Wl,--print-memory-usage
     )
-
-
-
-
 
 ###########################################################################################################################################################
 ##########################################################################################################################################################

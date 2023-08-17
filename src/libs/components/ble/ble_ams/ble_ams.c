@@ -193,11 +193,11 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     if ((conn_handle == BLE_CONN_HANDLE_INVALID))
         return nrf_ERR_INVALID_PARAM;
 
-    /// make zero out static volatile uint8_t player_volume = 0;
-
-    playbackstate=0;
-    track_duration = 0;elapsed_time = 0;  playbackrate=0;
-    q_att_index = 0; att_total_items_q = 0; q_att_shuffle_mode=0; q_att_repeat_mode=0;
+    /// make zero out 
+    playbackstate=0; player_volume = 0;track_duration = 0;
+    elapsed_time = 0;  playbackrate=0;
+    q_att_index = 0; att_total_items_q = 0;
+    q_att_shuffle_mode=0; q_att_repeat_mode=0;
 
     /// it is asssumed that the gatt client module is inited and working succesfully
     ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_DEINITED;
@@ -319,6 +319,15 @@ uint32_t ble_ams_deinit(void)
 
     //// clear the cmd supported  values
     memset((uint8_t *)&ble_ams_handler.cmds.ams_supp_cmds, 0, sizeof(ble_ams_handler.cmds.ams_supp_cmds));
+
+    /// deinit the kernel m,emory 
+    kernel_mem_deinit(&ble_ams_mem_inst);
+    
+    /// make zero out 
+    playbackstate=0; player_volume = 0;track_duration = 0;
+    elapsed_time = 0;  playbackrate=0;
+    q_att_index = 0; att_total_items_q = 0;
+    q_att_shuffle_mode=0; q_att_repeat_mode=0;
 
     ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_DEINITED;
     ble_ams_handler.conn_handle = BLE_CONN_HANDLE_INVALID;
@@ -474,18 +483,24 @@ uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index)
 void ble_ams_print_media_info(void)
 {
     /// print the strings first
-    NRF_LOG_INFO("p %d", ble_ams_get_attribute_name(ble_ams_attribute_index_mediaplayer));
+    char *str = ble_ams_get_attribute_name(ble_ams_attribute_index_mediaplayer);
+    NRF_LOG_INFO("p %s", ((str==NULL)?("nil"):(str)) );
     delay(50);
-    NRF_LOG_INFO("a %d", ble_ams_get_attribute_name(ble_ams_attribute_index_artist_name));
+
+    str =  ble_ams_get_attribute_name(ble_ams_attribute_index_artist_name);
+    NRF_LOG_INFO("a %s", ((str==NULL)?("nil"):(str)));
     delay(50);
-    NRF_LOG_INFO("t %d", ble_ams_get_attribute_name(ble_ams_attribute_index_track_name));
+
+    str = ble_ams_get_attribute_name(ble_ams_attribute_index_track_name);
+    NRF_LOG_INFO("t %s",  ((str==NULL)?("nil"):(str)));
     delay(50);
-    NRF_LOG_INFO("a %d", ble_ams_get_attribute_name(ble_ams_attribute_index_album_name));
+    
+    str =  ble_ams_get_attribute_name(ble_ams_attribute_index_album_name);
+    NRF_LOG_INFO("a %s", ((str==NULL)?("nil"):(str)));
+    delay(50);
 
     delay(50);
-    static uint8_t i=0;
-
-    NRF_LOG_INFO("s %d,et %d,td %d,v %d r%d"
+    NRF_LOG_INFO("s %d,et %d,td %d,v %d r %f"
     ,ble_ams_get_playback_info(ble_ams_info_state)
     ,ble_ams_get_playback_info(ble_ams_info_elapsed_time)
     ,ble_ams_get_playback_info(ble_ams_info_track_duration)
@@ -497,14 +512,7 @@ void ble_ams_print_media_info(void)
                  ble_ams_get_Queue_attribute(ble_ams_queue_attribute_byte_count),
                  ble_ams_get_Queue_attribute(ble_ams_queue_attribute_shuffle_mode),
                  ble_ams_get_Queue_attribute(ble_ams_queue_attribute_repeat_mode));
-
-
-        NRF_LOG_INFO("cmd %d rsp %d, act %d",i,ble_ams_execute_cmd(i),ble_ams_handler.cmds.ams_supp_cmds[i]);
-        i++;
-        if(i>13)
-        {i=0;}
-        delay(100);
-    
+      
     
 }
 
@@ -550,7 +558,6 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
         uint8_t att_id = evt->params.hvx.data[ble_ams_index_att_id];
         uint8_t trunc = evt->params.hvx.data[ble_ams_index_entity_update_flag];
 
-        NRF_LOG_INFO("e %d a %d fg %d l %d", entity_id, att_id, trunc, evt->params.hvx.len);
 
         if (evt->params.hvx.len > BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE)
         {
@@ -574,13 +581,15 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
             {
             case ble_ams_player_attribute_name:
             {
-                // uint8_t err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                // /// either add it or modify it
-                // if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
-                // {
-                //     //// uid already present , have to modify it
-                //     kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                // }
+                uint8_t err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer,
+                u8_ptr str , strlen);
+                /// either add it or modify it
+                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+                {
+                    //// uid already present , have to modify it
+                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer,
+                    u8_ptr str , strlen);
+                }
             }
             break;
 
@@ -675,13 +684,15 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
             case ble_ams_track_attribute_title:
             {
 
-                // err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                // /// either add it or modify it
-                // if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
-                // {
-                //     //// uid already present , have to modify it
-                //     kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
-                // }
+                err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name,
+                u8_ptr str , strlen);
+                /// either add it or modify it
+                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+                {
+                    //// uid already present , have to modify it
+                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name,
+                    u8_ptr str , strlen);
+                }
             }
             break;
             case ble_ams_track_attribute_duration:
