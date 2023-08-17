@@ -244,9 +244,10 @@ void system_shutdown(void)
     enter_low_pwr_mode();
 }
 
-FORCE_INLINE int str_to_int(char *str, uint16_t len)
+
+FORCE_INLINE int str_to_int(char const *str, uint16_t len)
 {
-    // Initialize result
+     // Initialize result
     int res = 0;
 
     // Iterate through all characters
@@ -256,8 +257,13 @@ FORCE_INLINE int str_to_int(char *str, uint16_t len)
     // value and multiply res by 10 to shuffle
     // digits left to update running total str[i] != '\0'
     for (int i = 0; i < len; ++i)
+    {
+    if((str[i] > 57) || (str[i]<48))
+    {
+      continue;
+    }
         res = res * 10 + str[i] - '0';
-
+    }
     // return result.
     return res;
 }
@@ -266,14 +272,14 @@ FORCE_INLINE int str_to_int(char *str, uint16_t len)
 /// @brief convert a string to float 
 /// @param str 
 /// @return float value 
-FORCE_INLINE float str_to_float(char *str )
-{
-      float floatValue = 0.0f;
+FORCE_INLINE float str_to_float(char const *str , uint16_t len)
+{ 
+    float floatValue = 0.0f;
     int decimalFlag = 0;
-    int decimalPlace = 0;
     float powerOfTen = 1.0f;
 
-    for (int i = 0; str[i] != '\0'; i++) {
+    for (int i = 0; i<len; i++)
+    {
         if (str[i] >= '0' && str[i] <= '9') {
             if (!decimalFlag) {
                 floatValue = (floatValue * 10.0f) + (str[i] - '0');

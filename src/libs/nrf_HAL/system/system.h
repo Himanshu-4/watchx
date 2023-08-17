@@ -218,7 +218,7 @@ check_assrt(x, __FUNCTION__ , __LINE__ ) \
 /// @param str
 /// @param stringlength
 /// @return integer
-int str_to_int(char *str , uint16_t len);
+int str_to_int(char const  *str , uint16_t len);
 
 /// @brief reverse a string .
 /// @param str
@@ -241,7 +241,7 @@ void ftoa(float n, char *res, int afterpoint);
 /// @brief convert a string to float 
 /// @param str 
 /// @return float value 
-float str_to_float(char *str);
+float str_to_float(char const *str , uint16_t len);
 
 /// @brief to get the power of the number 
 /// @param base 

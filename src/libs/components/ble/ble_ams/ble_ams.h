@@ -36,10 +36,10 @@ typedef PACKED_STRUCT __ALIGNED(4) _BLE_AMS_SERVICES_STRUCT_
 }
 ble_ams_services_struct_t;
 
-typedef PACKED_STRUCT __ALIGNED(4) _BLE_AMS_REMOTE_CMD_STRUCT_
+typedef PACKED_STRUCT _BLE_AMS_REMOTE_CMD_STRUCT_
 {
     // so ther are  14 cmds in total that we are available with 
-    bool ams_supp_cmds[14];
+    uint8_t ams_supp_cmds[14];
 }
 ble_ams_supported_cmdsets;
 
@@ -47,11 +47,11 @@ ble_ams_supported_cmdsets;
 #define BLE_AMS_INSTANCE_INITED 0x10
 #define BLE_AMS_INSTANCE_DEINITED 0x20
 
-typedef struct __ALIGNED(4) _BLE_AMS_STRUCT_
+typedef struct _BLE_AMS_STRUCT_
 {
     /// @brief contains the structure for the apple media service att table
     ble_ams_services_struct_t  ams_srvc_char;
-    ble_ams_supported_cmdsets cmds;
+    volatile ble_ams_supported_cmdsets cmds;
     uint16_t conn_handle;
     uint8_t ble_ams_instance_inited;
 }
@@ -72,7 +72,7 @@ enum _BLE_AMS_ERROR_CODES_
 /// @brief remote cmd supported by the AMS
 typedef enum _BLE_AMS_SUPPORTED_RREMOTE_CMDS_
 {
-    ble_ams_cmd_play,
+    ble_ams_cmd_play =0,
     ble_ams_cmd_pause,
     ble_ams_cmd_toogle_playpause,
     ble_ams_cmd_next_track,
@@ -203,6 +203,16 @@ typedef enum _BLE_AMS_ATTRIBUTES_NAME_INDEX_
     ble_ams_attribute_index_misc,
 }ble_ams_attribute_name;
 
+/// @brief this enum have index for the function to get the playback info 
+enum _BLE_AMS_ATTRIBUTE_PLAYBACK_INFO_
+{
+    ble_ams_info_state,
+    ble_ams_info_elapsed_time,
+    ble_ams_info_track_duration,
+    ble_ams_info_volume,
+    ble_ams_info_misc,
+};
+
 /// @brief this function gives the attribute string name 
 /// @param attributeindex
 /// @return string containg attribute , NULL if none
@@ -213,6 +223,11 @@ char *ble_ams_get_attribute_name(ble_ams_attribute_name index);
 /// @param  void
 void ble_ams_print_media_info(void);
 
+/// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_
+/// @param  playbackinfo
+/// @return value
+uint32_t ble_ams_get_playback_info(uint8_t info_type);
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 ///////////// below API are used to exectute the cmd on the media player 
@@ -222,38 +237,14 @@ void ble_ams_print_media_info(void);
 /// @return succ/Failure of the cmd 
 uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id);
 
-
-/// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_
-/// @param  playstate
-/// @return succ/faliure
-uint32_t ble_ams_get_playback_State(uint8_t *playstate);
-
-/// @brief get the playback rate in the integer fromat  playback rate 1.2x 1.5x 2.3x etc
-/// @param the playback rate in float value 
-/// @return succ/faliure
-uint32_t ble_ams_get_playbackrate(float * rate);
-
-/// @brief returns the volume of the media in percentage
-/// @param  volume pointer 
-/// @return succ/filure 
-uint32_t ble_ams_get_volume(uint8_t * volume);
-
-/// @brief geive the elapsed time in seconds 
-/// @param  void 
-/// @return returns the elpased time in seconds 
-uint32_t ble_ams_get_elapsed_time(uint32_t * elapse_time);
-
-/// @brief get the total time of the track 
-/// @param  void 
-/// @return returns the track time in seconds 
-uint32_t ble_ams_get_track_time(uint32_t * track_time);
-
+/// @brief get the playback rate in the floatfromat  playback rate 1.2x 1.5x 2.3x etc if not inited 0 
+/// @return rate 
+float ble_ams_get_playbackrate(void);
 
 /// @brief get the q attribute like q index , repeat mode @ref ble_ams_q_att_data
 /// @param  ble_ams_q_att_data
-/// @param ble_ams_QUeue data 
-/// @return returns cmd specific  @ref _BLE_AMS_SHUFFLE_MODE_  @ref _BLE_AMS_REPEAT_MODE_
-uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index , uint8_t *data);
+/// @return returns q atrtibute data 
+uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index);
 
 //////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////

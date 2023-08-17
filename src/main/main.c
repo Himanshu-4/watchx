@@ -114,7 +114,6 @@ int main()
 void general_task_function(void *param)
 {
     UNUSED_VARIABLE(param);
-
     uint8_t ret = 0;
     ///// check for the button events and print it
     for (;;)
