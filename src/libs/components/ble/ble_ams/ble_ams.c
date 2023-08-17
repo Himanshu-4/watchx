@@ -535,15 +535,14 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
     //// handle the remote cmd char
     if (evt->params.hvx.handle == ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.handle_value)
     {
-        NRF_LOG_WARNING("cp");
         memset(u8_ptr &ble_ams_handler.cmds.ams_supp_cmds, 0, sizeof(ble_ams_handler.cmds.ams_supp_cmds));
         //// here you get the cmd supported in the ams control char
         for (uint8_t i = 0; i < evt->params.hvx.len; i++)
         {
             /// put the cmd in the supported coomands
             ble_ams_handler.cmds.ams_supp_cmds[evt->params.hvx.data[i]] = 1;
-            NRF_LOG_INFO("%d,%d",evt->params.hvx.data[i],          
-            ble_ams_handler.cmds.ams_supp_cmds[evt->params.hvx.data[i]]);
+            // NRF_LOG_INFO("%d,%d",evt->params.hvx.data[i],          
+            // ble_ams_handler.cmds.ams_supp_cmds[evt->params.hvx.data[i]]);
         }
     }
     /// handle the entity update char , here we recieve the differnt entity attributes value
@@ -596,6 +595,7 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
             case ble_ams_player_attribute_playbackinfo:
             {
                 ble_ams_seperate_playbackinfo(str, strlen);
+                NRF_LOG_INFO("elp %f ",elapsed_time);
             }
             break;
 
