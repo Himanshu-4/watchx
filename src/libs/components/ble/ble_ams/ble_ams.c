@@ -31,18 +31,18 @@ enum __ENTITY_UPDATE_CHAR_NOTIF_CB_FORMAT_
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //// in the global vars to store the volume, duration, etc
- 
+
 static volatile uint8_t playbackstate;
 
-static volatile float player_volume = 0, track_duration = 0, elapsed_time = 0,  playbackrate=0;
+static volatile float player_volume = 0, track_duration = 0, elapsed_time = 0, playbackrate = 0;
 
-/// @brief music queue attributes 
+/// @brief music queue attributes
 static volatile uint8_t q_att_index = 0, att_total_items_q = 0, q_att_shuffle_mode, q_att_repeat_mode;
 
 /////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-///////// defining the global instance 
+///////// defining the global instance
 
 static ble_ams_struct_t ble_ams_handler = {0};
 
@@ -193,11 +193,16 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     if ((conn_handle == BLE_CONN_HANDLE_INVALID))
         return nrf_ERR_INVALID_PARAM;
 
-    /// make zero out 
-    playbackstate=0; player_volume = 0;track_duration = 0;
-    elapsed_time = 0;  playbackrate=0;
-    q_att_index = 0; att_total_items_q = 0;
-    q_att_shuffle_mode=0; q_att_repeat_mode=0;
+    /// make zero out
+    playbackstate = 0;
+    player_volume = 0;
+    track_duration = 0;
+    elapsed_time = 0;
+    playbackrate = 0;
+    q_att_index = 0;
+    att_total_items_q = 0;
+    q_att_shuffle_mode = 0;
+    q_att_repeat_mode = 0;
 
     /// it is asssumed that the gatt client module is inited and working succesfully
     ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_DEINITED;
@@ -305,12 +310,11 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     err = gatt_client_char_write(conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char, CHAR_WRITE_WITH_RSP, entity_id_track, sizeof(entity_id_track));
     NRF_ASSERT(err);
 
- 
     /// make all the data to zero
     return nrf_OK;
 }
 
-/// @todo also zero out all the data stored in vars and strings 
+/// @todo also zero out all the data stored in vars and strings
 /// @brief this is to deinit the ams at disconnection, ble disbale
 /// @param  void
 uint32_t ble_ams_deinit(void)
@@ -318,16 +322,21 @@ uint32_t ble_ams_deinit(void)
     NRF_LOG_WARNING("ams deinit");
 
     //// clear the cmd supported  values
-    memset((uint8_t *)&ble_ams_handler.cmds.ams_supp_cmds, 0, sizeof(ble_ams_handler.cmds.ams_supp_cmds));
+    memset((uint8_t *)&ble_ams_handler.cmds, 0, sizeof(ble_ams_handler.cmds));
 
-    /// deinit the kernel m,emory 
+    /// deinit the kernel m,emory
     kernel_mem_deinit(&ble_ams_mem_inst);
-    
-    /// make zero out 
-    playbackstate=0; player_volume = 0;track_duration = 0;
-    elapsed_time = 0;  playbackrate=0;
-    q_att_index = 0; att_total_items_q = 0;
-    q_att_shuffle_mode=0; q_att_repeat_mode=0;
+
+    /// make zero out
+    playbackstate = 0;
+    player_volume = 0;
+    track_duration = 0;
+    elapsed_time = 0;
+    playbackrate = 0;
+    q_att_index = 0;
+    att_total_items_q = 0;
+    q_att_shuffle_mode = 0;
+    q_att_repeat_mode = 0;
 
     ble_ams_handler.ble_ams_instance_inited = BLE_AMS_INSTANCE_DEINITED;
     ble_ams_handler.conn_handle = BLE_CONN_HANDLE_INVALID;
@@ -365,32 +374,79 @@ uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id)
     {
         return nrf_ERR_INVALID_PARAM;
     }
-    if (ble_ams_handler.cmds.ams_supp_cmds[cmd_id] == 0)
+    uint8_t err = 0;
+
+    switch (cmd_id)
+    {
+    case ble_ams_cmd_play:
+        err = ble_ams_handler.cmds.ams_cmd_play;
+        break;
+    case ble_ams_cmd_pause:
+        err = ble_ams_handler.cmds.ams_cmd_pause;
+        break;
+    case ble_ams_cmd_toogle_playpause:
+        err = ble_ams_handler.cmds.ams_cmd_toogle_playpause;
+        break;
+    case ble_ams_cmd_next_track:
+        err = ble_ams_handler.cmds.ams_cmd_next_track;
+        break;
+    case ble_ams_cmd_previous_track:
+        err = ble_ams_handler.cmds.ams_cmd_previous_track;
+        break;
+    case ble_ams_cmd_volume_up:
+        err = ble_ams_handler.cmds.ams_cmd_volume_up;
+        break;
+    case ble_ams_cmd_volue_down:
+        err = ble_ams_handler.cmds.ams_cmd_volue_down;
+        break;
+    case ble_ams_cmd_advance_repeat_mode:
+        err = ble_ams_handler.cmds.ams_cmd_advance_repeat_mode;
+        break;
+    case ble_ams_cmd_advance_shuffle_mode:
+        err = ble_ams_handler.cmds.ams_cmd_advance_shuffle_mode;
+        break;
+    case ble_ams_cmd_skip_forward:
+        err = ble_ams_handler.cmds.ams_cmd_skip_forward;
+        break;
+    case ble_ams_cmd_skip_backward:
+        err = ble_ams_handler.cmds.ams_cmd_skip_backward;
+        break;
+    case ble_ams_cmd_like_track:
+        err = ble_ams_handler.cmds.ams_cmd_like_track;
+        break;
+    case ble_ams_cmd_dislike_track:
+        err = ble_ams_handler.cmds.ams_cmd_dislike_track;
+        break;
+    case ble_ams_cmd_bookmark_track:
+        err = ble_ams_handler.cmds.ams_cmd_bookmark_track;
+        break;
+    default:
+        err = 0;
+        break;
+    }
+    if (err == 0)
     {
         return nrf_ERR_OPERATION_FAILED;
     }
 
-    uint8_t err = 0;
-    uint8_t cmd = cmd_id;
     /// we can execute the cmds
-    err = gatt_client_char_write(ble_ams_handler.conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_char, CHAR_WRITE_WITH_RSP, &cmd, 1);
+    err = gatt_client_char_write(ble_ams_handler.conn_handle, (ble_char_struct_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_char, CHAR_WRITE_WITH_RSP, &cmd_id, 1);
     NRF_ASSERT(err);
 
     return nrf_OK;
 }
 
-
 /// @brief get the playback state @ref _BLE_AMS_PLAYBACK_STATE_
 /// @param  playbackinfo
 /// @return value
 uint32_t ble_ams_get_playback_info(uint8_t info_type)
-{   
+{
     if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
     {
         return 0;
     }
-    
-    uint32_t data=0;
+
+    uint32_t data = 0;
     switch (info_type)
     {
     case ble_ams_info_state:
@@ -410,19 +466,19 @@ uint32_t ble_ams_get_playback_info(uint8_t info_type)
     break;
     case ble_ams_info_volume:
     {
-        data = player_volume *100;
+        data = player_volume * 100;
     }
     break;
     default:
-        data =0;
+        data = 0;
         break;
     }
 
     return data;
 }
 
-/// @brief get the playback rate in the floatfromat  playback rate 1.2x 1.5x 2.3x etc if not inited 0 
-/// @return rate 
+/// @brief get the playback rate in the floatfromat  playback rate 1.2x 1.5x 2.3x etc if not inited 0
+/// @return rate
 float ble_ams_get_playbackrate(void)
 {
     if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
@@ -432,7 +488,6 @@ float ble_ams_get_playbackrate(void)
 
     return playbackrate;
 }
-
 
 /// @brief get the q attribute like q index , repeat mode @ref ble_ams_q_att_data
 /// @param  ble_ams_q_att_data
@@ -484,37 +539,40 @@ void ble_ams_print_media_info(void)
 {
     /// print the strings first
     char *str = ble_ams_get_attribute_name(ble_ams_attribute_index_mediaplayer);
-    NRF_LOG_INFO("p %s", ((str==NULL)?("nil"):(str)) );
+    NRF_LOG_INFO("p %s", ((str == NULL) ? ("nil") : (str)));
     delay(50);
 
-    str =  ble_ams_get_attribute_name(ble_ams_attribute_index_artist_name);
-    NRF_LOG_INFO("a %s", ((str==NULL)?("nil"):(str)));
+    str = ble_ams_get_attribute_name(ble_ams_attribute_index_artist_name);
+    NRF_LOG_INFO("a %s", ((str == NULL) ? ("nil") : (str)));
     delay(50);
 
     str = ble_ams_get_attribute_name(ble_ams_attribute_index_track_name);
-    NRF_LOG_INFO("t %s",  ((str==NULL)?("nil"):(str)));
+    NRF_LOG_INFO("t %s", ((str == NULL) ? ("nil") : (str)));
     delay(50);
-    
-    str =  ble_ams_get_attribute_name(ble_ams_attribute_index_album_name);
-    NRF_LOG_INFO("a %s", ((str==NULL)?("nil"):(str)));
+
+    str = ble_ams_get_attribute_name(ble_ams_attribute_index_album_name);
+    NRF_LOG_INFO("a %s", ((str == NULL) ? ("nil") : (str)));
     delay(50);
 
     delay(50);
-    NRF_LOG_INFO("s %d,et %d,td %d,v %d r %f"
-    ,ble_ams_get_playback_info(ble_ams_info_state)
-    ,ble_ams_get_playback_info(ble_ams_info_elapsed_time)
-    ,ble_ams_get_playback_info(ble_ams_info_track_duration)
-    ,ble_ams_get_playback_info(ble_ams_info_volume)
-    ,ble_ams_get_playbackrate()
-    );
+    NRF_LOG_INFO("s %d,et %d,td %d,v %d r %f", ble_ams_get_playback_info(ble_ams_info_state), ble_ams_get_playback_info(ble_ams_info_elapsed_time), ble_ams_get_playback_info(ble_ams_info_track_duration), ble_ams_get_playback_info(ble_ams_info_volume), ble_ams_get_playbackrate());
 
     NRF_LOG_INFO("qi %d qc %d qs %d qr %d", ble_ams_get_Queue_attribute(ble_ams_queue_attribute_index),
                  ble_ams_get_Queue_attribute(ble_ams_queue_attribute_byte_count),
                  ble_ams_get_Queue_attribute(ble_ams_queue_attribute_shuffle_mode),
                  ble_ams_get_Queue_attribute(ble_ams_queue_attribute_repeat_mode));
-      
-    
+
+
+    static uint8_t cmd =0;
+
+    NRF_LOG_INFO("cmd %d,rsp%d",cmd,ble_ams_execute_cmd(cmd));
+    cmd++;
+    if(cmd > ble_ams_cmd_bookmark_track)
+    {
+        cmd =0;
+    }
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -535,13 +593,60 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
     //// handle the remote cmd char
     if (evt->params.hvx.handle == ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.handle_value)
     {
-        memset(u8_ptr &ble_ams_handler.cmds.ams_supp_cmds, 0, sizeof(ble_ams_handler.cmds.ams_supp_cmds));
+        memset(u8_ptr & ble_ams_handler.cmds, 0, sizeof(ble_ams_handler.cmds));
         //// here you get the cmd supported in the ams control char
         for (uint8_t i = 0; i < evt->params.hvx.len; i++)
         {
             /// put the cmd in the supported coomands
-            ble_ams_handler.cmds.ams_supp_cmds[evt->params.hvx.data[i]] = 1;
-            // NRF_LOG_INFO("%d,%d",evt->params.hvx.data[i],          
+            switch (evt->params.hvx.data[i])
+            {
+            case ble_ams_cmd_play:
+                ble_ams_handler.cmds.ams_cmd_play = 1;
+                break;
+            case ble_ams_cmd_pause:
+                ble_ams_handler.cmds.ams_cmd_pause = 1;
+                break;
+            case ble_ams_cmd_toogle_playpause:
+                ble_ams_handler.cmds.ams_cmd_toogle_playpause = 1;
+                break;
+            case ble_ams_cmd_next_track:
+                ble_ams_handler.cmds.ams_cmd_next_track = 1;
+                break;
+            case ble_ams_cmd_previous_track:
+                ble_ams_handler.cmds.ams_cmd_previous_track = 1;
+                break;
+            case ble_ams_cmd_volume_up:
+                ble_ams_handler.cmds.ams_cmd_volume_up = 1;
+                break;
+            case ble_ams_cmd_volue_down:
+                ble_ams_handler.cmds.ams_cmd_volue_down = 1;
+                break;
+            case ble_ams_cmd_advance_repeat_mode:
+                ble_ams_handler.cmds.ams_cmd_advance_repeat_mode = 1;
+                break;
+            case ble_ams_cmd_advance_shuffle_mode:
+                ble_ams_handler.cmds.ams_cmd_advance_shuffle_mode = 1;
+                break;
+            case ble_ams_cmd_skip_forward:
+                ble_ams_handler.cmds.ams_cmd_skip_forward = 1;
+                break;
+            case ble_ams_cmd_skip_backward:
+                ble_ams_handler.cmds.ams_cmd_skip_backward = 1;
+                break;
+            case ble_ams_cmd_like_track:
+                ble_ams_handler.cmds.ams_cmd_like_track = 1;
+                break;
+            case ble_ams_cmd_dislike_track:
+                ble_ams_handler.cmds.ams_cmd_dislike_track = 1;
+                break;
+            case ble_ams_cmd_bookmark_track:
+                ble_ams_handler.cmds.ams_cmd_bookmark_track = 1;
+                break;
+            default:
+                NRF_LOG_ERROR("unsupp cmd");
+                break;
+            }
+            // NRF_LOG_INFO("%d,%d",evt->params.hvx.data[i],
             // ble_ams_handler.cmds.ams_supp_cmds[evt->params.hvx.data[i]]);
         }
     }
@@ -556,7 +661,6 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
         uint8_t entity_id = evt->params.hvx.data[ble_ams_index_entity_id];
         uint8_t att_id = evt->params.hvx.data[ble_ams_index_att_id];
         uint8_t trunc = evt->params.hvx.data[ble_ams_index_entity_update_flag];
-
 
         if (evt->params.hvx.len > BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE)
         {
@@ -580,14 +684,21 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
             {
             case ble_ams_player_attribute_name:
             {
-                uint8_t err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer,
-                u8_ptr str , strlen);
-                /// either add it or modify it
-                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+                if (strlen == 0)
                 {
-                    //// uid already present , have to modify it
-                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer,
-                    u8_ptr str , strlen);
+                    kernel_mem_delete_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer);
+                }
+                else
+                {
+                    uint8_t err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer,
+                                                      u8_ptr str, strlen);
+                    /// either add it or modify it
+                    if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+                    {
+                        //// uid already present , have to modify it
+                        kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_mediaplayer,
+                                               u8_ptr str, strlen);
+                    }
                 }
             }
             break;
@@ -595,7 +706,6 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
             case ble_ams_player_attribute_playbackinfo:
             {
                 ble_ams_seperate_playbackinfo(str, strlen);
-                NRF_LOG_INFO("elp %f ",elapsed_time);
             }
             break;
 
@@ -657,7 +767,7 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
         {
             switch (att_id)
             {
-
+                /// we dont add artist name and album name , because they can consume more memory
             case ble_ams_track_attribute_artist:
             {
                 // err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_artist_name, &evt->params.hvx.data[ble_ams_index_data_value], evt->params.hvx.len - BLE_AMS_ENTITY_UPDATE_META_DATA_SIZE);
@@ -683,15 +793,21 @@ bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt)
             break;
             case ble_ams_track_attribute_title:
             {
-
-                err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name,
-                u8_ptr str , strlen);
-                /// either add it or modify it
-                if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+                if (strlen == 0)
                 {
-                    //// uid already present , have to modify it
-                    kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name,
-                    u8_ptr str , strlen);
+                    kernel_mem_delete_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name);
+                }
+                else
+                {
+                    err = kernel_mem_add_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name,
+                                              u8_ptr str, strlen);
+                    /// either add it or modify it
+                    if (err == KERNEL_MEM_ERR_UID_ALRDY_PRESENT)
+                    {
+                        //// uid already present , have to modify it
+                        kernel_mem_modify_data(&ble_ams_mem_inst, ble_ams_attribute_index_track_name,
+                                               u8_ptr str, strlen);
+                    }
                 }
             }
             break;

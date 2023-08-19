@@ -6,7 +6,6 @@
 
 #define NULL_STRING '\0'
 
-
 enum _BLE_AMS_ERRORS_
 {
     ble_ams_ok = 0x00,
@@ -38,11 +37,23 @@ ble_ams_services_struct_t;
 
 typedef PACKED_STRUCT _BLE_AMS_REMOTE_CMD_STRUCT_
 {
-    // so ther are  14 cmds in total that we are available with 
-    uint8_t ams_supp_cmds[14];
+    // so ther are  14 cmds in total that we are available with
+    uint8_t ams_cmd_play : 1;
+    uint8_t ams_cmd_pause : 1;
+    uint8_t ams_cmd_toogle_playpause : 1;
+    uint8_t ams_cmd_next_track : 1;
+    uint8_t ams_cmd_previous_track : 1;
+    uint8_t ams_cmd_volume_up : 1;
+    uint8_t ams_cmd_volue_down : 1;
+    uint8_t ams_cmd_advance_repeat_mode : 1;
+    uint8_t ams_cmd_advance_shuffle_mode : 1;
+    uint8_t ams_cmd_skip_forward : 1;
+    uint8_t ams_cmd_skip_backward : 1;
+    uint8_t ams_cmd_like_track : 1;
+    uint8_t ams_cmd_dislike_track : 1;
+    uint8_t ams_cmd_bookmark_track : 1;
 }
 ble_ams_supported_cmdsets;
-
 
 #define BLE_AMS_INSTANCE_INITED 0x10
 #define BLE_AMS_INSTANCE_DEINITED 0x20
@@ -50,12 +61,11 @@ ble_ams_supported_cmdsets;
 typedef struct _BLE_AMS_STRUCT_
 {
     /// @brief contains the structure for the apple media service att table
-    ble_ams_services_struct_t  ams_srvc_char;
+    ble_ams_services_struct_t ams_srvc_char;
     volatile ble_ams_supported_cmdsets cmds;
     uint16_t conn_handle;
     uint8_t ble_ams_instance_inited;
-}
-ble_ams_struct_t;
+} ble_ams_struct_t;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +82,7 @@ enum _BLE_AMS_ERROR_CODES_
 /// @brief remote cmd supported by the AMS
 typedef enum _BLE_AMS_SUPPORTED_RREMOTE_CMDS_
 {
-    ble_ams_cmd_play =0,
+    ble_ams_cmd_play = 0,
     ble_ams_cmd_pause,
     ble_ams_cmd_toogle_playpause,
     ble_ams_cmd_next_track,
@@ -87,7 +97,7 @@ typedef enum _BLE_AMS_SUPPORTED_RREMOTE_CMDS_
     ble_ams_cmd_dislike_track,
     ble_ams_cmd_bookmark_track,
     ble_ams_cmd_rfus,
-}ble_ams_media_cmds;
+} ble_ams_media_cmds;
 
 /// @brief this is the entity id for the player, q, and track
 enum _BLE_AMS_SUPPORTED_ENTITY_IDS_
@@ -131,14 +141,14 @@ enum _BLE_AMS_PLAYBACK_STATE_
 /// @brief define the queue attribute
 typedef enum _BLE_AMS_SUPPORTED_QUEUE_ATTRIBUTE_IDS_
 {
-    ble_ams_queue_attribute_index, // give the q present index 
-    ble_ams_queue_attribute_byte_count, // give the total no of item in q 
+    ble_ams_queue_attribute_index,      // give the q present index
+    ble_ams_queue_attribute_byte_count, // give the total no of item in q
     ble_ams_queue_attribute_shuffle_mode,
     ble_ams_queue_attribute_repeat_mode,
     ble_ams_queue_attribute_rfus,
-}ble_ams_q_att_data;
+} ble_ams_q_att_data;
 
-//// return of the cmd ble_ams_queue_attribute_shuffle_mode 
+//// return of the cmd ble_ams_queue_attribute_shuffle_mode
 /// @brief define the shuffle mode
 enum _BLE_AMS_SHUFFLE_MODE_
 {
@@ -191,19 +201,19 @@ uint32_t ble_ams_deinit(void);
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-///////////// below API are used to get the string value from the attributes 
-//// returns null string if attribute value is absent  
+///////////// below API are used to get the string value from the attributes
+//// returns null string if attribute value is absent
 
 typedef enum _BLE_AMS_ATTRIBUTES_NAME_INDEX_
 {
-    ble_ams_attribute_index_mediaplayer =0x01,
+    ble_ams_attribute_index_mediaplayer = 0x01,
     ble_ams_attribute_index_artist_name,
     ble_ams_attribute_index_track_name,
     ble_ams_attribute_index_album_name,
     ble_ams_attribute_index_misc,
-}ble_ams_attribute_name;
+} ble_ams_attribute_name;
 
-/// @brief this enum have index for the function to get the playback info 
+/// @brief this enum have index for the function to get the playback info
 enum _BLE_AMS_ATTRIBUTE_PLAYBACK_INFO_
 {
     ble_ams_info_state,
@@ -213,13 +223,12 @@ enum _BLE_AMS_ATTRIBUTE_PLAYBACK_INFO_
     ble_ams_info_misc,
 };
 
-/// @brief this function gives the attribute string name 
+/// @brief this function gives the attribute string name
 /// @param attributeindex
 /// @return string containg attribute , NULL if none
 char *ble_ams_get_attribute_name(ble_ams_attribute_name index);
 
-
-/// @brief this function is used for debugg purpose and to print the apple media info 
+/// @brief this function is used for debugg purpose and to print the apple media info
 /// @param  void
 void ble_ams_print_media_info(void);
 
@@ -230,26 +239,26 @@ uint32_t ble_ams_get_playback_info(uint8_t info_type);
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-///////////// below API are used to exectute the cmd on the media player 
+///////////// below API are used to exectute the cmd on the media player
 
-/// @brief ble_ams_execute cmd is the function used to execute a specific cmd in media player  
-/// @param cmd_id 
-/// @return succ/Failure of the cmd 
+/// @brief ble_ams_execute cmd is the function used to execute a specific cmd in media player
+/// @param cmd_id
+/// @return succ/Failure of the cmd
 uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id);
 
-/// @brief get the playback rate in the floatfromat  playback rate 1.2x 1.5x 2.3x etc if not inited 0 
-/// @return rate 
+/// @brief get the playback rate in the floatfromat  playback rate 1.2x 1.5x 2.3x etc if not inited 0
+/// @return rate
 float ble_ams_get_playbackrate(void);
 
 /// @brief get the q attribute like q index , repeat mode @ref ble_ams_q_att_data
 /// @param  ble_ams_q_att_data
-/// @return returns q atrtibute data 
+/// @return returns q atrtibute data
 uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index);
 
 //////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 /// @brief this is the apple media service handler where
 /// @param param
-bool ble_ams_client_event_handler( ble_gattc_evt_t const *evt);
+bool ble_ams_client_event_handler(ble_gattc_evt_t const *evt);
 
 #endif
