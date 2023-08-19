@@ -266,6 +266,8 @@ static const char *app_name_strings[] =
     "phonecall",
     "LinkedIn",
     "Slack",
+    "Swiggy",
+    ""
     "Health",
 
 };
@@ -514,6 +516,22 @@ uint32_t ble_ancs_perform_notif_Action(uint32_t nuid, uint8_t action)
 }
 
 
+uint32_t nuid =0;
+
+/// @brief this will be called in kernel task handler as this will handle the notif processing 
+/// @param void 
+/// @return succ/faliure 
+uint32_t ble_ancs_process_notif(void)
+{
+    uint32_t err =0;
+
+    uint8_t buff[] = {0x00,nuid,0,0,0,6,7};
+    gatt_client_char_write(ble_ancs_handler.conn_handle,(ble_char_struct_t *) &ble_ancs_handler.ancs_srvcs.ancs_control_point_char,
+    CHAR_WRITE_WITH_RSP,buff,sizeof(buff));
+
+
+    return err;
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -527,9 +545,10 @@ bool ble_ancs_client_event_handler( ble_gattc_evt_t const *evt)
     /// check for a valid conn handle
     if (evt->conn_handle != ble_ancs_handler.conn_handle)
     {
-        return;
+        return 0;
     }
 
+    bool ret =0;
     //// search for the char handles
 
     /// handle the notif source char events
@@ -540,21 +559,25 @@ bool ble_ancs_client_event_handler( ble_gattc_evt_t const *evt)
         //// first verify that the length is proper
         if (evt->params.hvx.len != sizeof(ble_ancs_notif_struct_t))
         {
-            return;
+            return 0;
         }
 
-        ble_ancs_notif_struct_t *my_notif_struct = (ble_ancs_notif_struct_t *)evt->params.hvx.data;
+        ble_ancs_notif_struct_t *my_notif_struct = (ble_ancs_notif_struct_t *)&evt->params.hvx.data;
 
         //// show the content of the notif data // for debugginf purpose 
-        NRF_LOG_INFO("ev-%d f-%d c-%d cc-%d u-%d",my_notif_struct->event_id,
-        my_notif_struct->event_Flag, my_notif_struct->category_id,my_notif_struct->category_count,
+        NRF_LOG_INFO("ev-%d f-%d%d%d%d%d c-%d cc-%d u-%d",my_notif_struct->event_id,
+        my_notif_struct->flag.evt_flag_silent,my_notif_struct->flag.evt_flag_imp,
+        my_notif_struct->flag.evt_flag_pre_existing,my_notif_struct->flag.evt_flag_pos_action,
+        my_notif_struct->flag.evt_flag_neg_action, my_notif_struct->category_id,my_notif_struct->category_count,
         my_notif_struct->notif_uid);
         
-
+        nuid = my_notif_struct->notif_uid;
         switch (my_notif_struct->event_id)
         {
         case BLE_ANCS_EVT_NOTIF_ADDED:
         {
+
+
             // sizeof(ble_ancs_notif_metadata_struct_t);
 
             // ble_ancs_notif_metadata_struct_t notif_meta;
@@ -584,16 +607,23 @@ bool ble_ancs_client_event_handler( ble_gattc_evt_t const *evt)
         default:
             break;
         }
- 
+
+        ret =1;
     }
 
     /// handle the data source  char
     else if (evt->params.hvx.handle == ble_ancs_handler.ancs_srvcs.ancs_data_source_char.handle_value)
     {
 
+        for (int  i = 0; i < evt->params.hvx.len; i++)
+        {
+            printf("%d ",evt->params.hvx.data[i]);
+        }
+        printf("\r\n");
+        
         /// do the respective action based on the uid 
     }
 
 
-    return 0;
+    return ret;
 }
