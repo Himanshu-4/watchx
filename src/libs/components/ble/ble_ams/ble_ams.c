@@ -126,20 +126,12 @@ static void ble_ams_service_init()
     ///////// first make sure that all the data is 0 for the services
     memset((uint8_t *)&ble_ams_handler.ams_srvc_char, 0, sizeof(ble_ams_services_struct_t));
 
-    uint32_t err_code = 0;
-    //// the apple media service id
-    err_code = sd_ble_uuid_vs_add(&ble_apple_media_service_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_service.ble_service.uuid.type);
-    NRF_ASSERT(err_code);
-
-    err_code = sd_ble_uuid_vs_add(&ble_ams_remote_command_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.uuid.type);
-    NRF_ASSERT(err_code);
-
-    err_code = sd_ble_uuid_vs_add(&ble_ams_entity_update_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.uuid.type);
-    NRF_ASSERT(err_code);
-
-    err_code = sd_ble_uuid_vs_add(&ble_ams_entity_attribute_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.uuid.type);
-    NRF_ASSERT(err_code);
-
+   //// the apple media service id
+    sd_ble_uuid_vs_add(&ble_apple_media_service_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_service.ble_service.uuid.type);
+    sd_ble_uuid_vs_add(&ble_ams_remote_command_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.uuid.type);
+    sd_ble_uuid_vs_add(&ble_ams_entity_update_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.uuid.type);
+    sd_ble_uuid_vs_add(&ble_ams_entity_attribute_char_uuid128, (uint8_t *)&ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.uuid.type);
+    
     /// assignt the service and chars uuid
     ble_ams_handler.ams_srvc_char.ams_service.ble_service.uuid.uuid = BLE_AMS_SERVICE_16BIT_UUID;
 

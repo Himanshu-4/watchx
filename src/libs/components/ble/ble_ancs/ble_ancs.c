@@ -11,6 +11,10 @@
 // #include "stream_buffer.h"
 
 
+#define ANCS_UUID_SERVICE                   0xF431  //!< 16-bit service UUID for the Apple Notification Center Service.
+#define ANCS_UUID_CHAR_CONTROL_POINT        0xD8F3  //!< 16-bit control point UUID.
+#define ANCS_UUID_CHAR_DATA_SOURCE          0xC6E9  //!< 16-bit data source UUID.
+#define ANCS_UUID_CHAR_NOTIFICATION_SOURCE  0x120D  //!< 16-bit notification source UUID.
 
 /////////////////////////////// 16 bit uuid ////////////////////////////
 #define BLE_BATT_SRVC_UUID 0x180F
@@ -28,40 +32,6 @@ BLE_UUID_16(batt_srvc_uuid, BLE_BATT_SRVC_UUID);
 //     .uuid = 0x31F4
 // };
 
-/**@brief 128-bit service UUID for the Apple Notification Center Service. */
-static ble_uuid128_t const ble_ancs_base_service_uuid128 =
-    {
-        .uuid128 =
-            {
-                // 7905F431-B5CE-4E99-A40F-4B1E122D00D0
-                0xd0, 0x00, 0x2d, 0x12, 0x1e, 0x4b, 0x0f, 0xa4,
-                0x99, 0x4e, 0xce, 0xb5, 0x31, 0xf4, 0x05, 0x79}};
-
-/**@brief 128-bit control point characteristic UUID. */
-static ble_uuid128_t const ble_ancs_control_point_char_uuid128 =
-    {
-        .uuid128 =
-            {
-                // 69d1d8f3-45e1-49a8-9821-9BBDFDAAD9D9
-                0xd9, 0xd9, 0xaa, 0xfd, 0xbd, 0x9b, 0x21, 0x98,
-                0xa8, 0x49, 0xe1, 0x45, 0xf3, 0xd8, 0xd1, 0x69}};
-
-/**@brief 128-bit notification source characteristics  UUID. */
-static ble_uuid128_t const ble_ancs_notificatoin_source_char_uuid128 =
-    {
-        {// 9FBF120D-6301-42D9-8C58-25E699A21DBD
-         0xbd, 0x1d, 0xa2, 0x99, 0xe6, 0x25, 0x58, 0x8c,
-         0xd9, 0x42, 0x01, 0x63, 0x0d, 0x12, 0xbf, 0x9f
-
-        }};
-
-/**@brief 128-bit data source characteristics  UUID. */
-static ble_uuid128_t const ble_ancs_data_source_char_uuid128 =
-    {
-        {// 22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB
-         0xfb, 0x7b, 0x7c, 0xce, 0x6a, 0xb3, 0x44, 0xbe,
-         0xb5, 0x4b, 0xd6, 0x24, 0xe9, 0xc6, 0xea, 0x22}};
-
 /////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
@@ -77,20 +47,64 @@ static void ble_ancs_services_int()
     // Make sure that the instance of service is clear. GATT handles inside the service and characteristics are set to @ref BLE_GATT_HANDLE_INVALID.
     memset(&ble_ancs_handler.ancs_srvcs, 0, sizeof(ble_ancs_services_struct_t));
 
-    uint32_t err_code = 0;
+/**@brief 128-bit service UUID for the Apple Notification Center Service. */
+ble_uuid128_t const ble_ancs_base_service_uuid128 =
+    {
+        .uuid128 =
+            {
+                // 7905F431-B5CE-4E99-A40F-4B1E122D00D0
+                0xd0, 0x00, 0x2d, 0x12, 0x1e, 0x4b, 0x0f, 0xa4,
+                0x99, 0x4e, 0xce, 0xb5, 0x31, 0xf4, 0x05, 0x79}};
+
+/**@brief 128-bit control point characteristic UUID. */
+ble_uuid128_t const ble_ancs_control_point_char_uuid128 =
+    {
+        .uuid128 =
+            {
+                // 69d1d8f3-45e1-49a8-9821-9BBDFDAAD9D9
+                0xd9, 0xd9, 0xaa, 0xfd, 0xbd, 0x9b, 0x21, 0x98,
+                0xa8, 0x49, 0xe1, 0x45, 0xf3, 0xd8, 0xd1, 0x69}};
+
+/**@brief 128-bit notification source characteristics  UUID. */
+ble_uuid128_t const ble_ancs_notificatoin_source_char_uuid128 =
+    {
+        {// 9FBF120D-6301-42D9-8C58-25E699A21DBD
+         0xbd, 0x1d, 0xa2, 0x99, 0xe6, 0x25, 0x58, 0x8c,
+         0xd9, 0x42, 0x01, 0x63, 0x0d, 0x12, 0xbf, 0x9f
+
+        }};
+
+/**@brief 128-bit data source characteristics  UUID. */
+ble_uuid128_t const ble_ancs_data_source_char_uuid128 =
+    {
+        {// 22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB
+         0xfb, 0x7b, 0x7c, 0xce, 0x6a, 0xb3, 0x44, 0xbe,
+         0xb5, 0x4b, 0xd6, 0x24, 0xe9, 0xc6, 0xea, 0x22}};
+
+
     // Assign UUID types.
-    err_code = sd_ble_uuid_vs_add(&ble_ancs_base_service_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_service.uuid.type);
-    NRF_ASSERT(err_code);
+    sd_ble_uuid_vs_add(&ble_ancs_base_service_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_service.uuid.type);
+    sd_ble_uuid_vs_add(&ble_ancs_control_point_char_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_control_point_char.uuid.type);
+    sd_ble_uuid_vs_add(&ble_ancs_notificatoin_source_char_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_notif_src_char.uuid.type);
+    sd_ble_uuid_vs_add(&ble_ancs_data_source_char_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_data_source_char.uuid.type);
+    
+ 
+/// assign the uuids for the ancs services and chars 
+ble_ancs_handler.ancs_srvcs.ancs_service.uuid.uuid = ANCS_UUID_SERVICE;
 
-    err_code = sd_ble_uuid_vs_add(&ble_ancs_control_point_char_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_control_point_char.uuid.type);
-    NRF_ASSERT(err_code);
+ble_ancs_handler.ancs_srvcs.ancs_notif_src_char.uuid.uuid = ANCS_UUID_CHAR_NOTIFICATION_SOURCE;
+ble_ancs_handler.ancs_srvcs.ancs_data_source_char.uuid.uuid = ANCS_UUID_CHAR_DATA_SOURCE;
+ble_ancs_handler.ancs_srvcs.ancs_control_point_char.uuid.uuid = ANCS_UUID_CHAR_CONTROL_POINT;
 
-    err_code = sd_ble_uuid_vs_add(&ble_ancs_notificatoin_source_char_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_notif_src_char.uuid.type);
-    NRF_ASSERT(err_code);
+/// assign the uuids for the descriptors 
+ble_ancs_handler.ancs_srvcs.ancs_notif_src_desc.uuid.type = BLE_UUID_TYPE_BLE; 
+ble_ancs_handler.ancs_srvcs.ancs_notif_src_desc.uuid.uuid = BLE_UUID_DESCRIPTOR_CLIENT_CHAR_CONFIG;
+    
+ble_ancs_handler.ancs_srvcs.ancs_data_source_desc.uuid.type = BLE_UUID_TYPE_BLE; 
+ble_ancs_handler.ancs_srvcs.ancs_data_source_desc.uuid.uuid = BLE_UUID_DESCRIPTOR_CLIENT_CHAR_CONFIG;
 
-    err_code = sd_ble_uuid_vs_add(&ble_ancs_data_source_char_uuid128, &ble_ancs_handler.ancs_srvcs.ancs_data_source_char.uuid.type);
-    NRF_ASSERT(err_code);
-
+ble_ancs_handler.ancs_srvcs.ancs_control_point_desc.uuid.type = BLE_UUID_TYPE_BLE;
+ble_ancs_handler.ancs_srvcs.ancs_control_point_desc.uuid.uuid = BLE_UUID_DESCRIPTOR_CHAR_EXT_PROP;
     // NRF_LOG_INFO("type %d, %d, %d, %d",ble_ancs_handler.ancs_srvc_char.ancs_service.uuid.type,
     // ble_ancs_handler.ancs_srvc_char.ancs_control_point_char.uuid.type, ble_ancs_handler.ancs_srvc_char.ancs_notif_src_char.uuid.type,
     //  ble_ancs_handler.ancs_srvc_char.ancs_data_source_char.uuid.type);
@@ -114,7 +128,7 @@ KERNEL_MEM_INSTANTISE(ble_ancs_mem_inst, ble_ancs_mem_pool, BLE_ANCS_MEM_SIZE, b
 /// @return succ/failure
 uint32_t ble_ancs_init(uint16_t conn_handle)
 {
-    uint32_t ret_code = nrf_OK;
+    uint32_t err = nrf_OK;
 
     ///// assign the handler and callback function
     ble_ancs_handler.conn_handle = BLE_ANCS_INSTANCE_INITED;
@@ -123,10 +137,87 @@ uint32_t ble_ancs_init(uint16_t conn_handle)
 
 
     /// init the kernel memory pool 
-    kernel_mem_init(&ble_ancs_mem_inst, ble_ancs_mem_pool, BLE_ANCS_MEM_SIZE, &ble_ancs_memory_mutex, BLE_ANCS_MUTEX_TIMEOUT);
+    err =  kernel_mem_init(&ble_ancs_mem_inst, ble_ancs_mem_pool, BLE_ANCS_MEM_SIZE, &ble_ancs_memory_mutex, BLE_ANCS_MUTEX_TIMEOUT);
     ///// search for services and charcteristics
 
-    return ret_code;
+    
+    //// discover the ancs service 
+    err = gatt_client_discover_service(conn_handle, (ble_service_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_service);
+    NRF_ASSERT(err);
+
+    // serach the service if present
+    if (err != nrf_OK)
+    {
+        return nrf_ERR_OPERATION_FAILED;
+    }
+
+    /// discover the notification source char 
+    err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_service, (ble_char_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_notif_src_char);
+    NRF_ASSERT(err);
+    // discover the notif source descriptor
+    err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_notif_src_char, (ble_char_desc_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_notif_src_desc);
+    NRF_ASSERT(err);
+
+    // NRF_LOG_INFO("c %x,%d, %d%d%d%d%d%d %x,%x",
+    //              ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.uuid.uuid,
+    //              ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.uuid.type,
+    //              ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.char_props.indicate,
+    //              ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.char_props.notify,
+    //              ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.char_props.read,
+    //              ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.char_props.write,
+    //              ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.char_props.write_wo_resp,
+    //              ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.char_props.auth_signed_wr,
+    //              ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.handle_decl,
+    //              ble_ams_handler.ams_srvc_char.ams_control_point_char.characterstic.handle_value);
+
+    /// discover the control point char and descriptor 
+    err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_service, (ble_char_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_control_point_char);
+    NRF_ASSERT(err);
+
+    err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_control_point_char, (ble_char_desc_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_control_point_desc);
+    NRF_ASSERT(err);
+    // NRF_LOG_INFO("c %x,%d, %d%d%d%d%d%d %x,%x",
+    //              ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.uuid.uuid,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.uuid.type,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.char_props.indicate,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.char_props.notify,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.char_props.read,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.char_props.write,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.char_props.write_wo_resp,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.char_props.auth_signed_wr,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.handle_decl,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_update_char.characterstic.handle_value);
+    ///// discover the client char config descriptor
+
+    /// discover the data source char and its descriptor 
+    err = gatt_client_discover_chars(conn_handle, (ble_service_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_service, (ble_char_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_data_source_char);
+    NRF_ASSERT(err);
+
+    //// discover the char descriptor extended properties
+    err = gatt_client_discover_char_desc(conn_handle, (ble_char_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_data_source_char, (ble_char_desc_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_data_source_desc);
+    NRF_ASSERT(err);
+
+    // NRF_LOG_INFO("c %x,%d, %d%d%d%d%d%d %x,%x",
+    //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.uuid.uuid,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.uuid.type,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.char_props.indicate,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.char_props.notify,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.char_props.read,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.char_props.write,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.char_props.write_wo_resp,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.char_props.auth_signed_wr,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.handle_decl,
+    //              ble_ams_handler.ams_srvc_char.ams_entity_attribute_char.characterstic.handle_value);
+
+    const uint16_t notif_en_data = NOTIFICATION_ENABLE;
+    /// now here suscribe for the notification for the gatt char
+    /// suscribe the gatt notication of remote cmd and entity update char
+    err = gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_notif_src_desc, u8_ptr & notif_en_data, sizeof(notif_en_data));
+    NRF_ASSERT(err);
+    err = gattc_client_char_desc_write(conn_handle, (ble_char_desc_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_data_source_desc, u8_ptr & notif_en_data, sizeof(notif_en_data));
+    NRF_ASSERT(err);
+
+    return err;
 }
 
 /// @brief this is to deinit the ancs protocol
@@ -165,6 +256,19 @@ static const char *category_strings[BLE_ANCS_CATEGORY_ID_TOTAL] =
 };
 
 
+static const char *app_name_strings[] =
+{
+    "whatsapp",
+    "spotify",
+    "Gmail",
+    "Mail",
+    "Music",
+    "phonecall",
+    "LinkedIn",
+    "Slack",
+    "Health",
+
+};
 /// @brief this func is used to get the string from the category id 
 /// @param cat_id 
 /// @return return the string frim the category id 

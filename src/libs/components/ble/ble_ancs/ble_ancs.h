@@ -7,12 +7,6 @@
 /// include the kernel time manager 
 #include "time_manager/kernel_time.h"
 
-#define ANCS_UUID_SERVICE                   0xF431  //!< 16-bit service UUID for the Apple Notification Center Service.
-#define ANCS_UUID_CHAR_CONTROL_POINT        0xD8F3  //!< 16-bit control point UUID.
-#define ANCS_UUID_CHAR_DATA_SOURCE          0xC6E9  //!< 16-bit data source UUID.
-#define ANCS_UUID_CHAR_NOTIFICATION_SOURCE  0x120D  //!< 16-bit notification source UUID.
-
-
 
 /// @defgroup BLE_ANCS_NP_ERROR_CODES Notification Provider (iOS) Error Codes
 
@@ -146,7 +140,7 @@ typedef PACKED_STRUCT _IOS_NOTIFICATION_STRUCTURE_
 
 
 
-typedef PACKED_STRUCT _BLE_ANCS_SERVICES_STRUCT_
+typedef PACKED_STRUCT __ALIGNED(4) _BLE_ANCS_SERVICES_STRUCT_
 {
     /// @brief this is the ble ancs service uuid 
     ble_gattc_service_t ancs_service;
@@ -167,7 +161,7 @@ typedef PACKED_STRUCT _BLE_ANCS_SERVICES_STRUCT_
 }ble_ancs_services_struct_t;
 
 
-typedef PACKED_STRUCT _BLE_ANCS_STRUCT_
+typedef struct _BLE_ANCS_STRUCT_
 {
     ble_ancs_services_struct_t ancs_srvcs;
 
