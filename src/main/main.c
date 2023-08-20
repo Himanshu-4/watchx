@@ -144,6 +144,11 @@ void general_task_function(void *param)
                 // NRF_LOG_INFO ("uid %d",uid);
                 // add the data , get the data pointer
             }
+            else if(evt == NRF_BUTTON_HOME_EVT)
+            {
+                // NRF_LOG_WARNING("%d", ble_gap_delete_bonds());
+                
+            }
         }
         delay(100);
 

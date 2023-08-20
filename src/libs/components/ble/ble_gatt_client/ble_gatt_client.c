@@ -619,7 +619,6 @@ server_operation:
   {
     /// log the erroor
     NRF_LOG_ERROR("write %d", err);
-    err = ble_client_err_write_op_failed;
   }
 }
 
@@ -683,7 +682,6 @@ server_operation:
   {
     /// log the erroor
     NRF_LOG_ERROR("read %x", err);
-    err = ble_client_err_read_op_failed;
   }
   else 
   {
@@ -763,7 +761,6 @@ server_operation:
   {
     /// log the erroor
     NRF_LOG_ERROR("write %d", err);
-    err = ble_client_err_write_op_failed;
   }
 }
 
@@ -823,7 +820,6 @@ server_operation:
   {
     /// log the erroor
     NRF_LOG_ERROR("read %d", err);
-    err = ble_client_err_read_op_failed;
   }
   else 
   {
