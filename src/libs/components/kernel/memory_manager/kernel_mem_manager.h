@@ -43,7 +43,7 @@ typedef struct _KERNEL_MEM_INSTANCE_
 #define KERNEL_MEM_INSTANTISE(a, b, c, d)          \
     static uint8_t KERNEL_MEM_SECTION __USED b[c]; \
     static StaticSemaphore_t d;                    \
-    static kernel_mem_instance a
+    static kernel_mem_instance a;           \
 
 /// @brief nvs
 enum _KERNEL_MEM_STRUCTURE_

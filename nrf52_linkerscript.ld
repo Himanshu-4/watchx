@@ -18,14 +18,18 @@ MEMORY
 
 SECTIONS
 {
-   .kernel_mem_allocater :
+   .kernel_memory_types :
   {
     /* processor can read write faster at 4 byte align address  */
     . = ALIGN(4);
-    PROVIDE(__start_kernel_mem_allocater_data = .);
+    PROVIDE(__start_kernel_mem_allocated_data = .);
     KEEP(*(SORT(.kernel_mem_data)))
-    PROVIDE(__stop_kernel_mem_allocater_data = .);
+    PROVIDE(__end_kernel_mem_allocated_data = .);
 
+    . = ALIGN(4);
+    PROVIDE(__start_kernel_ll_allocated_data = .);
+    KEEP(*(SORT(.kernel_linklist_data)))
+    PROVIDE(__end_kernel_ll_allocated_data = .);
     . = ALIGN(4);
   } > RAM
 
