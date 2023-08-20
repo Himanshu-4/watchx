@@ -1,6 +1,6 @@
 #include "gpiote.h"
 
-static void (*func_ptr[8])(void) = {NULL};
+static void (*func_ptr[GPIOTE_CHANNEL_MAX])(void) = {NULL};
 
 // install the isr service
 bool gpio_install_isr_servc(void)
@@ -61,7 +61,7 @@ void GPIOTE_IRQHandler(void)
 {
     uint32_t val = NRF_GPIOTE->INTENSET;
     // check for the which chaanel resposible for the event
-    for (uint8_t i = 0; i < 8; i++)
+    for (uint8_t i = 0; i < GPIOTE_CHANNEL_MAX; i++)
     {
         // check the event
         if (NRF_GPIOTE->EVENTS_IN[i] == 1UL) // if that is true means event happens
@@ -95,36 +95,60 @@ FORCE_INLINE bool gpio_config_channel(uint8_t ch_no, const my_gpiote_cfg *cfg)
 ////////////////////////////////////////////////////////////////////////////////////
 FORCE_INLINE void gpio_add_irq_handler(uint8_t ch_no, void (*func)(void))
 {
+    if(ch_no >= GPIOTE_CHANNEL_MAX)
+    {
+        return;
+    }
     func_ptr[ch_no] = func;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 FORCE_INLINE void gpio_remove_channel(uint8_t ch_no)
 {
+    if(ch_no >= GPIOTE_CHANNEL_MAX)
+    {
+        return;
+    }
     NRF_GPIOTE->CONFIG[ch_no] = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 FORCE_INLINE void gpio_remove_irq_handler(uint8_t ch_no)
 {
+    if(ch_no >= GPIOTE_CHANNEL_MAX)
+    {
+        return;
+    }
     func_ptr[ch_no] = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 FORCE_INLINE void gpio_int_enable(uint8_t ch_no)
 {
+    if(ch_no >= GPIOTE_CHANNEL_MAX)
+    {
+        return;
+    }
     NRF_GPIOTE->INTENSET = _BV(ch_no);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 FORCE_INLINE void gpio_int_disable(uint8_t ch_no)
 {
+    if(ch_no >= GPIOTE_CHANNEL_MAX)
+    {
+        return;
+    }
     NRF_GPIOTE->INTENCLR = _BV(ch_no);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 FORCE_INLINE void task_explicit_set(uint8_t ch_no)
 {
+    if(ch_no >= GPIOTE_CHANNEL_MAX)
+    {
+        return;
+    }
     // check if task mode is enabled on that pin
     if ((NRF_GPIOTE->CONFIG[ch_no] & 3) == 3)
     {
@@ -136,6 +160,10 @@ FORCE_INLINE void task_explicit_set(uint8_t ch_no)
 ////////////////////////////////////////////////////////////////////////////////////
 FORCE_INLINE void task_explicit_clr(uint8_t ch_no)
 {
+    if(ch_no >= GPIOTE_CHANNEL_MAX)
+    {
+        return;
+    }
     // check if task mode is enabled on that pin
     if ((NRF_GPIOTE->CONFIG[ch_no] & 3) == 3)
     {
@@ -147,6 +175,10 @@ FORCE_INLINE void task_explicit_clr(uint8_t ch_no)
 ////////////////////////////////////////////////////////////////////////////////////
 FORCE_INLINE void task_explicit_out(uint8_t ch_no)
 {
+    if(ch_no >= GPIOTE_CHANNEL_MAX)
+    {
+        return;
+    }
     // check if task mode is enabled on that pin
     if ((NRF_GPIOTE->CONFIG[ch_no] & 3) == 3)
     {

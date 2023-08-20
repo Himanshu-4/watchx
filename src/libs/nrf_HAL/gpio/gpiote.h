@@ -75,6 +75,8 @@ enum _GPIO_CHANNEL_TYPES_
     GPIOTE_CHANNEL_5,
     GPIOTE_CHANNEL_6,
     GPIOTE_CHANNEL_7,
+    GPIOTE_CHANNEL_8,
+    GPIOTE_CHANNEL_MAX,
 };
 
 // define the polarity here for the task mode and for the event mode 

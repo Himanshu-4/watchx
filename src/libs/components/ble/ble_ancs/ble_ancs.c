@@ -525,7 +525,7 @@ uint32_t ble_ancs_process_notif(void)
 {
     uint32_t err =0;
 
-    uint8_t buff[] = {0x00,nuid,0,0,0,6,7};
+    uint8_t buff[] = {0x00,nuid,0,0,0,6,7,0};
     gatt_client_char_write(ble_ancs_handler.conn_handle,(ble_char_struct_t *) &ble_ancs_handler.ancs_srvcs.ancs_control_point_char,
     CHAR_WRITE_WITH_RSP,buff,sizeof(buff));
 

@@ -27,6 +27,7 @@ static xQueueHandle nrf_btn_evtq_handle = NULL;
 static void gpio_int_handler_for_up(void);
 static void gpio_int_handler_for_down(void);
 static void gpio_int_handler_for_middle(void);
+static void gpio_int_handler_for_home(void);
 
 
 /// @brief this is to init the nrf button library for the watchx button functionality 
@@ -55,7 +56,8 @@ void nrf_button_evt_lib_init(void)
     gpio_config(NRF_UP_BUTTON_PIN , &nrf_buttons_gpio_type);
     gpio_config(NRF_DOWN_BUTTON_PIN, &nrf_buttons_gpio_type);
     gpio_config(NRF_MIDDLE_BUTTON_PIN, &nrf_buttons_gpio_type);
-
+    gpio_config(NRF_HOME_BUTTON_PIN, &nrf_buttons_gpio_type);
+    
     //// up pin gpiote 
     const my_gpiote_cfg up_pin_int_cfg =
     {
@@ -80,22 +82,32 @@ void nrf_button_evt_lib_init(void)
         .outlevel = TASK_OUT_INIT_LEVEL_HIGH,
         .polarity = NRF_BUTTON_INTERRUPT_POLARITY,
     };
+
+    const my_gpiote_cfg home_pin_int_cfg =
+    {
+        .mode = GPIO_EVENT_MODE,
+        .pinsel = NRF_HOME_BUTTON_PIN,
+        .outlevel = TASK_OUT_INIT_LEVEL_HIGH,
+        .polarity = NRF_BUTTON_INTERRUPT_POLARITY
+    };
     
     //// config the gpio int channel 
     gpio_config_channel( NRF_UP_BUTTON_GPIOTE_CHANNEL,&up_pin_int_cfg );
     gpio_config_channel( NRF_DOWN_BUTTON_GPIOTE_CHANNEL,&down_pin_int_cfg );
     gpio_config_channel(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL,&middle_pin_int_cfg );
-
+    gpio_config_channel(NRF_HOME_BUTTON_GPIOTE_CHANNEL, &home_pin_int_cfg);
 
     //// config the gpio irq handler 
     gpio_add_irq_handler(NRF_UP_BUTTON_GPIOTE_CHANNEL,gpio_int_handler_for_up );
     gpio_add_irq_handler(NRF_DOWN_BUTTON_GPIOTE_CHANNEL,gpio_int_handler_for_down);
     gpio_add_irq_handler(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL,gpio_int_handler_for_middle);
+    gpio_add_irq_handler(NRF_HOME_BUTTON_GPIOTE_CHANNEL, gpio_int_handler_for_home);
 
     //////// enable the int for the gpio 
     gpio_int_enable(NRF_UP_BUTTON_GPIOTE_CHANNEL);
     gpio_int_enable(NRF_DOWN_BUTTON_GPIOTE_CHANNEL);
     gpio_int_enable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_HOME_BUTTON_GPIOTE_CHANNEL);
 
 }
 
@@ -123,11 +135,13 @@ void nrf_button_evt_lib_deinit(void)
     gpio_int_disable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
     gpio_int_disable(NRF_UP_BUTTON_GPIOTE_CHANNEL);
     gpio_int_disable(NRF_DOWN_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
 
     ///// remove the gpio channel 
     gpio_remove_channel(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
     gpio_remove_channel(NRF_UP_BUTTON_GPIOTE_CHANNEL);
     gpio_remove_channel(NRF_DOWN_BUTTON_GPIOTE_CHANNEL);
+    gpio_remove_channel(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
 
 }
 
@@ -254,6 +268,19 @@ static void gpio_int_handler_for_middle(void)
 
     //// send the event to the queue 
     uint8_t event = NRF_BUTTON_MIDD_EVT;
+
+        xQueueOverwriteFromISR(nrf_btn_evtq_handle, &event , &high_task_woken);
+
+       // check if we need a task switch 
+    portYIELD_FROM_ISR(high_task_woken);
+}
+
+static void gpio_int_handler_for_home(void)
+{
+    BaseType_t high_task_woken =pdFALSE;
+
+    //// send the event to the queue 
+    uint8_t event = NRF_BUTTON_HOME_EVT;
 
         xQueueOverwriteFromISR(nrf_btn_evtq_handle, &event , &high_task_woken);
 

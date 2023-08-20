@@ -161,10 +161,9 @@
 ////================================================================================
 ////====================================== button configurations 
 
+#define NRF_HOME_BUTTON_PIN PIN_16
 #define NRF_MIDDLE_BUTTON_PIN  PIN_13 
-
 #define NRF_UP_BUTTON_PIN PIN_14 
-
 #define NRF_DOWN_BUTTON_PIN PIN_15
 
 //////////// define the interrupt type 
@@ -174,6 +173,7 @@
 #define NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL GPIOTE_CHANNEL_1
 #define NRF_UP_BUTTON_GPIOTE_CHANNEL GPIOTE_CHANNEL_2
 #define NRF_DOWN_BUTTON_GPIOTE_CHANNEL GPIOTE_CHANNEL_3
+#define NRF_HOME_BUTTON_GPIOTE_CHANNEL GPIOTE_CHANNEL_4
 
 #define NRF_BUTTON_EVENT_WAIT_TIME 2000 /// 2 secs
 
