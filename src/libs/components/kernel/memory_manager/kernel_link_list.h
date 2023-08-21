@@ -13,16 +13,25 @@
 #define KERNEL_LINK_LIST_DEINITED 0x20
 
 
+__PACKED_STRUCT kernel_linklist_node_type 
+{
+    struct kernel_linklist_node_type *next_link;
+    uint8_t data[1];  
+    /// 1 is only the placeholder for compilation , actual size is @sizeof_one_node
+};
+
+typedef struct kernel_linklist_node_type kernel_ll_node;
+
 /// @brief this is the link list instnace that is unique for every instnace in differnt scopes 
 typedef struct _KERNEL_LINKLIST_INST_
 {
-    uint8_t *head_ptr;
+    kernel_ll_node *head_ptr;
     uint8_t linklist_inited;
 
     /// @brief size of the link list 
+    /// @note the size of one node is including the linklist meta node size 
     uint16_t total_link_nodes;
     uint16_t sizeof_one_node; 
-    // the size of one node is including the linklist meta node size 
 
     /// @brief link list memory size allocate for it 
     uint8_t *mem_ptr;
@@ -34,13 +43,6 @@ typedef struct _KERNEL_LINKLIST_INST_
 
 } kernel_linklist_instance;
 
-
-typedef struct _KERNEL_LINK_LIST_NODE_TYPE_
-{
-    uint8_t *next_link;
-    uint8_t data[1];  
-    /// 1 is only the placeholder for compilation , actual size is @sizeof_one_node
-} kernel_linklist_node_type;
 
 #define KERNEL_LINKLIST_INSTANTISE(a,b,c,d) \
     static uint8_t KERNEL_LINK_LIST_SECTION __USED b[c];    \
@@ -57,6 +59,8 @@ enum _KERNEL_LINK_LIST_STRUCTURE_
 
 /// this is the meta data size of the link list 
 #define KERNEL_LINK_LIST_META_DATA_SIZE 4
+
+#define LINK_TERMINATED (void *)U32_MAX
 
 /// @brief this is the err tyes in the lin list lib 
 typedef enum _KERNEL_LINK_LIST_ERR_CODES_
@@ -97,7 +101,7 @@ kernel_LL_err_type kernel_ll_deinit(kernel_linklist_instance * instnace);
 /// @param data 
 /// @param size 
 /// @return succ/err codes 
-kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst , uint8_t *data, uint8_t size);
+kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst , uint8_t *data, uint16_t size);
 
 /// @brief remove the data from the ll that match the paramter data
 /// @param inst 

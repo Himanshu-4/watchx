@@ -31,12 +31,13 @@ kernel_mem_err_type kernel_mem_init(kernel_mem_instance *kernel_inst_ptr, uint8_
     kernel_inst_ptr->total_uid = 0;
 
     ///// give the mutex at starting
-    xSemaphoreGive(kernel_inst_ptr->kernel_mem_mutex_handle);
 
     kernel_inst_ptr->kernel_mem_pool_inited = KERNEL_MEM_POOL_INITED;
-
     kernel_inst_ptr->mem_ptr = mem_inst;
+    
     memset(mem_inst, 0, size);
+    xSemaphoreGive(kernel_inst_ptr->kernel_mem_mutex_handle);
+    
     return KERNEL_MEM_OP_SUCCESS;
 }
 
