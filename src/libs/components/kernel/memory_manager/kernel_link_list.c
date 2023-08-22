@@ -38,10 +38,10 @@ kernel_LL_err_type kernel_ll_init(kernel_linklist_instance *instance, uint8_t *m
     instance->mem_ptr = mem_inst;
     instance->total_mem_size = size;
 
-    instance->linklist_inited = KERNEL_LINK_LIST_INITED;
-
     /// we have to explicitly memset the memory to zero as it is not done by startup file because not fall in .data or .bss section
     memset(mem_inst, 0, instance->total_mem_size);
+
+    instance->linklist_inited = KERNEL_LINK_LIST_INITED;
 
     xSemaphoreGive(instance->kernel_linklist_mutexhandle);
 
@@ -64,11 +64,11 @@ kernel_LL_err_type kernel_ll_deinit(kernel_linklist_instance *instnace)
 /// @param data
 /// @param size
 /// @return succ/err codes
-kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst, uint8_t *data, uint16_t size)
+kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst, const uint8_t *data, uint16_t size)
 {
     VERIFY_INIT(inst);
 
-    // check that size is greater than one node size
+    // check that size is greater than one node size or there is space avalable in mem
     if ((inst->sizeof_one_node < size) ||
         ((inst->total_link_nodes * inst->sizeof_one_node) >= inst->total_mem_size))
     {
@@ -105,7 +105,8 @@ kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst, uint8_t *d
             empty_node += inst->sizeof_one_node;
             total_poss_node--;
         }
-        
+        /// equate the node to that empty ndoe
+        node = (kernel_ll_node *)&empty_node;
 
         // step 2 search for the last link of ll
         kernel_ll_node *temp = (kernel_ll_node *)inst->head_ptr;
@@ -114,12 +115,13 @@ kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst, uint8_t *d
             /// change the pointer to the next link
             temp = temp->next_link;
         }
-        /// extend the lin node 
+        /// extend the lin node
         temp->next_link = (kernel_ll_node *)empty_node;
     }
 
     node->next_link = LINK_TERMINATED;
-    memcpy(&node->data, data, size);
+    memcpy(node->data, data, size);
+    inst->total_link_nodes++;
 
     xSemaphoreGive(inst->kernel_linklist_mutexhandle);
     return nrf_OK;
@@ -131,10 +133,101 @@ kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst, uint8_t *d
 /// @param data
 /// @param size
 /// @return succ/faliure
-kernel_LL_err_type kernel_ll_remove_data(kernel_linklist_instance *inst, uint8_t start_index, uint8_t *data, uint8_t size)
+kernel_LL_err_type kernel_ll_remove_data(kernel_linklist_instance *inst, uint8_t start_index, const uint8_t *data, uint8_t size)
 {
 
-    return nrf_OK;
+    VERIFY_INIT(inst);
+    // check that size is greater than one node size or there is space avalable in mem
+    if (inst->sizeof_one_node < size)
+    {
+        return KERNEL_LL_ERR_OUT_OF_MEM;
+    }
+    if (xSemaphoreTake(inst->kernel_linklist_mutexhandle, inst->kernel_linklist_mutex_timeout) != pdPASS)
+    {
+        return KERNEL_LL_ERR_MUTEX_TIMEOUT;
+    }
+    uint32_t ret = 0;
+
+    kernel_ll_node *prev_link = NULL;
+    kernel_ll_node *this_link = inst->head_ptr;
+
+    if(this_link == NULL)
+    {
+        ret = KERNEL_LL_ERR_MATCH_FAILED;
+        goto return_mech;
+    }
+    
+    uint16_t total_nodes = inst->total_link_nodes;
+    while(total_nodes >0)
+    {
+
+        if( memcmp(this_link->data + start_index, data, size) ==0)
+        {
+            if(this_link == inst->head_ptr)
+            {
+                if(this_link->next_link == LINK_TERMINATED)
+                {
+                    
+                }
+            }
+        }
+
+        prev_link = this_link;
+        this_link = this_link->next_link;
+        total_nodes--;
+    }
+    inst->total_link_nodes--;
+        
+    ret = KERNEL_LL_ERR_MATCH_FAILED;
+
+return_mech:
+    xSemaphoreGive(inst->kernel_linklist_mutexhandle);
+    return ret;
+}
+
+/// @brief this function is used to modify the data of the linklist node
+/// @param inst
+/// @param start_index
+/// @param databuff
+/// @param size
+/// @param newdata
+/// @return succ/failure
+kernel_LL_err_type kernel_ll_modify_data(const kernel_linklist_instance *inst, uint8_t start_index, const uint8_t *databuff, uint8_t size, const uint8_t *newdata)
+{
+    VERIFY_INIT(inst);
+
+    if (inst->sizeof_one_node < size)
+    {
+        return KERNEL_LL_ERR_OUT_OF_MEM;
+    }
+    if (xSemaphoreTake(inst->kernel_linklist_mutexhandle, inst->kernel_linklist_mutex_timeout) != pdPASS)
+    {
+        return KERNEL_LL_ERR_MUTEX_TIMEOUT;
+    }
+
+    uint32_t ret = 0;
+    /// serach for the data in the links
+    kernel_ll_node *start = (kernel_ll_node *)inst->head_ptr;
+    if(start == NULL)
+    {
+        return KERNEL_LL_ERR_EMPTY_LINKLIST;
+    }
+    while (start != LINK_TERMINATED)
+    {
+        if (memcmp(databuff, (start->data + start_index), size) == 0)
+        {
+            /// modify  the data to the buffer
+            memcpy(start->data, newdata, inst->sizeof_one_node);
+            ret = KERNEL_LL_OP_SUCESS;
+            goto return_mech;
+        }
+        start = start->next_link;
+    }
+    ret = KERNEL_LL_ERR_MATCH_FAILED;
+
+return_mech:
+    xSemaphoreGive(inst->kernel_linklist_mutexhandle);
+    return ret;
 }
 
 /// @brief copy the data pointed by the match paramter
@@ -145,7 +238,7 @@ kernel_LL_err_type kernel_ll_remove_data(kernel_linklist_instance *inst, uint8_t
 /// @param copy_buff
 /// @param copy_size
 /// @return succ/fialure
-kernel_LL_err_type kernel_ll_get_data(kernel_linklist_instance *inst, uint8_t start_index, uint8_t *data, uint8_t size, uint8_t *copy_buff, uint8_t copy_size)
+kernel_LL_err_type kernel_ll_get_data(const kernel_linklist_instance *inst, uint8_t start_index, const uint8_t *data, uint8_t size, uint8_t *copy_buff, uint8_t copy_size)
 {
     VERIFY_INIT(inst);
 
@@ -155,7 +248,11 @@ kernel_LL_err_type kernel_ll_get_data(kernel_linklist_instance *inst, uint8_t st
     }
     /// serach for the data in the links
     kernel_ll_node *start = (kernel_ll_node *)inst->head_ptr;
-    while (start != NULL)
+    if(start == NULL)
+    {
+        return KERNEL_LL_ERR_EMPTY_LINKLIST;
+    }
+    while (start != LINK_TERMINATED)
     {
         if (memcmp(data, (start->data + start_index), size) == 0)
         {
@@ -175,7 +272,7 @@ kernel_LL_err_type kernel_ll_get_data(kernel_linklist_instance *inst, uint8_t st
 /// @param data
 /// @param size
 /// @return pointer to that matched data
-uint8_t *kernel_ll_get_data_ptr(kernel_linklist_instance *inst, uint8_t start_index, uint8_t *data, uint8_t size)
+uint8_t *kernel_ll_get_data_ptr(const kernel_linklist_instance *inst, uint8_t start_index, const uint8_t *data, uint8_t size)
 {
     if (inst->linklist_inited != KERNEL_LINK_LIST_INITED)
     {
@@ -189,7 +286,9 @@ uint8_t *kernel_ll_get_data_ptr(kernel_linklist_instance *inst, uint8_t start_in
     uint8_t *data_ptr = NULL;
     /// serach for the data in the links
     kernel_ll_node *start = (kernel_ll_node *)inst->head_ptr;
-    while ((start != NULL) || (start != LINK_TERMINATED))
+    if(start  == NULL){return NULL;}
+
+    while (start != LINK_TERMINATED)
     {
         if (memcmp(data, (start->data + start_index), size) == 0)
         {
@@ -205,7 +304,7 @@ uint8_t *kernel_ll_get_data_ptr(kernel_linklist_instance *inst, uint8_t start_in
 /// @brief total number of nodes present (active ) in the ll
 /// @param inst
 /// @return nodes
-uint16_t kernel_ll_get_total_nodes(kernel_linklist_instance *inst)
+uint16_t kernel_ll_get_total_nodes(const kernel_linklist_instance *inst)
 {
     if (inst->linklist_inited != KERNEL_LINK_LIST_INITED)
     {
@@ -217,7 +316,7 @@ uint16_t kernel_ll_get_total_nodes(kernel_linklist_instance *inst)
 /// @brief to get the size used by the link list
 /// @param inst
 /// @return size 0 if not inited or empty ll
-uint16_t kernel_ll_get_size_used(kernel_linklist_instance *inst)
+uint16_t kernel_ll_get_size_used(const kernel_linklist_instance *inst)
 {
     if (inst->linklist_inited != KERNEL_LINK_LIST_INITED)
     {

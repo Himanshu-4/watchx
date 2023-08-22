@@ -93,6 +93,7 @@ set(COMMON_DEFINES
         -DNRF52_PAN_74
         -DCONFIG_NFCT_PINS_AS_GPIOS
         -DARM_MATH_CM4=1
+        # this will enable differnet exception handlers like memmanagefault,busg=fault ,etc 
         -DENABLE_FAULT_HANDLERS=1
 
         -DNRF_SD_BLE_API_VERSION=7
@@ -127,6 +128,7 @@ set(COMMON_C_FLAGS
         -Wno-unused-function
         -Wno-unused-variable
         -Wno-array-bounds
+        -Wno-dangling-pointer
 )
 
 
@@ -140,11 +142,11 @@ set(LINKER_FLAGS
         ${DEBUG_Flags}
         ${RELEASE_Flags}
         -Wl,-Map=${PROJECT_NAME}.map
-        -Wl,--gc-sections  --specs=nano.specs
+        -Wl,--gc-sections --specs=nano.specs
         -Wl,--start-group
         -lstdc++
         -Wl,--end-group
-        -lnosys
+        -lnosys # no semihosting is required 
         -lm # link with the math library 
         -Wl,--print-memory-usage
     )

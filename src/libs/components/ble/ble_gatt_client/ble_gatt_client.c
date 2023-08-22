@@ -618,7 +618,7 @@ server_operation:
   if (err != nrf_OK)
   {
     /// log the erroor
-    NRF_LOG_ERROR("write %d", err);
+    NRF_LOG_ERROR("write %x", err);
   }
 }
 
@@ -760,7 +760,7 @@ server_operation:
   if (err != nrf_OK)
   {
     /// log the erroor
-    NRF_LOG_ERROR("write %d", err);
+    NRF_LOG_ERROR("write %x", err);
   }
 }
 
@@ -819,7 +819,7 @@ server_operation:
   if (err != nrf_OK)
   {
     /// log the erroor
-    NRF_LOG_ERROR("read %d", err);
+    NRF_LOG_ERROR("read %x", err);
   }
   else 
   {

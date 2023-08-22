@@ -6,6 +6,20 @@
 #include "task.h"
 #include "queue.h"
 
+
+/// deifne some services that are used in some general info from iphone
+
+#define BLE_UUID_SERVICE_DEVICE_INFO 0x180A
+#define BLE_UUID_CHAR_MANUFACTURER_NAME 0x2A29
+#define BLE_UUID_CHAR_MODEL_NUMBER 0x2A24
+
+#define BLE_UUID_SERVICE_BATTERY 0x180F
+#define BLE_UUID_CHAR_BATTERY_LEVEL 0x2A19
+
+#define BLE_UUID_SERVICE_CURRENT_TIME 0x1805
+#define BLE_UUID_CHAR_CURRENT_TIME 0x2A2B
+#define BLE_UUID_CHAR_LOCAL_TIME 0x2A0F
+
 /// @brief this contains the 
 static ble_peer_device_info_struct_t peer_dev_info;
 
@@ -62,6 +76,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     //              gap_char_dev_app.characterstic.char_props.write,
     //              gap_char_dev_app.characterstic.char_props.notify);
 
+    peer_dev_info.gap.ble_gap_device_name_char_handle = gap_char_dev_name.characterstic.handle_value;
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
     /// GATT service
@@ -106,6 +121,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     err = gattc_client_char_desc_write(conn_handle, &char_srvc_change_cccd, u8_ptr & notifval, sizeof(notifval));
     NRF_ASSERT(err);
 
+    peer_dev_info.gatt.ble_Gatt_srvc_cgd_char_handle = gatt_char_srvc_change.characterstic.handle_value;
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
     /// DEVICE Info service
@@ -150,6 +166,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     //              dev_info_manufacturer_model_char.characterstic.char_props.write,
     //              dev_info_manufacturer_model_char.characterstic.char_props.notify);
 
+    peer_dev_info.dev_info.ble_gatt_device_info_srvc_char_handle = dev_info_manufacturer_name_char.characterstic.handle_value;
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
     /// battey  service
@@ -197,8 +214,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     // // read the descriptoer value
     // err = gattc_client_char_desc_read(conn_handle, &batt_level_char_cccd, u8_ptr & b_notifval, sizeof(notifval));
     // NRF_ASSERT(err);
-
-    // NRF_LOG_INFO("b-%d", b_notifval);
+    peer_dev_info.batt_val.ble_battery_level_char_handle = batt_info_batt_level_char.characterstic.handle_value;
 
     /////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -258,6 +274,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     err = gattc_client_char_desc_write(conn_handle, &current_time_value_cccd, u8_ptr & t_notifval, sizeof(notifval));
     NRF_ASSERT(err);
 
+    peer_dev_info.dev_time.ble_dev_time_info_char_handle = current_time_value_char.characterstic.handle_value;
     // // read the descriptoer value
     // err = gattc_client_char_desc_read(conn_handle, &current_time_value_cccd, u8_ptr & t_notifval, sizeof(notifval));
     // NRF_ASSERT(err);
@@ -265,24 +282,6 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     // NRF_LOG_INFO("t-%d", t_notifval);
 
     /// discover the chars
-
-    delay(100);
-
-    // ble_char_struct_t dev_pp =
-    // {
-    //     .characterstic.uuid.type = BLE_UUID_TYPE_BLE,
-    //     .characterstic.uuid.uuid = BLE_UUID_GAP_CHARACTERISTIC_PPCP,
-    // };
-    // delay(100);
-    char dev_name[50];
-
-   
-    // try to read device name
-    err = gatt_client_char_read(conn_handle, &gap_char_dev_name , u8_ptr dev_name, sizeof(dev_name));
-    NRF_ASSERT(err);
-        
-    NRF_LOG_WARNING("%s", dev_name);
-    
 
     peer_dev_info.ble_peer_Device_inited =1;
     peer_dev_info.conn_handle = conn_handle;
@@ -295,7 +294,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
 /// @param conn_handle 
 /// @param time 
 /// @return succ/failure of the fun 
-uint32_t ble_peer_get_Time_info(uint16_t conn_handle , kernel_time_struct_t * time)
+uint32_t ble_peer_get_Time_info( kernel_time_struct_t * time)
 {
 
 }
@@ -304,7 +303,7 @@ uint32_t ble_peer_get_Time_info(uint16_t conn_handle , kernel_time_struct_t * ti
 /// @param conn_handle 
 /// @param date 
 /// @return succ/failure 
-uint32_t ble_peer_get_date_info(uint16_t conn_handle, kernel_date_struct_t *date)
+uint32_t ble_peer_get_date_info( kernel_date_struct_t *date)
 {
 
 }
@@ -313,7 +312,7 @@ uint32_t ble_peer_get_date_info(uint16_t conn_handle, kernel_date_struct_t *date
 /// @param conn_handle 
 /// @param batt_soc 
 /// @return succ/failure of fun
-uint32_t ble_peer_get_battery_info(uint16_t conn_handle, uint8_t * batt_soc)
+uint32_t ble_peer_get_battery_info( uint8_t * batt_soc)
 {
 
 }
@@ -322,8 +321,15 @@ uint32_t ble_peer_get_battery_info(uint16_t conn_handle, uint8_t * batt_soc)
 /// @param conn_handle 
 /// @param device_name 
 /// @return succ/failure of function 
-uint32_t ble_peer_get_device_name(uint16_t conn_handle, char *device_name)
+uint32_t ble_peer_get_device_name( char *device_name, uint16_t size)
 {
+    if(peer_dev_info.ble_peer_Device_inited != BLE_PPER_DEV_INITED)
+    {
+        return nrf_ERR_INVALID_PARAM;
+    }
+    
+    ble_char_struct_t temp = {.characterstic.handle_value = peer_dev_info.gap.ble_gap_device_name_char_handle};
+    return gatt_client_char_read(peer_dev_info.conn_handle, &temp ,u8_ptr device_name, size);
 
 }
 
@@ -331,7 +337,7 @@ uint32_t ble_peer_get_device_name(uint16_t conn_handle, char *device_name)
 /// @brief to get the servie changed indication notification 
 /// @param conn_handle 
 /// @return service changed indication 
-uint8_t ble_peer_get_service_change_ind(uint16_t conn_handle)
+uint8_t ble_peer_get_service_change_ind(void)
 {
 
 }
@@ -347,7 +353,7 @@ void ble_peer_Device_indication_handler(ble_gattc_evt_t const *evt)
     if (evt->params.hvx.handle == peer_dev_info.gatt.ble_Gatt_srvc_cgd_char_handle)
     {
         /* code */
-        NRF_LOG_INFO("srvs %d %d",evt->params.hvx.len,evt->params.hvx.data[0]);
+        NRF_LOG_INFO("srvc chgd %d %d",evt->params.hvx.len,evt->params.hvx.data[0]);
     }
 
      

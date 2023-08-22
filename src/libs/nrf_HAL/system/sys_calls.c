@@ -198,7 +198,6 @@ NVIC_EnableIRQ(UsageFault_IRQn);
 
 static void default_handler(void)
 {
-
 	system_soft_reset();
 }
 
@@ -241,6 +240,7 @@ default_handler();
 
 void softdevice_err_handler(uint32_t id, uint32_t pc, uint32_t info)
 {
+
 	printf(BRED"apperror->id %ld,pc %ld, info %ld\r\n",id,pc,info);
 	nrf_delay_ms(2000);
 	system_soft_reset();

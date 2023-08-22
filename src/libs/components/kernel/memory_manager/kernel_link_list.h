@@ -22,6 +22,7 @@ __PACKED_STRUCT kernel_linklist_node_type
 
 typedef struct kernel_linklist_node_type kernel_ll_node;
 
+
 /// @brief this is the link list instnace that is unique for every instnace in differnt scopes 
 typedef struct _KERNEL_LINKLIST_INST_
 {
@@ -60,7 +61,7 @@ enum _KERNEL_LINK_LIST_STRUCTURE_
 /// this is the meta data size of the link list 
 #define KERNEL_LINK_LIST_META_DATA_SIZE 4
 
-#define LINK_TERMINATED (void *)U32_MAX
+#define LINK_TERMINATED (kernel_ll_node *)U32_MAX
 
 /// @brief this is the err tyes in the lin list lib 
 typedef enum _KERNEL_LINK_LIST_ERR_CODES_
@@ -71,6 +72,7 @@ typedef enum _KERNEL_LINK_LIST_ERR_CODES_
     KERNEL_LL_ERR_INVALID_PARAM,
     KERNEL_LL_ERR_OUT_OF_MEM,
     KERNEL_LL_ERR_MATCH_FAILED,
+    KERNEL_LL_ERR_EMPTY_LINKLIST
 
 } kernel_LL_err_type;
 
@@ -101,7 +103,7 @@ kernel_LL_err_type kernel_ll_deinit(kernel_linklist_instance * instnace);
 /// @param data 
 /// @param size 
 /// @return succ/err codes 
-kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst , uint8_t *data, uint16_t size);
+kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst , const uint8_t *data, uint16_t size);
 
 /// @brief remove the data from the ll that match the paramter data
 /// @param inst 
@@ -109,7 +111,7 @@ kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst , uint8_t *
 /// @param data 
 /// @param size 
 /// @return succ/faliure 
-kernel_LL_err_type kernel_ll_remove_data(kernel_linklist_instance *inst , uint8_t start_index, uint8_t *data, uint8_t size);
+kernel_LL_err_type kernel_ll_remove_data(kernel_linklist_instance *inst , uint8_t start_index,const uint8_t *data, uint8_t size);
 
 /// @brief copy the data pointed by the match paramter 
 /// @param inst 
@@ -119,7 +121,17 @@ kernel_LL_err_type kernel_ll_remove_data(kernel_linklist_instance *inst , uint8_
 /// @param copy_buff 
 /// @param copy_size 
 /// @return succ/fialure 
-kernel_LL_err_type kernel_ll_get_data(kernel_linklist_instance *inst, uint8_t start_index, uint8_t *data, uint8_t size, uint8_t *copy_buff, uint8_t copy_size);
+kernel_LL_err_type kernel_ll_get_data(const kernel_linklist_instance *inst, uint8_t start_index, const uint8_t *data, uint8_t size, uint8_t *copy_buff, uint8_t copy_size);
+
+
+/// @brief this function is used to modify the data of the linklist node 
+/// @param inst 
+/// @param start_index 
+/// @param databuff 
+/// @param size 
+/// @param newdata 
+/// @return succ/failure 
+kernel_LL_err_type kernel_ll_modify_data(const kernel_linklist_instance *inst, uint8_t start_index, const uint8_t *databuff,uint8_t size,const  uint8_t *newdata);
 
 /// @brief get the data pointer pointed to the node that have matched data 
 /// @param inst 
@@ -127,16 +139,16 @@ kernel_LL_err_type kernel_ll_get_data(kernel_linklist_instance *inst, uint8_t st
 /// @param data 
 /// @param size 
 /// @return pointer to that matched data 
-uint8_t * kernel_ll_get_data_ptr(kernel_linklist_instance *inst ,uint8_t start_index,uint8_t *data , uint8_t size );
+uint8_t * kernel_ll_get_data_ptr(const kernel_linklist_instance *inst ,uint8_t start_index,const uint8_t *data , uint8_t size );
 
 /// @brief total number of nodes present (active ) in the ll
 /// @param inst 
 /// @return nodes 
-uint16_t kernel_ll_get_total_nodes(kernel_linklist_instance *inst);
+uint16_t kernel_ll_get_total_nodes(const kernel_linklist_instance *inst);
 
 /// @brief to get the size used by the link list 
 /// @param inst 
 /// @return size 0 if not inited or empty ll 
-uint16_t kernel_ll_get_size_used(kernel_linklist_instance *inst); 
+uint16_t kernel_ll_get_size_used(const kernel_linklist_instance *inst); 
 
 #endif
