@@ -7,9 +7,10 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+
 // # include the  math library for arm math operations
 // #include <math.h>
-// #include "arm_math.h"
+#include "arm_math.h"
 
 // include the library file for the register deifnations
 #include "nrf52.h"
@@ -247,7 +248,7 @@ float str_to_float(char const *str , uint16_t len);
 /// @param base 
 /// @param power 
 /// @return result of the operation 
-uint32_t pow(uint32_t base  , uint32_t power);
+uint32_t POWER(uint32_t base  , uint32_t power);
 
 
 /**

@@ -151,25 +151,38 @@ kernel_LL_err_type kernel_ll_remove_data(kernel_linklist_instance *inst, uint8_t
     kernel_ll_node *prev_link = NULL;
     kernel_ll_node *this_link = inst->head_ptr;
 
-    if(this_link == NULL)
+    if (this_link == NULL)
     {
         ret = KERNEL_LL_ERR_MATCH_FAILED;
         goto return_mech;
     }
-    
+
     uint16_t total_nodes = inst->total_link_nodes;
-    while(total_nodes >0)
+    while (total_nodes > 0)
     {
 
-        if( memcmp(this_link->data + start_index, data, size) ==0)
+        if (memcmp(this_link->data + start_index, data, size) == 0)
         {
-            if(this_link == inst->head_ptr)
+            /// check if this is the head pointer
+            if (this_link == inst->head_ptr)
             {
-                if(this_link->next_link == LINK_TERMINATED)
+                // also chekck is this is the only node in the ll
+                if (this_link->next_link == LINK_TERMINATED)
                 {
-                    
+                    //// make the head to zero
+                    inst->head_ptr = NULL;
+                    // __SIMD32() this is the simd instructiont
+                }
+                else
+                {
+                    inst->head_ptr = this_link->next_link;
                 }
             }
+            else
+            {
+                prev_link->next_link = this_link->next_link;
+            }
+            memset(this_link, 0, inst->sizeof_one_node);
         }
 
         prev_link = this_link;
@@ -177,7 +190,7 @@ kernel_LL_err_type kernel_ll_remove_data(kernel_linklist_instance *inst, uint8_t
         total_nodes--;
     }
     inst->total_link_nodes--;
-        
+
     ret = KERNEL_LL_ERR_MATCH_FAILED;
 
 return_mech:
@@ -208,7 +221,7 @@ kernel_LL_err_type kernel_ll_modify_data(const kernel_linklist_instance *inst, u
     uint32_t ret = 0;
     /// serach for the data in the links
     kernel_ll_node *start = (kernel_ll_node *)inst->head_ptr;
-    if(start == NULL)
+    if (start == NULL)
     {
         return KERNEL_LL_ERR_EMPTY_LINKLIST;
     }
@@ -248,7 +261,7 @@ kernel_LL_err_type kernel_ll_get_data(const kernel_linklist_instance *inst, uint
     }
     /// serach for the data in the links
     kernel_ll_node *start = (kernel_ll_node *)inst->head_ptr;
-    if(start == NULL)
+    if (start == NULL)
     {
         return KERNEL_LL_ERR_EMPTY_LINKLIST;
     }
@@ -286,7 +299,10 @@ uint8_t *kernel_ll_get_data_ptr(const kernel_linklist_instance *inst, uint8_t st
     uint8_t *data_ptr = NULL;
     /// serach for the data in the links
     kernel_ll_node *start = (kernel_ll_node *)inst->head_ptr;
-    if(start  == NULL){return NULL;}
+    if (start == NULL)
+    {
+        return NULL;
+    }
 
     while (start != LINK_TERMINATED)
     {
@@ -295,6 +311,42 @@ uint8_t *kernel_ll_get_data_ptr(const kernel_linklist_instance *inst, uint8_t st
             data_ptr = start->data;
             break;
         }
+        start = start->next_link;
+    }
+
+    return data_ptr;
+}
+
+/// @brief to get the data from the particular node in the linklist
+/// @param inst
+/// @param index
+/// @return data pointer from the index
+uint8_t *kernel_ll_get_data_from_index(const kernel_linklist_instance *inst, uint16_t index)
+{
+    if (inst->linklist_inited != KERNEL_LINK_LIST_INITED)
+    {
+        return NULL;
+    }
+    if (inst->total_link_nodes < index)
+    {
+        return NULL;
+    }
+
+    uint8_t *data_ptr = NULL;
+    /// serach for the data in the links
+    kernel_ll_node *start = (kernel_ll_node *)inst->head_ptr;
+    if (start == NULL)
+    {
+        return NULL;
+    }
+    uint16_t ind = 0;
+    while (start != LINK_TERMINATED)
+    {
+        if (ind == index)
+        {
+            data_ptr = start->data;
+        }
+        ind++;
         start = start->next_link;
     }
 
@@ -324,3 +376,4 @@ uint16_t kernel_ll_get_size_used(const kernel_linklist_instance *inst)
     }
     return (inst->total_link_nodes * (inst->sizeof_one_node));
 }
+

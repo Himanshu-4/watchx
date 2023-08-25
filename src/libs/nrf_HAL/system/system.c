@@ -353,7 +353,7 @@ void ftoa(float n, char *res, int afterpoint)
     int_to_str((int)fpart, res + i + 1, afterpoint);
 }
 
-uint32_t pow(uint32_t base, uint32_t power)
+uint32_t POWER(uint32_t base, uint32_t power)
 {
     uint32_t res = 1;
     for (uint32_t i = 0; i < power; i++)

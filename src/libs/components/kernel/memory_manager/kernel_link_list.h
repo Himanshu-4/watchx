@@ -146,6 +146,12 @@ uint8_t * kernel_ll_get_data_ptr(const kernel_linklist_instance *inst ,uint8_t s
 /// @return nodes 
 uint16_t kernel_ll_get_total_nodes(const kernel_linklist_instance *inst);
 
+/// @brief to get the data from the particular node in the linklist 
+/// @param inst 
+/// @param index 
+/// @return data pointer from the index  
+uint8_t * kernel_ll_get_data_from_index(const kernel_linklist_instance *inst , uint16_t index);
+
 /// @brief to get the size used by the link list 
 /// @param inst 
 /// @return size 0 if not inited or empty ll 
