@@ -28,7 +28,7 @@ typedef struct kernel_linklist_node_type kernel_ll_node;
 /// @brief linklist structure in terms of union to easily increment the addr  
 typedef union _KERNEL_LL_NODE_UNION_TYPE_
 {
-    kernel_ll_node ll_node;
+    kernel_ll_node *ll_node;
     uint8_t *empty_node;
 }kernel_ll_node_union;
 
@@ -55,6 +55,7 @@ typedef struct _KERNEL_LINKLIST_INST_
 } kernel_linklist_instance;
 
 
+/// @brief a-> instnace b-> mem_name c-> size, d-> mutex 
 #define KERNEL_LINKLIST_INSTANTISE(a,b,c,d) \
     static uint8_t KERNEL_LINK_LIST_SECTION __USED b[c];    \
     static StaticSemaphore_t d; \
@@ -162,7 +163,7 @@ uint16_t kernel_ll_get_total_nodes(const kernel_linklist_instance *inst);
 /// @return data pointer from the index  
 uint8_t * kernel_ll_get_data_from_index(const kernel_linklist_instance *inst , uint16_t index);
 
-/// @brief to get the size used by the link list 
+/// @brief to get the size used by the link list note that index starting from 1  
 /// @param inst 
 /// @return size 0 if not inited or empty ll 
 uint16_t kernel_ll_get_size_used(const kernel_linklist_instance *inst); 

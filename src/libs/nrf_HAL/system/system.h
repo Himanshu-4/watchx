@@ -211,6 +211,20 @@ check_assrt(x, __FUNCTION__ , __LINE__ ) \
 
 #endif
 
+/// @brief this is a constanr mem buff type 
+typedef PACKED_STRUCT _CONST_BUFFER_TYPE_
+{
+    const uint8_t * ptr;
+    uint16_t size;
+}const_memory_buff;
+
+/// @brief this is the memory buffer for pointing to a buffer and size 
+typedef PACKED_STRUCT _BUFFER_TYPE_ 
+{
+    uint8_t *buff;
+    uint16_t size;
+}memory_buff;
+
 ////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////

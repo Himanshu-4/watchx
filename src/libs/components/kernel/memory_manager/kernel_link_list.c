@@ -1,4 +1,5 @@
 #include "kernel_link_list.h"
+#include "nrf_custom_log.h"
 
 #define VERIFY_INIT(x)                                   \
     if ((x->linklist_inited != KERNEL_LINK_LIST_INITED)) \
@@ -18,7 +19,7 @@
 kernel_LL_err_type kernel_ll_init(kernel_linklist_instance *instance, uint8_t *mem_inst, uint16_t size, StaticSemaphore_t *mutexbuff_ptr, uint16_t timeout, uint16_t sizeof_one_node)
 {
     instance->kernel_linklist_mutexhandle = xSemaphoreCreateMutexStatic(mutexbuff_ptr);
-    NRF_ASSERT((instance->kernel_linklist_mutexhandle != NULL));
+    NRF_ASSERT((instance->kernel_linklist_mutexhandle == NULL));
 
     instance->kernel_linklist_mutex_timeout = timeout;
 
@@ -91,22 +92,21 @@ kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst, const uint
     }
     else
     {
-        // step 1 search for the empty node in the mem buff
-        uint8_t *empty_node = inst->mem_ptr;
+        ////step 1 serach for empty node
         uint16_t total_poss_node = inst->total_mem_size / inst->sizeof_one_node;
+        kernel_ll_node_union temp_u;
+        temp_u.empty_node = inst->mem_ptr;
 
         while (total_poss_node > 0)
         {
-            kernel_ll_node *temp = (kernel_ll_node *)empty_node;
-            if (temp->next_link == NULL)
+            if (temp_u.ll_node->next_link == NULL)
             {
                 break;
             }
-            empty_node += inst->sizeof_one_node;
+            temp_u.empty_node += inst->sizeof_one_node;
             total_poss_node--;
         }
-        /// equate the node to that empty ndoe
-        node = (kernel_ll_node *)&empty_node;
+        node = temp_u.ll_node;
 
         // step 2 search for the last link of ll
         kernel_ll_node *temp = (kernel_ll_node *)inst->head_ptr;
@@ -116,7 +116,7 @@ kernel_LL_err_type kernel_ll_add_data(kernel_linklist_instance *inst, const uint
             temp = temp->next_link;
         }
         /// extend the lin node
-        temp->next_link = (kernel_ll_node *)empty_node;
+        temp->next_link = node;
     }
 
     node->next_link = LINK_TERMINATED;
@@ -154,6 +154,7 @@ kernel_LL_err_type kernel_ll_remove_data(kernel_linklist_instance *inst, uint8_t
     if (this_link == NULL)
     {
         ret = KERNEL_LL_ERR_MATCH_FAILED;
+        NRF_LOG_ERROR("ll empty");
         goto return_mech;
     }
 
@@ -183,13 +184,14 @@ kernel_LL_err_type kernel_ll_remove_data(kernel_linklist_instance *inst, uint8_t
                 prev_link->next_link = this_link->next_link;
             }
             memset(this_link, 0, inst->sizeof_one_node);
+            inst->total_link_nodes--;
+            goto return_mech;
         }
 
         prev_link = this_link;
         this_link = this_link->next_link;
         total_nodes--;
     }
-    inst->total_link_nodes--;
 
     ret = KERNEL_LL_ERR_MATCH_FAILED;
 
@@ -213,24 +215,26 @@ kernel_LL_err_type kernel_ll_modify_data(const kernel_linklist_instance *inst, u
     {
         return KERNEL_LL_ERR_OUT_OF_MEM;
     }
+      /// serach for the data in the links
+    kernel_ll_node *start = (kernel_ll_node *)inst->head_ptr;
+    if (start == NULL)
+    {
+        return KERNEL_LL_ERR_EMPTY_LINKLIST;
+    }
+
     if (xSemaphoreTake(inst->kernel_linklist_mutexhandle, inst->kernel_linklist_mutex_timeout) != pdPASS)
     {
         return KERNEL_LL_ERR_MUTEX_TIMEOUT;
     }
 
     uint32_t ret = 0;
-    /// serach for the data in the links
-    kernel_ll_node *start = (kernel_ll_node *)inst->head_ptr;
-    if (start == NULL)
-    {
-        return KERNEL_LL_ERR_EMPTY_LINKLIST;
-    }
+  
     while (start != LINK_TERMINATED)
     {
         if (memcmp(databuff, (start->data + start_index), size) == 0)
         {
             /// modify  the data to the buffer
-            memcpy(start->data, newdata, inst->sizeof_one_node);
+            memcpy(start->data, newdata, (inst->sizeof_one_node - KERNEL_LINK_LIST_META_DATA_SIZE));
             ret = KERNEL_LL_OP_SUCESS;
             goto return_mech;
         }
@@ -259,11 +263,18 @@ kernel_LL_err_type kernel_ll_get_data(const kernel_linklist_instance *inst, uint
     {
         return KERNEL_LL_ERR_OUT_OF_MEM;
     }
+    if (xSemaphoreTake(inst->kernel_linklist_mutexhandle, inst->kernel_linklist_mutex_timeout) != pdPASS)
+    {
+        return KERNEL_LL_ERR_MUTEX_TIMEOUT;
+    }
+    uint32_t ret = 0;
+
     /// serach for the data in the links
     kernel_ll_node *start = (kernel_ll_node *)inst->head_ptr;
     if (start == NULL)
     {
-        return KERNEL_LL_ERR_EMPTY_LINKLIST;
+        ret = KERNEL_LL_ERR_EMPTY_LINKLIST;
+        goto return_mech;
     }
     while (start != LINK_TERMINATED)
     {
@@ -271,12 +282,18 @@ kernel_LL_err_type kernel_ll_get_data(const kernel_linklist_instance *inst, uint
         {
             /// copy the data to the buffer
             memcpy(copy_buff, start->data, copy_size);
-            return KERNEL_LL_OP_SUCESS;
+            
+            ret = KERNEL_LL_OP_SUCESS;
+            goto return_mech;
         }
         start = start->next_link;
     }
 
-    return KERNEL_LL_ERR_MATCH_FAILED;
+    ret = KERNEL_LL_ERR_MATCH_FAILED;
+
+return_mech:
+    xSemaphoreGive(inst->kernel_linklist_mutexhandle);
+    return ret;
 }
 
 /// @brief get the data pointer pointed to the node that have matched data
@@ -317,7 +334,7 @@ uint8_t *kernel_ll_get_data_ptr(const kernel_linklist_instance *inst, uint8_t st
     return data_ptr;
 }
 
-/// @brief to get the data from the particular node in the linklist
+/// @brief to get the size used by the link list note that index starting from 1
 /// @param inst
 /// @param index
 /// @return data pointer from the index
@@ -376,4 +393,3 @@ uint16_t kernel_ll_get_size_used(const kernel_linklist_instance *inst)
     }
     return (inst->total_link_nodes * (inst->sizeof_one_node));
 }
-

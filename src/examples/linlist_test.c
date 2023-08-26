@@ -109,6 +109,7 @@ int main()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////// static functions define here /////////////////////////////////////////////
 
+KERNEL_LINKLIST_INSTANTISE(ll_inst, ll_mem,40,ll_mut);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////// genral task /////////////////////////////////////////////
@@ -117,6 +118,12 @@ void general_task_function(void *param)
     UNUSED_VARIABLE(param);
     uint32_t ret = 0;
 
+    //// first to check that 
+    uint32_t value =0;
+
+    ret = kernel_ll_init(&ll_inst, ll_mem, 40, &ll_mut, 500,  4 + KERNEL_LINK_LIST_META_DATA_SIZE);
+    NRF_ASSERT(ret);
+    NRF_LOG_INFO("memadr %x",ll_mem);
     ///// check for the button events and print it
     for (;;)
     {
@@ -126,31 +133,49 @@ void general_task_function(void *param)
             // NRF_LOG_WARNING("%d", evt);
             if (evt == NRF_BUTTON_UP_EVT)
             {
-           
+                value++;
+                ret = kernel_ll_add_data(&ll_inst, u8_ptr &value,4 );
+                NRF_ASSERT(ret);
                 // NRF_LOG_INFO("%d", nvs_add_data(uid, data_buff , min_Size + uid ));
                 // NRF_LOG_WARNING("pointer %x",nvs_get_data_pointer(uid));
                 //// start the advertise
-                NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
+                // NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
             }
             else if (evt == NRF_BUTTON_DOWN_EVT)
             {
                 
+                uint8_t find = value--;
+                ret = kernel_ll_remove_data(&ll_inst, 0, &find, 1);
+                NRF_ASSERT(ret);
                 // get the data pointer
-                NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
+                // NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
 
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
                 // NRF_LOG_INFO("delete %d", ble_gap_delete_bonds());
-                ble_ams_print_media_info();
+                // ble_ams_print_media_info();
                 //   ble_gap_print_keys(0);
-    
+                uint8_t find = value;
+                uint32_t new_val = 0xff;
+                uint32_t  *val = (uint32_t *) kernel_ll_get_data_ptr(&ll_inst, 0, &find ,1);
+                NRF_LOG_INFO("value %d, ad %x ,vlaue %d ret %d",value,val,*val,kernel_ll_modify_data(&ll_inst, 0, &find, 1, u8_ptr &new_val));
+
+                    uint32_t temp =0;
+                kernel_ll_get_data(&ll_inst, 0, u8_ptr &new_val,1, u8_ptr &temp, 4 );
+                NRF_LOG_INFO("ttn %d ,used size %d modfi %x",kernel_ll_get_total_nodes(&ll_inst),kernel_ll_get_size_used(&ll_inst),
+                    temp);
             }
             else if(evt == NRF_BUTTON_HOME_EVT)
             {
                 // NRF_LOG_WARNING("%d", ble_gap_delete_bonds());
                 /// show memory content 
-              
+                NRF_LOG_INFO("mem cnt ");
+                for (size_t i = 0; i < 40; i++)
+                {
+                    printf("%x ",ll_mem[i]);
+                }
+                printf("\r\n");
             }
         }
         delay(100);
