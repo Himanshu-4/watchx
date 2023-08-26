@@ -137,7 +137,7 @@ void Kernel_task_preinit(void)
     ble_gatt_client_add_callback(ble_gatt_client_error_callback, ble_client_error_handler);
     ble_gatt_client_add_callback(ble_gatt_client_timeout_callback, ble_client_timeout_handler);
 
-    /// init a gap instance
+    /// init a gap instance and define the pairing type 
     ble_gap_instance_init(BLE_GAP_DEVICE_INDEX, PAIRING_TYPE_LESC);
 
     /// create a kernel task
@@ -223,8 +223,8 @@ ble_funcs_deinit:
     err = ble_ancs_deinit();
     NRF_ASSERT(err);
 
-    // err = ble_peer_device_info_deinit();
-    // NRF_ASSERT(err);
+    err = ble_peer_device_info_deinit();
+    NRF_ASSERT(err);
 
     ble_gap_instance_clear(BLE_GAP_DEVICE_INDEX);
     goto main_loop;

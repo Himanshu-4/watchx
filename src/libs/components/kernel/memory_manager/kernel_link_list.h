@@ -23,6 +23,16 @@ __PACKED_STRUCT kernel_linklist_node_type
 typedef struct kernel_linklist_node_type kernel_ll_node;
 
 
+/// @todo have to check the implementation through the union 
+
+/// @brief linklist structure in terms of union to easily increment the addr  
+typedef union _KERNEL_LL_NODE_UNION_TYPE_
+{
+    kernel_ll_node ll_node;
+    uint8_t *empty_node;
+}kernel_ll_node_union;
+
+
 /// @brief this is the link list instnace that is unique for every instnace in differnt scopes 
 typedef struct _KERNEL_LINKLIST_INST_
 {

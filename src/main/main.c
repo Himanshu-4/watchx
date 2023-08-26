@@ -127,19 +127,19 @@ void general_task_function(void *param)
                 // NRF_LOG_INFO("%d", nvs_add_data(uid, data_buff , min_Size + uid ));
                 // NRF_LOG_WARNING("pointer %x",nvs_get_data_pointer(uid));
                 //// start the advertise
-                NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
+                // NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
             }
             else if (evt == NRF_BUTTON_DOWN_EVT)
             {
                 // NRF_LOG_WARNING("%d", nvs_delete_data(uid));
                 // NRF_LOG_WARNING("pointer %x",nvs_get_data_pointer(uid));
                 // get the data pointer
-                NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
+                // NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
                 // NRF_LOG_INFO("delete %d", ble_gap_delete_bonds());
-                ble_ams_print_media_info();
+                // ble_ams_print_media_info();
                 //   ble_gap_print_keys(0);
                 // NRF_LOG_INFO ("uid %d",uid);
                 // add the data , get the data pointer

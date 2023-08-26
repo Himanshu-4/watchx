@@ -289,6 +289,14 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
     return err;
 }
 
+/// @brief this is to deinit the ble peer device info
+/// @return succ/failure of function 
+uint32_t ble_peer_device_info_deinit()
+{
+    memcpy(&peer_dev_info, 0, sizeof(peer_dev_info));
+    peer_dev_info.conn_handle = BLE_CONN_HANDLE_INVALID;
+    return nrf_OK;
+}
 
 /// @brief to get the time information from the iphone 
 /// @param conn_handle 

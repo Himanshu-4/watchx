@@ -21,6 +21,10 @@ enum _BLE_PEER_DEVICE_INFO_ERRORS_
 /// @return succ/failure of the function
 uint32_t ble_peer_device_init(uint16_t conn_handle);
 
+/// @brief this is to deinit the ble peer device info
+/// @return succ/failure of function 
+uint32_t ble_peer_device_info_deinit();
+
 /// @brief to get the time information from the iphone
 /// @param time
 /// @return succ/failure of the fun

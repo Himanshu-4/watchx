@@ -80,11 +80,6 @@ return len;
 {
 	
     uart_log_bytes((uint8_t *)ptr , len);
-	// for (DataIdx = 0; DataIdx < len; DataIdx++)
-	// {
-	// 	__io_putchar(*ptr++);
-	// }
-
 	return len;
 }
 
