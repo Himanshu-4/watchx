@@ -234,7 +234,6 @@ ble_funcs_deinit:
 ble_func_recv_notif:
 {
 
-    NRF_LOG_INFO("ble_notif rcvd");
     ble_ancs_process_notif();
     goto main_loop;
 }

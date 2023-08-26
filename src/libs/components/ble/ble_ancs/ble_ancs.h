@@ -160,9 +160,6 @@ ble_ancs_services_struct_t;
 typedef struct _BLE_ANCS_STRUCT_
 {
     ble_ancs_services_struct_t ancs_srvcs;
-
-    uint16_t total_notif_added;
-
     uint16_t conn_handle;
     uint8_t ble_ancs_instance_inited;
 
@@ -217,26 +214,29 @@ typedef PACKED_STRUCT _BLE_ANCS_NOTIF_UID_
     uint32_t nuid;
 
     /// @brief notification properties
-    uint8_t event_Flag;
+    ble_ancs_ios_notif_evtflag_struct_t event_Flag;
     uint8_t category_id;
-    uint8_t category_count;
+    uint16_t category_count;
 
+    /// @brief notif fetch level. @ref _BLE_ANCS_NOTIF_FETCH_LEVEL_
     uint8_t notif_fetched_level;
 
     /// @brief this is the notif data that are fetched from iphone , these store the pointer
     //// where that strings are present
-    char *app_identifier;        /// this contain the application name
+
+    uint8_t app_name;
+    // char *app_identifier;        /// this contain the application name
     char *app_attr_display_name; /// this contain the name of the msg
 
     char *notif_title;    /// this contains the title of notif
     char *notif_subtitle; /// this contains the subtitle of notif
     char *notif_msg;      /// this contains the actual msg
 
+    // char *pos_action_label;
+    // char *neg_action_label;
+
     uint16_t notif_msg_size;
 
-    /// @brief keep track of the actions that can be performed
-    uint8_t positive_action;
-    uint8_t negative_action;
 
     /// @brief keep track of at what time the notif rcvd
     kernel_time_struct_t time_rcvd;

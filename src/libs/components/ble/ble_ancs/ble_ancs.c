@@ -39,8 +39,6 @@ BLE_UUID_16(batt_srvc_uuid, BLE_BATT_SRVC_UUID);
 /// @brief global handler for the ble ancs profile
 static ble_ancs_struct_t ble_ancs_handler = {0};
 
-//// initalis e a linklist here 
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -122,8 +120,10 @@ void ble_ancs_pre_init(void)
 //// create a kernel memory instance to hold the data from the notification handler into this memory
 /// this is useful because it can give us compile time memory consumption , which in our case is useful because now run time
 ///// consumption can be minimized
-
 KERNEL_MEM_INSTANTISE(ble_ancs_mem_inst, ble_ancs_mem_pool, BLE_ANCS_MEM_SIZE, ble_ancs_memory_mutex);
+
+//// initalise a linklist for the ancs lib  here 
+KERNEL_LINKLIST_INSTANTISE(ble_ancs_ll_inst, ancs_ll_memory , BLE_ANCS_LL_SIZE, ble_ancs_ll_mutex);
 
 /// @brief this is to init the ancs profile from iphone
 /// @param conn_handle
@@ -135,14 +135,16 @@ uint32_t ble_ancs_init(uint16_t conn_handle)
     ///// assign the handler and callback function
     ble_ancs_handler.conn_handle = BLE_ANCS_INSTANCE_INITED;
     ble_ancs_handler.conn_handle = conn_handle;
-    ble_ancs_handler.total_notif_added = 0;
-
 
     /// init the kernel memory pool 
     err =  kernel_mem_init(&ble_ancs_mem_inst, ble_ancs_mem_pool, BLE_ANCS_MEM_SIZE, &ble_ancs_memory_mutex, BLE_ANCS_MUTEX_TIMEOUT);
-    ///// search for services and charcteristics
-
     
+    /// we get able to reserver memory for 40 differnt notification
+    /// init the link list for the ancs lib 
+    err = kernel_ll_init(&ble_ancs_ll_inst, ancs_ll_memory, BLE_ANCS_LL_SIZE, &ble_ancs_ll_mutex, BLE_ANCS_MUTEX_TIMEOUT, sizeof(ble_ancs_notif_metadata_struct_t) + KERNEL_LINK_LIST_META_DATA_SIZE );
+    NRF_ASSERT(err);
+
+    ///// search for services and charcteristics
     //// discover the ancs service 
     err = gatt_client_discover_service(conn_handle, (ble_service_struct_t *)&ble_ancs_handler.ancs_srvcs.ancs_service);
     NRF_ASSERT(err);
@@ -231,9 +233,9 @@ uint32_t ble_ancs_deinit(void)
 
     ble_ancs_handler.conn_handle = BLE_ANCS_INSTANCE_DEINITED;
     ble_ancs_handler.conn_handle = BLE_CONN_HANDLE_INVALID;
-    ble_ancs_handler.total_notif_added = 0;
-
+    
     kernel_mem_deinit(&ble_ancs_mem_inst);
+    kernel_ll_deinit(&ble_ancs_ll_inst);
 
     return nrf_OK;
 }
@@ -269,7 +271,11 @@ static const char *app_name_strings[] =
     "LinkedIn",
     "Slack",
     "Swiggy",
-    ""
+    "Paytm",
+    "messaging",
+    "maps",
+    "settings",
+    "facetime",
     "Health",
 
 };
@@ -527,9 +533,9 @@ uint32_t ble_ancs_process_notif(void)
 {
     uint32_t err =0;
 
-    uint8_t buff[] = {0x00,nuid,0,0,0,6,7,0};
-    gatt_client_char_write(ble_ancs_handler.conn_handle,(ble_char_struct_t *) &ble_ancs_handler.ancs_srvcs.ancs_control_point_char,
-    CHAR_WRITE_WITH_RSP,buff,sizeof(buff));
+    // uint8_t buff[] = {0x00,nuid,0,0,0,6,7,0};
+    // gatt_client_char_write(ble_ancs_handler.conn_handle,(ble_char_struct_t *) &ble_ancs_handler.ancs_srvcs.ancs_control_point_char,
+    // CHAR_WRITE_WITH_RSP,buff,sizeof(buff));
 
 
     return err;
@@ -578,7 +584,11 @@ bool ble_ancs_client_event_handler( ble_gattc_evt_t const *evt)
         {
         case BLE_ANCS_EVT_NOTIF_ADDED:
         {
+            ble_ancs_notif_metadata_struct_t new_data ={0};
 
+            // new_data.nuid = ;
+            // new_data.
+            // kernel_ll_add_data(&ble_ancs_ll_inst, );
 
             // sizeof(ble_ancs_notif_metadata_struct_t);
 

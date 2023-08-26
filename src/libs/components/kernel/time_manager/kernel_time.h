@@ -49,7 +49,7 @@ typedef PACKED_STRUCT _KEERNEL_DATE_FORAMT_
     uint8_t date;
     uint8_t day;
     uint8_t month;
-    uint32_t year;
+    uint16_t year;
 }kernel_date_struct_t;
 
 ////////////////////////////////////////////////////////////////////////////
