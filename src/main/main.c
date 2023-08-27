@@ -25,6 +25,7 @@
 #include "kernel_task.h"
 
 #include "ble_ams.h"
+#include "ble_peer_info.h"
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////// general Task Function decleartions /////////////////////////////////////
@@ -150,6 +151,7 @@ void general_task_function(void *param)
             {
                 // NRF_LOG_WARNING("%d", ble_gap_delete_bonds());
                 /// show memory content 
+                NRF_LOG_INFO("batt is %d",ble_peer_get_battery_info());
               
             }
         }

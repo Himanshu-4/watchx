@@ -38,7 +38,7 @@ uint32_t ble_peer_get_date_info(kernel_date_struct_t *date);
 /// @brief to get the battery information from the iphone
 /// @param batt_soc
 /// @return succ/failure of fun
-uint32_t ble_peer_get_battery_info( uint8_t *batt_soc);
+uint8_t ble_peer_get_battery_info(void);
 
 /// @brief to get the device name of the bluetooth
 /// @param device_name

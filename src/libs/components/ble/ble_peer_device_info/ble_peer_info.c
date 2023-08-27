@@ -283,7 +283,7 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
 
     /// discover the chars
 
-    peer_dev_info.ble_peer_Device_inited =1;
+    peer_dev_info.ble_peer_Device_inited =BLE_PPER_DEV_INITED;
     peer_dev_info.conn_handle = conn_handle;
 
     return err;
@@ -318,11 +318,25 @@ uint32_t ble_peer_get_date_info( kernel_date_struct_t *date)
 
 /// @brief to get the battery information from the iphone 
 /// @param conn_handle 
-/// @param batt_soc 
 /// @return succ/failure of fun
-uint32_t ble_peer_get_battery_info( uint8_t * batt_soc)
+uint8_t ble_peer_get_battery_info( void)
 {
+      if(peer_dev_info.ble_peer_Device_inited != BLE_PPER_DEV_INITED)
+    {
+        NRF_LOG_ERROR("peer not inited");
+        return 0;
+    }
+    uint8_t soc =0;
+     ble_char_struct_t temp = {.characterstic.handle_value =peer_dev_info.batt_val.ble_battery_level_char_handle };
+    uint32_t ret =0;
+    ret = gatt_client_char_read(peer_dev_info.conn_handle ,&temp,&soc,1 );
+    if(ret != nrf_OK)
+    {
+        NRF_LOG_ERROR("batt reading %d",ret);
+        return 0;
+    }
 
+    return soc;
 }
 
 /// @brief to get the device name of the bluetooth

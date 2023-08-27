@@ -160,6 +160,8 @@ ble_ancs_services_struct_t;
 typedef struct _BLE_ANCS_STRUCT_
 {
     ble_ancs_services_struct_t ancs_srvcs;
+
+    uint16_t total_notif_present;
     uint16_t conn_handle;
     uint8_t ble_ancs_instance_inited;
 

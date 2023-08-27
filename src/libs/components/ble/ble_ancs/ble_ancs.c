@@ -135,7 +135,8 @@ uint32_t ble_ancs_init(uint16_t conn_handle)
     ///// assign the handler and callback function
     ble_ancs_handler.conn_handle = BLE_ANCS_INSTANCE_INITED;
     ble_ancs_handler.conn_handle = conn_handle;
-
+    ble_ancs_handler.total_notif_present = 0;
+    
     /// init the kernel memory pool 
     err =  kernel_mem_init(&ble_ancs_mem_inst, ble_ancs_mem_pool, BLE_ANCS_MEM_SIZE, &ble_ancs_memory_mutex, BLE_ANCS_MUTEX_TIMEOUT);
     
@@ -233,6 +234,7 @@ uint32_t ble_ancs_deinit(void)
 
     ble_ancs_handler.conn_handle = BLE_ANCS_INSTANCE_DEINITED;
     ble_ancs_handler.conn_handle = BLE_CONN_HANDLE_INVALID;
+    ble_ancs_handler.total_notif_present = 0;
     
     kernel_mem_deinit(&ble_ancs_mem_inst);
     kernel_ll_deinit(&ble_ancs_ll_inst);
