@@ -183,6 +183,7 @@ typedef struct _BLE_ANCS_STRUCT_
     ble_ancs_services_struct_t ancs_srvcs;
 
     uint16_t total_notif_present;
+    uint32_t ble_ancs_last_nuid;
     uint16_t conn_handle;
     uint8_t ble_ancs_instance_inited;
 
@@ -205,9 +206,7 @@ enum _BLE_ANCS_NOTIF_STORED_METAS_
 enum _BLE_ANCS_NOTIF_FETCH_LEVEL_
 {
     BLE_ANCS_NOTIF_FETCH_PENDING,
-    BLE_ANCS_NOTIF_FETCH_APP_ATT,
-    BLE_ANCS_NOTIF_FETCH_TITLE_ONLY,
-    BLE_ANCS_NOTIF_FETCH_WITH_SUBTITLE,
+    BLE_ANCS_NOTIF_FETCH_NOTIF_ATT,
     BLE_ANCS_NOTIF_FETCH_FULL_MSG,
 };
 
