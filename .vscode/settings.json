@@ -28,7 +28,8 @@
         "array": "c",
         "string": "c",
         "string_view": "c",
-        "freertosconfig.h": "c"
+        "freertosconfig.h": "c",
+        "initializer_list": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator":"MinGW Makefiles",

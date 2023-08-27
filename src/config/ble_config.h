@@ -195,7 +195,7 @@
 
 #define BLE_ANCS_MUTEX_TIMEOUT 500
 /// 1600 bytes for the ancs link list 
-#define BLE_ANCS_LL_SIZE 1600 
+#define BLE_ANCS_LL_SIZE 800 
 
 
 //////////////////////////////////////////////////////////////////////////////////////

@@ -6,7 +6,6 @@
 #include "task.h"
 #include "queue.h"
 
-
 /// deifne some services that are used in some general info from iphone
 
 #define BLE_UUID_SERVICE_DEVICE_INFO 0x180A
@@ -20,7 +19,7 @@
 #define BLE_UUID_CHAR_CURRENT_TIME 0x2A2B
 #define BLE_UUID_CHAR_LOCAL_TIME 0x2A0F
 
-/// @brief this contains the 
+/// @brief this contains the
 static ble_peer_device_info_struct_t peer_dev_info;
 
 /// @brief this is to init the ble peer device info
@@ -283,14 +282,14 @@ uint32_t ble_peer_device_init(uint16_t conn_handle)
 
     /// discover the chars
 
-    peer_dev_info.ble_peer_Device_inited =BLE_PPER_DEV_INITED;
+    peer_dev_info.ble_peer_Device_inited = BLE_PPER_DEV_INITED;
     peer_dev_info.conn_handle = conn_handle;
 
     return err;
 }
 
 /// @brief this is to deinit the ble peer device info
-/// @return succ/failure of function 
+/// @return succ/failure of function
 uint32_t ble_peer_device_info_deinit()
 {
     memcpy(&peer_dev_info, 0, sizeof(peer_dev_info));
@@ -298,41 +297,39 @@ uint32_t ble_peer_device_info_deinit()
     return nrf_OK;
 }
 
-/// @brief to get the time information from the iphone 
-/// @param conn_handle 
-/// @param time 
-/// @return succ/failure of the fun 
-uint32_t ble_peer_get_Time_info( kernel_time_struct_t * time)
+/// @brief to get the time information from the iphone
+/// @param conn_handle
+/// @param time
+/// @return succ/failure of the fun
+uint32_t ble_peer_get_Time_info(kernel_time_struct_t *time)
 {
-
 }
 
-/// @brief to get the date information from the iphone 
-/// @param conn_handle 
-/// @param date 
-/// @return succ/failure 
-uint32_t ble_peer_get_date_info( kernel_date_struct_t *date)
+/// @brief to get the date information from the iphone
+/// @param conn_handle
+/// @param date
+/// @return succ/failure
+uint32_t ble_peer_get_date_info(kernel_date_struct_t *date)
 {
-
 }
 
-/// @brief to get the battery information from the iphone 
-/// @param conn_handle 
+/// @brief to get the battery information from the iphone
+/// @param conn_handle
 /// @return succ/failure of fun
-uint8_t ble_peer_get_battery_info( void)
+uint8_t ble_peer_get_battery_info(void)
 {
-      if(peer_dev_info.ble_peer_Device_inited != BLE_PPER_DEV_INITED)
+    if (peer_dev_info.ble_peer_Device_inited != BLE_PPER_DEV_INITED)
     {
         NRF_LOG_ERROR("peer not inited");
         return 0;
     }
-    uint8_t soc =0;
-     ble_char_struct_t temp = {.characterstic.handle_value =peer_dev_info.batt_val.ble_battery_level_char_handle };
-    uint32_t ret =0;
-    ret = gatt_client_char_read(peer_dev_info.conn_handle ,&temp,&soc,1 );
-    if(ret != nrf_OK)
+    uint8_t soc = 0;
+    ble_char_struct_t temp = {.characterstic.handle_value = peer_dev_info.batt_val.ble_battery_level_char_handle};
+    uint32_t ret = 0;
+    ret = gatt_client_char_read(peer_dev_info.conn_handle, &temp, &soc, 1);
+    if (ret != nrf_OK)
     {
-        NRF_LOG_ERROR("batt reading %d",ret);
+        NRF_LOG_ERROR("batt reading %d", ret);
         return 0;
     }
 
@@ -340,63 +337,54 @@ uint8_t ble_peer_get_battery_info( void)
 }
 
 /// @brief to get the device name of the bluetooth
-/// @param conn_handle 
-/// @param device_name 
-/// @return succ/failure of function 
-uint32_t ble_peer_get_device_name( char *device_name, uint16_t size)
+/// @param conn_handle
+/// @param device_name
+/// @return succ/failure of function
+uint32_t ble_peer_get_device_name(char *device_name, uint16_t size)
 {
-    if(peer_dev_info.ble_peer_Device_inited != BLE_PPER_DEV_INITED)
+    if (peer_dev_info.ble_peer_Device_inited != BLE_PPER_DEV_INITED)
     {
         return nrf_ERR_INVALID_PARAM;
     }
-    
-    ble_char_struct_t temp = {.characterstic.handle_value = peer_dev_info.gap.ble_gap_device_name_char_handle};
-    return gatt_client_char_read(peer_dev_info.conn_handle, &temp ,u8_ptr device_name, size);
 
+    ble_char_struct_t temp = {.characterstic.handle_value = peer_dev_info.gap.ble_gap_device_name_char_handle};
+    return gatt_client_char_read(peer_dev_info.conn_handle, &temp, u8_ptr device_name, size);
 }
 
-
-/// @brief to get the servie changed indication notification 
-/// @param conn_handle 
-/// @return service changed indication 
+/// @brief to get the servie changed indication notification
+/// @param conn_handle
+/// @return service changed indication
 uint8_t ble_peer_get_service_change_ind(void)
 {
-
 }
 
-
-
-/// @brief Device indication handler 
-/// @param param 
-/// @param evt 
+/// @brief Device indication handler
+/// @param param
+/// @param evt
 void ble_peer_Device_indication_handler(ble_gattc_evt_t const *evt)
 {
-    /// handle the gatt service change indication 
+    /// handle the gatt service change indication
     if (evt->params.hvx.handle == peer_dev_info.gatt.ble_Gatt_srvc_cgd_char_handle)
     {
         /* code */
-        NRF_LOG_INFO("srvc chgd %d %d",evt->params.hvx.len,evt->params.hvx.data[0]);
+        NRF_LOG_INFO("srvc chgd %d %d", evt->params.hvx.len, evt->params.hvx.data[0]);
     }
-
-     
 }
 
-/// @brief Device notification handler 
-/// @param param 
-/// @param evt 
-bool ble_peer_Device_notification_handler( ble_gattc_evt_t const *evt)
+/// @brief Device notification handler
+/// @param param
+/// @param evt
+bool ble_peer_Device_notification_handler(ble_gattc_evt_t const *evt)
 {
     /// handle the notification from time and batt profile
-    if(evt->params.hvx.handle == peer_dev_info.batt_val.ble_battery_level_char_handle)
+    if (evt->params.hvx.handle == peer_dev_info.batt_val.ble_battery_level_char_handle)
     {
-        NRF_LOG_INFO("batt len %d, %d",evt->params.hvx.len,evt->params.hvx.data[0]);
-
+        NRF_LOG_INFO("batt len %d, %d", evt->params.hvx.len, evt->params.hvx.data[0]);
     }
-    else if(evt->params.hvx.handle == peer_dev_info.dev_time.ble_dev_time_info_char_handle)
+    else if (evt->params.hvx.handle == peer_dev_info.dev_time.ble_dev_time_info_char_handle)
     {
-        NRF_LOG_INFO("devtime %d , %d",evt->params.hvx.len,evt->params.hvx.data[0]);
-        
+        NRF_LOG_INFO("devtime %d , %d", evt->params.hvx.len, evt->params.hvx.data[0]);
     }
 
-return 0;
+    return 0;
 }

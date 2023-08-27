@@ -64,8 +64,29 @@ typedef enum
     BLE_ANCS_CATEGORY_ID_TOTAL
 } ble_ancs_c_category_id_val_t;
 
-/// @brief Control point command IDs that the Notification Consumer can send to the Notification Provider. */
+/// @brief this is to get the app names based on the IDs 
+typedef enum _BLE_ANCS_NOTIF_APPS_NAMES_ 
+{
+    ble_ancs_app_name_id_whatsapp,
+    ble_ancs_app_name_id_spotify,
+    ble_ancs_app_name_id_Gmail,
+    ble_ancs_app_name_id_Mail,
+    ble_ancs_app_name_id_Music,
+    ble_ancs_app_name_id_phonecall,
+    ble_ancs_app_name_id_LinkedIn,
+    ble_ancs_app_name_id_Slack,
+    ble_ancs_app_name_id_Swiggy,
+    ble_ancs_app_name_id_Paytm,
+    ble_ancs_app_name_id_messaging,
+    ble_ancs_app_name_id_maps,
+    ble_ancs_app_name_id_settings,
+    ble_ancs_app_name_id_facetime,
+    ble_ancs_app_name_id_Health,
+    ble_ancs_app_name_total
+}ble_ancs_app_name_indexes;
 
+
+/// @brief Control point command IDs that the Notification Consumer can send to the Notification Provider. */
 #define BLE_ANCS_COMMAND_ID_GET_NOTIF_ATTRIBUTES 0     /**< Requests attributes to be sent from the NP to the NC for a given notification. */
 #define BLE_ANCS_COMMAND_ID_GET_APP_ATTRIBUTES 1       /**< Requests attributes to be sent from the NP to the NC for a given iOS app. */
 #define BLE_ANCS_COMMAND_ID_GET_PERFORM_NOTIF_ACTION 2 /**< Requests an action to be performed on a given notification. For example, dismiss an alarm. */
@@ -271,25 +292,6 @@ uint32_t ble_ancs_deinit(void);
 /// @return the total no of uids
 uint32_t ble_ancs_get_total_nuid(void);
 
-/// @brief this function is to read the notification uid value based on index
-/// @param nuid pointer
-/// @return succ/err code
-uint32_t ble_ancs_read_ancs_nuid_value(uint16_t index, uint32_t *nuid);
-
-/// @brief to get the notification meta data with the help of index
-/// @param uid
-/// @param notif_meta
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_meta_info(uint16_t index, ble_ancs_notif_metadata_struct_t *notif_meta);
-
-/// @brief this is to modify the meta data info of that particular uid
-/// @param uid
-/// @param meta_Data_index  @ref _BLE_ANCS_NOTIF_UID_META_DATA_INDEX_
-/// @param data_pointer
-/// @param size
-/// @return succ/failure
-uint32_t ble_ancs_modify_meta_info(uint32_t uid, uint16_t meta_Data_index, void *data_pointer, uint8_t size);
-
 /// @brief to remove that particular uid from cache and iphone
 /// @param nuid
 /// @return succ/failure
@@ -375,6 +377,12 @@ uint32_t ble_ancs_perform_notif_Action(uint32_t nuid, uint8_t action);
 /// @param cat_id
 /// @return return the string frim the category id
 const char *ble_ancs_get_catg_string(uint8_t cat_id);
+
+
+/// @brief fun is used to get the string based on the app name id 
+/// @param app_name_id 
+/// @return return the string based on app name 
+const char * ble_ancs_get_app_name(uint8_t app_name_id);
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////

@@ -123,7 +123,7 @@ void ble_ancs_pre_init(void)
 KERNEL_MEM_INSTANTISE(ble_ancs_mem_inst, ble_ancs_mem_pool, BLE_ANCS_MEM_SIZE, ble_ancs_memory_mutex);
 
 //// initalise a linklist for the ancs lib  here 
-KERNEL_LINKLIST_INSTANTISE(ble_ancs_ll_inst, ancs_ll_memory , BLE_ANCS_LL_SIZE, ble_ancs_ll_mutex);
+KERNEL_LINKLIST_INSTANTISE(ble_ancs_ll_inst, ancs_ll_memory , BLE_ANCS_LL_SIZE, ble_ancs_ll_static_mutex_buff);
 
 /// @brief this is to init the ancs profile from iphone
 /// @param conn_handle
@@ -140,9 +140,9 @@ uint32_t ble_ancs_init(uint16_t conn_handle)
     /// init the kernel memory pool 
     err =  kernel_mem_init(&ble_ancs_mem_inst, ble_ancs_mem_pool, BLE_ANCS_MEM_SIZE, &ble_ancs_memory_mutex, BLE_ANCS_MUTEX_TIMEOUT);
     
-    /// we get able to reserver memory for 40 differnt notification
+    /// we get able to reserver memory for 20 differnt notification
     /// init the link list for the ancs lib 
-    err = kernel_ll_init(&ble_ancs_ll_inst, ancs_ll_memory, BLE_ANCS_LL_SIZE, &ble_ancs_ll_mutex, BLE_ANCS_MUTEX_TIMEOUT, sizeof(ble_ancs_notif_metadata_struct_t) + KERNEL_LINK_LIST_META_DATA_SIZE );
+    err = kernel_ll_init(&ble_ancs_ll_inst, ancs_ll_memory, BLE_ANCS_LL_SIZE, &ble_ancs_ll_static_mutex_buff, BLE_ANCS_MUTEX_TIMEOUT, sizeof(ble_ancs_notif_metadata_struct_t) + KERNEL_LINK_LIST_META_DATA_SIZE );
     NRF_ASSERT(err);
 
     ///// search for services and charcteristics
@@ -262,7 +262,7 @@ static const char *category_strings[BLE_ANCS_CATEGORY_ID_TOTAL] =
 };
 
 
-static const char *app_name_strings[] =
+static const char *app_name_strings[ble_ancs_app_name_total] =
 {
     "whatsapp",
     "spotify",
@@ -293,7 +293,17 @@ const char * ble_ancs_get_catg_string(uint8_t cat_id)
     return category_strings[cat_id];
 } 
 
-
+/// @brief fun is used to get the string based on the app name id 
+/// @param app_name_id 
+/// @return return the string based on app name 
+const char * ble_ancs_get_app_name(uint8_t app_name_id)
+{
+    if(app_name_id >= ble_ancs_app_name_total)
+    {
+        return NULL;
+    }
+    return app_name_strings[app_name_id];
+}
 //////========================================================================================
 ////////=======================================================================================
 
@@ -526,7 +536,6 @@ uint32_t ble_ancs_perform_notif_Action(uint32_t nuid, uint8_t action)
 }
 
 
-uint32_t nuid =0;
 
 /// @brief this will be called in kernel task handler as this will handle the notif processing 
 /// @param void 
@@ -581,27 +590,21 @@ bool ble_ancs_client_event_handler( ble_gattc_evt_t const *evt)
         my_notif_struct->flag.evt_flag_neg_action, my_notif_struct->category_id,my_notif_struct->category_count,
         my_notif_struct->notif_uid);
         
-        nuid = my_notif_struct->notif_uid;
         switch (my_notif_struct->event_id)
         {
         case BLE_ANCS_EVT_NOTIF_ADDED:
         {
-            ble_ancs_notif_metadata_struct_t new_data ={0};
+            ble_ancs_notif_metadata_struct_t new_data = {0};
 
-            // new_data.nuid = ;
-            // new_data.
-            // kernel_ll_add_data(&ble_ancs_ll_inst, );
-
-            // sizeof(ble_ancs_notif_metadata_struct_t);
-
-            // ble_ancs_notif_metadata_struct_t notif_meta;
-            // notif_meta.event_Flag = my_notif_struct->event_id;
-            // notif_meta.category_id = my_notif_struct->category_id;
-            // // notif_meta.notif_fetched = BLE_ANCS_NOTIF_DATA_PENING;
-
+            new_data.nuid =my_notif_struct->notif_uid;
+            new_data.category_id = my_notif_struct->category_id;
+            new_data.category_count = my_notif_struct->category_count;
+            new_data.event_Flag = my_notif_struct->flag;
+            new_data.notif_fetched_level = BLE_ANCS_NOTIF_FETCH_PENDING;
             
+            kernel_ll_add_data(&ble_ancs_ll_inst, u8_ptr &new_data, sizeof(new_data));
 
-            /// add the notification id to the ancs mem pool 
+        /// add the notification id to the ancs mem pool 
             // kernel_mem_add_data(&ble_ancs_mem_inst, my_notif_struct->event_id, )
         }
         break;
@@ -609,12 +612,23 @@ bool ble_ancs_client_event_handler( ble_gattc_evt_t const *evt)
         case BLE_ANCS_EVT_NOTIF_MODIFIED:
         {
             /// modify the notification id to the ancs mem pool
+            ble_ancs_notif_metadata_struct_t new_data = {0};
+
+            new_data.nuid =my_notif_struct->notif_uid;
+            new_data.category_id = my_notif_struct->category_id;
+            new_data.category_count = my_notif_struct->category_count;
+            new_data.event_Flag = my_notif_struct->flag;
+            new_data.notif_fetched_level = BLE_ANCS_NOTIF_FETCH_PENDING;
+            
+            kernel_ll_modify_data(&ble_ancs_ll_inst,  BLE_ANCS_META_INDEX_UID,u8_ptr &my_notif_struct->notif_uid,sizeof(my_notif_struct->notif_uid), u8_ptr &new_data);
         }
         break;
 
         case BLE_ANCS_EVT_NOTIF_REMOVED:
         {
-            /// remove the notification id from the ancs mem pool
+            /// we have to remove the data from the linklist 
+            kernel_ll_remove_data(&ble_ancs_ll_inst, BLE_ANCS_META_INDEX_UID,u8_ptr &my_notif_struct->notif_uid,sizeof(my_notif_struct->notif_uid));
+            // also delete any memory associated with it 
         }
         break;
 
@@ -628,7 +642,6 @@ bool ble_ancs_client_event_handler( ble_gattc_evt_t const *evt)
     /// handle the data source  char
     else if (evt->params.hvx.handle == ble_ancs_handler.ancs_srvcs.ancs_data_source_char.handle_value)
     {
-
         for (int  i = 0; i < evt->params.hvx.len; i++)
         {
             printf("%d ",evt->params.hvx.data[i]);
