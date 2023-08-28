@@ -5,7 +5,7 @@
 
 
 /// @brief this is the enum about the button event q 
-enum _BUTTON_EVENT_Q_
+enum _BUTTON_EVENTS_
 {
     NRF_BUTTON_NONE_EVT,
     NRF_BUTTON_UP_EVT,

@@ -119,21 +119,6 @@
 
 ////================================================================================
 ////================================================================================
-////==================================== accelrometer adxl345 configurations 
-
-#define ADXL_INT1_PIN PIN_27 
-// #define ADXL_INT2_PIN PIN_28
-
-#define ADXL_ACCEL_INT1_INTERRUPT_POLARITY EVENT_RISING_EDGE
-
-#define ADXL_ACCEL_INT1_GPIO_CHANNEL GPIOTE_CHANNEL_4
-
-#define ADXL_ACCEL_EVENT_Q_ITEM_SIZE  (sizeof(uint8_t))
-
-#define ADXL_ACCEL_EVENT_Q_LEN  3 /// let say we accomodate 3 accel event max 
-
-////================================================================================
-////================================================================================
 ////======================================== OLED configurations 
 
 
@@ -182,9 +167,26 @@
 
 ////// define the event q length for the buttons event 
 #define NRF_BUTTON_EVENTQ_ITEM_LEN 2
-//////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////         FUel gauge Lib
+
+
+////================================================================================
+////================================================================================
+////==================================== accelrometer adxl345 configurations 
+
+#define ADXL_INT1_PIN PIN_27 
+// #define ADXL_INT2_PIN PIN_28
+
+#define ADXL_ACCEL_INT1_INTERRUPT_POLARITY EVENT_RISING_EDGE
+
+#define ADXL_ACCEL_INT1_GPIO_CHANNEL GPIOTE_CHANNEL_5
+
+#define ADXL_ACCEL_EVENT_Q_ITEM_SIZE  (sizeof(uint8_t))
+
+#define ADXL_ACCEL_EVENT_Q_LEN  5 /// let say we accomodate 3 accel event max 
+
+////================================================================================
+////================================================================================
+////==================================== Fuel Gauge  configurations 
 
 #define FUEL_GAUGE_WAIT_FOR_RESPONSE 300
 

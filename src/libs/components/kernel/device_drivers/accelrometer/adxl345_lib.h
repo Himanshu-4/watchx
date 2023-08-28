@@ -9,17 +9,6 @@
 // follows the NXP I2C guide put the CS to high to put the IC in I2C mode 
 // the SDO can be use as ALT address pin in I2C mode when high I2c addr is 0x1D , LOw ->0x53
 
-#define ADXL_SCL_IO           GPIO_NUM_23     /*!< GPIO number used for I2C master clock */
-#define ADXL_SDA_IO           GPIO_NUM_22      /*!< GPIO number used for I2C master data  */
-#define I2C_HOST_0              0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
-#define ADXL_FREQ_HZ          400000                          /*!< I2C master doesn't need buffer */
-
-
-
-#define _bv(b) (1<<b)
-#define set_bit(x,y) (x |= y)
-#define read_bit(x,y) ((x>>y) & 0x01)
-#define clear_bit(x,y) ( x &= (uint8_t)~(1<<y))
 
 // #define weak_alias ( __attribute__ ((weak, alias ("default_handler"))) )
 
@@ -133,8 +122,6 @@ void adxl_deinit(void);
 
 void adxl_cfg_(adxl_config);
 
-void handle_int1(void);
-
 
 #define singletap  0x01
 #define double_tap 0x03
@@ -142,6 +129,7 @@ void handle_int1(void);
 #define x_axis 0x01
 #define y_axis 0x02
 #define z_axis 0x04
+
 typedef struct __packed
 {
     uint8_t tap_type;  // could be single or double tap
@@ -228,22 +216,13 @@ enum
 #define _enable 1
 
 #define _disable 0
+
 void cfg_int(uint8_t , uint8_t);
 
 // disable all the interrupts and then enable according to your use case 
 void disable_all_ints(void);
 
 uint8_t read_int_type(void);
-
-/////// weak declartions of the handlers functions 
-
-void __weak_symbol tap_int_handler(void);
-
-void __weak_symbol act_inact_handler(void);
-
-void __weak_symbol fifo_int_handler(void);
-
-void default_handler(void);
 
 bool adxl_read_data(uint8_t *, uint16_t size);
 

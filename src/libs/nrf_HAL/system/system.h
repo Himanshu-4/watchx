@@ -34,6 +34,10 @@
 
 #define _BV(x) (1UL << (x))
 
+#define SETBIT(x,y) ((x) |= (y))
+#define READBIT(x,y) (((x)>>(y)) & 0x01)
+#define CLEARBIT(x,y) ( (x) &= ~(1<<(y)))
+
 #define LSB16(a) ((a) & 0xFF)
 #define MSB16(a) (((a)>>8 )& 0xFF)
 
