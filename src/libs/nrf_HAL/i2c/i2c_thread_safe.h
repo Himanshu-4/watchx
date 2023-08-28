@@ -4,9 +4,6 @@
 
 #include "i2c.h"
 
-
-
-
 #define TOTAL_I2C_HARDWARE 2
 
 typedef struct PACKED

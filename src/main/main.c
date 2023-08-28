@@ -121,7 +121,7 @@ void general_task_function(void *param)
     ///// check for the button events and print it
     for (;;)
     {
-        uint8_t evt = nrf_get_btn_evtq();
+        uint8_t evt = nrf_btn_get_evtq();
         if (evt != 0)
         {
             // NRF_LOG_WARNING("%d", evt);

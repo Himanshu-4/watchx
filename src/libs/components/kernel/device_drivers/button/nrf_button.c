@@ -147,7 +147,7 @@ void nrf_button_evt_lib_deinit(void)
 
 /// @brief this function is to get the event from the button q 
 /// @return event , 0 if no event present 
-uint8_t nrf_get_btn_evtq(void)
+uint8_t nrf_btn_get_evtq(void)
 {
     uint8_t evt = NRF_BUTTON_NONE_EVT;
     if(xQueueReceive(nrf_btn_evtq_handle , &evt , 0) != pdPASS)
@@ -159,7 +159,7 @@ uint8_t nrf_get_btn_evtq(void)
 
 /// @brief this function is to wait for the event q to have an event 
 /// @return this will wait for the specified time and return 0 if the time expires as event dont happen
-uint8_t nrf_get_btn_evtq_wait(uint32_t wait_time)
+uint8_t nrf_btn_get_evtq_wait(uint32_t wait_time)
 {
     uint8_t evt =NRF_BUTTON_NONE_EVT;
     if(xQueueReceive(nrf_btn_evtq_handle , &evt , pdMS_TO_TICKS(wait_time) ) != pdPASS)
@@ -171,7 +171,7 @@ uint8_t nrf_get_btn_evtq_wait(uint32_t wait_time)
 
 /// @brief this is to reset the btn event q 
 /// @param  void 
-void nrf_reset_btn_evtq(void)
+void nrf_btn_reset_evtq(void)
 {
     xQueueReset(nrf_btn_evtq_handle);
 }
@@ -179,7 +179,7 @@ void nrf_reset_btn_evtq(void)
 /// @brief this is to put the data in the event q 
 /// @param  the data to put in event q
 /// @return succ/failure of the function
-uint8_t nrf_put_in_btn_evtq(uint8_t event )
+uint8_t nrf_btn_put_in_evtq(uint8_t event )
 {
     if(event > NRF_BUTTON_DOWN_MID_EVT)
     {
@@ -189,8 +189,11 @@ uint8_t nrf_put_in_btn_evtq(uint8_t event )
     return nrf_OK;
 
 }
-
-uint8_t nrf_put_in_btn_evtq_wait(uint8_t event)
+ 
+/// @brief to put the events in the evt q
+/// @param event 
+/// @return succ/failure
+uint8_t nrf_btn_put_in_evtq_wait(uint8_t event)
 {
     if(event > NRF_BUTTON_DOWN_MID_EVT)
     {
@@ -203,6 +206,29 @@ uint8_t nrf_put_in_btn_evtq_wait(uint8_t event)
     }
     return nrf_OK;
     
+}
+
+
+/// @brief this is to pause the events from the eventq
+/// @param  void 
+void nrf_btn_pause_events(void)
+{
+       ///// disable the gpio int 
+    gpio_int_disable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_UP_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_DOWN_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+}
+
+/// @brief to resume the events from evt q
+/// @param  void
+void nrf_btn_resume_events(void)
+{
+    //////// enable the int for the gpio 
+    gpio_int_enable(NRF_UP_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_DOWN_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_HOME_BUTTON_GPIOTE_CHANNEL);
 }
 
 
