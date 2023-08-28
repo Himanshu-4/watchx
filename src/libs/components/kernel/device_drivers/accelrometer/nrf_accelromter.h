@@ -20,7 +20,8 @@ enum _ACCELROMETER_EVENTS_
 
 enum _ACCELROMETER_FIFO_EVENTS_
 {
-
+    NRF_ACCEL_WATERMARK_EVT,
+    NRF_ACCEL_OVERRUN_EVT
 };
 
 /// these are the axis of the accelrometer where we get the events 

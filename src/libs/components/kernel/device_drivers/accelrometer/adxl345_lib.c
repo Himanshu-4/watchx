@@ -9,48 +9,37 @@
 // function to read the register 
 static uint8_t read_reg( uint8_t reg_addr)
 {
-    // uint8_t data;
-    // if (i2c_master_write_read_device(I2C_HOST_0, ADXL_SENS_ADDR, &reg_addr, _1byte , &data, _1byte , i2c_wait_time) == ESP_OK)
-    // return data;
-    return 0;
+    uint8_t read_buff[1];
+    uint8_t write_buff[] = {reg_addr};
 
+    i2c_xfr_config xfrcfg = 
+    {
+        .tx_buff = write_buff,
+        .tx_size = sizeof(write_buff),
+        .rx_buff = read_buff,
+        .rx_size = sizeof(read_buff)
+    };
+    if(nrf_OK !=  i2c_write_and_read_data_arr(I2C_HOST_USED, ADXL_SENS_ADDR, &xfrcfg))
+    {
+       return 0; 
+    }
+    return read_buff[0];
 }
 
 // function to write the register 
 static void write_reg(uint8_t reg_addr, uint8_t data)
 {
-    // uint8_t buff[] ={reg_addr, data};
-
-    // if (i2c_master_write_to_device(I2C_HOST_0, ADXL_SENS_ADDR, buff, _2byte , i2c_wait_time) != ESP_OK)
-    // assert(0);
-
+    uint8_t buff[] = {reg_addr, data};
+    i2c_write_data_arr(I2C_HOST_USED, ADXL_SENS_ADDR, buff, sizeof(buff));
 }
 
 
-// function to init the accelro
-uint8_t adxl_init(void)
-{
-    uint8_t ret = nrf_OK;
-    ///// init the interrupt handler and pins 
-
-    //////// init the gpio event type and interrupt 
-
-    ///////// init the event q here 
-
-    return ret;
-}
-
-
-void adxl_deinit(void)
-{
-    // i2c_driver_delete(I2C_HOST_0);
-}
 
 
 void adxl_cfg_(adxl_config cfg)
 {
     uint8_t val = read_reg(POWER_CTL);
-    if(read_bit(val, 3))
+    if(READBIT(val, 3))
     {
         // clear the measure bit to configure the accel make the register to 0
         write_reg(POWER_CTL ,0x00);
@@ -58,7 +47,7 @@ void adxl_cfg_(adxl_config cfg)
     
     ////// configure the rate of the acclero
     val =0;
-    set_bit(val ,(cfg->low_pwr << 4) | (cfg->rate));
+    SETBIT(val ,(cfg->low_pwr << 4) | (cfg->rate));
     write_reg(BW_RATE, val);
 
     /// /// configure the int map
@@ -69,14 +58,14 @@ void adxl_cfg_(adxl_config cfg)
 
     // //// write the data format reg  , set the int to active low  and set fullres mode 
     val =0; 
-    set_bit(val, _bv(5) | _bv(3) | cfg->output_range);
+    SETBIT(val, _BV(5) | _BV(3) | cfg->output_range);
     write_reg(DATA_FORMAT, val);
 
 
     val =0;
-    set_bit(val, _bv(3));
+    SETBIT(val, _BV(3));
     if(cfg->link_autosleep)
-    set_bit(val , 0x30 );
+    SETBIT(val , 0x30 );
 
     write_reg(POWER_CTL, val);
 
@@ -88,10 +77,10 @@ void adxl_cfg_taps(taps_cfg cfg)
    
     // // check if measurement bit is set 
      uint8_t val = read_reg(POWER_CTL);
-    if(read_bit(val, 3))
+    if(READBIT(val, 3))
     {
         // clear the measure bit to configure the accel
-        clear_bit(val,3);
+        CLEARBIT(val,3);
         write_reg(POWER_CTL ,val);
     }
 
@@ -109,18 +98,18 @@ void adxl_cfg_taps(taps_cfg cfg)
         // uint8_t int_val =0;
         // int_val = read_reg(INT_ENABLE);
 
-        // set_bit(int_val, _bv(5));
+        // SETBIT(int_val, _BV(5));
         // write_reg(INT_ENABLE, int_val);
     }
 
     // configure axis 
     val =0; // the supress bit is already set 
-    set_bit(val, cfg->tap_axes ); // you can add axis by logical OR x_axis | y_axis | z_axis
+    SETBIT(val, cfg->tap_axes ); // you can add axis by logical OR x_axis | y_axis | z_axis
     write_reg(TAP_AXES , val);
 
     // // now put the adxl back in masurement mode 
     val = read_reg(POWER_CTL);
-    set_bit(val, _bv(3));
+    SETBIT(val, _BV(3));
     write_reg(POWER_CTL, val);
 
 }
@@ -129,10 +118,10 @@ void adxl_cfg_act_inact(act_inact_cfg cfg)
 {
     // // check if measurement bit is set 
      uint8_t val = read_reg(POWER_CTL);
-    if(read_bit(val, 3))
+    if(READBIT(val, 3))
     {
         // clear the measure bit to configure the accel
-        clear_bit(val,3);
+        CLEARBIT(val,3);
         write_reg(POWER_CTL ,val);
     }
     // /// configure activity 
@@ -143,13 +132,13 @@ void adxl_cfg_act_inact(act_inact_cfg cfg)
     write_reg(TIME_INACT , cfg->inact.time_inact);
     
     val = read_reg(ACT_INACT_CTL);
-    set_bit(val, (cfg->act._ac_dc <<7 ) |cfg->act.axes | (cfg->inact.axes) | (cfg->inact._ac_dc << 3));
+    SETBIT(val, (cfg->act._ac_dc <<7 ) |cfg->act.axes | (cfg->inact.axes) | (cfg->inact._ac_dc << 3));
     write_reg(ACT_INACT_CTL , val);
     
 
     // // now put the adxl back in masurement mode 
     val = read_reg(POWER_CTL);
-    set_bit(val, _bv(3));
+    SETBIT(val, _BV(3));
     write_reg(POWER_CTL, val);
 
 }
@@ -158,10 +147,10 @@ void adxl_cfg_freefall(uint8_t accel , uint8_t time)
 {
        // // check if measurement bit is set 
      uint8_t val = read_reg(POWER_CTL);
-    if(read_bit(val, 3))
+    if(READBIT(val, 3))
     {
         // clear the measure bit to configure the accel
-        clear_bit(val,3);
+        CLEARBIT(val,3);
         write_reg(POWER_CTL ,val);
     }
 
@@ -171,12 +160,12 @@ void adxl_cfg_freefall(uint8_t accel , uint8_t time)
     
       // enable the interrupt 
     val = read_reg(INT_ENABLE);
-    set_bit(val, _bv(2)); // set both the act and inact int
+    SETBIT(val, _BV(2)); // set both the act and inact int
     write_reg(INT_ENABLE ,val);
 
      // // now put the adxl back in masurement mode 
     val = read_reg(POWER_CTL);
-    set_bit(val, _bv(3));
+    SETBIT(val, _BV(3));
     write_reg(POWER_CTL, val);
 
 }
@@ -186,10 +175,10 @@ void cfg_int(uint8_t int_type, uint8_t value)
 {
         // // check if measurement bit is set 
      uint8_t val = read_reg(POWER_CTL);
-    if(read_bit(val, 3))
+    if(READBIT(val, 3))
     {
         // clear the measure bit to configure the accel
-        clear_bit(val,3);
+        CLEARBIT(val,3);
         write_reg(POWER_CTL ,val);
     }
 
@@ -197,18 +186,18 @@ void cfg_int(uint8_t int_type, uint8_t value)
 
     if (value) // enable the interrupt 
     {
-        set_bit(val, _bv(int_type));
+        SETBIT(val, _BV(int_type));
     }
     else // clear the interrupt
     {
-        clear_bit(val, int_type);
+        CLEARBIT(val, int_type);
     }
     
     write_reg(INT_ENABLE, val);
 
      // // now put the adxl back in masurement mode 
     val = read_reg(POWER_CTL);
-    set_bit(val, _bv(3));
+    SETBIT(val, _BV(3));
     write_reg(POWER_CTL, val);
 }
 
@@ -216,17 +205,17 @@ void disable_all_ints(void)
 {
            // // check if measurement bit is set 
      uint8_t val = read_reg(POWER_CTL);
-    if(read_bit(val, 3))
+    if(READBIT(val, 3))
     {
         // clear the measure bit to configure the accel
-        clear_bit(val,3);
+        CLEARBIT(val,3);
         write_reg(POWER_CTL ,val);
     }
     write_reg(INT_ENABLE, 0);
 
      // // now put the adxl back in masurement mode 
     val = read_reg(POWER_CTL);
-    set_bit(val, _bv(3));
+    SETBIT(val, _BV(3));
     write_reg(POWER_CTL, val);
 
 
@@ -235,16 +224,16 @@ void adxl_cfg_fifo(uint8_t mode, uint8_t samples)
 {
       // // check if measurement bit is set 
      uint8_t val = read_reg(POWER_CTL);
-    if(read_bit(val, 3))
+    if(READBIT(val, 3))
     {
         // clear the measure bit to configure the accel
-        clear_bit(val,3);
+        CLEARBIT(val,3);
         write_reg(POWER_CTL ,val);
     }
-    set_bit(val, (mode<<6) | samples);
+    SETBIT(val, (mode<<6) | samples);
     // // now put the adxl back in masurement mode 
     val = read_reg(POWER_CTL);
-    set_bit(val, _bv(3));
+    SETBIT(val, _BV(3));
     write_reg(POWER_CTL, val);
 
 }

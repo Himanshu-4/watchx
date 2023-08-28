@@ -104,10 +104,16 @@ void i2c_thread_safe_deinit(uint8_t i2c_hardware)
 }
 
 
-
-
-
-uint8_t i2c_write_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, uint8_t *buff, uint8_t size)
+/**
+ * @name i2c_write_data_arr
+ * @param i2c_hardware
+ * @param deviceaddress 
+ * @param tx_buffer
+ * @param size of the tx buffer 
+ * @return the error codes
+ * @brief used to write data on the device hanging on the i2c line 
+*/
+uint32_t i2c_write_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, uint8_t *buff, uint8_t size)
 {
     if (xSemaphoreTake(i2c_semphr_handle[i2c_hardware], i2c_timeout[i2c_hardware]) != pdPASS)
     {
@@ -144,7 +150,17 @@ uint8_t i2c_write_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, uint8_t *buff
     return err;
 }
 
-uint8_t i2c_read_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, uint8_t *buff, uint8_t size)
+/***
+ * @name i2c_read_reg_data
+ * @param i2c_hardware
+ * @param device_address
+ * @param ptr to rx buff 
+ * @param rx_Size
+ * @return error code 
+ * @brief used to read the data from the device address 
+
+*/
+uint32_t i2c_read_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, uint8_t *buff, uint8_t size)
 {
     if (xSemaphoreTake(i2c_semphr_handle[i2c_hardware], i2c_timeout[i2c_hardware]) != pdPASS)
     {
@@ -181,7 +197,16 @@ uint8_t i2c_read_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, uint8_t *buff,
     return err;
 }
 
-uint8_t i2c_write_and_read_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, i2c_xfr_config *cfg)
+
+/**
+ * @name  i2c_write_and_read_data_arr
+ * @param i2c_hardware
+ * @param device_Address
+ * @param i2c_xfr_config_structure
+ * @return error coede 
+ * @brief used to get the data from a i2c register 
+*/
+uint32_t i2c_write_and_read_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, i2c_xfr_config *cfg)
 {
 
     if (xSemaphoreTake(i2c_semphr_handle[i2c_hardware], i2c_timeout[i2c_hardware]) != pdPASS)

@@ -57,7 +57,7 @@ void i2c_thread_safe_deinit(uint8_t i2c_hardware);
  * @return the error codes
  * @brief used to write data on the device hanging on the i2c line 
 */
- uint8_t  i2c_write_data_arr(uint8_t i2c_hardware ,uint8_t dev_addr, uint8_t * buff, uint8_t size);
+ uint32_t  i2c_write_data_arr(uint8_t i2c_hardware ,uint8_t dev_addr, uint8_t * buff, uint8_t size);
 
 /***
  * @name i2c_read_reg_data
@@ -69,7 +69,7 @@ void i2c_thread_safe_deinit(uint8_t i2c_hardware);
  * @brief used to read the data from the device address 
 
 */
- uint8_t i2c_read_data_arr(uint8_t i2c_hardware, uint8_t dev_addr , uint8_t *reg_data , uint8_t size);
+ uint32_t i2c_read_data_arr(uint8_t i2c_hardware, uint8_t dev_addr , uint8_t *reg_data , uint8_t size);
 
 /**
  * @name  i2c_write_and_read_data_arr
@@ -79,7 +79,7 @@ void i2c_thread_safe_deinit(uint8_t i2c_hardware);
  * @return error coede 
  * @brief used to get the data from a i2c register 
 */
-uint8_t i2c_write_and_read_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, i2c_xfr_config * );
+uint32_t i2c_write_and_read_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, i2c_xfr_config * );
 
 
 

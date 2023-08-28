@@ -173,16 +173,15 @@
 ////================================================================================
 ////==================================== accelrometer adxl345 configurations 
 
+#define ACCEL_I2C_HOST_USED I2C_HARDWARE_USE
 #define ADXL_INT1_PIN PIN_27 
 // #define ADXL_INT2_PIN PIN_28
 
-#define ADXL_ACCEL_INT1_INTERRUPT_POLARITY EVENT_RISING_EDGE
+#define ACCEL_INT1_INTERRUPT_POLARITY EVENT_RISING_EDGE
+#define ACCEL_INT1_GPIO_CHANNEL GPIOTE_CHANNEL_5
 
-#define ADXL_ACCEL_INT1_GPIO_CHANNEL GPIOTE_CHANNEL_5
-
-#define ADXL_ACCEL_EVENT_Q_ITEM_SIZE  (sizeof(uint8_t))
-
-#define ADXL_ACCEL_EVENT_Q_LEN  5 /// let say we accomodate 3 accel event max 
+#define ACCEL_EVENT_Q_ITEM_SIZE  (sizeof(uint8_t))
+#define ACCEL_EVENT_Q_LEN  5 /// let say we accomodate 3 accel event max 
 
 ////================================================================================
 ////================================================================================

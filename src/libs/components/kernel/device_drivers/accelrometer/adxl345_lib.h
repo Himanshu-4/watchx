@@ -9,7 +9,7 @@
 // follows the NXP I2C guide put the CS to high to put the IC in I2C mode 
 // the SDO can be use as ALT address pin in I2C mode when high I2c addr is 0x1D , LOw ->0x53
 
-
+#define I2C_HOST_USED ACCEL_I2C_HOST_USED
 // #define weak_alias ( __attribute__ ((weak, alias ("default_handler"))) )
 
 ////////// sensor address  with the ALT addr pin HIGH 
