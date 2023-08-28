@@ -2,11 +2,33 @@
 
 #include "adxl345_lib.h"
 
+/// include the gpiote lib
+#include "gpiote.h"
+
+/// include the freertos implemenatation
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+
+#define NRF_ACCEL_EVENT_Q_LENGTH  ACCEL_EVENT_Q_LEN
+#define NRF_ACCEL_EVENT_Q_ITEM_SIZE ACCEL_EVENT_Q_ITEM_SIZE
+
+static StaticQueue_t xstatic_q_for_accel_events;
+static uint8_t ucQueueStorageArea_for_acceleventq [NRF_ACCEL_EVENT_Q_LENGTH * NRF_ACCEL_EVENT_Q_ITEM_SIZE ];
+
+static xQueueHandle nrf_accel_evtqhandle = NULL;
+
+
+
 /// @brief this is the accelrometer event lib 
 /// @param  void 
 void nrf_accel_evt_lib_init(void)
 {
+    nrf_accel_evtqhandle = xQueueCreateStatic(NRF_ACCEL_EVENT_Q_LENGTH,
+    NRF_ACCEL_EVENT_Q_ITEM_SIZE, ucQueueStorageArea_for_acceleventq, 
+    &xstatic_q_for_accel_events);
 
+    
 }
 
 /// @brief this is the accelrometer lib deinit 

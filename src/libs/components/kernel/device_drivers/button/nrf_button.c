@@ -35,8 +35,6 @@ static void gpio_int_handler_for_home(void);
 /// @return succ/failure of the event 
 void nrf_button_evt_lib_init(void)
 {
-    /// init the gpio with proper parameters 
-    uint32_t ret_code = nrf_OK;
     /// init the status q 
      nrf_btn_evtq_handle = xQueueCreateStatic(NRF_BUTTON_EVENT_Q_LENGTH ,
                                  NRF_BUTTON_EVENT_Q_ITEM_SIZE,

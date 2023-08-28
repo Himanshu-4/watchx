@@ -65,9 +65,6 @@ int main()
     /// init the kernel task preinit
     Kernel_task_preinit();
     
-    ////// init the devices here
-    nrf_button_evt_lib_init();
-
 
     /// @todo have to implement the kernel init file
     // watchx_kernel_init();

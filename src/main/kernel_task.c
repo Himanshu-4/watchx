@@ -16,13 +16,19 @@
 #include "ble_ancs.h"
 #include "ble_peer_info.h"
 
+
 /// freertos libraries
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 
 /// include the driver common files
+/// implement the driver for the kernel 
 #include "device_drivers/drivers_common/drivers_common.h"
+
+#include "device_drivers/accelrometer/nrf_accelromter.h"
+#include "device_drivers/button/nrf_button.h"
+#include "device_drivers/display/nrf_oled_driver.h"
 
 //================================================================================================
 //=================================================================================================
@@ -106,6 +112,11 @@ void Kernel_task_preinit(void)
 {
     /// init the spi,i2c and gpio drivers
     Hardware_drivers_install();
+
+    
+    ////// init the devices drivers here
+    nrf_button_evt_lib_init();
+    nrf_accel_evt_lib_init();
 
     /// init the ble functionalities of the device
     //////////////////////////////////////////////////////////

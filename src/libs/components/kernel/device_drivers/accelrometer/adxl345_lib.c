@@ -144,15 +144,15 @@ void adxl_cfg_freefall(uint8_t accel , uint8_t time)
 }
 
 
-void cfg_int(uint8_t int_type, uint8_t value)
+void accel_int_en_dis(uint8_t int_type, uint8_t en_dis)
 {
     ADXL_STANDBY();
 
     uint8_t val = read_reg(ADXL_REG_INT_ENABLE);
 
-    if (value) // enable the interrupt 
+    if (en_dis) // enable the interrupt 
     {
-        SETBIT(val, _BV(int_type));
+        SETBIT(val, int_type);
     }
     else // clear the interrupt
     {

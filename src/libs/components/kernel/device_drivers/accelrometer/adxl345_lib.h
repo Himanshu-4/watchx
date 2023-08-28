@@ -178,35 +178,39 @@ void adxl_cfg_act_inact(act_inact_cfg);
 /// @param  time value 5ms/LSB 100 ms and 350 ms recommend
 void adxl_cfg_freefall(uint8_t, uint8_t);
 
-enum
+enum _FIFO_CONFIGURETAION_TYPE_
 {
     _bypass,
     _fifo,
     _stream,
     _trigger
 };
+
 /// @brief configure the fifo
 /// @param  fifo_mode
-/// @param  samples //  the max number of samples is 32
+/// @param  samples // max samples is 32
 void adxl_cfg_fifo(uint8_t, uint8_t);
 
-enum
+enum _ACCEL_CFG_INT_TYPE_
 {
-    _overrun = 0x00, // overrun interrupt set
-    _watermark,      //  watermark interrupt set
-    _freefall,       // freefall detection max time 1.25 sec
-    _inactivity,     // inactivity
-    _activity,       // activity
-    _double_tap,     // double tap
-    _single_tap,     // single tap innterrupt
-    _data_ready      //  this interrupt fires when data is ready according to the data rate
+    accel_int_overrun = 0x00, // overrun interrupt set
+    accel_int_watermark,      //  watermark interrupt set
+    accel_int_freefall,       // freefall detection max time 1.25 sec
+    accel_int_inactivity,     // inactivity
+    accel_int_activity,       // activity
+    accel_int_double_tap,     // double tap
+    accel_int_single_tap,     // single tap innterrupt
+    accel_int_data_ready,     //  this interrupt fires when data is ready according to the data rate
 };
 
-#define _enable 1
+#define INT_ENABLE 0x01u
 
-#define _disable 0
+#define INT_DISABLE 0x00u
 
-void cfg_int(uint8_t, uint8_t);
+/// @brief to enable or disable the interrupt
+/// @param int_type
+/// @param en_dis
+void accel_int_en_dis(uint8_t int_type, uint8_t en_dis);
 
 // disable all the interrupts and then enable according to your use case
 void disable_all_ints(void);
@@ -214,16 +218,6 @@ void disable_all_ints(void);
 uint8_t read_int_type(void);
 
 bool adxl_read_data(uint8_t *, uint16_t size);
-
-/***
- * @name read_acccelration
- * @param pointer to a buffer
- * @param size of the buffer
- * @return if reading is succesfull or not
- * @note it will automatically calculate the accelration in terms of g
- *
- */
-bool read_accelration(float *);
 
 //////////// define the gain of the acclerometer
 #define gain 3.874f /// mg/LSB
