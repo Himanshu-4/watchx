@@ -37,9 +37,11 @@
 #define LSB16(a) ((a) & 0xFF)
 #define MSB16(a) (((a)>>8 )& 0xFF)
 
+/// @brief this is used to extract the bytes from a 32 byte number 
 #define LSB32(a) ((a) & 0xFF)
-
-
+#define MIDB32(a) (((a)>>8) & 0xFF)
+#define MID_B32(a) (((a)>>16) & 0xFF)
+#define MSB32(a) (((a)>>24) & 0xFF)
 
 #define MIN_OF(a,b) ((a)>(b)?(b):(a))
 #define MAX_OF(a,b) ((a)>(b)?(a):(b))

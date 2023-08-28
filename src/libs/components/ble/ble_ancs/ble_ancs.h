@@ -93,8 +93,8 @@ typedef enum _BLE_ANCS_NOTIF_APPS_NAMES_
 
 /**@brief IDs for actions that can be performed for iOS notifications. */
 
-#define ACTION_ID_POSITIVE 0x01 /**< Positive action. */
-#define ACTION_ID_NEGATIVE 0x02 /**< Negative action. */
+#define ACTION_ID_POSITIVE 0x00 /**< Positive action. */
+#define ACTION_ID_NEGATIVE 0x01 /**< Negative action. */
 
 /**@brief App attribute ID values.
  * @details Currently, only one value is defined. However, the number of app
@@ -118,19 +118,14 @@ typedef enum
     BLE_ANCS_NOTIF_ATTR_ID_NEGATIVE_ACTION_LABEL, // The notification has a "Negative action" that can be executed associated with it. */
 } ble_ancs_c_notif_attr_id_val_t;
 
-// /**@brief Parsing states for received iOS notification and app attributes. */
-// typedef enum
+// /// @brief BLE_ANCS notification attribute format 
+// typedef enum 
 // {
-//     COMMAND_ID,    /**< Parsing the command ID. */
-//     NOTIF_UID,     /**< Parsing the notification UID. */
-//     APP_ID,        /**< Parsing app ID. */
-//     ATTR_ID,       /**< Parsing attribute ID. */
-//     ATTR_LEN1,     /**< Parsing the LSB of the attribute length. */
-//     ATTR_LEN2,     /**< Parsing the MSB of the attribute length. */
-//     ATTR_DATA,     /**< Parsing the attribute data. */
-//     ATTR_SKIP,     /**< Parsing is skipped for the rest of an attribute (or entire attribute). */
-//     DONE,          /**< Parsing for one attribute is done. */
-// } ble_ancs_c_parse_state_t;
+//     BLE_ANCS_NOTIF_ATT_
+//     BLE_ANCS_NOTIF_ATTR_ATT_ID1,
+//     BLE_ANCS_NOTIF_ATT_LEN
+// }ble_ancs_notif_attr_format;
+
 
 //// ancs time format yyyyMMdd'T'HHmmSS.
 
@@ -191,16 +186,6 @@ typedef struct _BLE_ANCS_STRUCT_
 
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-
-/// @brief this is the enum for storing the meta data of the notification
-enum _BLE_ANCS_NOTIF_STORED_METAS_
-{
-    BLE_ANCS_NOTIF_META_EVT_FLAG = 0,
-    BLE_ANCS_NOTIF_META_CATG_ID,
-    BLE_ANCS_NOTIF_META_CATG_COUNT,
-    BLE_ANCS_NOTIF_META_CATG_MSG_SIZE_4,
-    BLE_ANCS_NOTIF_META_DATA_
-};
 
 /// @brief this is to fetch the notification
 enum _BLE_ANCS_NOTIF_FETCH_LEVEL_
@@ -291,31 +276,15 @@ uint32_t ble_ancs_deinit(void);
 /// @return the total no of uids
 uint32_t ble_ancs_get_total_nuid(void);
 
-/// @brief to remove that particular uid from cache and iphone
-/// @param nuid
-/// @return succ/failure
-uint32_t ble_ancs_remove_nuid(uint32_t nuid);
-
-/// @brief to clear the data recvd in the nuid like title, msg , all string data
-/// @param nuid
-/// @return succ/failure
-uint32_t ble_ancs_clear_nuid(uint32_t nuid);
-
 /// @brief this func must be called before reading the notification attributes
 /// @param uid
 /// @param notif_fetch_level @ref _BLE_ANCS_NOTIF_FETCH_LEVEL_
 /// @return succ/failure
-uint32_t ble_ancs_fetch_notif_data(uint32_t uid, uint8_t fetch_level);
+uint32_t ble_ancs_fetch_notif_data(uint32_t uid);
 
 //// below functions are only operation when you called above function firsst
 //////=======================================================================================
 ////////======================================================================================
-
-/// @brief to get the notification meta data
-/// @param uid
-/// @param notif_meta
-/// @return
-uint32_t ble_ancs_get_notif_meta_data(uint32_t uid, ble_ancs_notif_metadata_struct_t *notif_meta);
 
 /// @brief to get the current time that when the notif rcvd
 /// @param nuid
@@ -335,35 +304,6 @@ uint32_t ble_ancs_get_notif_date(uint32_t nuid, kernel_date_struct_t *ancs_date)
 /// @return succ/failure
 uint32_t ble_ancs_get_notif_rcvd_time(uint32_t nuid, kernel_time_struct_t *notif_time);
 
-/// @brief get the title string  of the notification
-/// @param uid
-/// @param title
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_title(uint32_t uid, const char *title);
-
-/// @brief get the subtitle of the notif string
-/// @param uid
-/// @param subtitle
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_subtitle(uint32_t uid, const char *subtitle);
-
-/// @brief get the msg string of the notif
-/// @param uid
-/// @param notif_msg
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_msg(uint32_t uid, const char *notif_msg);
-
-/// @brief get the msg size of the notification
-/// @param uid
-/// @param size
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_msg_size(uint32_t uid, uint32_t *size);
-
-/// @brief get the action that can be oerformed on that particular notif
-/// @param nuid
-/// @param actions
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_aciton(uint32_t nuid, uint32_t *actions);
 
 ///// this function can remove the notif from the notif
 /// @brief this function is to perform the notification action on the nuid
@@ -383,6 +323,29 @@ const char *ble_ancs_get_catg_string(uint8_t cat_id);
 /// @return return the string based on app name 
 const char * ble_ancs_get_app_name(uint8_t app_name_id);
 
+/// @brief get the msg size of the notification
+/// @param uid
+/// @param size
+/// @return msg size 
+uint16_t ble_ancs_get_notif_msg_size(uint32_t uid);
+
+/// @brief get the msg string of the notif
+/// @param uid
+/// @param notif_msg
+/// @return actual msg  
+const char * ble_ancs_get_notif_msg(uint32_t uid);
+
+/// @brief get the subtitle of the notif string
+/// @param uid
+/// @param subtitle
+/// @return notif subtitle
+const char * ble_ancs_get_notif_subtitle(uint32_t uid);
+
+/// @brief get the title string  of the notification
+/// @param uid
+/// @param title
+/// @return notif title
+const char * ble_ancs_get_notif_title(uint32_t uid);
 ////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

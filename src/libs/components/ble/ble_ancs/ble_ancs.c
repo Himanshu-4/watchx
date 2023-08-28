@@ -262,7 +262,7 @@ static const char *category_strings[BLE_ANCS_CATEGORY_ID_TOTAL] =
 
 static const char *app_name_strings[ble_ancs_app_name_total] =
     {
-        "whatsapp",
+        "whatsApp",
         "spotify",
         "Gmail",
         "Mail",
@@ -271,7 +271,7 @@ static const char *app_name_strings[ble_ancs_app_name_total] =
         "LinkedIn",
         "Slack",
         "Swiggy",
-        "Paytm",
+        "paytm",
         "messaging",
         "maps",
         "settings",
@@ -312,70 +312,21 @@ uint32_t ble_ancs_get_total_nuid(void)
 {
     if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
     {
-        return ble_ancs_err_not_intited;
+        return 0;
     }
+    
+    return ble_ancs_handler.total_notif_present;
 
-    return ble_ancs_ok;
 }
 
-/// @brief to get the notification meta data
-/// @param uid
-/// @param notif_meta
-/// @return
-uint32_t ble_ancs_get_notif_meta_data(uint32_t uid, ble_ancs_notif_metadata_struct_t *notif_meta)
-{
-    if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
-    {
-        return ble_ancs_err_not_intited;
-    }
 
-    return ble_ancs_ok;
-}
 
-/// @brief this function is to read the notification uid characteristic
-/// @param nuid pointer
-/// @return succ/err code
-uint32_t ble_ancs_read_ancs_nuid_char(uint16_t index, uint32_t *nuid)
-{
-    if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
-    {
-        return ble_ancs_err_not_intited;
-    }
-
-    return ble_ancs_ok;
-}
-
-/// @brief to remove that particular uid from cache and iphone
-/// @param nuid
-/// @return succ/failure
-uint32_t ble_ancs_remove_nuid(uint32_t nuid)
-{
-    if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
-    {
-        return ble_ancs_err_not_intited;
-    }
-
-    return ble_ancs_ok;
-}
-
-/// @brief to clear the data recvd in the nuid like title, msg , msg size ,etc
-/// @param nuid
-/// @return succ/failure
-uint32_t ble_ancs_clear_nuid(uint32_t nuid)
-{
-    if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
-    {
-        return ble_ancs_err_not_intited;
-    }
-
-    return ble_ancs_ok;
-}
 
 /// @brief this func must be called before reading the notification attributes
 /// @param uid
 /// @param fetch_level
 /// @return succ/failure
-uint32_t ble_ancs_fetch_notif_data(uint32_t uid, uint8_t fetch_level)
+uint32_t ble_ancs_fetch_notif_data(uint32_t uid)
 {
     if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
     {
@@ -434,72 +385,59 @@ uint32_t ble_ancs_get_notif_rcvd_time(uint32_t nuid, kernel_time_struct_t *notif
 /// @brief get the title string  of the notification
 /// @param uid
 /// @param title
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_title(uint32_t uid, const char *title)
+/// @return notif title
+const char * ble_ancs_get_notif_title(uint32_t uid)
 {
     if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
     {
-        return ble_ancs_err_not_intited;
+        return NULL;
     }
 
-    return ble_ancs_ok;
+    return NULL;
 }
 
 /// @brief get the subtitle of the notif string
 /// @param uid
 /// @param subtitle
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_subtitle(uint32_t uid, const char *subtitle)
+/// @return notif subtitle
+const char * ble_ancs_get_notif_subtitle(uint32_t uid)
 {
     if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
     {
-        return ble_ancs_err_not_intited;
+        return NULL;
     }
 
-    return ble_ancs_ok;
+    return NULL;
 }
 
 /// @brief get the msg string of the notif
 /// @param uid
 /// @param notif_msg
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_msg(uint32_t uid, const char *notif_msg)
+/// @return actual msg  
+const char * ble_ancs_get_notif_msg(uint32_t uid)
 {
     if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
     {
-        return ble_ancs_err_not_intited;
+        return NULL;
     }
 
-    return ble_ancs_ok;
+    return NULL;
 }
 
 /// @brief get the msg size of the notification
 /// @param uid
 /// @param size
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_msg_size(uint32_t uid, uint32_t *size)
+/// @return msg size 
+uint16_t ble_ancs_get_notif_msg_size(uint32_t uid)
 {
     if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
     {
-        return ble_ancs_err_not_intited;
+        return 0;
     }
 
-    return ble_ancs_ok;
+    return 0;
 }
 
-/// @brief get the action that can be oerformed on that particular notif
-/// @param nuid
-/// @param actions
-/// @return succ/failure
-uint32_t ble_ancs_get_notif_aciton(uint32_t nuid, uint32_t *actions)
-{
-    if (ble_ancs_handler.ble_ancs_instance_inited != BLE_ANCS_INSTANCE_INITED)
-    {
-        return ble_ancs_err_not_intited;
-    }
-
-    return ble_ancs_ok;
-}
 
 ///// this function can remove the notif from the notif
 /// @brief this function is to perform the notification action on the nuid
@@ -512,8 +450,15 @@ uint32_t ble_ancs_perform_notif_Action(uint32_t nuid, uint8_t action)
     {
         return ble_ancs_err_not_intited;
     }
+    
+    uint8_t temp_buff[] = {BLE_ANCS_COMMAND_ID_GET_PERFORM_NOTIF_ACTION,LSB32(nuid), MIDB32(nuid),
+    MID_B32(nuid),MSB32(nuid),action,0,0,0,0,0};
+    
+    uint32_t ret =0;
+    ret = gatt_client_char_write(ble_ancs_handler.conn_handle,(ble_char_struct_t *) &ble_ancs_handler.ancs_srvcs.ancs_control_point_char,
+    CHAR_WRITE_WITH_RSP,temp_buff,sizeof(temp_buff));
 
-    return ble_ancs_ok;
+    return ret;
 }
 
 /// @brief this will be called in kernel task handler as this will handle the notif processing
@@ -522,10 +467,14 @@ uint32_t ble_ancs_perform_notif_Action(uint32_t nuid, uint8_t action)
 uint32_t ble_ancs_process_notif(void)
 {
     uint32_t err = 0;
-
-    // uint8_t buff[] = {0x00,nuid,0,0,0,6,7,0};
-    // gatt_client_char_write(ble_ancs_handler.conn_handle,(ble_char_struct_t *) &ble_ancs_handler.ancs_srvcs.ancs_control_point_char,
-    // CHAR_WRITE_WITH_RSP,buff,sizeof(buff));
+    // __SIMD32
+    
+    uint8_t temp_buff[] = {BLE_ANCS_COMMAND_ID_GET_NOTIF_ATTRIBUTES,LSB32(ble_ancs_handler.ble_ancs_last_nuid), MIDB32(ble_ancs_handler.ble_ancs_last_nuid),
+    MID_B32(ble_ancs_handler.ble_ancs_last_nuid),MSB32(ble_ancs_handler.ble_ancs_last_nuid),BLE_ANCS_NOTIF_ATTR_ID_MESSAGE_SIZE,BLE_ANCS_NOTIF_ATTR_ID_DATE,
+    BLE_ANCS_NOTIF_ATTR_ID_APP_IDENTIFIER};
+      
+    err = gatt_client_char_write(ble_ancs_handler.conn_handle,(ble_char_struct_t *) &ble_ancs_handler.ancs_srvcs.ancs_control_point_char,
+    CHAR_WRITE_WITH_RSP,temp_buff,sizeof(temp_buff));
 
     return err;
 }
@@ -581,8 +530,11 @@ bool ble_ancs_client_event_handler(ble_gattc_evt_t const *evt)
 
             kernel_ll_add_data(&ble_ancs_ll_inst, u8_ptr & new_data, sizeof(new_data));
 
+            ble_ancs_handler.ble_ancs_last_nuid = new_data.nuid;
+            ble_ancs_handler.total_notif_present++;
             /// add the notification id to the ancs mem pool
             // kernel_mem_add_data(&ble_ancs_mem_inst, my_notif_struct->event_id, )
+             ret = 1;
         }
         break;
 
@@ -598,6 +550,10 @@ bool ble_ancs_client_event_handler(ble_gattc_evt_t const *evt)
             new_data.notif_fetched_level = BLE_ANCS_NOTIF_FETCH_PENDING;
 
             kernel_ll_modify_data(&ble_ancs_ll_inst, BLE_ANCS_META_INDEX_UID, u8_ptr & my_notif_struct->notif_uid, sizeof(my_notif_struct->notif_uid), u8_ptr & new_data);
+        
+            ble_ancs_handler.ble_ancs_last_nuid = new_data.nuid;
+
+             ret = 1;
         }
         break;
 
@@ -605,20 +561,33 @@ bool ble_ancs_client_event_handler(ble_gattc_evt_t const *evt)
         {
             /// we have to remove the data from the linklist
             kernel_ll_remove_data(&ble_ancs_ll_inst, BLE_ANCS_META_INDEX_UID, u8_ptr & my_notif_struct->notif_uid, sizeof(my_notif_struct->notif_uid));
-            // also delete any memory associated with it
+           /// total notification present would be decremented 
+           ble_ancs_handler.total_notif_present--;
+           // also delete any memory associated with it
         }
         break;
 
         default:
             break;
         }
-
-        ret = 1;
     }
 
     /// handle the data source  char
     else if (evt->params.hvx.handle == ble_ancs_handler.ancs_srvcs.ancs_data_source_char.handle_value)
     {
+       /// get the notification attribute 
+
+       // if getting the title, subtitle and complete message then used tasknotification 
+       
+       // otherwise handle it for the msg size,date,app_attribute
+        
+        NRF_LOG_INFO("data");
+        for (size_t i = 0; i < evt->params.hvx.len; i++)
+        {
+            printf("%d ",evt->params.hvx.data[i]);
+        }
+        printf("\r\n");
+        
     }
 
     return ret;
