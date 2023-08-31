@@ -8,3 +8,6 @@
 - because the function have a limited memory that is allocated for the  task at the time of its creation  
 - we should use the malloc and free . but for now we can assume that nvs data cannt be very big in size 
 - the max we are using nvs data is 500 bytes . so for that context we are for now using task local stack 
+
+- we cant able to make nvs partition and sotre differnt types of data in it,
+for now on we are only storing the encryption keys in it. 
