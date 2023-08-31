@@ -59,22 +59,22 @@
 //// the data rate of the accelrometer and based upon that current is given
 enum
 {
-    _010 = 0x00, /// 23ua
-    _020,        // 23
-    _039,        // 23
-    _078,        // 23
-    _15_6,       // 34
-    _3_13,       // 40
-    _6_25,       // 45
-    _12_5,       // 50
-    _25,         // 60
-    _50,         // 90
-    _100,        // 140
-    _200,        // 140
-    _400,        // 140
-    _800,        // 140
-    _1600,       // 90
-    _3200        // 140
+    adxl_datarate_010 = 0x00, /// 23ua
+    adxl_datarate_020,        // 23
+    adxl_datarate_039,        // 23
+    adxl_datarate_078,        // 23
+    adxl_datarate_15_6,       // 34
+    adxl_datarate_3_13,       // 40
+    adxl_datarate_6_25,       // 45
+    adxl_datarate_12_5,       // 50
+    adxl_datarate_25,         // 60
+    adxl_datarate_50,         // 90
+    adxl_datarate_100,        // 140
+    adxl_datarate_200,        // 140
+    adxl_datarate_400,        // 140
+    adxl_datarate_800,        // 140
+    adxl_datarate_1600,       // 90
+    adxl_datarate_3200        // 140
 
 };
 
@@ -92,10 +92,10 @@ enum
 // ///// output range of the accel
 enum _ACCEL_OUTPUT_RANGE_
 {
-    _2g = 0x00,
-    _4g,
-    _8g,
-    _16g
+    adxl_range_2g = 0x00,
+    adxl_range_4g,
+    adxl_range_8g,
+    adxl_range_16g
 };
 ////////////////// config for the adxl
 typedef struct __packed _CONFIG_
@@ -108,19 +108,19 @@ typedef struct __packed _CONFIG_
 } adxl_cfg;
 
 ////////// pointer of the adxl config typen
-typedef adxl_cfg *adxl_config;
+typedef const adxl_cfg * adxl_config;
 
 /// @brief this is to configure the accelormeter based on the paramter
 /// @param adxl_configure *
 /// @return succ/failure
 uint32_t adxl_configure(adxl_config cfg);
 
-#define singletap 0x01
-#define double_tap 0x03
+#define tap_en_singletap 0x01
+#define tap_en_double_tap 0x03
 
-#define x_axis 0x01
-#define y_axis 0x02
-#define z_axis 0x04
+#define tap_axis_en_x 0x01
+#define tap_axis_en_y 0x02
+#define tap_axis_en_z 0x04
 
 typedef struct __packed
 {
@@ -133,15 +133,15 @@ typedef struct __packed
 
 } taps_configurations;
 
-typedef taps_configurations *taps_cfg;
+typedef const taps_configurations *taps_cfg;
 
 void adxl_cfg_taps(taps_cfg);
 
 #define act_x_en 0x40
 #define act_y_en 0x20
 #define act_z_en 0x10
-#define dc_oper 0
-#define ac_oper 1
+#define act_dc_oper 0
+#define act_ac_oper 1
 
 typedef struct __packed
 {
@@ -169,21 +169,21 @@ typedef struct __packed
 
 } activity_inact_config;
 
-typedef activity_inact_config *act_inact_cfg;
+typedef const activity_inact_config *act_inact_cfg;
 
 void adxl_cfg_act_inact(act_inact_cfg);
 
 /// @brief this is used to configure the frefall
 /// @param  accleration value 62.5mg/LSB 300 to 600mg recommend
 /// @param  time value 5ms/LSB 100 ms and 350 ms recommend
-void adxl_cfg_freefall(uint8_t, uint8_t);
+void adxl_cfg_freefall(uint8_t accel, uint8_t time );
 
 enum _FIFO_CONFIGURETAION_TYPE_
 {
-    _bypass,
-    _fifo,
-    _stream,
-    _trigger
+    adxl_fifomode_bypass,
+    adxl_fifomode_fifo,
+    adxl_fifomode_stream,
+    adxl_fifomode_trigger
 };
 
 /// @brief configure the fifo
@@ -203,19 +203,37 @@ enum _ACCEL_CFG_INT_TYPE_
     accel_int_data_ready,     //  this interrupt fires when data is ready according to the data rate
 };
 
-#define INT_ENABLE 0x01u
 
-#define INT_DISABLE 0x00u
+#define ACCEL_INT_ENABLE 0x01u
+#define ACCEL_INT_DISABLE 0x00u
 
 /// @brief to enable or disable the interrupt
 /// @param int_type
 /// @param en_dis
-void accel_int_en_dis(uint8_t int_type, uint8_t en_dis);
+void adxl_int_en_dis(uint8_t int_type, uint8_t en_dis);
 
 // disable all the interrupts and then enable according to your use case
-void disable_all_ints(void);
+void adxl_disable_all_ints(void);
 
-uint8_t read_int_type(void);
+/// @brief this will give you the interupt type of the accel 
+/// @param  void
+/// @return interupt type @ref _ACCEL_CFG_INT_TYPE_
+uint8_t adxl_read_int_type(void);
+
+#define ACCEL_GETAXIS_FOR_ACTIVITY 0x10u
+#define ACCEL_GETAXIS_FOR_TAPS 0x20u
+
+#define ACCEL_INT_AXIS_NONE 0x0u
+#define ACCEL_INT_AXIS_Z 0x01u
+#define ACCEL_INT_AXIS_Y 0x02u
+#define ACCEL_INT_AXIS_X 0x04u
+
+#define ACCEL_INT_AXIS_MASK_VALUE 0x07u
+
+/// @brief this will give you whch axis give the interrupt 
+/// @param int_type 
+/// @return interrupt axis 
+uint8_t adxl_read_int_axis(uint8_t int_type);
 
 bool adxl_read_data(uint8_t *, uint16_t size);
 
