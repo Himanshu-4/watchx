@@ -78,11 +78,13 @@ uint32_t adxl_configure(const adxl_config cfg)
     write_reg(ADXL_REG_BW_RATE, val);
 
     /// /// configure the int map
-    // //// data ready , watermark and overrun are mapped to int 2 pin 
+    // //// data ready , watermark and overrun are mapped to int 1 pin 
     // //// single, double ,act, inact, freefall are mapped to int 1 pin
 
-    write_reg(ADXL_REG_INT_MAP, 0x82);
+    write_reg(ADXL_REG_INT_MAP, 0x00);
     write_reg(ADXL_REG_INT_ENABLE, 0);
+
+    /// int 2 is used to trigeer the data for the triggering in the fifo mode 
 
     write_reg(ADXL_REG_FIFO_CTL, 0);
     // //// write the data format reg  , set the int to active low  and set fullres mode 
@@ -198,7 +200,8 @@ void adxl_cfg_fifo(uint8_t mode, uint8_t samples)
      ADXL_STANDBY();
 
     uint8_t val =0;
-    SETBIT(val, (mode<<6) | samples);
+    // link the trigger mode to int 2 so that when triggered at this pin fifo starts collecting data 
+    SETBIT(val, _BV(5) |  (mode<<6) | samples);
 
     ADXL_CLEAR_STANDBY();
 }
@@ -253,52 +256,41 @@ bool adxl_read_data(uint8_t * data , uint8_t size)
 
 /// @brief read the accelration values and convert it into proper float arrays value
 /// @param buff 
-void read_accelration(float *buff , uint8_t *data ,uint8_t size)
+uint32_t read_accelration(int16_t *buff , uint8_t *data ,uint8_t size)
 {
-    uint8_t x0_addr = ADXL_REG_DATAX0;
-    uint8_t raw_buff[6] ={0};
-   
-    //     int16_t  x = (raw_buff[1] <<8 | raw_buff[0] );
-    //     int16_t  y = (raw_buff[3] <<8 | raw_buff[2] );
-    //     int16_t  z = (raw_buff[5] <<8 | raw_buff[4] );
+    if((size %6 ) != 0) return nrf_ERR_INVALID_PARAM;
 
+    for (uint8_t i = 0; i < (size/6); i++)
+    {
+    
+        uint16_t  x = (data[1 + i*6] <<8 | data[0 + i*6 ] );
+        uint16_t  y = (data[3 + i*6] <<8 | data[2 + i*6 ] );
+        uint16_t  z = (data[5 + i*6] <<8 | data[4 + i*6 ] );
 
-    //     // calculate the compliment  this is correct 
-    //     if(x & 0x8000) // check if x is -ve 
-    //     {
-    //         buff[0] = -(~(x-1));
-    //     }
-    //     else // if it is not -ve then asitis
-    //     {
-    //         buff[0] = x;
-    //     }
-    //     if(y & 0x8000)
-    //     {
-    //         buff[1] = -(~(y-1));
-    //     }
-    //     else 
-    //     {
-    //         buff[1] = y;
-    //     }
-    //     if( z & 0x8000)
-    //     {
-    //         buff[2] = -(~(z-1));
-    //     }
-    //     else 
-    //     {
-    //         buff[2] = z;
-    //     }
-    //     // multiply the data with the  gain factor 
-    //     // the gain is 3.876 mg/LSB
-    //     for(uint8_t i=0; i<3; i++)
-    //     {
-    //         buff[i] *= gain;
-        // }
+        x =  x>>1;
+        y = y>>1;
+        z = z>>1;
 
+        // calculate the compliment  this is correct 
+        if(x & 0x8000) // check if x is -ve 
+        {
+            x= -(~(x-1));
+        }
+        if(y & 0x8000)
+        {
+            y = -(~(y-1));
+        }
+        if( z & 0x8000)
+        {
+            z = -(~(z-1));
+        }
 
-        // return 1;
-    // }
-   
+        buff[0 + i] = x;
+        buff[1 + i] = y;
+        buff[2 + i] = z;
+    
+    }
+
    
 }
 

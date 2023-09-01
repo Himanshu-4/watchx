@@ -240,14 +240,14 @@ uint8_t adxl_read_int_axis(uint8_t int_type);
 /// @param data 
 /// @param size 
 /// @return succ/failure 
-bool adxl_read_data(uint8_t * data , uint8_t size)
+bool adxl_read_data(uint8_t * data , uint8_t size);
 
 
 /// @brief read the accelration values and convert it into proper float arrays value
 /// @param buff 
-void read_accelration(float *buff , uint8_t *data ,uint8_t size)
+uint32_t read_accelration(int16_t *buff , uint8_t *data ,uint8_t size);
 
 //////////// define the gain of the acclerometer
-#define accel_standard_gain 3.874f /// mg/LSB
+#define accel_standard_gain 3.9f /// mg/LSB
 
 #endif

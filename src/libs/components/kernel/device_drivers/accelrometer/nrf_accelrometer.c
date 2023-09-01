@@ -59,6 +59,8 @@ static uint8_t ucQueueStorageArea_for_acceleventq[ACCEL_EVENT_Q_LENGTH * ACCEL_E
 
 static xQueueHandle nrf_accel_evtqhandle = NULL;
 
+
+static volatile uint8_t int_axis = ACCEL_INT_AXIS_NONE;
 ///=====================================================================
 ///=====================================================================
 /// ============ function handlers
@@ -190,7 +192,7 @@ uint32_t nrf_accel_get_evtq_wait(uint32_t wait_time)
 /// @return or combination axis of the event (x | Y | Z)
 uint32_t nrf_accel_get_event_axis_type(void)
 {
-
+    return int_axis;
 }
 
 /// @brief put the event in the event q forcefully and wait for the time if the q is full
@@ -249,6 +251,14 @@ void nrf_accel_resume_events(void)
     xQueueReset(nrf_accel_evtqhandle);
 }
 
+/// @brief read the raw accelration of the accelrometer 
+/// @param  
+void nrf_read_accel_raw(void)
+{
+
+}
+
+
 static void gpio_int_handler_for_accel_int1(void)
 {
     BaseType_t high_task_woken = pdFALSE;
@@ -256,8 +266,8 @@ static void gpio_int_handler_for_accel_int1(void)
 
     /// get the interrupt type
     uint8_t int_type = adxl_read_int_type();
-    uint8_t int_axis = ACCEL_INT_AXIS_NONE;
-
+   
+    int_axis = ACCEL_INT_AXIS_NONE;
     switch (int_type)
     {
     case accel_int_freefall:

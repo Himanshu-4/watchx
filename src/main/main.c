@@ -152,7 +152,10 @@ void general_task_function(void *param)
               
             }
         }
-        delay(100);
+        // delay(100);
+
+        /// handle the accelrometer here 
+        
 
         // NRF_LOG_INFO("main task 1");
     }
