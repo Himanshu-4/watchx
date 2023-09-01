@@ -8,14 +8,17 @@
 /// include the freertos implemenatation
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 #include "semphr.h"
+
+#include "nrf_custom_log.h"
 
 ///===================================================================
 ///====================================================================
 ///============================ define the threshold value used for accel
 
 #define ACCEL_CONFIG_OUTPUT_RANGE adxl_range_4g
-#define ACCEL_CONFIG_DATA_RATE adxl_datarate_50
+#define ACCEL_CONFIG_DATA_RATE adxl_datarate_25
 
 #define ACCEL_TAP_AXES (tap_axis_en_x | tap_axis_en_y | tap_axis_en_z)
 #define ACCEL_TAP_TYPE (tap_en_singletap | tap_en_double_tap)
@@ -57,7 +60,7 @@
 static StaticQueue_t xstatic_q_for_accel_events;
 static uint8_t ucQueueStorageArea_for_acceleventq[ACCEL_EVENT_Q_LENGTH * ACCEL_EVENT_Q_ITEM_SIZE];
 
-static xQueueHandle nrf_accel_evtqhandle = NULL;
+static volatile xQueueHandle nrf_accel_evtqhandle = NULL;
 
 
 static volatile uint8_t int_axis = ACCEL_INT_AXIS_NONE;
@@ -74,7 +77,7 @@ void nrf_accel_evt_lib_init(void)
     nrf_accel_evtqhandle = xQueueCreateStatic(ACCEL_EVENT_Q_LENGTH,
                                               ACCEL_EVENT_Q_ITEM_SIZE, ucQueueStorageArea_for_acceleventq,
                                               &xstatic_q_for_accel_events);
-
+ 
     const my_gpio_cfg nrf_buttons_gpio_type =
         {
             .gpio_dir = GPIO_PIN_DIR_INPUT,
@@ -97,56 +100,57 @@ void nrf_accel_evt_lib_init(void)
     gpio_config_channel(NRF_ACCEL_INT1_GPIO_CHANNEL, &accel_pin_int_cfg);
     //// config the gpio irq handler
     gpio_add_irq_handler(NRF_ACCEL_INT1_GPIO_CHANNEL, gpio_int_handler_for_accel_int1);
-
-    /// configure the accelrometer
+    
+    //configure the accelrometer
     const adxl_cfg nrf_accel_cfg =
         {
             .link_autosleep = 1, .low_pwr = 0, .rate = ACCEL_CONFIG_DATA_RATE, .output_range = ACCEL_CONFIG_OUTPUT_RANGE};
-    adxl_configure(&nrf_accel_cfg);
-
+    uint32_t ret = adxl_configure(&nrf_accel_cfg);
+    NRF_ASSERT(ret);
     //// configure the single ,double tap
-    const taps_configurations nrf_accel_taps_config =
-        {
-            .tap_axes = ACCEL_TAP_AXES,
-            .tap_type = ACCEL_TAP_TYPE,
-            .tap_thresh = ACCEL_TAP_THRESH,
-            .tap_durat = ACCEL_TAP_DURATION,
-            // double_Tap_configurations
-            .double_tap_lattency = ACCEL_DOUBLE_TAP_LATENCY,
-            .double_tap_window = ACCEL_DOUBLE_TAP_WINDOW,
+    // const taps_configurations nrf_accel_taps_config =
+    //     {
+    //         .tap_axes = ACCEL_TAP_AXES,
+    //         .tap_type = ACCEL_TAP_TYPE,
+    //         .tap_thresh = ACCEL_TAP_THRESH,
+    //         .tap_durat = ACCEL_TAP_DURATION,
+    //         // double_Tap_configurations
+    //         .double_tap_lattency = ACCEL_DOUBLE_TAP_LATENCY,
+    //         .double_tap_window = ACCEL_DOUBLE_TAP_WINDOW,
 
-        };
-    adxl_cfg_taps(&nrf_accel_taps_config);
+    //     };
+    // adxl_cfg_taps(&nrf_accel_taps_config);
 
-    //// configure the activity ,inactivity
-    const activity_inact_config nrf_Act_inact_config =
-        {
-            .act.axes = ACCEL_ACTIVITY_AXES,
-            .act.thresh_act = ACCEL_ACTIVITY_THRESH,
-            .act._ac_dc = ACCEL_ACTIVITY_OP_TYPE,
+    // //// configure the activity ,inactivity
+    // const activity_inact_config nrf_Act_inact_config =
+    //     {
+    //         .act.axes = ACCEL_ACTIVITY_AXES,
+    //         .act.thresh_act = ACCEL_ACTIVITY_THRESH,
+    //         .act._ac_dc = ACCEL_ACTIVITY_OP_TYPE,
 
-            .inact.axes = ACCEL_INACTIVITY_AXES,
-            .inact.thresh_inact = ACCEL_INACTIVITY_THRESH,
-            .inact.time_inact = ACCEL_INACTIVITY_TIME,
-            .inact._ac_dc = ACCEL_INACTIVITY_OP_TYPE};
-    adxl_cfg_act_inact(&nrf_Act_inact_config);
+    //         .inact.axes = ACCEL_INACTIVITY_AXES,
+    //         .inact.thresh_inact = ACCEL_INACTIVITY_THRESH,
+    //         .inact.time_inact = ACCEL_INACTIVITY_TIME,
+    //         .inact._ac_dc = ACCEL_INACTIVITY_OP_TYPE};
+    // adxl_cfg_act_inact(&nrf_Act_inact_config);
 
-    /// configure the freefall
-    adxl_cfg_freefall(ACCEL_FREEFALL_THRESH, ACCEL_FREEFALL_TIME);
+    // /// configure the freefall
+    // adxl_cfg_freefall(ACCEL_FREEFALL_THRESH, ACCEL_FREEFALL_TIME);
 
     //// configure the fifo in bypass mode and its interrupt
     adxl_cfg_fifo(ACCEL_FIFO_MODE, ACCEL_FIFO_SAMPLES);
 
     /// first disable all interupts
     adxl_disable_all_ints();
-    /// configure the interrupts and reading type
-    adxl_int_en_dis(accel_int_freefall, ACCEL_INT_ENABLE);
-    adxl_int_en_dis(accel_int_inactivity, ACCEL_INT_ENABLE);
-    adxl_int_en_dis(accel_int_activity, ACCEL_INT_ENABLE);
-    adxl_int_en_dis(accel_int_double_tap, ACCEL_INT_ENABLE);
-    adxl_int_en_dis(accel_int_single_tap, ACCEL_INT_ENABLE);
+    // /// configure the interrupts and reading type
+    // // adxl_int_en_dis(accel_int_freefall, ACCEL_INT_ENABLE);
+    // // adxl_int_en_dis(accel_int_inactivity, ACCEL_INT_ENABLE);
+    // // adxl_int_en_dis(accel_int_activity, ACCEL_INT_ENABLE);
+    // adxl_int_en_dis(accel_int_double_tap, ACCEL_INT_ENABLE);
+    // adxl_int_en_dis(accel_int_single_tap, ACCEL_INT_ENABLE);
 
-    //////// enable the int for the gpio
+    // adxl_int_en_dis(accel_int_data_ready, ACCEL_INT_ENABLE);
+    // //////// enable the int for the gpio
     gpio_int_enable(NRF_ACCEL_INT1_GPIO_CHANNEL);
 }
 
@@ -252,10 +256,19 @@ void nrf_accel_resume_events(void)
 }
 
 /// @brief read the raw accelration of the accelrometer 
-/// @param  
-void nrf_read_accel_raw(void)
+/// @param  void 
+void nrf_accel_read_raw(void)
 {
+    uint8_t databuff[6]  =  {0};
+    int16_t data[3] = {0};
 
+    adxl_read_data(databuff,6);
+    read_accelration(data, databuff, 6 );
+
+    printf("%4.4f,%4.4f,%4.4f\r\n",data[0] *accel_standard_gain, 
+    data[1]*accel_standard_gain, data[2]*accel_standard_gain );
+
+    // adxl_Read_reg();
 }
 
 
@@ -265,34 +278,49 @@ static void gpio_int_handler_for_accel_int1(void)
     uint8_t evt_To_append = NRF_ACCEL_EVT_NONE;
 
     /// get the interrupt type
-    uint8_t int_type = adxl_read_int_type();
+    uint8_t int_type =0;
+    int_type =  adxl_read_int_type();
    
     int_axis = ACCEL_INT_AXIS_NONE;
     switch (int_type)
     {
-    case accel_int_freefall:
+    case ADXL_INT_MASK_FREEFALL:
         evt_To_append = NRF_ACCEL_EVT_FREEFALL;
         break;
-    case accel_int_inactivity:
+    case ADXL_INT_MASK_INACTIVITY:
         evt_To_append = NRF_ACCEL_EVT_INACTIVITY;
         break;
-    case accel_int_activity:
+    case ADXL_INT_MASK_ACTIVITY :
         evt_To_append = NRF_ACCEL_EVT_ACTIVITY;
         int_axis = adxl_read_int_axis(ACCEL_GETAXIS_FOR_ACTIVITY);
         break;
-    case accel_int_double_tap:
+    case ADXL_INT_MASK_DOUBLE_TAP:
         evt_To_append = NRF_ACCEL_EVT_DOUBLE_TAP;
         int_axis = adxl_read_int_axis(ACCEL_GETAXIS_FOR_TAPS);
         break;
 
-    case accel_int_single_tap:
+    case ADXL_INT_MASK_SINGLE_TAP:
         evt_To_append = NRF_ACCEL_EVT_SINGLE_TAP;
         int_axis = adxl_read_int_axis(ACCEL_GETAXIS_FOR_TAPS);
         break;
+
+    /// @brief fifo related events 
+    case ADXL_INT_MASK_DATA_READY:
+        evt_To_append = NRF_ACCEL_EVT_FIFO_DATARDY;
+        break;
+
+    case ADXL_INT_MASK_WATERMARK:
+        evt_To_append = NRF_ACCEL_EVT_FIFO_WATERMARK;
+        break;
+
+    case ADXL_INT_MASK_OVERRUN:
+        evt_To_append = NRF_ACCEL_EVT_FIFO_OVERRUN;
+        break;
+
     default:
+        evt_To_append = NRF_ACCEL_EVT_FIFO_DATARDY;
         break;
     }
-
     // if activity or tap then get the axis
     xQueueOverwriteFromISR(nrf_accel_evtqhandle, &evt_To_append, &high_task_woken);
 

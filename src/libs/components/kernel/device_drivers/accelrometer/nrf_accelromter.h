@@ -8,28 +8,26 @@
 enum _ACCELROMETER_EVENTS_
 {
     NRF_ACCEL_EVT_NONE,
+    /// @brief gesture events 
     NRF_ACCEL_EVT_SINGLE_TAP,
     NRF_ACCEL_EVT_DOUBLE_TAP,
     NRF_ACCEL_EVT_FREEFALL,
     NRF_ACCEL_EVT_ACTIVITY,
     NRF_ACCEL_EVT_INACTIVITY,
+    /// @brief  fifo related events 
+    NRF_ACCEL_EVT_FIFO_DATARDY,
+    NRF_ACCEL_EVT_FIFO_WATERMARK,
+    NRF_ACCEL_EVT_FIFO_OVERRUN,
     NRF_ACCEL_EVT_MAX_LIMIT,
 
 };
 
-/// @brief  these are the fifo events 
-enum _ACCELROMETER_FIFO_EVENTS_
-{
-    NRF_ACCEL_EVT_FIFO_NONE,
-    NRF_ACCEL_EVT_FIFO_DATARDY,
-    NRF_ACCEL_EVT_FIFO_WATERMARK,
-    NRF_ACCEL_EVT_FIFO_OVERRUT
-};
 
 /// these are the axis of the accelrometer where we get the events 
-#define ACCEL_X_AXIS 0x10
-#define ACCEL_Y_AXIS 0x20
-#define ACCEL_Z_AXIS 0x30
+#define ACCEL_AXIS_NONE 0x00u
+#define ACCEL_X_AXIS 0x01U
+#define ACCEL_Y_AXIS 0x02U
+#define ACCEL_Z_AXIS 0x04U
 
 
 /// @brief this is the accelrometer event lib 
@@ -74,10 +72,18 @@ void nrf_accel_pasue_events(void);
 void nrf_accel_resume_events(void);
 
 
+/// @brief read the raw accelration of the accelrometer 
+/// @param  void 
+void nrf_accel_read_raw(void);
+
 /// @brief to get the axis of the event like if x axis triggers the event in activity or taps 
 /// @param  void 
 /// @return or combination axis of the event (x | Y | Z)
 uint32_t nrf_accel_get_event_axis_type(void);
+
+/// @brief read the raw accelration of the accelrometer 
+/// @param  void 
+void nrf_read_accel_raw(void);
 
 
 #endif

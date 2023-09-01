@@ -26,6 +26,8 @@
 
 #include "ble_ams.h"
 #include "ble_peer_info.h"
+
+#include "device_drivers/accelrometer/nrf_accelromter.h"
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////// general Task Function decleartions /////////////////////////////////////
@@ -152,10 +154,19 @@ void general_task_function(void *param)
               
             }
         }
-        // delay(100);
+        
+        delay(100);
 
         /// handle the accelrometer here 
+        // uint8_t evttype =  nrf_accel_get_evtq();
         
+        // if(evttype != NRF_ACCEL_EVT_NONE)
+        // {
+        // NRF_LOG_INFO("evt is %d",evttype) ;
+        // }    
+        // {
+        nrf_accel_read_raw();
+        // }
 
         // NRF_LOG_INFO("main task 1");
     }

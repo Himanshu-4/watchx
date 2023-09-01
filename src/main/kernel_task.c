@@ -112,12 +112,7 @@ void Kernel_task_preinit(void)
 {
     /// init the spi,i2c and gpio drivers
     Hardware_drivers_install();
-
     
-    ////// init the devices drivers here
-    nrf_button_evt_lib_init();
-    nrf_accel_evt_lib_init();
-
     /// init the ble functionalities of the device
     //////////////////////////////////////////////////////////
     // init the ble stack
@@ -169,6 +164,11 @@ void kernel_task_deinit(void)
 void kernel_task(void *param)
 {
     UNUSED_PARAMETER(param);
+
+    /// init the device driver at the start of kernel task 
+
+    nrf_button_evt_lib_init();
+    nrf_accel_evt_lib_init();
 
     /// global err to store the err of retutrns
     uint32_t err = 0;

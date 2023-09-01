@@ -14,13 +14,6 @@
 // with the ALT addr pin LOW
 #define ADXL_SENS_ADDR 0x53
 
-#define _1byte 1
-#define _2byte 2
-#define _3byte 3
-#define _6byte 6
-
-#define i2c_wait_time 20 /// 100 msec
-
 #define ADXL_REG_DEVID 0x00
 #define ADXL_REG_THRESH_TAP 0x1D
 #define ADXL_REG_OFSX 0x1E
@@ -108,7 +101,7 @@ typedef struct __packed _CONFIG_
 } adxl_cfg;
 
 ////////// pointer of the adxl config typen
-typedef const adxl_cfg * adxl_config;
+typedef const adxl_cfg *adxl_config;
 
 /// @brief this is to configure the accelormeter based on the paramter
 /// @param adxl_configure *
@@ -176,7 +169,7 @@ void adxl_cfg_act_inact(act_inact_cfg);
 /// @brief this is used to configure the frefall
 /// @param  accleration value 62.5mg/LSB 300 to 600mg recommend
 /// @param  time value 5ms/LSB 100 ms and 350 ms recommend
-void adxl_cfg_freefall(uint8_t accel, uint8_t time );
+void adxl_cfg_freefall(uint8_t accel, uint8_t time);
 
 enum _FIFO_CONFIGURETAION_TYPE_
 {
@@ -201,8 +194,17 @@ enum _ACCEL_CFG_INT_TYPE_
     accel_int_double_tap,     // double tap
     accel_int_single_tap,     // single tap innterrupt
     accel_int_data_ready,     //  this interrupt fires when data is ready according to the data rate
+    accel_int_max_limit,
 };
 
+#define ADXL_INT_MASK_OVERRUN (_BV(accel_int_overrun))
+#define ADXL_INT_MASK_WATERMARK (_BV(accel_int_watermark))
+#define ADXL_INT_MASK_FREEFALL (_BV(accel_int_freefall))
+#define ADXL_INT_MASK_INACTIVITY (_BV(accel_int_inactivity))
+#define ADXL_INT_MASK_ACTIVITY (_BV(accel_int_activity))
+#define ADXL_INT_MASK_DOUBLE_TAP (_BV(accel_int_double_tap))
+#define ADXL_INT_MASK_SINGLE_TAP (_BV(accel_int_single_tap))
+#define ADXL_INT_MASK_DATA_READY (_BV(accel_int_data_ready))
 
 #define ACCEL_INT_ENABLE 0x01u
 #define ACCEL_INT_DISABLE 0x00u
@@ -215,7 +217,7 @@ void adxl_int_en_dis(uint8_t int_type, uint8_t en_dis);
 // disable all the interrupts and then enable according to your use case
 void adxl_disable_all_ints(void);
 
-/// @brief this will give you the interupt type of the accel 
+/// @brief this will give you the interupt type of the accel
 /// @param  void
 /// @return interupt type @ref _ACCEL_CFG_INT_TYPE_
 uint8_t adxl_read_int_type(void);
@@ -230,24 +232,23 @@ uint8_t adxl_read_int_type(void);
 
 #define ACCEL_INT_AXIS_MASK_VALUE 0x07u
 
-/// @brief this will give you whch axis give the interrupt 
-/// @param int_type 
-/// @return interrupt axis 
+/// @brief this will give you whch axis give the interrupt
+/// @param int_type
+/// @return interrupt axis
 uint8_t adxl_read_int_axis(uint8_t int_type);
 
-
-/// @brief this will read the accelration data from the sensor 
-/// @param data 
-/// @param size 
-/// @return succ/failure 
-bool adxl_read_data(uint8_t * data , uint8_t size);
-
+/// @brief this will read the accelration data from the sensor
+/// @param data
+/// @param size
+/// @return succ/failure
+bool adxl_read_data(uint8_t *data, uint8_t size);
 
 /// @brief read the accelration values and convert it into proper float arrays value
-/// @param buff 
-uint32_t read_accelration(int16_t *buff , uint8_t *data ,uint8_t size);
+/// @param buff
+uint32_t read_accelration(int16_t *buff, uint8_t *data, uint8_t size);
 
+void adxl_Read_reg(void );
 //////////// define the gain of the acclerometer
-#define accel_standard_gain 3.9f /// mg/LSB
+#define accel_standard_gain 3.874f /// mg/LSB
 
 #endif
