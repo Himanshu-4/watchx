@@ -54,18 +54,30 @@ uint32_t nrf_accel_get_evtq_wait(uint32_t time);
 /// @param void 
 void nrf_accel_reset_evtq(void);
 
-/// @brief 
+/// @brief put the event in the evtq forcefully aka overwriting if the q is full 
 /// @param evt 
-/// @return 
+/// @return succ/errcode
 uint32_t nrf_accel_put_in_evtq(uint8_t evt);
 
-/// @brief 
-/// @param  
+/// @brief put the event in the event q forcefully and wait for the time if the q is full
+/// @param evt 
+/// @param time 
+/// @return succ/failure 
+uint32_t nrf_accel_put_in_evtq_wait(uint8_t evt, uint32_t time);
+
+/// @brief this will pause the events 
+/// @param  void 
 void nrf_accel_pasue_events(void);
 
-/// @brief 
-/// @param  
+/// @brief this will resume the events 
+/// @param  void 
 void nrf_accel_resume_events(void);
+
+
+/// @brief to get the axis of the event like if x axis triggers the event in activity or taps 
+/// @param  void 
+/// @return or combination axis of the event (x | Y | Z)
+uint32_t nrf_accel_get_event_axis_type(void);
 
 
 #endif

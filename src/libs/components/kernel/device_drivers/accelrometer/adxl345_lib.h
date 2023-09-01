@@ -6,7 +6,7 @@
 // follows the NXP I2C guide put the CS to high to put the IC in I2C mode
 // the SDO can be use as ALT address pin in I2C mode when high I2c addr is 0x1D , LOw ->0x53
 
-#define I2C_HOST_USED ACCEL_I2C_HOST_USED
+#define I2C_HOST_USED NRF_ACCEL_I2C_HOST_USED
 // #define weak_alias ( __attribute__ ((weak, alias ("default_handler"))) )
 
 ////////// sensor address  with the ALT addr pin HIGH
@@ -235,9 +235,19 @@ uint8_t adxl_read_int_type(void);
 /// @return interrupt axis 
 uint8_t adxl_read_int_axis(uint8_t int_type);
 
-bool adxl_read_data(uint8_t *, uint16_t size);
+
+/// @brief this will read the accelration data from the sensor 
+/// @param data 
+/// @param size 
+/// @return succ/failure 
+bool adxl_read_data(uint8_t * data , uint8_t size)
+
+
+/// @brief read the accelration values and convert it into proper float arrays value
+/// @param buff 
+void read_accelration(float *buff , uint8_t *data ,uint8_t size)
 
 //////////// define the gain of the acclerometer
-#define gain 3.874f /// mg/LSB
+#define accel_standard_gain 3.874f /// mg/LSB
 
 #endif

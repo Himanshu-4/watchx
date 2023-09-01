@@ -15,8 +15,8 @@ static uint8_t read_reg( uint8_t reg_addr)
 
     i2c_xfr_config xfrcfg = 
     {
-        .tx_buff = write_buff,
-        .tx_size = sizeof(write_buff),
+        .tx_buff = &reg_addr,
+        .tx_size = 1,
         .rx_buff = read_buff,
         .rx_size = sizeof(read_buff)
     };
@@ -34,6 +34,18 @@ static void write_reg(uint8_t reg_addr, uint8_t data)
     i2c_write_data_arr(I2C_HOST_USED, ADXL_SENS_ADDR, buff, sizeof(buff));
 }
 
+static uint32_t read_data(uint8_t reg_addr, uint8_t *buff, uint8_t size )
+{
+    i2c_xfr_config xfrcfg =
+    {
+        .tx_buff = &reg_addr,
+        .tx_size = 1,
+        .rx_buff = buff,
+        .rx_size = size
+    };
+
+    return i2c_write_and_read_data_arr(I2C_HOST_USED, ADXL_SENS_ADDR, &xfrcfg);
+}
 
 //// we always set the link+autosleep in the adxl345
 
@@ -228,20 +240,24 @@ uint8_t adxl_read_int_axis(uint8_t int_type)
 }
 
 
-bool adxl_read_data(uint8_t * data , uint16_t size)
+/// @brief this will read the accelration data from the sensor 
+/// @param data 
+/// @param size 
+/// @return succ/failure 
+bool adxl_read_data(uint8_t * data , uint8_t size)
 {
-     uint8_t x0_addr = ADXL_REG_DATAX0;
-    // if (i2c_master_write_read_device(I2C_HOST_0, ADXL_SENS_ADDR, &x0_addr, _1byte , data, size , i2c_wait_time) == ESP_OK)
-    return 1;
+    if (read_data(ADXL_REG_DATAX0, data, size) == nrf_OK)
+    return 1; 
     return 0;
 }
 
-bool read_accelration(float *buff )
+/// @brief read the accelration values and convert it into proper float arrays value
+/// @param buff 
+void read_accelration(float *buff , uint8_t *data ,uint8_t size)
 {
     uint8_t x0_addr = ADXL_REG_DATAX0;
     uint8_t raw_buff[6] ={0};
-    // if (i2c_master_write_read_device(I2C_HOST_0, ADXL_SENS_ADDR, &x0_addr, _1byte , raw_buff, 6 , i2c_wait_time) == ESP_OK)
-    // {
+   
     //     int16_t  x = (raw_buff[1] <<8 | raw_buff[0] );
     //     int16_t  y = (raw_buff[3] <<8 | raw_buff[2] );
     //     int16_t  z = (raw_buff[5] <<8 | raw_buff[4] );
@@ -283,7 +299,6 @@ bool read_accelration(float *buff )
         // return 1;
     // }
    
-    return 0;
    
 }
 
