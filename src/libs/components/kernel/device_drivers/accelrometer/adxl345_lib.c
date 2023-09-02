@@ -243,7 +243,7 @@ bool adxl_read_data(uint8_t *data, uint8_t size)
 
 void adxl_Read_reg(void)
 {
-    printf("isrc %x,p %x,df %x inten %x \r\n", adxl_read_int_type(), read_reg(ADXL_REG_POWER_CTL),
+    printf("isrc %x ,p %x,df %x inten %x \r\n", adxl_read_int_type(), read_reg(ADXL_REG_POWER_CTL),
            read_reg(ADXL_REG_DATA_FORMAT), read_reg(ADXL_REG_INT_ENABLE));
 }
 

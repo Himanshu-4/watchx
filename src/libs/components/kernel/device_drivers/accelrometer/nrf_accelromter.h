@@ -83,7 +83,7 @@ uint32_t nrf_accel_get_event_axis_type(void);
 
 /// @brief read the raw accelration of the accelrometer 
 /// @param  void 
-void nrf_read_accel_raw(void);
+void nrf_accel_read_raw(void);
 
 
 #endif

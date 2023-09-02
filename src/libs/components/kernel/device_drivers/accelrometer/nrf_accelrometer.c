@@ -17,31 +17,38 @@
 ///====================================================================
 ///============================ define the threshold value used for accel
 
-#define ACCEL_CONFIG_OUTPUT_RANGE adxl_range_16g
+#define ACCEL_CONFIG_OUTPUT_RANGE adxl_range_2g
 #define ACCEL_CONFIG_DATA_RATE adxl_datarate_25
 
-#define ACCEL_TAP_AXES (tap_axis_en_x | tap_axis_en_y | tap_axis_en_z)
+// #define ACCEL_TAP_AXES (tap_axis_en_x | tap_axis_en_y | tap_axis_en_z)
+
+#define ACCEL_TAP_AXES (tap_axis_en_z )
 #define ACCEL_TAP_TYPE (tap_en_singletap | tap_en_double_tap)
-#define ACCEL_TAP_THRESH 20   /// 20 * 62.5mg/lsb
-#define ACCEL_TAP_DURATION 10 //// 625usec/lsb
+#define ACCEL_TAP_THRESH 0x30   /// 20 * 62.5mg/lsb
+#define ACCEL_TAP_DURATION 0x10 //// 625usec/lsb
 
 // double_Tap_configurations
-#define ACCEL_DOUBLE_TAP_LATENCY 30 /// 1.25ms/lsb
-#define ACCEL_DOUBLE_TAP_WINDOW 20  /// 1.25ms/lsb
+#define ACCEL_DOUBLE_TAP_LATENCY 16 /// 1.25ms/lsb
+#define ACCEL_DOUBLE_TAP_WINDOW 64  /// 1.25ms/lsb
 
 // activity configurations
-#define ACCEL_ACTIVITY_THRESH 10 // 10* 62.5mg/lsb
-#define ACCEL_ACTIVITY_AXES (act_x_en | act_y_en | act_z_en)
+#define ACCEL_ACTIVITY_THRESH 16 // 10* 62.5mg/lsb
+// #define ACCEL_ACTIVITY_AXES (act_x_en | act_y_en | act_z_en)
+
+#define ACCEL_ACTIVITY_AXES ( act_z_en)
 #define ACCEL_ACTIVITY_OP_TYPE act_dc_oper
 
 // inactivity configuration
-#define ACCEL_INACTIVITY_THRESH 20 /// 20 * 62.5mg/lsb
+#define ACCEL_INACTIVITY_THRESH 16 /// 16 * 62.5mg/lsb
 #define ACCEL_INACTIVITY_TIME 5    // 5* 1sec/lsb
-#define ACCEL_INACTIVITY_AXES (inact_x_en | inact_y_en | inact_z_en)
+// #define ACCEL_INACTIVITY_AXES (inact_x_en | inact_y_en | inact_z_en)
+
+#define ACCEL_INACTIVITY_AXES ( inact_z_en)
+
 #define ACCEL_INACTIVITY_OP_TYPE act_dc_oper
 
 /// freefall configuration
-#define ACCEL_FREEFALL_THRESH 30 /// 30 * 62.5mg/lsb
+#define ACCEL_FREEFALL_THRESH 14 /// 30 * 62.5mg/lsb
 #define ACCEL_FREEFALL_TIME 100  // 5 * 100 ms/lsb
 
 /// fifo mode and sample configuration
@@ -135,7 +142,7 @@ void nrf_accel_evt_lib_init(void)
     adxl_cfg_act_inact(&nrf_Act_inact_config);
 
     /// configure the freefall
-    adxl_cfg_freefall(ACCEL_FREEFALL_THRESH, ACCEL_FREEFALL_TIME);
+    // adxl_cfg_freefall(ACCEL_FREEFALL_THRESH, ACCEL_FREEFALL_TIME);
 
     //// configure the fifo in bypass mode and its interrupt
     adxl_cfg_fifo(ACCEL_FIFO_MODE, ACCEL_FIFO_SAMPLES);
@@ -143,7 +150,7 @@ void nrf_accel_evt_lib_init(void)
     /// first disable all interupts
     adxl_disable_all_ints();
     // /// configure the interrupts and reading type
-    adxl_int_en_dis(accel_int_freefall, ACCEL_INT_ENABLE);
+    // adxl_int_en_dis(accel_int_freefall, ACCEL_INT_ENABLE);
     adxl_int_en_dis(accel_int_inactivity, ACCEL_INT_ENABLE);
     adxl_int_en_dis(accel_int_activity, ACCEL_INT_ENABLE);
     adxl_int_en_dis(accel_int_double_tap, ACCEL_INT_ENABLE);
@@ -259,16 +266,16 @@ void nrf_accel_resume_events(void)
 /// @param  void 
 void nrf_accel_read_raw(void)
 {
-    uint8_t databuff[6]  =  {0};
-    int16_t data[3] = {0};
+    // uint8_t databuff[6]  =  {0};
+    // int16_t data[3] = {0};
 
-    adxl_read_data(databuff,6);
-    read_accelration(data, databuff, 6 );
+    // adxl_read_data(databuff,6);
+    // read_accelration(data, databuff, 6 );
 
-    printf("%f,%f,%f\r\n",data[0] *accel_gain_in_g, 
-    data[1]*accel_gain_in_g, data[2]*accel_gain_in_g );
+    // printf("%f,%f,%f\r\n",data[0] *accel_gain_in_g, 
+    // data[1]*accel_gain_in_g, data[2]*accel_gain_in_g );
 
-    // adxl_Read_reg();
+    adxl_Read_reg();
 }
 
 
@@ -318,7 +325,6 @@ static void gpio_int_handler_for_accel_int1(void)
         break;
 
     default:
-        evt_To_append = NRF_ACCEL_EVT_FIFO_DATARDY;
         break;
     }
     // if activity or tap then get the axis
