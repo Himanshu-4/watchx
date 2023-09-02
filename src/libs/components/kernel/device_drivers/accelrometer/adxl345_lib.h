@@ -249,6 +249,7 @@ uint32_t read_accelration(int16_t *buff, uint8_t *data, uint8_t size);
 
 void adxl_Read_reg(void );
 //////////// define the gain of the acclerometer
-#define accel_standard_gain 3.874f /// mg/LSB
+#define accel_gain_in_mg 3.9f /// mg/LSB
+#define accel_gain_in_g 0.0039f /// g/lsb
 
 #endif

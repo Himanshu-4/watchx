@@ -257,23 +257,9 @@ uint32_t read_accelration(int16_t *buff, uint8_t *data, uint8_t size)
     for (uint8_t i = 0; i < (size / 6); i++)
     {
 
-         buff[0 + i] = ((data[1 + i * 6] << 8 | data[0 + i * 6]) >>1);
-        buff[1 + i] = ((data[3 + i * 6] << 8 | data[2 + i * 6]) >> 1);
-         buff[2 + i] = ((data[5 + i * 6] << 8 | data[4 + i * 6]) >>1);
-
-        // calculate the compliment  this is correct
-        if (   buff[0 + i] & 0x8000) // check if x is -ve
-        {
-            buff[0 + i] = 0x10000;
-        }
-        if (buff[1 + i] & 0x8000)
-        {
-            buff[1 + i] = 0x10000;
-        }
-        if (buff[2 + i] & 0x8000)
-        {
-            buff[2 + i] = 0x10000;
-        }
+        buff[0 + i] = (data[1 + i * 6] << 8) | data[0 + i * 6];
+        buff[1 + i] = (data[3 + i * 6] << 8) | data[2 + i * 6];
+        buff[2 + i] = (data[5 + i * 6] << 8) | data[4 + i * 6];
     }
 
     return nrf_OK;

@@ -17,7 +17,7 @@
 ///====================================================================
 ///============================ define the threshold value used for accel
 
-#define ACCEL_CONFIG_OUTPUT_RANGE adxl_range_4g
+#define ACCEL_CONFIG_OUTPUT_RANGE adxl_range_16g
 #define ACCEL_CONFIG_DATA_RATE adxl_datarate_25
 
 #define ACCEL_TAP_AXES (tap_axis_en_x | tap_axis_en_y | tap_axis_en_z)
@@ -107,35 +107,35 @@ void nrf_accel_evt_lib_init(void)
             .link_autosleep = 1, .low_pwr = 0, .rate = ACCEL_CONFIG_DATA_RATE, .output_range = ACCEL_CONFIG_OUTPUT_RANGE};
     uint32_t ret = adxl_configure(&nrf_accel_cfg);
     NRF_ASSERT(ret);
-    //// configure the single ,double tap
-    // const taps_configurations nrf_accel_taps_config =
-    //     {
-    //         .tap_axes = ACCEL_TAP_AXES,
-    //         .tap_type = ACCEL_TAP_TYPE,
-    //         .tap_thresh = ACCEL_TAP_THRESH,
-    //         .tap_durat = ACCEL_TAP_DURATION,
-    //         // double_Tap_configurations
-    //         .double_tap_lattency = ACCEL_DOUBLE_TAP_LATENCY,
-    //         .double_tap_window = ACCEL_DOUBLE_TAP_WINDOW,
+    // configure the single ,double tap
+    const taps_configurations nrf_accel_taps_config =
+        {
+            .tap_axes = ACCEL_TAP_AXES,
+            .tap_type = ACCEL_TAP_TYPE,
+            .tap_thresh = ACCEL_TAP_THRESH,
+            .tap_durat = ACCEL_TAP_DURATION,
+            // double_Tap_configurations
+            .double_tap_lattency = ACCEL_DOUBLE_TAP_LATENCY,
+            .double_tap_window = ACCEL_DOUBLE_TAP_WINDOW,
 
-    //     };
-    // adxl_cfg_taps(&nrf_accel_taps_config);
+        };
+    adxl_cfg_taps(&nrf_accel_taps_config);
 
-    // //// configure the activity ,inactivity
-    // const activity_inact_config nrf_Act_inact_config =
-    //     {
-    //         .act.axes = ACCEL_ACTIVITY_AXES,
-    //         .act.thresh_act = ACCEL_ACTIVITY_THRESH,
-    //         .act._ac_dc = ACCEL_ACTIVITY_OP_TYPE,
+    //// configure the activity ,inactivity
+    const activity_inact_config nrf_Act_inact_config =
+        {
+            .act.axes = ACCEL_ACTIVITY_AXES,
+            .act.thresh_act = ACCEL_ACTIVITY_THRESH,
+            .act._ac_dc = ACCEL_ACTIVITY_OP_TYPE,
 
-    //         .inact.axes = ACCEL_INACTIVITY_AXES,
-    //         .inact.thresh_inact = ACCEL_INACTIVITY_THRESH,
-    //         .inact.time_inact = ACCEL_INACTIVITY_TIME,
-    //         .inact._ac_dc = ACCEL_INACTIVITY_OP_TYPE};
-    // adxl_cfg_act_inact(&nrf_Act_inact_config);
+            .inact.axes = ACCEL_INACTIVITY_AXES,
+            .inact.thresh_inact = ACCEL_INACTIVITY_THRESH,
+            .inact.time_inact = ACCEL_INACTIVITY_TIME,
+            .inact._ac_dc = ACCEL_INACTIVITY_OP_TYPE};
+    adxl_cfg_act_inact(&nrf_Act_inact_config);
 
-    // /// configure the freefall
-    // adxl_cfg_freefall(ACCEL_FREEFALL_THRESH, ACCEL_FREEFALL_TIME);
+    /// configure the freefall
+    adxl_cfg_freefall(ACCEL_FREEFALL_THRESH, ACCEL_FREEFALL_TIME);
 
     //// configure the fifo in bypass mode and its interrupt
     adxl_cfg_fifo(ACCEL_FIFO_MODE, ACCEL_FIFO_SAMPLES);
@@ -143,11 +143,11 @@ void nrf_accel_evt_lib_init(void)
     /// first disable all interupts
     adxl_disable_all_ints();
     // /// configure the interrupts and reading type
-    // // adxl_int_en_dis(accel_int_freefall, ACCEL_INT_ENABLE);
-    // // adxl_int_en_dis(accel_int_inactivity, ACCEL_INT_ENABLE);
-    // // adxl_int_en_dis(accel_int_activity, ACCEL_INT_ENABLE);
-    // adxl_int_en_dis(accel_int_double_tap, ACCEL_INT_ENABLE);
-    // adxl_int_en_dis(accel_int_single_tap, ACCEL_INT_ENABLE);
+    adxl_int_en_dis(accel_int_freefall, ACCEL_INT_ENABLE);
+    adxl_int_en_dis(accel_int_inactivity, ACCEL_INT_ENABLE);
+    adxl_int_en_dis(accel_int_activity, ACCEL_INT_ENABLE);
+    adxl_int_en_dis(accel_int_double_tap, ACCEL_INT_ENABLE);
+    adxl_int_en_dis(accel_int_single_tap, ACCEL_INT_ENABLE);
 
     // adxl_int_en_dis(accel_int_data_ready, ACCEL_INT_ENABLE);
     // //////// enable the int for the gpio
@@ -265,8 +265,8 @@ void nrf_accel_read_raw(void)
     adxl_read_data(databuff,6);
     read_accelration(data, databuff, 6 );
 
-    printf("%4.4f,%4.4f,%4.4f\r\n",data[0] *accel_standard_gain, 
-    data[1]*accel_standard_gain, data[2]*accel_standard_gain );
+    printf("%f,%f,%f\r\n",data[0] *accel_gain_in_g, 
+    data[1]*accel_gain_in_g, data[2]*accel_gain_in_g );
 
     // adxl_Read_reg();
 }

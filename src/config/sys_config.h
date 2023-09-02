@@ -100,11 +100,11 @@
 
 #define  SPI_DUMMY_TX_BYTE 0x00 
 
-#define  SPI_MISO_LINE  PIN_13
+#define  SPI_MISO_LINE  PIN_3
 
-#define  SPI_MOSI_LINE PIN_12 
+#define  SPI_MOSI_LINE PIN_4 
 
-#define  SPI_SCK_LINE  PIN_11
+#define  SPI_SCK_LINE  PIN_5
 
 #define  SPI_MODE_USED  SPI_MODE_0
 
@@ -121,6 +121,13 @@
 ////================================================================================
 ////======================================== OLED configurations 
 
+#define NRF_OLED_WAIT_TIME 1000 /// 1sec 
+
+#define NRF_OLED_SPI_HOST_USED SPI_HARDWARE_USE
+
+#define NRF_OLED_CHIP_SELECT_PIN PIN_2 
+#define NRF_OLED_DC_OUT_PIN PIN_9 
+#define NRF_OLED_MOD_RESET_PIN PIN_10
 
 
 ////================================================================================
@@ -146,10 +153,10 @@
 ////================================================================================
 ////====================================== button configurations 
 
-#define NRF_HOME_BUTTON_PIN PIN_16
 #define NRF_MIDDLE_BUTTON_PIN  PIN_13 
 #define NRF_UP_BUTTON_PIN PIN_14 
 #define NRF_DOWN_BUTTON_PIN PIN_15
+#define NRF_HOME_BUTTON_PIN PIN_16
 
 //////////// define the interrupt type 
 #define NRF_BUTTON_INTERRUPT_POLARITY EVENT_RISING_EDGE
