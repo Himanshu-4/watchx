@@ -53,4 +53,23 @@
 #define SSD13X_REG_SET_VCOMH_LEVEL  0xDB
 #define SSD13X_REG_NOP 0xE3
 
+
+
+
+
+uint32_t nrf_oled_screen_init(void);
+
+uint32_t nrf_oled_set_contrast_ratio(uint8_t contrast);
+
+uint32_t nrf_oled_display_on(uint8_t follow_ram);
+
+
+
+
+
+
+
+
+
+
 #endif

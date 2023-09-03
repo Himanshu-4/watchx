@@ -129,7 +129,7 @@ void Kernel_task_preinit(void)
     ble_ams_pre_init();
 
     /// init nvs
-    nvs_flash_init(NVS_FLASH_OPERATION_TIMEOUT);
+    nvs_flash_init(NRF_CONFIG_NVS_FLASH_OPERATION_TIMEOUT);
 
     /// define and add  ble related callbacks here
     ///// add the callbacks for the gap

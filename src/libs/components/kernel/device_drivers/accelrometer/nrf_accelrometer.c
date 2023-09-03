@@ -61,8 +61,8 @@
 ///====================================================================
 ///============================ event Q related
 
-#define ACCEL_EVENT_Q_LENGTH NRF_ACCEL_EVENT_Q_LEN
-#define ACCEL_EVENT_Q_ITEM_SIZE NRF_ACCEL_EVENT_Q_ITEM_SIZE
+#define ACCEL_EVENT_Q_LENGTH NRF_CONFIG_ACCEL_EVENT_Q_LEN
+#define ACCEL_EVENT_Q_ITEM_SIZE NRF_CONFIG_ACCEL_EVENT_Q_ITEM_SIZE
 
 static StaticQueue_t xstatic_q_for_accel_events;
 static uint8_t ucQueueStorageArea_for_acceleventq[ACCEL_EVENT_Q_LENGTH * ACCEL_EVENT_Q_ITEM_SIZE];
@@ -93,20 +93,20 @@ void nrf_accel_evt_lib_init(void)
             .gpio_input_buff = GPIO_PIN_INPUT_BUFF_CONNECT};
 
     // config the gpio hardware
-    gpio_config(NRF_ADXL_INT1_PIN, &nrf_buttons_gpio_type);
+    gpio_config(NRF_CONFIG_ADXL_INT1_PIN, &nrf_buttons_gpio_type);
 
     //// up pin gpiote
     const my_gpiote_cfg accel_pin_int_cfg =
         {
             .mode = GPIO_EVENT_MODE,
-            .pinsel = NRF_ADXL_INT1_PIN,
+            .pinsel = NRF_CONFIG_ADXL_INT1_PIN,
             .outlevel = TASK_OUT_INIT_LEVEL_HIGH,
-            .polarity = NRF_ACCEL_INT1_INTERRUPT_POLARITY,
+            .polarity = NRF_CONFIG_ACCEL_INT1_INTERRUPT_POLARITY,
         };
     //// config the gpio int channel
-    gpio_config_channel(NRF_ACCEL_INT1_GPIO_CHANNEL, &accel_pin_int_cfg);
+    gpio_config_channel(NRF_CONFIG_ACCEL_INT1_GPIO_CHANNEL, &accel_pin_int_cfg);
     //// config the gpio irq handler
-    gpio_add_irq_handler(NRF_ACCEL_INT1_GPIO_CHANNEL, gpio_int_handler_for_accel_int1);
+    gpio_add_irq_handler(NRF_CONFIG_ACCEL_INT1_GPIO_CHANNEL, gpio_int_handler_for_accel_int1);
     
     //configure the accelrometer
     const adxl_cfg nrf_accel_cfg =
@@ -158,7 +158,7 @@ void nrf_accel_evt_lib_init(void)
 
     // adxl_int_en_dis(accel_int_data_ready, ACCEL_INT_ENABLE);
     // //////// enable the int for the gpio
-    gpio_int_enable(NRF_ACCEL_INT1_GPIO_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_ACCEL_INT1_GPIO_CHANNEL);
 }
 
 /// @brief this is the accelrometer lib deinit
@@ -169,7 +169,7 @@ void nrf_accel_evt_lib_deinit(void)
 
     vQueueDelete(nrf_accel_evtqhandle);
     /// disable the interrupt from gpio channel
-    gpio_int_disable(NRF_ACCEL_INT1_GPIO_CHANNEL);
+    gpio_int_disable(NRF_CONFIG_ACCEL_INT1_GPIO_CHANNEL);
 }
 
 /// @brief this is to get event from accelrometer evtq
@@ -249,7 +249,7 @@ void nrf_accel_reset_evtq(void)
 void nrf_accel_pasue_events(void)
 {
     //////// enable the int for the gpio
-    gpio_int_enable(NRF_ACCEL_INT1_GPIO_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_ACCEL_INT1_GPIO_CHANNEL);
     xQueueReset(nrf_accel_evtqhandle);
 }
 
@@ -258,7 +258,7 @@ void nrf_accel_pasue_events(void)
 void nrf_accel_resume_events(void)
 {
     //////// enable the int for the gpio
-    gpio_int_enable(NRF_ACCEL_INT1_GPIO_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_ACCEL_INT1_GPIO_CHANNEL);
     xQueueReset(nrf_accel_evtqhandle);
 }
 

@@ -29,7 +29,8 @@
         "string": "c",
         "string_view": "c",
         "freertosconfig.h": "c",
-        "initializer_list": "c"
+        "initializer_list": "c",
+        "nrf_oled_driver.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator":"MinGW Makefiles",

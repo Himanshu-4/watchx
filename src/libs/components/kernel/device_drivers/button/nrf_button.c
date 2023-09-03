@@ -9,8 +9,8 @@
 
 ////////// create the qoueue storage area 
 //////////////////// error code queue data structure 
-#define NRF_BUTTON_EVENT_Q_LENGTH       NRF_BUTTON_EVENTQ_ITEM_LEN 
-#define NRF_BUTTON_EVENT_Q_ITEM_SIZE    NRF_BUTTON_EVENTQ_ITEM_SIZE
+#define NRF_BUTTON_EVENT_Q_LENGTH       NRF_CONFIG_BUTTON_EVENTQ_ITEM_LEN 
+#define NRF_BUTTON_EVENT_Q_ITEM_SIZE    NRF_CONFIG_BUTTON_EVENTQ_ITEM_SIZE
 
 /* The variable used to hold the queue's data structure. */
 static StaticQueue_t xstatic_q_for_button_events;
@@ -51,61 +51,61 @@ void nrf_button_evt_lib_init(void)
     };
 
     // config the gpio hardware 
-    gpio_config(NRF_UP_BUTTON_PIN , &nrf_buttons_gpio_type);
-    gpio_config(NRF_DOWN_BUTTON_PIN, &nrf_buttons_gpio_type);
-    gpio_config(NRF_MIDDLE_BUTTON_PIN, &nrf_buttons_gpio_type);
-    gpio_config(NRF_HOME_BUTTON_PIN, &nrf_buttons_gpio_type);
+    gpio_config(NRF_CONFIG_UP_BUTTON_PIN , &nrf_buttons_gpio_type);
+    gpio_config(NRF_CONFIG_DOWN_BUTTON_PIN, &nrf_buttons_gpio_type);
+    gpio_config(NRF_CONFIG_MIDDLE_BUTTON_PIN, &nrf_buttons_gpio_type);
+    gpio_config(NRF_CONFIG_HOME_BUTTON_PIN, &nrf_buttons_gpio_type);
     
     //// up pin gpiote 
     const my_gpiote_cfg up_pin_int_cfg =
     {
         .mode = GPIO_EVENT_MODE,
-        .pinsel = NRF_UP_BUTTON_PIN,
+        .pinsel = NRF_CONFIG_UP_BUTTON_PIN,
         .outlevel = TASK_OUT_INIT_LEVEL_HIGH,
-        .polarity = NRF_BUTTON_INTERRUPT_POLARITY,
+        .polarity = NRF_CONFIG_BUTTON_INTERRUPT_POLARITY,
     };
 
     const my_gpiote_cfg down_pin_int_cfg =
     {
         .mode = GPIO_EVENT_MODE,
-        .pinsel = NRF_DOWN_BUTTON_PIN,
+        .pinsel = NRF_CONFIG_DOWN_BUTTON_PIN,
         .outlevel = TASK_OUT_INIT_LEVEL_HIGH,
-        .polarity = NRF_BUTTON_INTERRUPT_POLARITY,
+        .polarity = NRF_CONFIG_BUTTON_INTERRUPT_POLARITY,
     };
 
     const my_gpiote_cfg middle_pin_int_cfg =
     {
         .mode = GPIO_EVENT_MODE,
-        .pinsel = NRF_MIDDLE_BUTTON_PIN,
+        .pinsel = NRF_CONFIG_MIDDLE_BUTTON_PIN,
         .outlevel = TASK_OUT_INIT_LEVEL_HIGH,
-        .polarity = NRF_BUTTON_INTERRUPT_POLARITY,
+        .polarity = NRF_CONFIG_BUTTON_INTERRUPT_POLARITY,
     };
 
     const my_gpiote_cfg home_pin_int_cfg =
     {
         .mode = GPIO_EVENT_MODE,
-        .pinsel = NRF_HOME_BUTTON_PIN,
+        .pinsel = NRF_CONFIG_HOME_BUTTON_PIN,
         .outlevel = TASK_OUT_INIT_LEVEL_HIGH,
-        .polarity = NRF_BUTTON_INTERRUPT_POLARITY
+        .polarity = NRF_CONFIG_BUTTON_INTERRUPT_POLARITY
     };
     
     //// config the gpio int channel 
-    gpio_config_channel( NRF_UP_BUTTON_GPIOTE_CHANNEL,&up_pin_int_cfg );
-    gpio_config_channel( NRF_DOWN_BUTTON_GPIOTE_CHANNEL,&down_pin_int_cfg );
-    gpio_config_channel(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL,&middle_pin_int_cfg );
-    gpio_config_channel(NRF_HOME_BUTTON_GPIOTE_CHANNEL, &home_pin_int_cfg);
+    gpio_config_channel(NRF_CONFIG_UP_BUTTON_GPIOTE_CHANNEL,&up_pin_int_cfg );
+    gpio_config_channel(NRF_CONFIG_DOWN_BUTTON_GPIOTE_CHANNEL,&down_pin_int_cfg );
+    gpio_config_channel(NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL,&middle_pin_int_cfg );
+    gpio_config_channel(NRF_CONFIG_HOME_BUTTON_GPIOTE_CHANNEL, &home_pin_int_cfg);
 
     //// config the gpio irq handler 
-    gpio_add_irq_handler(NRF_UP_BUTTON_GPIOTE_CHANNEL,gpio_int_handler_for_up );
-    gpio_add_irq_handler(NRF_DOWN_BUTTON_GPIOTE_CHANNEL,gpio_int_handler_for_down);
-    gpio_add_irq_handler(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL,gpio_int_handler_for_middle);
-    gpio_add_irq_handler(NRF_HOME_BUTTON_GPIOTE_CHANNEL, gpio_int_handler_for_home);
+    gpio_add_irq_handler(NRF_CONFIG_UP_BUTTON_GPIOTE_CHANNEL,gpio_int_handler_for_up );
+    gpio_add_irq_handler(NRF_CONFIG_DOWN_BUTTON_GPIOTE_CHANNEL,gpio_int_handler_for_down);
+    gpio_add_irq_handler(NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL,gpio_int_handler_for_middle);
+    gpio_add_irq_handler(NRF_CONFIG_HOME_BUTTON_GPIOTE_CHANNEL, gpio_int_handler_for_home);
 
     //////// enable the int for the gpio 
-    gpio_int_enable(NRF_UP_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_enable(NRF_DOWN_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_enable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_enable(NRF_HOME_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_UP_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_DOWN_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_HOME_BUTTON_GPIOTE_CHANNEL);
 
 }
 
@@ -130,16 +130,16 @@ void nrf_button_evt_lib_deinit(void)
     }
 
     ///// disable the gpio int 
-    gpio_int_disable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_disable(NRF_UP_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_disable(NRF_DOWN_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_disable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_CONFIG_UP_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_CONFIG_DOWN_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL);
 
     ///// remove the gpio channel 
-    gpio_remove_channel(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
-    gpio_remove_channel(NRF_UP_BUTTON_GPIOTE_CHANNEL);
-    gpio_remove_channel(NRF_DOWN_BUTTON_GPIOTE_CHANNEL);
-    gpio_remove_channel(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_remove_channel(NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_remove_channel(NRF_CONFIG_UP_BUTTON_GPIOTE_CHANNEL);
+    gpio_remove_channel(NRF_CONFIG_DOWN_BUTTON_GPIOTE_CHANNEL);
+    gpio_remove_channel(NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL);
 
 }
 
@@ -198,7 +198,7 @@ uint8_t nrf_btn_put_in_evtq_wait(uint8_t event)
         return nrf_ERR_INVALID_PARAM;
     }
 
-    if(xQueueSend(nrf_btn_evtq_handle , &event , pdMS_TO_TICKS(NRF_BUTTON_EVENT_WAIT_TIME)) != pdPASS)
+    if(xQueueSend(nrf_btn_evtq_handle , &event , pdMS_TO_TICKS(NRF_CONFIG_BUTTON_EVENT_WAIT_TIME)) != pdPASS)
     {
         return nrf_ERR_TIMEOUT;
     }
@@ -212,10 +212,10 @@ uint8_t nrf_btn_put_in_evtq_wait(uint8_t event)
 void nrf_btn_pause_events(void)
 {
        ///// disable the gpio int 
-    gpio_int_disable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_disable(NRF_UP_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_disable(NRF_DOWN_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_disable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_CONFIG_UP_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_CONFIG_DOWN_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_disable(NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL);
 }
 
 /// @brief to resume the events from evt q
@@ -223,10 +223,10 @@ void nrf_btn_pause_events(void)
 void nrf_btn_resume_events(void)
 {
     //////// enable the int for the gpio 
-    gpio_int_enable(NRF_UP_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_enable(NRF_DOWN_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_enable(NRF_MIDDLE_BUTTON_GPIOTE_CHANNEL);
-    gpio_int_enable(NRF_HOME_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_UP_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_DOWN_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL);
+    gpio_int_enable(NRF_CONFIG_HOME_BUTTON_GPIOTE_CHANNEL);
 }
 
 
