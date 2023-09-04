@@ -226,7 +226,7 @@ enum _BLE_AMS_ATTRIBUTE_PLAYBACK_INFO_
 /// @brief this function gives the attribute string name
 /// @param attributeindex
 /// @return string containg attribute , NULL if none
-char *ble_ams_get_attribute_name(ble_ams_attribute_name index);
+const char *ble_ams_get_attribute_name(ble_ams_attribute_name index);
 
 /// @brief this function is used for debugg purpose and to print the apple media info
 /// @param  void

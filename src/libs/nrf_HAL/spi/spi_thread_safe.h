@@ -56,12 +56,12 @@ uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, spi_xfr_buff 
 
 
 /***
- * @name spi_poll_xfr_thread_safe_tdcs
+ * @name spi_poll_xfr_thread_safe_duffernt 
  * @param spi hardware number 
  * @param chip select pin
  * @param spi transfer buffer 
- * @brief used to transfer the content to the TDCS . 
+ * @brief . 
 */
-uint8_t spi_poll_xfr_thread_safe_tdcs(uint8_t , uint8_t , spi_xfr_buff *);
+uint8_t spi_poll_xfr_thread_safe_differnt(uint8_t spi_num, uint8_t csn_pin, spi_xfr_buff *spi_buff);
 
 #endif

@@ -18,7 +18,7 @@
 #define SSD13X_REG_DEACTIVATE_SCROLL 0x2E   // afterdeactivate scrolling ram needs to be rewritten 
 #define SSD13X_REG_ACTIVATE_SCROLL 0x2F // after 
 #define SSD13X_REG_HORIZONTAL_SCROOL_TO_RIGHT 0x26
-#define SSD13X_REG_HORIZONTAL_SCROOL_TO_LLEFT 0x27
+#define SSD13X_REG_HORIZONTAL_SCROOL_TO_LEFT 0x27
 #define SSD13X_REG_VERTICAL_AND_HORIZONTAL_SCROLL_RIGHT 0x29
 #define SSD13X_REG_VERTICAL_AND_HORIZONTAL_SCROLL_LEFT 0x2A
 #define SSD13X_REG_SET_VERTICAL_SCROLL_AREA 0xA3
@@ -54,18 +54,102 @@
 #define SSD13X_REG_NOP 0xE3
 
 
+#define SSD13X_ENABLE_CHARGE_PUMP (_BV(2))
+#define SSD13X_DISABLE_CHARGE_PUMP (0x00U)
+
+#define SSD13X_REG_CHARGE_PUMP_REGULATOR 0x8D 
 
 
+enum _NRF_OLED_PAGES_ADDR_
+{
+    NRF_OLED_PAGE_0,
+    NRF_OLED_PAGE_1,
+    NRF_OLED_PAGE_2,
+    NRF_OLED_PAGE_3,
+    NRF_OLED_PAGE_4,
+    NRF_OLED_PAGE_5,
+    NRF_OLED_PAGE_6,
+    NRF_OLED_PAGE_7,
+};
+
+
+///////////////// fundametnal OLed APIs 
 
 uint32_t nrf_oled_screen_init(void);
 
 uint32_t nrf_oled_set_contrast_ratio(uint8_t contrast);
 
+#define NRF_OLED_FOLLOW_RAM 0x01u
+#define NRF_OLED_IGNORES_RAM 0x00U
+
+
 uint32_t nrf_oled_display_on(uint8_t follow_ram);
 
+uint32_t nrf_oled_entire_display_on(void);
+
+uint32_t nrf_olrf_entire_display_off(void);
+
+
+uint32_t nrf_oled_set_mem_addressing_mode(uint8_t mode);
+
+uint32_t nrf_oled_set_page_addressing_mode(uint8_t page_addr);
+
+
+///////////////////  scrolling related APIs 
+enum _SCROLL_FRAME_FREQ_
+{
+    sc_freq_5fps = 0x00,
+    sc_freq_64fps,
+    sc_freq_128fps,
+    sc_freq_256fps,
+    sc_freq_3fps,
+    sc_freq_4fps,
+    sc_freq_25fps,
+    sc_freq_2fps,
+};
+
+
+uint32_t nrf_oled_activate_scroll(void);
+
+uint32_t nrf_oled_deactivate_scroll(void);
+
+#define OLED_SCROLL_LEFT 0x10u
+#define OLED_SCROLL_RIGHT 0x20u
+
+uint32_t nrf_oled_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
+, uint8_t end_page, uint8_t frame_freq);
+
+
+uint32_t nrf_oled_vert_and_horizontal_scroll(uint8_t scroll_type, uint8_t start_page,
+uint8_t end_page , uint8_t frame_freq, uint8_t vertical_row_offset);
+
+
+uint32_t nrf_oled_vertical_scroll_area(uint8_t start_row, uint8_t end_row);
+
+
+///////////////// addressing Table APIs 
+
+#define OLED_HORIZONTAL_ADDR_MODE 0x00u
+#define OLED_VERTICAL_ADDR_MODE 0x01u
+#define OLED_PAGE_ADDR_MODE 0x02u
+
+uint32_t nrf_oled_set_addressing_mode(uint8_t mode);
+
+
+uint32_t nrf_oled_page_adressing(uint8_t page_start_addr, uint8_t lower_colum_addr, uint8_t higher_colum_addr);
+
+uint32_t nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr);
+
+uint32_t nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr);
+
+
+//////// hardware configuration (panel resolution and layout changes ) APIs 
 
 
 
+
+
+////// timming and driving API for the oled 
 
 
 

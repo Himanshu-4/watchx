@@ -93,7 +93,9 @@ static ble_gap_id_key_t peer_id_keys;
 /// @return success or failure
 static int random_number_gen(uint8_t *dest, unsigned size)
 {
-    uint8_t split_no = ((size) / 16) + (((size) % 16) == 0 ? (0) : (1));
+    // uint8_t split_no = ((size) / 16) + (((size) % 16) == 0 ? (0) : (1));
+    /// have to find out how we can split the transactions into 16 bytes 
+    uint8_t split_no = GET_NO_OF_PERFECT_DIVIDE(size,16);
     uint8_t bytes_avial = 0;
     uint8_t index = 0;
 

@@ -57,8 +57,9 @@
 #define u8_ptr (uint8_t *)
 
 ///////////// get the size of the buffer of uint32_t  from uint8_t buff
-#define buff_size8_to_32(size) (((size)/4) + (((size)%4)==0?(0):(1)) )
+// #define buff_size8_to_32(size) (((size)/4) + (((size)%4)==0?(0):(1)) )
 
+#define GET_NO_OF_PERFECT_DIVIDE(input,div)  (((input)/(div)) + ((input)%(div)?(1):(0)))
 
 //////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
@@ -115,6 +116,7 @@ enum _NRF_ERROR_TYPES_
     nrf_ERR_INVALID_STATE,
     nrf_ERR_OPERATION_FAILED,
     nrf_ERR_OUT_OF_MEM,
+    nrf_ERR_MAX_LIMIT,
 };
 
 #define ERR_CHK(x)         \

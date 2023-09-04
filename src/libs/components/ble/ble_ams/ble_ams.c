@@ -339,7 +339,7 @@ uint32_t ble_ams_deinit(void)
 /// @brief this function gives the attribute string name
 /// @param attributeindex
 /// @return string containg attribute , NULL if none
-char *ble_ams_get_attribute_name(ble_ams_attribute_name index)
+const char *ble_ams_get_attribute_name(ble_ams_attribute_name index)
 {
     if (ble_ams_handler.ble_ams_instance_inited != BLE_AMS_INSTANCE_INITED)
     {
@@ -530,7 +530,7 @@ uint32_t ble_ams_get_Queue_attribute(ble_ams_q_att_data index)
 void ble_ams_print_media_info(void)
 {
     /// print the strings first
-    char *str = ble_ams_get_attribute_name(ble_ams_attribute_index_mediaplayer);
+    const char *str = ble_ams_get_attribute_name(ble_ams_attribute_index_mediaplayer);
     NRF_LOG_INFO("p %s", ((str == NULL) ? ("nil") : (str)));
     delay(50);
 

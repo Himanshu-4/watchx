@@ -252,7 +252,7 @@ static uint32_t nvs_write_raw_data(uint32_t uid, uint8_t *data_buff, uint16_t si
         /////create a buffer and store the data on it
         // uint16_t nvs_data_len = nvs_get_size_of_stored_data(NVS_PARTITION_START_ADDR);
         uint16_t len = 0;
-        len = NVS_META_DATA_SIZE_WORDS + buff_size8_to_32(size);
+        len = NVS_META_DATA_SIZE_WORDS + GET_NO_OF_PERFECT_DIVIDE(size,4); // buff_size8_to_32(size);
 
         ///////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////// here we are allocating memory ///////////////////
@@ -269,7 +269,7 @@ static uint32_t nvs_write_raw_data(uint32_t uid, uint8_t *data_buff, uint16_t si
         /////// store the next link to absent
         arr_data[NVS_STRUCT_SOD] = START_OF_DATA;
         ///////// fisrt store the len of the data
-        arr_data[NVS_STRUCT_LEN] = NVS_META_DATA_SIZE_WORDS + buff_size8_to_32(size);
+        arr_data[NVS_STRUCT_LEN] = NVS_META_DATA_SIZE_WORDS + GET_NO_OF_PERFECT_DIVIDE(size,4); //buff_size8_to_32(size);
         ////// then store the new uid
         arr_data[NVS_STRUCT_UID] = uid;
         /////then store the RFU
@@ -497,7 +497,7 @@ static uint32_t nvs_raw_modify_data(uint32_t uid, uint8_t *buff, uint16_t size)
 
     if (softdevice_enabled)
     {
-        uint16_t len = nvs_get_size_of_stored_data(NVS_PARTITION_START_ADDR) - nvs_get_size_of_data(NVS_PARTITION_START_ADDR, uid) + buff_size8_to_32(size) ;
+        uint16_t len = nvs_get_size_of_stored_data(NVS_PARTITION_START_ADDR) - nvs_get_size_of_data(NVS_PARTITION_START_ADDR, uid) +    GET_NO_OF_PERFECT_DIVIDE(size,4); /* buff_size8_to_32(size) */ 
 
         uint32_t arr_data[len];
         uint32_t arr_shift = 0;
@@ -527,7 +527,7 @@ static uint32_t nvs_raw_modify_data(uint32_t uid, uint8_t *buff, uint16_t size)
 
         // add the content of modified data 
         arr_data[arr_shift + NVS_STRUCT_SOD] = START_OF_DATA;
-        arr_data[arr_shift + NVS_STRUCT_LEN] = buff_size8_to_32(size) + NVS_META_DATA_SIZE_WORDS;
+        arr_data[arr_shift + NVS_STRUCT_LEN] = GET_NO_OF_PERFECT_DIVIDE(size,4) /*buff_size8_to_32(size)*/ + NVS_META_DATA_SIZE_WORDS;
         arr_data[arr_shift + NVS_STRUCT_UID] = uid;
         arr_data[arr_shift + NVS_STRUCT_RFU0] = 0;
         arr_data[arr_shift + NVS_STRUCT_RFU1] =0;
