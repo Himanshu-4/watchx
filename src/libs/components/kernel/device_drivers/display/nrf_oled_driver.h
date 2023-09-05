@@ -10,8 +10,8 @@
 #define SSD13X_REG_DISPLAY_ON_IGNORERAM 0xA5
 #define SSD13X_REG_NORMAL_DISPLAY_MODE 0xA6
 #define SSD13X_REG_INVERSE_DISPLAY_MODE 0xA7
-#define SSD13X_REG_ENTIRE_DISPLAY_OFF 0xAE
-#define SSD13X_REG_ENTIRE_DISPLAY_ON 0xAF
+#define SSD13X_REG_OLED_DRIVER_OFF 0xAE
+#define SSD13X_REG_OLED_DRIVER_ON 0xAF
 
 /// scrolling related table 
 
@@ -75,25 +75,39 @@ enum _NRF_OLED_PAGES_ADDR_
 
 ///////////////// fundametnal OLed APIs 
 
-uint32_t nrf_oled_screen_init(void);
+/// @brief this will init the oled module 
+/// @param  void 
+void nrf_oled_screen_init(void);
 
-uint32_t nrf_oled_set_contrast_ratio(uint8_t contrast);
+/// @brief set contrast ratio for the oled 
+/// @param contrast 
+void nrf_oled_set_contrast_ratio(uint8_t contrast);
 
 #define NRF_OLED_FOLLOW_RAM 0x01u
 #define NRF_OLED_IGNORES_RAM 0x00U
 
 
-uint32_t nrf_oled_display_on(uint8_t follow_ram);
+/// @brief turn on the oled display and start following ram 
+/// @param follow_ram 
+void nrf_oled_display_on(uint8_t follow_ram);
 
-uint32_t nrf_oled_entire_display_on(void);
+/// @brief  wakeup the ssd1306 from sleep mode  
+/// @param  void 
+void nrf_oled_driver_on(void);
 
-uint32_t nrf_olrf_entire_display_off(void);
+/// @brief this will put the ssd1306 in sleep mode 
+/// @param  void 
+void nrf_olrf_oled_driver_off(void);
 
+#define OLED_DISPLAY_SET_INVERT 0x01
+#define OLED_DISPLAY_SET_NORMAL 0x02
 
-uint32_t nrf_oled_set_mem_addressing_mode(uint8_t mode);
+/// @brief invert the display or normal mode 
+/// @param mode 
+void nrf_oled_invert_display(uint8_t mode);
 
-uint32_t nrf_oled_set_page_addressing_mode(uint8_t page_addr);
-
+////////////=================================================================================================
+///// ====================================== to set the address in horizontal and vertical addressing mode 
 
 ///////////////////  scrolling related APIs 
 enum _SCROLL_FRAME_FREQ_
@@ -109,47 +123,62 @@ enum _SCROLL_FRAME_FREQ_
 };
 
 
-uint32_t nrf_oled_activate_scroll(void);
+void nrf_oled_activate_scroll(void);
 
-uint32_t nrf_oled_deactivate_scroll(void);
+void nrf_oled_deactivate_scroll(void);
 
 #define OLED_SCROLL_LEFT 0x10u
 #define OLED_SCROLL_RIGHT 0x20u
 
-uint32_t nrf_oled_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
+void nrf_oled_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
 , uint8_t end_page, uint8_t frame_freq);
 
 
-uint32_t nrf_oled_vert_and_horizontal_scroll(uint8_t scroll_type, uint8_t start_page,
+void nrf_oled_vert_and_horizontal_scroll(uint8_t scroll_type, uint8_t start_page,
 uint8_t end_page , uint8_t frame_freq, uint8_t vertical_row_offset);
 
 
-uint32_t nrf_oled_vertical_scroll_area(uint8_t start_row, uint8_t end_row);
+void nrf_oled_vertical_scroll_area(uint8_t start_row, uint8_t end_row);
 
 
+
+////////////=================================================================================================
+///// ====================================== to set the address in horizontal and vertical addressing mode 
 ///////////////// addressing Table APIs 
 
 #define OLED_HORIZONTAL_ADDR_MODE 0x00u
 #define OLED_VERTICAL_ADDR_MODE 0x01u
 #define OLED_PAGE_ADDR_MODE 0x02u
 
-uint32_t nrf_oled_set_addressing_mode(uint8_t mode);
+
+void nrf_oled_set_addressing_mode(uint8_t mode);
 
 
-uint32_t nrf_oled_page_adressing(uint8_t page_start_addr, uint8_t lower_colum_addr, uint8_t higher_colum_addr);
-
-uint32_t nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr);
-
-uint32_t nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr);
+void nrf_oled_page_adressing(uint8_t page_start_addr, uint8_t lower_colum_addr, uint8_t higher_colum_addr);
 
 
-//////// hardware configuration (panel resolution and layout changes ) APIs 
+/// @brief to set the page addresse for horizontal and vertical addressing mode 
+/// @param page_start_addr 
+/// @param page_end_addr 
+/// @return err codes 
+void nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr);
+
+/// @brief 
+/// @param colum_start_addr 
+/// @param colum_end_addr 
+/// @return 
+void nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr);
+
+////////////=================================================================================================
+///// =======================hardware configuration (panel resolution and layout changes ) APIs =============
 
 
 
 
 
-////// timming and driving API for the oled 
+////////////=================================================================================================
+///// =======================timming and driving API for the oled APIs ======================================
+ 
 
 
 
