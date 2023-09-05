@@ -17,8 +17,10 @@
 
 #define SSD13X_REG_DEACTIVATE_SCROLL 0x2E   // afterdeactivate scrolling ram needs to be rewritten 
 #define SSD13X_REG_ACTIVATE_SCROLL 0x2F // after 
+
 #define SSD13X_REG_HORIZONTAL_SCROOL_TO_RIGHT 0x26
 #define SSD13X_REG_HORIZONTAL_SCROOL_TO_LEFT 0x27
+
 #define SSD13X_REG_VERTICAL_AND_HORIZONTAL_SCROLL_RIGHT 0x29
 #define SSD13X_REG_VERTICAL_AND_HORIZONTAL_SCROLL_LEFT 0x2A
 #define SSD13X_REG_SET_VERTICAL_SCROLL_AREA 0xA3
@@ -38,9 +40,10 @@
 #define SSD13X_REG_SEG0_MAP_TO_COL0 0xA0 /// reset beahviour
 #define SSD13X_REG_SEG0_MAP_TO_COL127 0xA1 
 
-#define SSD13X_REG_SET_MULTIPLEX_RATIO 0xA8 /// set mux ratio to n+1 mux reset is 64 mux
 #define SSD13X_REG_SET_COM_OUT_SCAN_DIR_C0_TO_CN 0xC0 /// reset 
 #define SSD13X_REG_SET_COM_OUT_SCAN_DIR_CN_TO_C0 0xC8
+
+#define SSD13X_REG_SET_MULTIPLEX_RATIO 0xA8 /// set mux ratio to n+1 mux reset is 64 mux
 
 #define SSD13X_REG_SET_DISPLAY_OFFSET 0xD3 
 #define SSD13X_REG_SET_COM_PINS_HARDWARE_CONF 0xDA 
@@ -54,8 +57,8 @@
 #define SSD13X_REG_NOP 0xE3
 
 
-#define SSD13X_ENABLE_CHARGE_PUMP (_BV(2))
-#define SSD13X_DISABLE_CHARGE_PUMP (0x00U)
+#define SSD13X_ENABLE_CHARGE_PUMP 0x14U
+#define SSD13X_DISABLE_CHARGE_PUMP 0x00U
 
 #define SSD13X_REG_CHARGE_PUMP_REGULATOR 0x8D 
 
@@ -172,7 +175,9 @@ void nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr);
 ////////////=================================================================================================
 ///// =======================hardware configuration (panel resolution and layout changes ) APIs =============
 
-
+/// @brief flip the oled to 180 degree 
+/// @param  input
+void nrf_oled_flip_180(bool input);
 
 
 

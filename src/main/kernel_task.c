@@ -29,7 +29,7 @@
 #include "device_drivers/accelrometer/nrf_accelromter.h"
 #include "device_drivers/button/nrf_button.h"
 #include "device_drivers/display/nrf_oled_driver.h"
-
+#include "device_drivers/display/nrf_gfx.h"
 //================================================================================================
 //=================================================================================================
 //==================== extern variables here ======================================================
@@ -155,6 +155,8 @@ void Kernel_task_preinit(void)
     }
 }
 
+
+/// @todo have to implement 
 /// @brief to deinit the any pre initalise thinfs
 /// @param  void
 void kernel_task_deinit(void)
@@ -169,6 +171,10 @@ void kernel_task(void *param)
 
     nrf_button_evt_lib_init();
     nrf_accel_evt_lib_init();
+
+    /// int the oled screen and gfx lib 
+    nrf_oled_screen_init();
+    
 
     /// global err to store the err of retutrns
     uint32_t err = 0;

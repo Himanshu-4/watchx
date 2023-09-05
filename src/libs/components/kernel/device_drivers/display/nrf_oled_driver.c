@@ -39,7 +39,7 @@
 /// @brief  send the data to the oled through SPI
 /// @param data
 /// @param size
-static void oled_send(uint8_t *data, uint16_t size)
+static void oled_send(const uint8_t *data, uint16_t size)
 {
     NRF_OLED_CMD_MODE();
     uint8_t ret = 0;
@@ -92,26 +92,37 @@ void nrf_oled_screen_init(void)
 
     /// software init the oled module
     /// set mux ratio a8/3f
-
     /// set display start line
-
     /// set segment remap
-
     /// set com output scan direction
-
     /// set com pins hardware config
-
     /// set contrast control
-
     /// disable entire display on
-
     /// set normal display
-
     /// set osc freq
-
     /// enable charge pump regulator
-
     /// dispay on
+
+    const uint8_t cmd[] =
+        {
+            SSD13X_REG_OLED_DRIVER_OFF,
+            SSD13X_REG_SET_DISPLAY_CLOCK_DIVIDE_FREQ, 0x80, /*recommendded clock devider*/
+            SSD13X_REG_SET_MULTIPLEX_RATIO, 63,             /*recommednde 128x64*/
+            SSD13X_REG_SET_DISPLAY_OFFSET, 0,               /*no offset */
+            SSD13X_REG_SET_DISPLAY_START_LINE_S | 0,
+            SSD13X_REG_CHARGE_PUMP_REGULATOR, SSD13X_ENABLE_CHARGE_PUMP,
+            SSD13X_REG_SET_MEMORY_ADDRESING_MODE, 0x00,
+            SSD13X_REG_SEG0_MAP_TO_COL0, SSD13X_REG_SET_COM_OUT_SCAN_DIR_C0_TO_CN,
+            SSD13X_REG_SET_COM_PINS_HARDWARE_CONF, 0x12, /*recommed enable seq com conf and enabel lef/reight remap*/
+            SSD13X_REG_SET_CONTRAST_CONTROL, 0xCF,       /*recommended */
+            SSD13X_REG_SET_PRECHARGE_PERIOD, 0xF1,       /*recommende in datasheet*/
+            SSD13X_REG_SET_VCOMH_LEVEL, 0x40,            /* recommedn in datasheet*/
+            SSD13X_REG_NORMAL_DISPLAY_MODE,
+            SSD13X_REG_DEACTIVATE_SCROLL,
+            SSD13X_REG_DISPLAY_ON_FOLLOWRAM,
+            SSD13X_REG_OLED_DRIVER_ON};
+
+    oled_send(cmd, sizeof(cmd));
 }
 
 /// @brief set contrast ratio for the oled
@@ -155,4 +166,25 @@ void nrf_oled_invert_display(uint8_t mode)
     uint8_t cmd = 0;
     cmd = (mode == OLED_DISPLAY_SET_INVERT) ? (SSD13X_REG_INVERSE_DISPLAY_MODE) : (SSD13X_REG_NORMAL_DISPLAY_MODE);
     oled_send(&cmd, 1);
+}
+
+////////////=================================================================================================
+///// =======================hardware configuration (panel resolution and layout changes ) APIs =============
+
+/// @brief flip the oled to 180 degree
+/// @param  input
+void nrf_oled_flip_180(bool input)
+{
+    //// rotate the display by 180
+    if (input)
+    {
+        uint8_t cmd[] = {SSD13X_REG_SEG0_MAP_TO_COL127, SSD13X_REG_SET_COM_OUT_SCAN_DIR_CN_TO_C0};
+        oled_send(cmd, sizeof(cmd));
+    }
+    //// dont roatate display
+    else
+    {
+        uint8_t cmd[] = {SSD13X_REG_SEG0_MAP_TO_COL0, SSD13X_REG_SET_COM_OUT_SCAN_DIR_C0_TO_CN};
+        oled_send(cmd, sizeof(cmd));
+    }
 }
