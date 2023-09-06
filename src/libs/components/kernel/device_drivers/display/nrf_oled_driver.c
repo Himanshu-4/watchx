@@ -41,7 +41,6 @@
 /// @param size
 static void oled_send(const uint8_t *data, uint16_t size)
 {
-    NRF_OLED_CMD_MODE();
     uint8_t ret = 0;
     //// split the transactions in multiple spi transfers into 256 bytes
     uint8_t split = GET_NO_OF_PERFECT_DIVIDE(size, OLED_SPI_MAX_XFR_BYTES);
@@ -102,7 +101,7 @@ void nrf_oled_screen_init(void)
     /// set osc freq
     /// enable charge pump regulator
     /// dispay on
-
+    NRF_OLED_CMD_MODE();
     const uint8_t cmd[] =
         {
             SSD13X_REG_OLED_DRIVER_OFF,
@@ -123,12 +122,18 @@ void nrf_oled_screen_init(void)
             SSD13X_REG_OLED_DRIVER_ON};
 
     oled_send(cmd, sizeof(cmd));
+
+
+    uint8_t data[] = {0x32,0x32,0x32,0x32};
+    NRF_OLED_DATA_MODE();
+    oled_send(data,sizeof(data));
 }
 
 /// @brief set contrast ratio for the oled
 /// @param contrast
 void nrf_oled_set_contrast_ratio(uint8_t contrast)
 {
+    NRF_OLED_CMD_MODE();
     uint8_t cmd_buff[] = {SSD13X_REG_SET_CONTRAST_CONTROL, contrast};
     oled_send(cmd_buff, sizeof(cmd_buff));
 }
@@ -137,6 +142,7 @@ void nrf_oled_set_contrast_ratio(uint8_t contrast)
 /// @param follow_ram
 void nrf_oled_display_on(uint8_t follow_ram)
 {
+    NRF_OLED_CMD_MODE();
     uint8_t cmd = 0;
     cmd = (follow_ram) ? (SSD13X_REG_DISPLAY_ON_FOLLOWRAM) : (SSD13X_REG_DISPLAY_ON_IGNORERAM);
     oled_send(&cmd, 1);
@@ -146,6 +152,7 @@ void nrf_oled_display_on(uint8_t follow_ram)
 /// @param  void
 void nrf_oled_driver_on(void)
 {
+    NRF_OLED_CMD_MODE();
     uint8_t cmd = SSD13X_REG_OLED_DRIVER_ON;
     oled_send(&cmd, 1);
 }
@@ -154,6 +161,7 @@ void nrf_oled_driver_on(void)
 /// @param  void
 void nrf_olrf_oled_driver_off(void)
 {
+    NRF_OLED_CMD_MODE();
     uint8_t cmd = SSD13X_REG_OLED_DRIVER_OFF;
     oled_send(&cmd, 1);
 }
@@ -162,7 +170,7 @@ void nrf_olrf_oled_driver_off(void)
 /// @param mode
 void nrf_oled_invert_display(uint8_t mode)
 {
-
+    NRF_OLED_CMD_MODE();
     uint8_t cmd = 0;
     cmd = (mode == OLED_DISPLAY_SET_INVERT) ? (SSD13X_REG_INVERSE_DISPLAY_MODE) : (SSD13X_REG_NORMAL_DISPLAY_MODE);
     oled_send(&cmd, 1);
@@ -175,6 +183,7 @@ void nrf_oled_invert_display(uint8_t mode)
 /// @param  input
 void nrf_oled_flip_180(bool input)
 {
+    NRF_OLED_CMD_MODE();
     //// rotate the display by 180
     if (input)
     {

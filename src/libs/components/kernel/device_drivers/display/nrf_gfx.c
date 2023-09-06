@@ -11,7 +11,8 @@
 /// @param  void 
 void nrf_gfx_lib_init(void)
 {
-
+    ////send data to oled and turn it on
+    
 }
 
 /// @brief to test the gfx library for testing 

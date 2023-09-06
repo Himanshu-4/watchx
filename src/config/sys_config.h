@@ -13,6 +13,7 @@
 
 // // enable the trace clock on pin 18 with 2 mhz clock
 // #define  ENABLE_TRACE  1
+#define NRF_CONFIG_RESET_DELAY 4 /// reset mcu after 4 sec
 
 /// @brief in this return type when assert will failed it return from the funcition with an err code
 #define ASSERT_TYPE_WITH_RETURN 0x02

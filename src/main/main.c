@@ -157,13 +157,13 @@ void general_task_function(void *param)
         
         delay(10);
 
-        /// handle the accelrometer here 
-        uint8_t evttype =  nrf_accel_get_evtq();
+        // /// handle the accelrometer here 
+        // uint8_t evttype =  nrf_accel_get_evtq();
         
-        if(evttype != NRF_ACCEL_EVT_NONE)
-        {
-            NRF_LOG_INFO("evt is %d",evttype) ;
-        }
+        // if(evttype != NRF_ACCEL_EVT_NONE)
+        // {
+        //     NRF_LOG_INFO("evt is %d",evttype) ;
+        // }
 
         // NRF_LOG_INFO("main task 1");
     }
