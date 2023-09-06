@@ -30,7 +30,9 @@
         "string_view": "c",
         "freertosconfig.h": "c",
         "initializer_list": "c",
-        "nrf_oled_driver.h": "c"
+        "nrf_oled_driver.h": "c",
+        "spi.h": "c",
+        "gpio.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator":"MinGW Makefiles",

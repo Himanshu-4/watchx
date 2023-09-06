@@ -57,9 +57,9 @@ static void oled_send_cmd(const uint8_t *data, uint16_t size)
     }
 }
 
-/// @brief send data to the oled ram 
-/// @param data 
-/// @param size 
+/// @brief send data to the oled ram
+/// @param data
+/// @param size
 static void oled_send_data(const uint8_t *data, uint16_t size)
 {
     NRF_OLED_DATA_MODE();
@@ -76,13 +76,15 @@ static void oled_send_data(const uint8_t *data, uint16_t size)
                 .tx_size = ((size) % (OLED_SPI_MAX_XFR_BYTES)) ? ((size) % (OLED_SPI_MAX_XFR_BYTES)) : (OLED_SPI_MAX_XFR_BYTES)};
 
         ret = spi_poll_xfr_thread_safe(OLED_SPI_USED, NRF_CONFIG_OLED_CHIP_SELECT_PIN, &buff);
-
+        NRF_LOG_INFO("sending data %d", i);
         if (ret != nrf_OK)
         {
             NRF_LOG_ERROR("oled %d , data %d", ret, data[0]);
         }
     }
 }
+
+
 
 static void oled_pre_init(void)
 {
@@ -151,7 +153,7 @@ void nrf_oled_screen_init(void)
 
     oled_send_cmd(cmd, sizeof(cmd));
 
-    const uint8_t data[] = {0x32, 0x33, 0x34, 0x35};
+    const uint8_t data[255] = {0x32};
     oled_send_data(data, sizeof(data));
 
     NRF_LOG_INFO("oled init");

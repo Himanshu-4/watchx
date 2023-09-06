@@ -15,6 +15,7 @@ extern void SPIM2_SPIS2_SPI2_IRQHandler(void);
 #define SPI1 1
 #define SPI2 2
 
+#define TOATL_SPI_HARDWARE 3
 
 // spi task enums to get the task index
 enum _SPI_TASK_TYPES_

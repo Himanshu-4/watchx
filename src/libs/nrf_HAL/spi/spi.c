@@ -2,15 +2,13 @@
 #include "gpio.h"
 
 /// @brief spi 0 interrupts function
-static void (*spi_0_intr_func[SPI_TOTAL_INTERRUPTS])(void) = {NULL};
+static void (*spi_intr_func[TOATL_SPI_HARDWARE][SPI_TOTAL_INTERRUPTS])(void) = {NULL};
 /// @brief spi 1 interrupts function
-static void (*spi_1_intr_func[SPI_TOTAL_INTERRUPTS])(void) = {NULL};
-/// @brief spi 2 interrupts function
-static void (*spi_2_intr_func[SPI_TOTAL_INTERRUPTS])(void) = {NULL};
-
+// static void (*spi_1_intr_func[SPI_TOTAL_INTERRUPTS])(void) = {NULL};
+// /// @brief spi 2 interrupts function
+// static void (*spi_2_intr_func[SPI_TOTAL_INTERRUPTS])(void) = {NULL};
 
 #ifndef FREERTOS_ENV
-
 
 /// @brief weak definations of the functions
 void __WEAK SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQHandler(void)
@@ -103,7 +101,7 @@ void __WEAK SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQHandler(void)
 }
 
 // please use this SPI if you only use 1 SPI in your project
-void   SPIM2_SPIS2_SPI2_IRQHandler(void)
+void SPIM2_SPIS2_SPI2_IRQHandler(void)
 {
     if (NRF_SPIM2->EVENTS_STARTED)
     {
@@ -139,7 +137,7 @@ void   SPIM2_SPIS2_SPI2_IRQHandler(void)
     }
     else if (NRF_SPIM2->EVENTS_STARTED)
     {
-        NRF_SPIM2->EVENTS_STARTED = 0;
+        NRF_SPIM2->EVENTS_STARTED = fdgsg 0;
         if (spi_2_intr_func[SPI_INT_STARTED_Func] != NULL)
         {
             spi_2_intr_func[SPI_INT_STARTED_Func]();
@@ -147,15 +145,12 @@ void   SPIM2_SPIS2_SPI2_IRQHandler(void)
     }
 }
 
-
-
 #endif
-
 
 /// @brief this function is used to get the spi instance from number
 /// @param spi_num
 /// @return the spi address
-static uint32_t  get_spi_instance(uint8_t spi_num)
+static uint32_t get_spi_instance(uint8_t spi_num)
 {
     uint32_t addr = 0;
     switch (spi_num)
@@ -197,16 +192,15 @@ FORCE_INLINE void spi_config(uint8_t spi_num, const my_spi_cfg *cfg)
     // gpio_set_dir(cfg->mosi_pin, GPIO_PIN_DIR_OUTPUT);
 
     const my_gpio_cfg my_spi_pins_cfg =
-    {
-        .gpio_dir = GPIO_PIN_DIR_OUTPUT,
-        .gpio_drive_type = GPIO_PIN_H0H1,
-        .gpio_input_buff = GPIO_PIN_INPUT_BUFF_DISCONNECT,
-        .gpiopull_mode = GPIO_PIN_NOPULL,
-        .gpio_sense_type = GPIO_PIN_NOSENSE
-    };
+        {
+            .gpio_dir = GPIO_PIN_DIR_OUTPUT,
+            .gpio_drive_type = GPIO_PIN_H0H1,
+            .gpio_input_buff = GPIO_PIN_INPUT_BUFF_DISCONNECT,
+            .gpiopull_mode = GPIO_PIN_NOPULL,
+            .gpio_sense_type = GPIO_PIN_NOSENSE};
 
-    gpio_config(cfg->sck_pin , &my_spi_pins_cfg);
-    gpio_config(cfg->mosi_pin , &my_spi_pins_cfg);
+    gpio_config(cfg->sck_pin, &my_spi_pins_cfg);
+    gpio_config(cfg->mosi_pin, &my_spi_pins_cfg);
 
     gpio_set_level(cfg->sck_pin, (cfg->spi_mode >> 1) & 1UL);
     gpio_pin_reset(cfg->mosi_pin);
@@ -220,56 +214,36 @@ FORCE_INLINE void spi_config(uint8_t spi_num, const my_spi_cfg *cfg)
     preg->PSEL.MOSI = cfg->mosi_pin;
 }
 
-FORCE_INLINE void spi_config_mode(uint8_t spi_num ,uint8_t spi_mode)
+FORCE_INLINE void spi_config_mode(uint8_t spi_num, uint8_t spi_mode)
 {
-    if((spi_mode >3) || (spi_num >2)) return;
+    if ((spi_mode > 3) || (spi_num > 2))
+        return;
 
-      // first get the address of the SPI instances
+    // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
-    // change the config mode 
-      // config
-    preg->CONFIG =  (spi_mode<<1) |  (preg->CONFIG & 0x01);
-
+    // change the config mode
+    // config
+    preg->CONFIG = (spi_mode << 1) | (preg->CONFIG & 0x01);
 }
 
-/// @brief set the dummy tx byte according to the sensor 
-/// @param spi_num 
-/// @param tx_byte 
-FORCE_INLINE void spi_set_dummy_tx(uint8_t spi_num , uint8_t tx_byte)
+/// @brief set the dummy tx byte according to the sensor
+/// @param spi_num
+/// @param tx_byte
+FORCE_INLINE void spi_set_dummy_tx(uint8_t spi_num, uint8_t tx_byte)
 {
-// first get the address of the SPI instances
+    // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
     // ocr value
     preg->ORC = tx_byte;
-
 }
-
 
 //// init the SPI module
 FORCE_INLINE void spi_module_init(uint8_t spi_num)
 {
     // nullify the IRQ handlers
-    switch (spi_num)
+    for (uint8_t i = 0; i < SPI_TOTAL_INTERRUPTS; i++)
     {
-    case SPI0:
-        for (uint8_t i = 0; i < SPI_TOTAL_INTERRUPTS; i++)
-        {
-            spi_0_intr_func[i] = NULL;
-        }
-        break;
-    case SPI1:
-        for (uint8_t i = 0; i < SPI_TOTAL_INTERRUPTS; i++)
-        {
-            spi_1_intr_func[i] = NULL;
-        }
-        break;
-
-    case SPI2:
-        for (uint8_t i = 0; i < SPI_TOTAL_INTERRUPTS; i++)
-        {
-            spi_2_intr_func[i] = NULL;
-        }
-        break;
+        spi_intr_func[spi_num][i] = NULL;
     }
 
     // first get the address of the SPI instances
@@ -278,8 +252,8 @@ FORCE_INLINE void spi_module_init(uint8_t spi_num)
     // disable the SPI isr
     spi_disable_isr(spi_num);
 
-    // clear the short register 
-    preg->SHORTS =0;
+    // clear the short register
+    preg->SHORTS = 0;
     /// disable all the interrupts
     preg->INTENCLR = U32_MAX;
     // enable the hardware
@@ -306,38 +280,12 @@ FORCE_INLINE void spi_module_deinit(uint8_t spi_num)
 
 FORCE_INLINE void spi_add_irq_handler(uint8_t spi_num, uint8_t int_num, void (*func)(void))
 {
-    switch (spi_num)
-    {
-    case SPI0:
-        spi_0_intr_func[int_num] = func;
-        break;
-
-    case SPI1:
-        spi_1_intr_func[int_num] = func;
-        break;
-
-    case SPI2:
-        spi_2_intr_func[int_num] = func;
-        break;
-    }
+    spi_intr_func[spi_num][int_num] = func;
 }
 
 FORCE_INLINE void spi_remove_irq_handler(uint8_t spi_num, uint8_t int_num)
 {
-    switch (spi_num)
-    {
-    case SPI0:
-        spi_0_intr_func[int_num] = NULL;
-        break;
-
-    case SPI1:
-        spi_1_intr_func[int_num] = NULL;
-        break;
-
-    case SPI2:
-        spi_2_intr_func[int_num] = NULL;
-        break;
-    }
+    spi_intr_func[spi_num][int_num] = NULL;
 }
 
 FORCE_INLINE void spi_enable_intr(uint8_t spi_num, uint8_t int_num)
@@ -438,19 +386,18 @@ FORCE_INLINE void spi_disable_isr(uint8_t spi_num)
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////   spi_transfer APIs
 
-
 FORCE_INLINE void spi_continous_xfr(uint8_t spi_num)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
-    preg->SHORTS = _BV(17);   
+    preg->SHORTS = _BV(17);
 }
 
 FORCE_INLINE void spi_one_shot_xfr(uint8_t spi_num)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
-    preg->SHORTS = 0;   
+    preg->SHORTS = 0;
 }
 
 /***
@@ -464,7 +411,7 @@ FORCE_INLINE void spi_one_shot_xfr(uint8_t spi_num)
  */
 FORCE_INLINE uint8_t spi_polling_xfr(uint8_t spi_num, const uint8_t *tx_buff, uint8_t tx_size, uint8_t *rx_buff, uint8_t rx_size)
 {
-    
+
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
 
@@ -474,11 +421,11 @@ FORCE_INLINE uint8_t spi_polling_xfr(uint8_t spi_num, const uint8_t *tx_buff, ui
     preg->RXD.PTR = (uint32_t)rx_buff;
     preg->RXD.MAXCNT = rx_size;
 
-    // start the transfer 
+    // start the transfer
     preg->TASKS_START = 1UL;
 
     // if the event is 1 then break from the loop
-    while(preg->EVENTS_END == 0)
+    while (preg->EVENTS_END == 0)
     {
         // nrf_delay_us(1);
         // timeout--;
@@ -487,8 +434,8 @@ FORCE_INLINE uint8_t spi_polling_xfr(uint8_t spi_num, const uint8_t *tx_buff, ui
         //     return nrf_ERR_TIMEOUT;
         // }
     }
-    // reset the event 
-    preg->EVENTS_END =0;
+    // reset the event
+    preg->EVENTS_END = 0;
     return nrf_OK;
 }
 
@@ -623,16 +570,16 @@ uint32_t *spi_get_event_addr(uint8_t spi_num, uint8_t event_type)
         addr = (uint32_t *)preg->EVENTS_STOPPED;
         break;
     case SPI_EVENTS_ENDRX:
-    addr = (uint32_t *)preg->EVENTS_ENDRX;
+        addr = (uint32_t *)preg->EVENTS_ENDRX;
         break;
     case SPI_EVENTS_END:
-    addr = (uint32_t *)preg->EVENTS_END;
+        addr = (uint32_t *)preg->EVENTS_END;
         break;
     case SPI_EVENTS_ENDTX:
-    addr = (uint32_t *)preg->EVENTS_ENDTX;
+        addr = (uint32_t *)preg->EVENTS_ENDTX;
         break;
     case SPI_EVENTS_STARTED:
-    addr = (uint32_t *)preg->EVENTS_STARTED;
+        addr = (uint32_t *)preg->EVENTS_STARTED;
         break;
     }
     return addr;
