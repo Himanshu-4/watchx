@@ -4,6 +4,8 @@
 #include "spi_thread_safe.h"
 
 #include "nrf_custom_log.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 #define OLED_SPI_USED NRF_CONFIG_OLED_SPI_HOST_USED
 
@@ -11,6 +13,7 @@
 
 #define OLED_RESET_PIN NRF_CONFIG_OLED_MOD_RESET_PIN
 #define OLED_DATA_PIN NRF_CONFIG_OLED_DC_OUT_PIN
+#define OLED_CS_PIN NRF_CONFIG_OLED_CHIP_SELECT_PIN
 
 ///========================================================================================================================
 ///================================================ macros functions here ============================================
@@ -27,10 +30,8 @@
 
 //// this macro function will hard reset the OLEd module
 #define NRF_OLED_HARD_RESET()       \
-    gpio_pin_set(OLED_RESET_PIN);   \
-    nrf_delay_us(5);                \
     gpio_pin_reset(OLED_RESET_PIN); \
-    nrf_delay_us(5);                \
+    nrf_delay_ms(5);                \
     gpio_pin_set(OLED_RESET_PIN);
 
 ///========================================================================================================================
@@ -39,8 +40,29 @@
 /// @brief  send the data to the oled through SPI
 /// @param data
 /// @param size
-static void oled_send(const uint8_t *data, uint16_t size)
+static void oled_send_cmd(const uint8_t *data, uint16_t size)
 {
+    NRF_OLED_CMD_MODE();
+    uint8_t ret = 0;
+    spi_xfr_buff buff =
+        {
+            .rx_buff = NULL,
+            .rx_size = 0,
+            .tx_buff = data,
+            .tx_size = size};
+    ret = spi_poll_xfr_thread_safe(OLED_SPI_USED, NRF_CONFIG_OLED_CHIP_SELECT_PIN, &buff);
+    if (ret != nrf_OK)
+    {
+        NRF_LOG_ERROR("oled %d , cmd %d", ret, data[0]);
+    }
+}
+
+/// @brief send data to the oled ram 
+/// @param data 
+/// @param size 
+static void oled_send_data(const uint8_t *data, uint16_t size)
+{
+    NRF_OLED_DATA_MODE();
     uint8_t ret = 0;
     //// split the transactions in multiple spi transfers into 256 bytes
     uint8_t split = GET_NO_OF_PERFECT_DIVIDE(size, OLED_SPI_MAX_XFR_BYTES);
@@ -55,9 +77,9 @@ static void oled_send(const uint8_t *data, uint16_t size)
 
         ret = spi_poll_xfr_thread_safe(OLED_SPI_USED, NRF_CONFIG_OLED_CHIP_SELECT_PIN, &buff);
 
-        if (ret != 0)
+        if (ret != nrf_OK)
         {
-            NRF_LOG_ERROR("oled %d , cmd %d", ret, data[0]);
+            NRF_LOG_ERROR("oled %d , data %d", ret, data[0]);
         }
     }
 }
@@ -76,6 +98,11 @@ static void oled_pre_init(void)
 
     gpio_config(OLED_RESET_PIN, &gpio_cfg);
     gpio_config(OLED_DATA_PIN, &gpio_cfg);
+    gpio_config(OLED_CS_PIN, &gpio_cfg);
+
+    gpio_pin_set(OLED_RESET_PIN);
+    gpio_pin_set(OLED_CS_PIN);
+    gpio_pin_set(OLED_DATA_PIN);
 }
 ///========================================================================================================================
 ///================================================ functions definations here ============================================
@@ -89,6 +116,7 @@ void nrf_oled_screen_init(void)
 
     NRF_OLED_HARD_RESET();
 
+    delay(10);
     /// software init the oled module
     /// set mux ratio a8/3f
     /// set display start line
@@ -101,7 +129,7 @@ void nrf_oled_screen_init(void)
     /// set osc freq
     /// enable charge pump regulator
     /// dispay on
-    NRF_OLED_CMD_MODE();
+
     const uint8_t cmd[] =
         {
             SSD13X_REG_OLED_DRIVER_OFF,
@@ -121,59 +149,55 @@ void nrf_oled_screen_init(void)
             SSD13X_REG_DISPLAY_ON_FOLLOWRAM,
             SSD13X_REG_OLED_DRIVER_ON};
 
-    oled_send(cmd, sizeof(cmd));
+    oled_send_cmd(cmd, sizeof(cmd));
 
+    const uint8_t data[] = {0x32, 0x33, 0x34, 0x35};
+    oled_send_data(data, sizeof(data));
 
-    uint8_t data[] = {0x32,0x32,0x32,0x32};
-    NRF_OLED_DATA_MODE();
-    oled_send(data,sizeof(data));
+    NRF_LOG_INFO("oled init");
 }
 
 /// @brief set contrast ratio for the oled
 /// @param contrast
 void nrf_oled_set_contrast_ratio(uint8_t contrast)
 {
-    NRF_OLED_CMD_MODE();
+
     uint8_t cmd_buff[] = {SSD13X_REG_SET_CONTRAST_CONTROL, contrast};
-    oled_send(cmd_buff, sizeof(cmd_buff));
+    oled_send_cmd(cmd_buff, sizeof(cmd_buff));
 }
 
 /// @brief turn on the oled display and start following ram
 /// @param follow_ram
 void nrf_oled_display_on(uint8_t follow_ram)
 {
-    NRF_OLED_CMD_MODE();
     uint8_t cmd = 0;
     cmd = (follow_ram) ? (SSD13X_REG_DISPLAY_ON_FOLLOWRAM) : (SSD13X_REG_DISPLAY_ON_IGNORERAM);
-    oled_send(&cmd, 1);
+    oled_send_cmd(&cmd, 1);
 }
 
 /// @brief  wakeup the ssd1306 from sleep mode
 /// @param  void
 void nrf_oled_driver_on(void)
 {
-    NRF_OLED_CMD_MODE();
     uint8_t cmd = SSD13X_REG_OLED_DRIVER_ON;
-    oled_send(&cmd, 1);
+    oled_send_cmd(&cmd, 1);
 }
 
 /// @brief this will put the ssd1306 in sleep mode
 /// @param  void
 void nrf_olrf_oled_driver_off(void)
 {
-    NRF_OLED_CMD_MODE();
     uint8_t cmd = SSD13X_REG_OLED_DRIVER_OFF;
-    oled_send(&cmd, 1);
+    oled_send_cmd(&cmd, 1);
 }
 
 /// @brief invert the display or normal mode
 /// @param mode
 void nrf_oled_invert_display(uint8_t mode)
 {
-    NRF_OLED_CMD_MODE();
     uint8_t cmd = 0;
     cmd = (mode == OLED_DISPLAY_SET_INVERT) ? (SSD13X_REG_INVERSE_DISPLAY_MODE) : (SSD13X_REG_NORMAL_DISPLAY_MODE);
-    oled_send(&cmd, 1);
+    oled_send_cmd(&cmd, 1);
 }
 
 ////////////=================================================================================================
@@ -183,17 +207,16 @@ void nrf_oled_invert_display(uint8_t mode)
 /// @param  input
 void nrf_oled_flip_180(bool input)
 {
-    NRF_OLED_CMD_MODE();
     //// rotate the display by 180
     if (input)
     {
         uint8_t cmd[] = {SSD13X_REG_SEG0_MAP_TO_COL127, SSD13X_REG_SET_COM_OUT_SCAN_DIR_CN_TO_C0};
-        oled_send(cmd, sizeof(cmd));
+        oled_send_cmd(cmd, sizeof(cmd));
     }
     //// dont roatate display
     else
     {
         uint8_t cmd[] = {SSD13X_REG_SEG0_MAP_TO_COL0, SSD13X_REG_SET_COM_OUT_SCAN_DIR_C0_TO_CN};
-        oled_send(cmd, sizeof(cmd));
+        oled_send_cmd(cmd, sizeof(cmd));
     }
 }

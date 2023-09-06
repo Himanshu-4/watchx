@@ -670,8 +670,7 @@ FORCE_INLINE uint8_t i2c_get_err_and_clear(uint8_t i2c_num)
 
     uint32_t err =0;
     err = preg->ERRORSRC;
-  
-    preg->ERRORSRC = err;
+    preg->ERRORSRC = 0X07;
     return err;
 
 }

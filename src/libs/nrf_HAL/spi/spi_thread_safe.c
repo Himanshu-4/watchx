@@ -47,11 +47,7 @@ void spi_thread_safe_init(uint8_t spi_num, const my_spi_cfg *spi_cfg, uint32_t t
     spi_enable_intr(spi_num, SPI_INT_END);
 
     // create the mutex
-    if (spi_semphr_handle[spi_num] == NULL)
-    {
-        spi_semphr_handle[spi_num] = xSemaphoreCreateMutexStatic(&spi_semphr_buffer[spi_num]);
-    }
-    configASSERT(spi_semphr_handle[spi_num]);
+    spi_semphr_handle[spi_num] = xSemaphoreCreateMutexStatic(&spi_semphr_buffer[spi_num]);
 
     // always give the  semaphore after initaling
     xSemaphoreGive(spi_semphr_handle[spi_num]);
@@ -76,7 +72,7 @@ void spi_thread_safe_deinit(uint8_t spi_num)
     spi_semphr_handle[spi_num] = NULL;
 }
 
-uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, spi_xfr_buff *spi_buff)
+uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, const spi_xfr_buff *spi_buff)
 {
     // take the semaphore
     if (xSemaphoreTake(spi_semphr_handle[spi_num], pdMS_TO_TICKS(spi_timeout[spi_num])) != pdPASS)
@@ -99,7 +95,7 @@ uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, spi_xfr_buff 
     spi_start_xfr(spi_num);
 
     // wait for the notification to be recievde from the isr
-    if (xTaskNotifyWait(U32_MAX, U32_MAX, &err, pdMS_TO_TICKS(spi_timeout[spi_num])) != pdPASS)
+    if (xTaskNotifyWait(U32_MAX, U32_MAX, &err, spi_timeout[spi_num]) != pdPASS)
     {
         // pull the pin to high
         gpio_pin_set(csn_pin);
@@ -121,7 +117,7 @@ return_mech:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t spi_poll_xfr_thread_safe_differnt(uint8_t spi_num, uint8_t csn_pin, spi_xfr_buff *spi_buff)
+uint8_t spi_poll_xfr_thread_safe_differnt(uint8_t spi_num, uint8_t csn_pin, const spi_xfr_buff *spi_buff)
 {
     // take the semaphore
     if (xSemaphoreTake(spi_semphr_handle[spi_num], pdMS_TO_TICKS(spi_timeout[spi_num])) != pdPASS)
@@ -142,13 +138,14 @@ uint8_t spi_poll_xfr_thread_safe_differnt(uint8_t spi_num, uint8_t csn_pin, spi_
     spi_start_xfr(spi_num);
 
     // wait for the notification to be recievde from the isr
-    if (xTaskNotifyWait(U32_MAX, U32_MAX, &err, pdMS_TO_TICKS(spi_timeout[spi_num])) != pdPASS)
+    if (xTaskNotifyWait(0x00, U32_MAX, &err, spi_timeout[spi_num]) != pdPASS)
     {
         // pull the pin to high
         gpio_pin_set(csn_pin);
         err = SPI_ERROR_XFR_TIMEOUT;
         goto return_mech;
     }
+
     // pull the spi csn pin low
     gpio_pin_reset(csn_pin);
     delay(1);
@@ -237,15 +234,15 @@ void spi_2_int_handler(void)
 
 #ifdef FREERTOS_ENV
 
-void __WEAK SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQHandler(void)
-{
-    spi_0_int_handler();
-}
-/// @brief  weak defination of the functions
-void __WEAK SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQHandler(void)
-{
-    spi_1_int_handler();
-}
+// void __WEAK SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQHandler(void)
+// {
+//     spi_0_int_handler();
+// }
+// /// @brief  weak defination of the functions
+// void __WEAK SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQHandler(void)
+// {
+//     spi_1_int_handler();
+// }
 
 // please use this SPI if you only use 1 SPI in your project
 void SPIM2_SPIS2_SPI2_IRQHandler(void)

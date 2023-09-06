@@ -10,7 +10,7 @@
 
 #define TOATL_SPI_HARDWARE 3
 
-typedef struct PACKED
+typedef __PACKED_STRUCT PACKED
 {
   const uint8_t * tx_buff ;
  uint8_t tx_size;
@@ -52,7 +52,7 @@ void spi_thread_safe_deinit(uint8_t spi_num);
  * @param spi transfer buffer strucutre 
  * @brief used for transfer of the content over spi in thread safe mode  
 */
-uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, spi_xfr_buff  * spi_buff);
+uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, const spi_xfr_buff  * spi_buff);
 
 
 /***
@@ -62,6 +62,6 @@ uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, spi_xfr_buff 
  * @param spi transfer buffer 
  * @brief . 
 */
-uint8_t spi_poll_xfr_thread_safe_differnt(uint8_t spi_num, uint8_t csn_pin, spi_xfr_buff *spi_buff);
+uint8_t spi_poll_xfr_thread_safe_differnt(uint8_t spi_num, uint8_t csn_pin,const  spi_xfr_buff *spi_buff);
 
 #endif

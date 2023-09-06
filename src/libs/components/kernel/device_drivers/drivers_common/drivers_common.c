@@ -40,47 +40,47 @@ void Hardware_drivers_install(void)
     gpio_install_isr_servc();
 #endif
 
-#if defined(I2C_DRIVER_INSTALL)
+#if defined(NRF_CONFIG_I2C_DRIVER_INSTALL)
 
     const my_i2c_config i2c_cfg =
         {
             .device_addr = 0x01, // dummy device address
             .internal_pullup = I2C_internal_pullup_enable,
-            .sda_pin = I2C_SDA_LINE,
-            .scl_pin = I2C_SCL_LINE,
-            .sck_freq = I2C_CLK_FREQ};
+            .sda_pin = NRF_CONFIG_I2C_SDA_LINE,
+            .scl_pin = NRF_CONFIG_I2C_SCL_LINE,
+            .sck_freq = NRF_CONFIG_I2C_CLK_FREQ};
 
     //// if freertos is defined then use the thread safe i2c API
 #if defined(FREERTOS_ENV)
 
-    i2c_thread_safe_init(I2C_HARDWARE_USE, &i2c_cfg, I2C_WAIT_FOR_DATA_RESPONSE);
+    i2c_thread_safe_init(NRF_CONFIG_I2C_HARDWARE_USE, &i2c_cfg, NRF_CONFIG_I2C_WAIT_FOR_DATA_RESPONSE);
 #else
 
-    i2c_config(I2C_HARDWARE_USE, &i2c_cfg);
-    i2c_module_init(I2C_HARDWARE_USE);
+    i2c_config(NRF_CONFIG_I2C_HARDWARE_USE, &i2c_cfg);
+    i2c_module_init(NRF_CONFIG_I2C_HARDWARE_USE);
 
 #endif
 #endif
 
-#if defined(SPI_DRIVER_INSTALL)
+#if defined(NRF_CONFIG_SPI_DRIVER_INSTALL)
 
     const my_spi_cfg spi_cfg =
         {
-            .dummy_tx_byte = SPI_DUMMY_TX_BYTE,
-            .miso_pin = SPI_MISO_LINE,
-            .mosi_pin = SPI_MOSI_LINE,
-            .sck_pin = SPI_SCK_LINE,
-            .spi_mode = SPI_MODE_USED,
-            .spi_bit_order = SPI_BIT_ORDER,
-            .sck_freq = SPI_SCK_FREQUENCY};
+            .dummy_tx_byte = NRF_CONFIG_SPI_DUMMY_TX_BYTE,
+            .miso_pin = NRF_CONFIG_SPI_MISO_LINE,
+            .mosi_pin = NRF_CONFIG_SPI_MOSI_LINE,
+            .sck_pin = NRF_CONFIG_SPI_SCK_LINE,
+            .spi_mode = NRF_CONFIG_SPI_MODE_USED,
+            .spi_bit_order = NRF_CONFIG_SPI_BIT_ORDER,
+            .sck_freq = NRF_CONFIG_SPI_SCK_FREQUENCY};
 
     //// if freertos is defined then use the thread safe i2c API
 #if defined(FREERTOS_ENV)
-    spi_thread_safe_init(SPI_HARDWARE_USE, &spi_cfg, SPI_DATA_RESPONSE_TIME);
+    spi_thread_safe_init(NRF_CONFIG_SPI_HARDWARE_USE, &spi_cfg, NRF_CONFIG_SPI_DATA_RESPONSE_TIME);
 
 #else
-    spi_config(SPI_HARDWARE_USE, &spi_cfg);
-    spi_module_init(SPI_HARDWARE_USE);
+    spi_config(NRF_CONFIG_SPI_HARDWARE_USE, &spi_cfg);
+    spi_module_init(NRF_CONFIG_SPI_HARDWARE_USE);
 
 #endif
 #endif

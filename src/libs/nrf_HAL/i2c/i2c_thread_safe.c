@@ -68,10 +68,7 @@ void i2c_thread_safe_init(uint8_t i2c_hardware, const my_i2c_config *i2c_cfg, ui
     i2c_enable_intr(i2c_hardware, I2C_INT_STOPPED);
 
     // create the mutex
-    if (i2c_semphr_handle[i2c_hardware] == NULL)
-    {
-        i2c_semphr_handle[i2c_hardware] = xSemaphoreCreateMutexStatic(&i2c_mutex_buffer[i2c_hardware]);
-    }
+    i2c_semphr_handle[i2c_hardware] = xSemaphoreCreateMutexStatic(&i2c_mutex_buffer[i2c_hardware]);
     
     if (i2c_semphr_handle[i2c_hardware] == NULL)
     {
@@ -97,7 +94,6 @@ void i2c_thread_safe_deinit(uint8_t i2c_hardware)
     i2c_remove_irq_handler(i2c_hardware, I2C_INT_STOPPED_Func );
     i2c_remove_irq_handler(i2c_hardware, I2C_INT_ERROR_Func);
 
-    
     i2c_module_deinit(i2c_hardware);
     i2c_disable_isr(i2c_hardware);
 
@@ -243,6 +239,8 @@ uint32_t i2c_write_and_read_data_arr(uint8_t i2c_hardware, uint8_t dev_addr, i2c
     i2c_unshort_event(i2c_hardware, I2C_SHORT_LASTRX_STOP);
 
     // give the semaphore
+     // nullify the task handle after use 
+    i2c_task_handle[i2c_hardware] = NULL;
     xSemaphoreGive(i2c_semphr_handle[i2c_hardware]);
 
     return err;
@@ -264,9 +262,6 @@ void i2c_0_stopped_event_callback_func(void)
         xTaskNotifyFromISR(i2c_task_handle[I2C0], status, eSetValueWithOverwrite, &high_priorty_task_woken);
     }
 
-    // nullify the task handle after use 
-    i2c_task_handle[I2C0] = NULL;
-
     /// do a contect switch if required
     portYIELD_FROM_ISR(high_priorty_task_woken);
 }
@@ -281,9 +276,6 @@ void i2c_1_stopped_event_callback_func(void)
     {
         xTaskNotifyFromISR(i2c_task_handle[I2C1], status, eSetValueWithOverwrite, &high_priorty_task_woken);
     }
-
-    // nullify the task handle after use 
-    i2c_task_handle[I2C1] = NULL;
 
     /// do a contect switch if required
     portYIELD_FROM_ISR(high_priorty_task_woken);
@@ -312,9 +304,6 @@ void i2c_0_err_callback_func(void)
         xTaskNotifyFromISR(i2c_task_handle[I2C0], status, eSetValueWithOverwrite, &high_priorty_task_woken);
     }
 
-    // nullify the task handle after use 
-    i2c_task_handle[I2C0] = NULL;
-
     /// do a contect switch if required
     portYIELD_FROM_ISR(high_priorty_task_woken);
 }
@@ -336,9 +325,6 @@ void i2c_1_err_callback_func(void)
     {
         xTaskNotifyFromISR(i2c_task_handle[I2C1], status, eSetValueWithOverwrite, &high_priorty_task_woken);
     }
-
-    // nullify the task handle after use 
-    i2c_task_handle[I2C1] = NULL;
 
     /// do a contect switch if required
     portYIELD_FROM_ISR(high_priorty_task_woken);

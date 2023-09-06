@@ -94,19 +94,19 @@
 #define NRF_CONFIG_SPI_BIT_ORDER SPI_BIT_ORDER_MSB_FIRST
 #define NRF_CONFIG_SPI_SCK_FREQUENCY SPI_SCK_500K
 #define NRF_CONFIG_SPI_HARDWARE_USE SPI2
-#define NRF_CONFIG_SPI_DATA_RESPONSE_TIME 100
+#define NRF_CONFIG_SPI_DATA_RESPONSE_TIME 1000
 
 ////================================================================================
 ////================================================================================
 ////======================================== OLED configurations
 
-#define NRF_CONFIG_OLED_WAIT_TIME 1000 /// 1sec
+#define NRF_CONFIG_OLED_WAIT_TIME 400 /// 1sec
 
 #define NRF_CONFIG_OLED_SPI_HOST_USED NRF_CONFIG_SPI_HARDWARE_USE
 
 #define NRF_CONFIG_OLED_CHIP_SELECT_PIN PIN_2
-#define NRF_CONFIG_OLED_DC_OUT_PIN PIN_9
-#define NRF_CONFIG_OLED_MOD_RESET_PIN PIN_10
+#define NRF_CONFIG_OLED_DC_OUT_PIN PIN_11
+#define NRF_CONFIG_OLED_MOD_RESET_PIN PIN_12
 
 ////================================================================================
 ////================================================================================

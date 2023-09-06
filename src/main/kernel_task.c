@@ -174,7 +174,7 @@ void kernel_task(void *param)
 
     /// int the oled screen and gfx lib 
     nrf_oled_screen_init();
-    // nrf_gfx_lib_init();
+    nrf_gfx_lib_init();
 
     /// global err to store the err of retutrns
     uint32_t err = 0;
