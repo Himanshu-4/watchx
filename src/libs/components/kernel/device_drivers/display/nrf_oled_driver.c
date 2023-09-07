@@ -152,11 +152,10 @@ void nrf_oled_screen_init(void)
             SSD13X_REG_OLED_DRIVER_ON};
 
     oled_send_cmd(cmd, sizeof(cmd));
-
     const uint8_t data[255] = {0x32};
     oled_send_data(data, sizeof(data));
 
-    NRF_LOG_INFO("oled init");
+    NRF_LOG_INFO("buf %x b2 %x",cmd,data);
 }
 
 /// @brief set contrast ratio for the oled

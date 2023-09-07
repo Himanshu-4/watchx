@@ -23,11 +23,11 @@ enable_language(C ASM)
 
 # specify whether u want to generate DEbug or release Version
 set(DEBUG_Flags 
-        # -O0 -g0
+        -O0 -g3
         )
 
 set(RELEASE_Flags 
-        -O3 -g0
+        # -O3 -g0
         )
 # specify the C standard and the c extensions
 

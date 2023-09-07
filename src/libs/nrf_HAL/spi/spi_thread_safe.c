@@ -2,7 +2,6 @@
 
 //// include the freertos libs
 #include "FreeRTOS.h"
-#include "FreeRTOSConfig.h"
 #include "semphr.h"
 #include "task.h"
 
@@ -74,7 +73,7 @@ void spi_thread_safe_deinit(uint8_t spi_num)
     spi_semphr_handle[spi_num] = NULL;
 }
 
-uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, const spi_xfr_buff *spi_buff)
+uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, const spi_xfr_buff *spi_buff) 
 {
     // take the semaphore
     if (xSemaphoreTake(spi_semphr_handle[spi_num], spi_timeout[spi_num]) != pdPASS)
@@ -89,6 +88,8 @@ uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, const spi_xfr
     // assign the csn pin
     current_csn_pin[spi_num] = csn_pin;
 
+    
+    NRF_LOG_INFO("b %x,s %d",spi_buff->tx_buff, spi_buff->tx_size);
     spi_set_tx_buff(spi_num, spi_buff->tx_buff, spi_buff->tx_size);
     spi_set_rx_buff(spi_num, spi_buff->rx_buff, spi_buff->rx_size);
     // pull the spi csn pin low
@@ -96,7 +97,7 @@ uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, const spi_xfr
     // start the xfr
     spi_start_xfr(spi_num);
 
- 
+
     // wait for the notification to be recievde from the isr
     if (xTaskNotifyWait(0, U32_MAX, &err, spi_timeout[spi_num]) != pdPASS)
     {
@@ -119,49 +120,49 @@ uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, const spi_xfr
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint8_t spi_poll_xfr_thread_safe_differnt(uint8_t spi_num, uint8_t csn_pin, const spi_xfr_buff *spi_buff)
-{
-    // take the semaphore
-    if (xSemaphoreTake(spi_semphr_handle[spi_num], spi_timeout[spi_num]) != pdPASS)
-    {
-        return SPI_ERROR_XFR_TIMEOUT;
-    }
-    uint32_t err = SPI_XFR_OK;
+// uint8_t spi_poll_xfr_thread_safe_differnt(uint8_t spi_num, uint8_t csn_pin, const spi_xfr_buff *spi_buff)
+// {
+//     // take the semaphore
+//     if (xSemaphoreTake(spi_semphr_handle[spi_num], spi_timeout[spi_num]) != pdPASS)
+//     {
+//         return SPI_ERROR_XFR_TIMEOUT;
+//     }
+//     uint32_t err = SPI_XFR_OK;
 
-    // get the current task handle
-    spi_task_handle[spi_num] = xTaskGetCurrentTaskHandle();
+//     // get the current task handle
+//     spi_task_handle[spi_num] = xTaskGetCurrentTaskHandle();
 
-    // assign the csn pin
-    current_csn_pin[spi_num] = csn_pin;
+//     // assign the csn pin
+//     current_csn_pin[spi_num] = csn_pin;
 
-    NRF_LOG_INFO("buff %x, s %d",spi_buff->tx_buff, spi_buff->tx_size);
-    spi_set_tx_buff(spi_num, spi_buff->tx_buff, spi_buff->tx_size);
-    spi_set_rx_buff(spi_num, spi_buff->rx_buff, spi_buff->rx_size);
-    // start the xfr
-    spi_start_xfr(spi_num);
+//     NRF_LOG_INFO("b %x,s %d",spi_buff->tx_buff, spi_buff->tx_size);
+//     spi_set_tx_buff(spi_num, spi_buff->tx_buff, spi_buff->tx_size);
+//     spi_set_rx_buff(spi_num, spi_buff->rx_buff, spi_buff->rx_size);
+//     // start the xfr
+//     spi_start_xfr(spi_num);
 
-    // wait for the notification to be recievde from the isr
-    if (xTaskNotifyWait(0x00, U32_MAX, &err, spi_timeout[spi_num]) != pdPASS)
-    {
-        // pull the pin to high
-        gpio_pin_set(csn_pin);
-        err = SPI_ERROR_XFR_TIMEOUT;
-        goto return_mech;
-    }
+//     // wait for the notification to be recievde from the isr
+//     if (xTaskNotifyWait(0x00, U32_MAX, &err, spi_timeout[spi_num]) != pdPASS)
+//     {
+//         // pull the pin to high
+//         gpio_pin_set(csn_pin);
+//         err = SPI_ERROR_XFR_TIMEOUT;
+//         goto return_mech;
+//     }
 
-    // pull the spi csn pin low
-    gpio_pin_reset(csn_pin);
-    delay(1);
-    gpio_pin_set(csn_pin);
+//     // pull the spi csn pin low
+//     gpio_pin_reset(csn_pin);
+//     delay(1);
+//     gpio_pin_set(csn_pin);
 
-return_mech:
-    // give back the semaphore after xfr is complete so that other task can avail the function
-    xSemaphoreGive(spi_semphr_handle[spi_num]);
-    // nullify the handle
-    spi_task_handle[spi_num] = NULL;
+// return_mech:
+//     // give back the semaphore after xfr is complete so that other task can avail the function
+//     xSemaphoreGive(spi_semphr_handle[spi_num]);
+//     // nullify the handle
+//     spi_task_handle[spi_num] = NULL;
 
-    return err;
-}
+//     return err;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,8 +225,8 @@ void spi_2_int_handler(void)
     {
         // clear the interrupt
         NRF_SPIM2->EVENTS_END = 0;
-        NRF_SPIM2->EVENTS_ENDRX = 0;
-        NRF_SPIM2->EVENTS_ENDTX = 0;
+        // NRF_SPIM2->EVENTS_ENDRX = 0;
+        // NRF_SPIM2->EVENTS_ENDTX = 0;
         res = nrf_OK;
     }
 
@@ -234,7 +235,7 @@ void spi_2_int_handler(void)
         xTaskNotifyFromISR(spi_task_handle[SPI2], res, eSetValueWithOverwrite, &high_task_awoken);
     }
 
-    portYIELD_FROM_ISR(high_task_awoken);
+    // portYIELD_FROM_ISR(high_task_awoken);
 }
 
 #ifdef FREERTOS_ENV
