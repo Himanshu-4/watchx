@@ -40,7 +40,7 @@
 /// @brief  send the data to the oled through SPI
 /// @param data
 /// @param size
-static void oled_send_cmd(const uint8_t *data, uint16_t size)
+static void __attribute__((optimize("O0"))) oled_send_cmd(const uint8_t *data, uint16_t size)
 {
     NRF_OLED_CMD_MODE();
     uint8_t ret = 0;
@@ -60,7 +60,7 @@ static void oled_send_cmd(const uint8_t *data, uint16_t size)
 /// @brief send data to the oled ram
 /// @param data
 /// @param size
-static void oled_send_data(const uint8_t *data, uint16_t size)
+static void __attribute__((optimize("O0"))) oled_send_data(const uint8_t *data, uint16_t size)
 {
     NRF_OLED_DATA_MODE();
     uint8_t ret = 0;
@@ -76,10 +76,10 @@ static void oled_send_data(const uint8_t *data, uint16_t size)
                 .tx_size = ((i == (split-1)) ? ( GET_REMNDER(size,OLED_SPI_MAX_XFR_BYTES) ?GET_REMNDER(size,OLED_SPI_MAX_XFR_BYTES):(OLED_SPI_MAX_XFR_BYTES) ) : (OLED_SPI_MAX_XFR_BYTES))};
 
         ret = spi_poll_xfr_thread_safe(OLED_SPI_USED, NRF_CONFIG_OLED_CHIP_SELECT_PIN, &buff);
-        NRF_LOG_INFO("sending data %d", i);
-        if (ret != nrf_OK)
+      if (ret != nrf_OK)
         {
             NRF_LOG_ERROR("oled %d , data %d", ret, data[0]);
+            return;
         }
     }
 }
@@ -108,10 +108,11 @@ static void oled_pre_init(void)
 }
 ///========================================================================================================================
 ///================================================ functions definations here ============================================
-const uint8_t __section(".rodata") data[1024] = {0x32};
+
+
 /// @brief this will init the oled module
 /// @param  void
-void nrf_oled_screen_init(void)
+void __attribute__((optimize("O0"))) nrf_oled_screen_init(void)
 {
     /// pre init the oled pins
     oled_pre_init();
@@ -151,11 +152,11 @@ void nrf_oled_screen_init(void)
             SSD13X_REG_DISPLAY_ON_FOLLOWRAM,
             SSD13X_REG_OLED_DRIVER_ON};
 
-    // oled_send_cmd(cmd, sizeof(cmd));
+    oled_send_cmd(cmd, sizeof(cmd));
+    __NOP();
+    const uint8_t  data[1024] = {[1 ... 200] = 0x32};
+    oled_send_data(data, sizeof(data));
 
-    // oled_send_data(data, sizeof(data));
-
-    NRF_LOG_INFO("cmd %x d %x, data %d",cmd ,data, data[0]);
 }
 
 /// @brief set contrast ratio for the oled

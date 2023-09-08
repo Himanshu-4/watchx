@@ -235,7 +235,7 @@ void spi_2_int_handler(void)
         xTaskNotifyFromISR(spi_task_handle[SPI2], res, eSetValueWithOverwrite, &high_task_awoken);
     }
 
-    // portYIELD_FROM_ISR(high_task_awoken);
+    portYIELD_FROM_ISR(high_task_awoken);
 }
 
 #ifdef FREERTOS_ENV

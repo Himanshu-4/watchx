@@ -20,14 +20,14 @@ project(Watchx
 enable_language(C ASM)
 
 
-
+set(CMAKE_BUILD_TYPE RELEASE )
 # specify whether u want to generate DEbug or release Version
 set(DEBUG_Flags 
         -O0 -g3
         )
 
 set(RELEASE_Flags 
-        # -O3 -g0
+        -O3 -g0
         )
 # specify the C standard and the c extensions
 
@@ -110,8 +110,9 @@ set(COMMON_C_FLAGS
         -mfloat-abi=hard
         -mfpu=fpv4-sp-d16
         # -mfloat-abi=soft #for  using the soft floating point library 
-        ${DEBUG_Flags}
-        ${RELEASE_Flags}
+        $<$<CONFIG:RELEASE>: ${RELEASE_Flags}>
+        $<$<CONFIG:DEBUG>: ${DEBUG_Flags} lfgnklsdh>
+        
         -mthumb
         -mabi=aapcs
         -Wall -Werror 
@@ -138,9 +139,10 @@ set(LINKER_FLAGS
         -mcpu=cortex-m4
         -mthumb -mabi=aapcs
         -mfloat-abi=hard -mfpu=fpv4-sp-d16
-        -u _printf_float 
-        ${DEBUG_Flags}
-        ${RELEASE_Flags}
+        -u _printf_float # this will include the printf symbol in the elf
+        # ${DEBUG_Flags}
+        $<$<CONFIG:RELEASE>: ${RELEASE_Flags} >
+        $<$<CONFIG:DEBUG>: ${DEBUG_Flags} kjgjvjkb>
         -Wl,-Map=${PROJECT_NAME}.map
         -Wl,--gc-sections --specs=nano.specs
         -Wl,--start-group
@@ -262,9 +264,9 @@ target_compile_definitions(freertos_lib PRIVATE
 
 target_compile_options(freertos_lib PRIVATE
            ${COMMON_C_FLAGS}
-           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized>
+           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -O0 >
            $<$<COMPILE_LANGUAGE:CXX>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti>
-           $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp>
+           $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp >
              )
 
 
@@ -273,6 +275,7 @@ target_include_directories(freertos_lib PUBLIC SYSTEM
         ${SDK_INCLUDE_DIR}
             )
 
+            
 
 ##################################################################################################################################################################
 ############################################################################################################################################################################
@@ -318,9 +321,9 @@ target_compile_definitions(micro_ecc_Crypto_lib PRIVATE
 
 target_compile_options(micro_ecc_Crypto_lib PRIVATE
            ${COMMON_C_FLAGS}
-           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fomit-frame-pointer -O3 -g0 >
+           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fomit-frame-pointer  >
            $<$<COMPILE_LANGUAGE:CXX>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti -fomit-frame-pointer>
-           $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp>
+           $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp >
              )
 
 
@@ -384,7 +387,7 @@ target_include_directories(micro_ecc_Crypto_lib PUBLIC SYSTEM
 ##########################################################   Build the SDK stdlib files   ##################################################################################
 
 file(GLOB_RECURSE nrf_hal_libs_srcs 
-        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/*.c 
+        ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/*.c  
 )
 
 
@@ -402,18 +405,19 @@ foreach(srcs ${SDK_INCLUDE_DIR})
 message(${srcs})
 endforeach(srcs ${SDK_INCLUDE_DIR})
 
+message("NRF HAL Sources ")
+
+
 
 list(APPEND 
     SDK_SRC_FILES
         ${nrf_hal_libs_srcs}
     )
 
-
-
         # build the nrf sdk library 
 
         # make a library of external 
-        add_library(nrf_sdk_libs  STATIC 
+        add_library(nrf_sdk_libs  OBJECT 
         ${SDK_SRC_FILES}
         )
         
@@ -427,9 +431,10 @@ list(APPEND
         
         target_compile_options(nrf_sdk_libs PRIVATE
                ${COMMON_C_FLAGS}
-               $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized >
+               $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized  >
                $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti >
-               $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp>
+               $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp >
+        #        $<$< >: > 
                  )
         
         
@@ -437,8 +442,15 @@ list(APPEND
             ${SDK_INCLUDE_DIR}
             ${FREERTOS_INCLUDE}
           )
-        
-        
+
+
+set(EXCLUDE_FILES_FOR_OPTIMISATION 
+${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi_thread_safe.c
+${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi.c
+)
+# Set specific compiler flags for "special_file.cpp"
+set_source_files_properties(${EXCLUDE_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O0")
+
 #######################################################################################3###########################
 ##################################################################################################
 ##################################################################################################
@@ -494,7 +506,7 @@ target_compile_options(ble_library PRIVATE
        ${COMMON_C_FLAGS}
        $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-return-type >
        $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-return-type -fno-rtti >
-       $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp>
+       $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp >
          )
 
 
@@ -564,9 +576,9 @@ target_compile_definitions(watchx_kernel_lib PRIVATE
 
 target_compile_options(watchx_kernel_lib PRIVATE
        ${COMMON_C_FLAGS}
-       $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized >
+       $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized  >
        $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti >
-       $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp>
+       $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp >
          )
 
 
@@ -581,6 +593,12 @@ target_include_directories(watchx_kernel_lib PUBLIC SYSTEM
 target_link_libraries( watchx_kernel_lib
         nrf_sdk_libs
 )
+
+set(EXCLUDE_KERNEL_FILES_FOR_OPTIMISATION
+${CMAKE_SOURCE_DIR}/libs/components/kernel/device_drivers/display/nrf_oled_driver.c
+)
+# Set specific compiler flags for "special_file.cpp"
+set_source_files_properties(${EXCLUDE_KERNEL_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O0 -g3")
 ###########################################################################################################################################################
 ##########################################################################################################################################################
 #########################################################################################################################################################
@@ -624,6 +642,7 @@ target_compile_options(${EXECUTABLE} PRIVATE
     
         # C flags common to all targets
         ${COMMON_C_FLAGS}
+        ${RELEASE_Flags}
 
         )
 
