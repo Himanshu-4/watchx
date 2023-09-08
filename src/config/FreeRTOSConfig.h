@@ -255,7 +255,7 @@ extern uint32_t SystemCoreClock;
 ///////// rest application uses the priority 5 and idle task have 0 priority 
 #define SOFTDEVICE_TASK_PRIORITY 7
 
-#define NRF_KERNEL_TASK_STACK_DEPTH 256 //// this will equal to 1KB of space  
+#define NRF_KERNEL_TASK_STACK_DEPTH 512 //// this will equal to 2KB of space  
 
 #define KERNEL_TASK_PRIORITY 6 //////// task priority of the kernel task 
 

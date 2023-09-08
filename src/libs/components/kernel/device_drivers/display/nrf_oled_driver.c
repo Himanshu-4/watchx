@@ -9,7 +9,7 @@
 
 #define OLED_SPI_USED NRF_CONFIG_OLED_SPI_HOST_USED
 
-#define OLED_SPI_MAX_XFR_BYTES 256
+#define OLED_SPI_MAX_XFR_BYTES 255
 
 #define OLED_RESET_PIN NRF_CONFIG_OLED_MOD_RESET_PIN
 #define OLED_DATA_PIN NRF_CONFIG_OLED_DC_OUT_PIN
@@ -73,7 +73,7 @@ static void oled_send_data(const uint8_t *data, uint16_t size)
                 .rx_buff = NULL,
                 .rx_size = 0,
                 .tx_buff = (data + i * OLED_SPI_MAX_XFR_BYTES),
-                .tx_size = ((size) % (OLED_SPI_MAX_XFR_BYTES)) ? ((size) % (OLED_SPI_MAX_XFR_BYTES)) : (OLED_SPI_MAX_XFR_BYTES)};
+                .tx_size = ((i == (split-1)) ? ( GET_REMNDER(size,OLED_SPI_MAX_XFR_BYTES) ?GET_REMNDER(size,OLED_SPI_MAX_XFR_BYTES):(OLED_SPI_MAX_XFR_BYTES) ) : (OLED_SPI_MAX_XFR_BYTES))};
 
         ret = spi_poll_xfr_thread_safe(OLED_SPI_USED, NRF_CONFIG_OLED_CHIP_SELECT_PIN, &buff);
         NRF_LOG_INFO("sending data %d", i);
@@ -108,7 +108,7 @@ static void oled_pre_init(void)
 }
 ///========================================================================================================================
 ///================================================ functions definations here ============================================
-
+const uint8_t __section(".rodata") data[1024] = {0x32};
 /// @brief this will init the oled module
 /// @param  void
 void nrf_oled_screen_init(void)
@@ -151,11 +151,11 @@ void nrf_oled_screen_init(void)
             SSD13X_REG_DISPLAY_ON_FOLLOWRAM,
             SSD13X_REG_OLED_DRIVER_ON};
 
-    oled_send_cmd(cmd, sizeof(cmd));
-    const uint8_t data[255] = {0x32};
-    oled_send_data(data, sizeof(data));
+    // oled_send_cmd(cmd, sizeof(cmd));
 
-    NRF_LOG_INFO("buf %x b2 %x",cmd,data);
+    // oled_send_data(data, sizeof(data));
+
+    NRF_LOG_INFO("cmd %x d %x, data %d",cmd ,data, data[0]);
 }
 
 /// @brief set contrast ratio for the oled

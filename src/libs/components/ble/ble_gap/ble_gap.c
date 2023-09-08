@@ -115,14 +115,17 @@ static int random_number_gen(uint8_t *dest, unsigned size)
             delay(BLE_GAP_RANDOM_NUM_GEN_WAIT_TIME_MSEC);
             continue;
         }
-
+        
+      
         /// get the data from softdevice random buffer
-        uint8_t ret = sd_rand_application_vector_get((dest + (index * 16)), (((size) % 16) == 0 ? (16) : ((size) % 16)));
+        uint8_t ret = sd_rand_application_vector_get((dest + (index * 16)), (GET_REMNDER(size,16) == 0 ? (16) : GET_REMNDER(size,16)));
         if (ret != nrf_OK)
         {
             continue;
         }
+
         /// increment the index
+        size -= 16;
         index++;
     }
 
