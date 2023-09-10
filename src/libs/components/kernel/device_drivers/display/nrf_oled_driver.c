@@ -9,6 +9,7 @@
 
 #define OLED_SPI_USED NRF_CONFIG_OLED_SPI_HOST_USED
 
+/// max amount transfer by spi at one go 
 #define OLED_SPI_MAX_XFR_BYTES 255
 
 #define OLED_RESET_PIN NRF_CONFIG_OLED_MOD_RESET_PIN
@@ -40,7 +41,7 @@
 /// @brief  send the data to the oled through SPI
 /// @param data
 /// @param size
-static void __attribute__((optimize("O0"))) oled_send_cmd(const uint8_t *data, uint16_t size)
+static void oled_send_cmd(const uint8_t *data, uint16_t size)
 {
     NRF_OLED_CMD_MODE();
     uint8_t ret = 0;
@@ -60,7 +61,7 @@ static void __attribute__((optimize("O0"))) oled_send_cmd(const uint8_t *data, u
 /// @brief send data to the oled ram
 /// @param data
 /// @param size
-static void __attribute__((optimize("O0"))) oled_send_data(const uint8_t *data, uint16_t size)
+static void oled_send_data(const uint8_t *data, uint16_t size)
 {
     NRF_OLED_DATA_MODE();
     uint8_t ret = 0;
@@ -153,17 +154,58 @@ void nrf_oled_screen_init(void)
             SSD13X_REG_OLED_DRIVER_ON};
 
     oled_send_cmd(cmd, sizeof(cmd));
-    __NOP();
-    const uint8_t  data[1024] = {[1 ... 200] = 0x32};
-    oled_send_data(data, sizeof(data));
 
 }
+
+
+/// @brief to reset the oled driver and to reinit it  
+/// @param  void 
+void nrf_oled_reset_driver(void)
+{
+
+    NRF_OLED_HARD_RESET();
+
+    delay(10);
+    /// software init the oled module
+    /// set mux ratio a8/3f
+    /// set display start line
+    /// set segment remap
+    /// set com output scan direction
+    /// set com pins hardware config
+    /// set contrast control
+    /// disable entire display on
+    /// set normal display
+    /// set osc freq
+    /// enable charge pump regulator
+    /// dispay on
+
+    const uint8_t cmd[] =
+        {
+            SSD13X_REG_OLED_DRIVER_OFF,
+            SSD13X_REG_SET_DISPLAY_CLOCK_DIVIDE_FREQ, 0x80, /*recommendded clock devider*/
+            SSD13X_REG_SET_MULTIPLEX_RATIO, 63,             /*recommednde 128x64*/
+            SSD13X_REG_SET_DISPLAY_OFFSET, 0,               /*no offset */
+            SSD13X_REG_SET_DISPLAY_START_LINE_S | 0,
+            SSD13X_REG_CHARGE_PUMP_REGULATOR, SSD13X_ENABLE_CHARGE_PUMP,
+            SSD13X_REG_SET_MEMORY_ADDRESING_MODE, 0x00,
+            SSD13X_REG_SEG0_MAP_TO_COL0, SSD13X_REG_SET_COM_OUT_SCAN_DIR_C0_TO_CN,
+            SSD13X_REG_SET_COM_PINS_HARDWARE_CONF, 0x12, /*recommed enable seq com conf and enabel lef/reight remap*/
+            SSD13X_REG_SET_CONTRAST_CONTROL, 0xCF,       /*recommended */
+            SSD13X_REG_SET_PRECHARGE_PERIOD, 0xF1,       /*recommende in datasheet*/
+            SSD13X_REG_SET_VCOMH_LEVEL, 0x40,            /* recommedn in datasheet*/
+            SSD13X_REG_NORMAL_DISPLAY_MODE,
+            SSD13X_REG_DEACTIVATE_SCROLL,
+            SSD13X_REG_DISPLAY_ON_FOLLOWRAM,
+            SSD13X_REG_OLED_DRIVER_ON};
+
+    oled_send_cmd(cmd, sizeof(cmd));
+}
+
 
 /// @brief set contrast ratio for the oled
 /// @param contrast
 void nrf_oled_set_contrast_ratio(uint8_t contrast)
 {
-
     uint8_t cmd_buff[] = {SSD13X_REG_SET_CONTRAST_CONTROL, contrast};
     oled_send_cmd(cmd_buff, sizeof(cmd_buff));
 }
@@ -221,4 +263,154 @@ void nrf_oled_flip_180(bool input)
         uint8_t cmd[] = {SSD13X_REG_SEG0_MAP_TO_COL0, SSD13X_REG_SET_COM_OUT_SCAN_DIR_C0_TO_CN};
         oled_send_cmd(cmd, sizeof(cmd));
     }
+}
+
+
+///================================================ scrolling functions definations here ============================================
+
+/// @brief to activate the scrolling 
+/// @param  void 
+void nrf_oled_activate_scroll(void)
+{
+    uint8_t cmd = SSD13X_REG_ACTIVATE_SCROLL;
+    oled_send_cmd(&cmd,1);
+}
+
+/// @brief deactivate the scrolling 
+/// @param  void 
+void nrf_oled_deactivate_scroll(void)
+{
+    uint8_t cmd = SSD13X_REG_DEACTIVATE_SCROLL;
+    oled_send_cmd(&cmd,1);
+}
+
+/// @brief activate the horizontal scroll and setting it 
+/// @param scroll_type 
+/// @param start_page 
+/// @param end_page 
+/// @param frame_freq 
+void nrf_oled_config_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
+, uint8_t end_page, uint8_t frame_freq)
+{
+    if((start_page >= SSD_OLED_PAGE_MAX) || (end_page >= SSD_OLED_PAGE_MAX ))
+    {
+        return ;
+    }
+    if(frame_freq >= scroll_freq_max) return;
+    const uint8_t cmd[] = 
+    {
+        ((scroll_type == OLED_SCROLL_TYPE_LEFT)?
+        (SSD13X_REG_HORIZONTAL_SCROOL_TO_LEFT):(SSD13X_REG_HORIZONTAL_SCROOL_TO_RIGHT)),
+        0x00,start_page,frame_freq,end_page,0x00,0xff
+    };
+    oled_send_cmd(cmd, sizeof(cmd));
+}
+
+/// @brief configure the vertical and horixontal scroll
+/// @param scroll_type 
+/// @param start_page 
+/// @param end_page 
+/// @param frame_freq 
+/// @param vertical_row_offset 
+void nrf_oled_config_vert_and_horizontal_scroll(uint8_t scroll_type, uint8_t start_page,
+uint8_t end_page , uint8_t frame_freq, uint8_t vertical_row_offset)
+{
+    if((start_page >= SSD_OLED_PAGE_MAX) || (end_page >= SSD_OLED_PAGE_MAX ))
+    {
+        return ;
+    }
+    if(frame_freq >= scroll_freq_max) return;
+    if(vertical_row_offset >= SSD_OLED_ROW_ADDR_MAX) return;
+
+    const uint8_t cmd[] = 
+    {
+        ((scroll_type == OLED_SCROLL_TYPE_LEFT)?
+        (SSD13X_REG_VERTICAL_AND_HORIZONTAL_SCROLL_LEFT):(SSD13X_REG_VERTICAL_AND_HORIZONTAL_SCROLL_RIGHT)),
+        0x00,start_page,frame_freq,end_page,vertical_row_offset
+    };
+        oled_send_cmd(cmd, sizeof(cmd));
+}
+
+/// @brief config the ertical scroll area 
+/// @param start_row 
+/// @param end_row 
+void nrf_oled_config_vertical_scroll_area(uint8_t start_row_fixed, uint8_t total_row_in_scroll)
+{
+    if((start_row_fixed >= SSD_OLED_ROW_ADDR_MAX) || (total_row_in_scroll >= SSD_OLED_COLUMN_ADDR_MAX))
+    return;
+
+    if((start_row_fixed + total_row_in_scroll) >= SSD_OLED_ROW_ADDR_MAX)
+    return;
+
+    uint8_t cmd[] =
+    {
+        SSD13X_REG_SET_VERTICAL_SCROLL_AREA,
+        start_row_fixed,total_row_in_scroll
+    };
+
+    oled_send_cmd(cmd,sizeof(cmd));
+}
+
+
+///================================================ addressing functions definations here ============================================
+
+
+
+/// @brief set the addressing mode of the oled 
+/// @param mode 
+void nrf_oled_set_addressing_mode(uint8_t mode)
+{
+    uint8_t cmd[] =
+    {
+        SSD13X_REG_SET_MEMORY_ADDRESING_MODE,mode
+    };
+    oled_send_cmd(cmd,sizeof(cmd));
+}
+
+/// @brief set the oled page addressing ,it is not self incrementing 
+/// @param page_start_addr 
+/// @param lower_colum_addr 
+/// @param higher_colum_addr 
+void nrf_oled_config_page_addressing(uint8_t page_start_addr, uint8_t column_start_Addr)
+{
+    uint8_t cmd[] =
+    {
+        (SSD13X_REG_SET_PAGE_START_ADDRESS_FOR_PAGE_ADDRESSING_MASK | page_start_addr),
+        (SSD13X_REG_SET_LOWER_COLUM_ADDR_FORPAGE_ADDRESSING_MASK | (LOWER_NIBBLE_MASK & column_start_Addr)),
+        (SSD13X_REG_SET_HIGHER_COLUM_ADDR_FORPAGE_ADDRESSING_MASK | ((column_start_Addr >> NO_OF_NIBBLE_BITS) & LOWER_NIBBLE_MASK))
+    };
+    oled_send_cmd(cmd,sizeof(cmd));
+}
+
+/// @brief set column address for hoircontal or vertical scrolling mode 
+/// @param colum_start_addr 
+/// @param colum_end_addr 
+/// @return 
+void nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr)
+{
+       if((colum_start_addr >= SSD_OLED_COLUMN_ADDR_MAX) || (colum_end_addr >= SSD_OLED_COLUMN_ADDR_MAX))
+    return;
+
+    uint8_t cmd[] = 
+    {
+        SSD13X_REG_SET_COLUMN_ADDRESSING, colum_start_addr,colum_end_addr
+    };
+    oled_send_cmd(cmd,sizeof(cmd));
+}
+
+
+/// @brief to set the page addresse for horizontal or vertical addressing mode 
+/// @param page_start_addr 
+/// @param page_end_addr 
+/// @return err codes 
+void nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr)
+{
+    if((page_start_addr >= SSD_OLED_PAGE_MAX) || (page_end_addr >= SSD_OLED_PAGE_MAX))
+    return;
+
+    uint8_t cmd[] = 
+    {
+        SSD13X_REG_SET_PAGE_ADDRESSING,page_start_addr,page_end_addr
+    };
+    oled_send_cmd(cmd,sizeof(cmd));
 }

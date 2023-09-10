@@ -14,9 +14,16 @@
 /// @param COLUMN_MAX 
 void nrf_gfx_lib_init(uint16_t ROW_MAX , uint16_t COLUMN_MAX );
 
+
+void nrf_gfx_lib_deinit(void);
+
+void nrf_gfx_lib_reset(void);
+
+
 /// @brief to test the gfx library for testing 
 /// @param  
 void nrf_gfx_lib_test(void);
+
 
 void nrf_gfx_send_frame_data(const uint8_t * frame, uint16_t frame_size);
 
@@ -28,7 +35,7 @@ void nrf_gfx_clear_screen(void);
 
 void nrf_gfx_screen_refresh();
 
-void nrf_
+
 
 
 #endif

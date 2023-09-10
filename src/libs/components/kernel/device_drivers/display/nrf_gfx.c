@@ -19,9 +19,11 @@ static void oled_send_frame_data(const uint8_t * frame, uint16_t size)
 //============================================================================================
 ///===================== basic graphics init library =========================================
 
-/// @brief to init the GFX library 
-/// @param  void 
-void nrf_gfx_lib_init(void)
+
+/// @brief initalise the graphics library and 
+/// @param ROW_MAX 
+/// @param COLUMN_MAX 
+void nrf_gfx_lib_init(uint16_t ROW_MAX , uint16_t COLUMN_MAX )
 {
     ////send data to oled and turn it on
     

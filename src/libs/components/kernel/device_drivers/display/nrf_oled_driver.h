@@ -30,6 +30,7 @@
 #define SSD13X_REG_SET_MEMORY_ADDRESING_MODE 0x20 /// 0x00 horizontal addr mode ,0x01 vertical addr mode , 0x10 page addr mode 
 #define SSD13X_REG_SET_LOWER_COLUM_ADDR_FORPAGE_ADDRESSING_MASK 0x00 /// 0 - F only 
 #define SSD13X_REG_SET_HIGHER_COLUM_ADDR_FORPAGE_ADDRESSING_MASK 0x10 /// 0 - F only 
+#define SSD13X_REG_SET_COLUMN_ADDRESSING 0x21 /// only for horizontal and vertical addessing mode
 #define SSD13X_REG_SET_PAGE_ADDRESSING 0x22 /// only for horizontal and vertical addessing mode 
 #define SSD13X_REG_SET_PAGE_START_ADDRESS_FOR_PAGE_ADDRESSING_MASK 0xB0 // page 0 - page 7 only 
 
@@ -63,17 +64,25 @@
 #define SSD13X_REG_CHARGE_PUMP_REGULATOR 0x8D 
 
 
+
+/// @brief contains the ssd oled pages 
 enum _NRF_OLED_PAGES_ADDR_
 {
-    NRF_OLED_PAGE_0,
-    NRF_OLED_PAGE_1,
-    NRF_OLED_PAGE_2,
-    NRF_OLED_PAGE_3,
-    NRF_OLED_PAGE_4,
-    NRF_OLED_PAGE_5,
-    NRF_OLED_PAGE_6,
-    NRF_OLED_PAGE_7,
+    SSD_OLED_PAGE_0,
+    SSD_OLED_PAGE_1,
+    SSD_OLED_PAGE_2,
+    SSD_OLED_PAGE_3,
+    SSD_OLED_PAGE_4,
+    SSD_OLED_PAGE_5,
+    SSD_OLED_PAGE_6,
+    SSD_OLED_PAGE_7,
+    SSD_OLED_PAGE_MAX
 };
+
+//// these addresses are starting from zero 
+
+#define SSD_OLED_COLUMN_ADDR_MAX 124
+#define SSD_OLED_ROW_ADDR_MAX 64
 
 
 ///////////////// fundametnal OLed APIs 
@@ -109,41 +118,63 @@ void nrf_olrf_oled_driver_off(void);
 /// @param mode 
 void nrf_oled_invert_display(uint8_t mode);
 
+/// @brief flip the oled to 180 degree 
+/// @param  input
+void nrf_oled_flip_180(bool input);
+
+/// @brief to reset the oled driver and to reinit it  
+/// @param  void 
+void nrf_oled_reset_driver(void);
 ////////////=================================================================================================
 ///// ====================================== to set the address in horizontal and vertical addressing mode 
 
 ///////////////////  scrolling related APIs 
 enum _SCROLL_FRAME_FREQ_
 {
-    sc_freq_5fps = 0x00,
-    sc_freq_64fps,
-    sc_freq_128fps,
-    sc_freq_256fps,
-    sc_freq_3fps,
-    sc_freq_4fps,
-    sc_freq_25fps,
-    sc_freq_2fps,
+    scrool_freq_5fps = 0x00,
+    scrool_freq_64fps,
+    scrool_freq_128fps,
+    scrool_freq_256fps,
+    scrool_freq_3fps,
+    scrool_freq_4fps,
+    scrool_freq_25fps,
+    scrool_freq_2fps,
+    scroll_freq_max
 };
 
-
+/// @brief to activate the scrolling 
+/// @param  void 
 void nrf_oled_activate_scroll(void);
 
+/// @brief deactivate the scrolling 
+/// @param  void 
 void nrf_oled_deactivate_scroll(void);
 
-#define OLED_SCROLL_LEFT 0x10u
-#define OLED_SCROLL_RIGHT 0x20u
+#define OLED_SCROLL_TYPE_LEFT 0x10u
+#define OLED_SCROLL_TYPE_RIGHT 0x20u
 
-void nrf_oled_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
+/// @brief activate the horizontal scroll and setting it 
+/// @param scroll_type 
+/// @param start_page 
+/// @param end_page 
+/// @param frame_freq 
+void nrf_oled_config_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
 , uint8_t end_page, uint8_t frame_freq);
 
 
-void nrf_oled_vert_and_horizontal_scroll(uint8_t scroll_type, uint8_t start_page,
+/// @brief configure the vertical and horixontal scroll
+/// @param scroll_type 
+/// @param start_page 
+/// @param end_page 
+/// @param frame_freq 
+/// @param vertical_row_offset 
+void nrf_oled_config_vert_and_horizontal_scroll(uint8_t scroll_type, uint8_t start_page,
 uint8_t end_page , uint8_t frame_freq, uint8_t vertical_row_offset);
 
-
-void nrf_oled_vertical_scroll_area(uint8_t start_row, uint8_t end_row);
-
-
+/// @brief config the ertical scroll area 
+/// @param start_row 
+/// @param end_row 
+void nrf_oled_config_vertical_scroll_area(uint8_t start_row_fixed, uint8_t total_row_in_scroll);
 
 ////////////=================================================================================================
 ///// ====================================== to set the address in horizontal and vertical addressing mode 
@@ -153,37 +184,27 @@ void nrf_oled_vertical_scroll_area(uint8_t start_row, uint8_t end_row);
 #define OLED_VERTICAL_ADDR_MODE 0x01u
 #define OLED_PAGE_ADDR_MODE 0x02u
 
-
+/// @brief set the addressing mode of the oled 
+/// @param mode 
 void nrf_oled_set_addressing_mode(uint8_t mode);
 
+/// @brief set the oled page addressing ,it is not self incrementing  
+/// @param page_start_addr 
+/// @param column_start_addr 
+void nrf_oled_config_page_addressing(uint8_t page_start_addr, uint8_t column_start_Addr);
 
-void nrf_oled_page_adressing(uint8_t page_start_addr, uint8_t lower_colum_addr, uint8_t higher_colum_addr);
 
-
-/// @brief to set the page addresse for horizontal and vertical addressing mode 
+/// @brief to set the page addresse for horizontal or vertical addressing mode 
 /// @param page_start_addr 
 /// @param page_end_addr 
 /// @return err codes 
 void nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr);
 
-/// @brief 
+/// @brief set column address for hoircontal or vertical scrolling mode 
 /// @param colum_start_addr 
 /// @param colum_end_addr 
 /// @return 
 void nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr);
-
-////////////=================================================================================================
-///// =======================hardware configuration (panel resolution and layout changes ) APIs =============
-
-/// @brief flip the oled to 180 degree 
-/// @param  input
-void nrf_oled_flip_180(bool input);
-
-
-
-////////////=================================================================================================
-///// =======================timming and driving API for the oled APIs ======================================
- 
 
 
 

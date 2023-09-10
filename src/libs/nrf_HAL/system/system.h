@@ -56,6 +56,8 @@
 
 #define u8_ptr (uint8_t *)
 
+
+
 ///////////// get the size of the buffer of uint32_t  from uint8_t buff
 // #define buff_size8_to_32(size) (((size)/4) + (((size)%4)==0?(0):(1)) )
 
@@ -93,6 +95,10 @@ extern void delay_microsec(uint16_t delay_time);
 #define U16_MAX (0xFFFFU)
 
 #define U_0 (0UL)
+
+#define NO_OF_NIBBLE_BITS 4 
+#define LOWER_NIBBLE_MASK 0x0f
+#define HIGHER_NIBBLE_MASK 0xf0
 
 ////////////////////////////////////////////////////////////////////
 //////////////// compiler attributes 
