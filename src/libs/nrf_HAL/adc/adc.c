@@ -383,7 +383,7 @@ void adc_stop(void)
     NRF_SAADC->TASKS_STOP = 1UL;
 }
 
-FORCE_INLINE void adc_take_asample(void)
+__FORCE_INLINE void adc_take_asample(void)
 {
     NRF_SAADC->TASKS_SAMPLE = 1UL;
 }
@@ -391,7 +391,7 @@ void adc_start_calibration(void)
 {
     NRF_SAADC->TASKS_CALIBRATEOFFSET = 1UL;
 }
-FORCE_INLINE bool is_adc_calibrated(void)
+__FORCE_INLINE bool is_adc_calibrated(void)
 {
     if (NRF_SAADC->EVENTS_CALIBRATEDONE)
     {
@@ -404,12 +404,12 @@ FORCE_INLINE bool is_adc_calibrated(void)
 
     // __WFI(); can be used outsied the function
 }
-FORCE_INLINE bool adc_check_busy(void)
+__FORCE_INLINE bool adc_check_busy(void)
 {
     return NRF_SAADC->STATUS;
 }
 
-FORCE_INLINE float adc_get_voltage(uint16_t adc_digi_out, const adc_channel_prop_config_struct_t *chn_cfg)
+__FORCE_INLINE float adc_get_voltage(uint16_t adc_digi_out, const adc_channel_prop_config_struct_t *chn_cfg)
 {
     // the adc_digi_out is a 2's complement , we have to remove the complement
     int val = 0;

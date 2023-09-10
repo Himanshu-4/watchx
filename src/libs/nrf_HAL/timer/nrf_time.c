@@ -93,7 +93,7 @@ void time_deinit(void)
  * @name millis
  * @note used to get the millisseconds from the start of the timer
  */
-FORCE_INLINE uint32_t millis(void)
+__FORCE_INLINE uint32_t millis(void)
 {
     return timer_get_counter_val(TIMER_TIME_MODULE) * TIMER_LEAST_COUNT(TIMER_TICK_FREQ);
 }
@@ -102,7 +102,7 @@ FORCE_INLINE uint32_t millis(void)
  * @name micros
  * @note used to get the microseconds from the start of the timer
  */
-FORCE_INLINE uint32_t micros(void)
+__FORCE_INLINE uint32_t micros(void)
 {
     return timer_get_counter_val(TIMER_TIME_MODULE);
 }
@@ -111,7 +111,7 @@ FORCE_INLINE uint32_t micros(void)
  * @name seconds
  * @note used to get the seconds from the start of the timer
  */
-FORCE_INLINE uint32_t seconds(void)
+__FORCE_INLINE uint32_t seconds(void)
 {
     return (timer_get_counter_val(TIMER_TIME_MODULE) * (TIMER_LEAST_COUNT(TIMER_TICK_FREQ) * 1000)) + 1;
 }
@@ -120,13 +120,13 @@ FORCE_INLINE uint32_t seconds(void)
  * @name minute
  * @note used to get minute from the start of the timer
  */
-FORCE_INLINE uint32_t minute(void)
+__FORCE_INLINE uint32_t minute(void)
 {
 
     return (timer_get_counter_val(TIMER_TIME_MODULE) * TIMER_LEAST_COUNT(TIMER_TICK_FREQ) * 6000) + 1;
 }
 
-FORCE_INLINE void delay_milisec(uint16_t delay_time)
+__FORCE_INLINE void delay_milisec(uint16_t delay_time)
 {
     uint32_t start_val = millis();
 
@@ -138,7 +138,7 @@ FORCE_INLINE void delay_milisec(uint16_t delay_time)
     }
 }
 
-FORCE_INLINE void delay_microsec(uint16_t delay_time)
+__FORCE_INLINE void delay_microsec(uint16_t delay_time)
 {
 
     uint32_t start_val = timer_get_counter_val(TIMER_TIME_MODULE);

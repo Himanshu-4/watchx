@@ -719,7 +719,7 @@ uint32_t nvs_read_data(uint32_t uid, uint8_t *buff, uint16_t size)
 /// @brief it will erase the complete nvs partition
 /// @param  void
 /// @return succ, faliure of the function
-uint32_t FORCE_INLINE nvs_erase_partition(void)
+uint32_t __FORCE_INLINE nvs_erase_partition(void)
 {
     return nvs_erase_page(NVS_PARTITION_PAGE_INDEX);
 }

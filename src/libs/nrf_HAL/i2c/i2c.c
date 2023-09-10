@@ -167,7 +167,7 @@ void SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQHandler(void)
 ///////////////////////////////////////////////////////////////////////////////////////
 //////////////// static function to get the address of the i2c
 
-static FORCE_INLINE uint32_t get_i2c_instance(uint8_t i2c_num)
+static __FORCE_INLINE uint32_t get_i2c_instance(uint8_t i2c_num)
 {
     uint32_t addr = 0;
     switch (i2c_num)
@@ -278,7 +278,7 @@ static FORCE_INLINE uint32_t get_i2c_instance(uint8_t i2c_num)
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////  interrupt related APIs
 
-FORCE_INLINE void i2c_add_irq_handler(uint8_t i2c_num, uint8_t int_num, void (*func)(void))
+__FORCE_INLINE void i2c_add_irq_handler(uint8_t i2c_num, uint8_t int_num, void (*func)(void))
 {
     switch (i2c_num)
     {
@@ -293,7 +293,7 @@ FORCE_INLINE void i2c_add_irq_handler(uint8_t i2c_num, uint8_t int_num, void (*f
     }
 }
 
-FORCE_INLINE void i2c_remove_irq_handler(uint8_t i2c_num, uint8_t int_num)
+__FORCE_INLINE void i2c_remove_irq_handler(uint8_t i2c_num, uint8_t int_num)
 {
     switch (i2c_num)
     {
@@ -308,7 +308,7 @@ FORCE_INLINE void i2c_remove_irq_handler(uint8_t i2c_num, uint8_t int_num)
     }
 }
 
-FORCE_INLINE void i2c_enable_intr(uint8_t i2c_num, uint8_t int_num)
+__FORCE_INLINE void i2c_enable_intr(uint8_t i2c_num, uint8_t int_num)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -345,7 +345,7 @@ FORCE_INLINE void i2c_enable_intr(uint8_t i2c_num, uint8_t int_num)
     }
 }
 
-FORCE_INLINE void i2c_disable_intr(uint8_t i2c_num, uint8_t int_num)
+__FORCE_INLINE void i2c_disable_intr(uint8_t i2c_num, uint8_t int_num)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -382,7 +382,7 @@ FORCE_INLINE void i2c_disable_intr(uint8_t i2c_num, uint8_t int_num)
     }
 }
 
-FORCE_INLINE void i2c_enable_isr(uint8_t i2c_num)
+__FORCE_INLINE void i2c_enable_isr(uint8_t i2c_num)
 {
     switch (i2c_num)
     {
@@ -398,7 +398,7 @@ FORCE_INLINE void i2c_enable_isr(uint8_t i2c_num)
     }
 }
 
-FORCE_INLINE void i2c_disable_isr(uint8_t i2c_num)
+__FORCE_INLINE void i2c_disable_isr(uint8_t i2c_num)
 {
     switch (i2c_num)
     {
@@ -416,7 +416,7 @@ FORCE_INLINE void i2c_disable_isr(uint8_t i2c_num)
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////   i2c _transfer APIs
 
-FORCE_INLINE void i2c_start_tx(uint8_t i2c_num)
+__FORCE_INLINE void i2c_start_tx(uint8_t i2c_num)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -424,7 +424,7 @@ FORCE_INLINE void i2c_start_tx(uint8_t i2c_num)
     preg->TASKS_STARTTX = 1UL;
 }
 
-FORCE_INLINE void i2c_start_rx(uint8_t i2c_num)
+__FORCE_INLINE void i2c_start_rx(uint8_t i2c_num)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -432,7 +432,7 @@ FORCE_INLINE void i2c_start_rx(uint8_t i2c_num)
     preg->TASKS_STARTRX = 1UL;
 }
 
-FORCE_INLINE void i2c_stop_xfr(uint8_t i2c_num)
+__FORCE_INLINE void i2c_stop_xfr(uint8_t i2c_num)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -441,7 +441,7 @@ FORCE_INLINE void i2c_stop_xfr(uint8_t i2c_num)
     preg->TASKS_STOP = 1UL;
 }
 
-FORCE_INLINE void i2c_suspend_xfr(uint8_t i2c_num)
+__FORCE_INLINE void i2c_suspend_xfr(uint8_t i2c_num)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -449,7 +449,7 @@ FORCE_INLINE void i2c_suspend_xfr(uint8_t i2c_num)
     preg->TASKS_SUSPEND = 1UL;
 }
 
-FORCE_INLINE void i2c_resume_xfr(uint8_t i2c_num)
+__FORCE_INLINE void i2c_resume_xfr(uint8_t i2c_num)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -461,7 +461,7 @@ FORCE_INLINE void i2c_resume_xfr(uint8_t i2c_num)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// @brief ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-FORCE_INLINE uint8_t i2c_polling_write_data(uint8_t i2c_num, const uint8_t *tx_buff, uint8_t tx_size, uint32_t timeout)
+__FORCE_INLINE uint8_t i2c_polling_write_data(uint8_t i2c_num, const uint8_t *tx_buff, uint8_t tx_size, uint32_t timeout)
 {
     uint8_t err_code = nrf_OK;
 
@@ -511,7 +511,7 @@ FORCE_INLINE uint8_t i2c_polling_write_data(uint8_t i2c_num, const uint8_t *tx_b
     return err_code;
 }
 
-FORCE_INLINE uint8_t i2c_polling_read_data(uint8_t i2c_num, uint8_t *rx_buff, uint8_t rx_size, uint32_t timeout)
+__FORCE_INLINE uint8_t i2c_polling_read_data(uint8_t i2c_num, uint8_t *rx_buff, uint8_t rx_size, uint32_t timeout)
 {
 
     uint8_t err_code = nrf_OK;
@@ -557,7 +557,7 @@ FORCE_INLINE uint8_t i2c_polling_read_data(uint8_t i2c_num, uint8_t *rx_buff, ui
     return err_code;
 }
 
-FORCE_INLINE uint8_t i2c_polling_write_and_read(uint8_t i2c_num, const uint8_t *tx_buff, uint8_t tx_size, uint8_t *rx_buff, uint8_t rx_size, uint32_t timeout)
+__FORCE_INLINE uint8_t i2c_polling_write_and_read(uint8_t i2c_num, const uint8_t *tx_buff, uint8_t tx_size, uint8_t *rx_buff, uint8_t rx_size, uint32_t timeout)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -653,7 +653,7 @@ FORCE_INLINE uint8_t i2c_polling_write_and_read(uint8_t i2c_num, const uint8_t *
     return err_code;
 }
 
-FORCE_INLINE void i2c_set_device_addr(uint8_t i2c_num, uint8_t dev_addr)
+__FORCE_INLINE void i2c_set_device_addr(uint8_t i2c_num, uint8_t dev_addr)
 {
 
     // get the I2c instances and typecast it
@@ -663,7 +663,7 @@ FORCE_INLINE void i2c_set_device_addr(uint8_t i2c_num, uint8_t dev_addr)
 }
 
 
-FORCE_INLINE uint8_t i2c_get_err_and_clear(uint8_t i2c_num)
+__FORCE_INLINE uint8_t i2c_get_err_and_clear(uint8_t i2c_num)
 {
         // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -678,7 +678,7 @@ FORCE_INLINE uint8_t i2c_get_err_and_clear(uint8_t i2c_num)
 ////////////////////////////////////////////////////////////////////////////////////////////
 /////////////I2C  short register configuration
 
-FORCE_INLINE void i2c_short_event(uint8_t i2c_num, uint8_t short_mask)
+__FORCE_INLINE void i2c_short_event(uint8_t i2c_num, uint8_t short_mask)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -686,7 +686,7 @@ FORCE_INLINE void i2c_short_event(uint8_t i2c_num, uint8_t short_mask)
     preg->SHORTS |= _BV(short_mask);
 }
 
-FORCE_INLINE void i2c_unshort_event(uint8_t i2c_num, uint8_t short_mask)
+__FORCE_INLINE void i2c_unshort_event(uint8_t i2c_num, uint8_t short_mask)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -698,7 +698,7 @@ FORCE_INLINE void i2c_unshort_event(uint8_t i2c_num, uint8_t short_mask)
 ////////////////////////////////////////////////////////////////////////////////////////////
 /////////////I2C DMA APIS
 
-FORCE_INLINE void i2c_set_tx_buff(uint8_t i2c_num, const uint8_t *tx_buff, uint8_t tx_size)
+__FORCE_INLINE void i2c_set_tx_buff(uint8_t i2c_num, const uint8_t *tx_buff, uint8_t tx_size)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);
@@ -707,7 +707,7 @@ FORCE_INLINE void i2c_set_tx_buff(uint8_t i2c_num, const uint8_t *tx_buff, uint8
     preg->TXD.MAXCNT = tx_size;
 }
 
-FORCE_INLINE void i2c_set_rx_buff(uint8_t i2c_num, uint8_t *rx_buff, uint8_t rx_size)
+__FORCE_INLINE void i2c_set_rx_buff(uint8_t i2c_num, uint8_t *rx_buff, uint8_t rx_size)
 {
     // get the I2c instances and typecast it
     NRF_TWIM_Type *preg = (NRF_TWIM_Type *)get_i2c_instance(i2c_num);

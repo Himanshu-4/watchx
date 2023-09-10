@@ -83,7 +83,7 @@ void GPIOTE_IRQHandler(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-FORCE_INLINE bool gpio_config_channel(uint8_t ch_no, const my_gpiote_cfg *cfg)
+__FORCE_INLINE bool gpio_config_channel(uint8_t ch_no, const my_gpiote_cfg *cfg)
 {
     NRF_GPIOTE->CONFIG[ch_no] = ((cfg->mode << GPIOTE_CONFIG_MODE_Pos) |
                                  (cfg->pinsel << GPIOTE_CONFIG_PSEL_Pos) | (cfg->polarity << GPIOTE_CONFIG_POLARITY_Pos) |
@@ -93,7 +93,7 @@ FORCE_INLINE bool gpio_config_channel(uint8_t ch_no, const my_gpiote_cfg *cfg)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-FORCE_INLINE void gpio_add_irq_handler(uint8_t ch_no, void (*func)(void))
+__FORCE_INLINE void gpio_add_irq_handler(uint8_t ch_no, void (*func)(void))
 {
     if(ch_no >= GPIOTE_CHANNEL_MAX)
     {
@@ -103,7 +103,7 @@ FORCE_INLINE void gpio_add_irq_handler(uint8_t ch_no, void (*func)(void))
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-FORCE_INLINE void gpio_remove_channel(uint8_t ch_no)
+__FORCE_INLINE void gpio_remove_channel(uint8_t ch_no)
 {
     if(ch_no >= GPIOTE_CHANNEL_MAX)
     {
@@ -113,7 +113,7 @@ FORCE_INLINE void gpio_remove_channel(uint8_t ch_no)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-FORCE_INLINE void gpio_remove_irq_handler(uint8_t ch_no)
+__FORCE_INLINE void gpio_remove_irq_handler(uint8_t ch_no)
 {
     if(ch_no >= GPIOTE_CHANNEL_MAX)
     {
@@ -123,7 +123,7 @@ FORCE_INLINE void gpio_remove_irq_handler(uint8_t ch_no)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-FORCE_INLINE void gpio_int_enable(uint8_t ch_no)
+__FORCE_INLINE void gpio_int_enable(uint8_t ch_no)
 {
     if(ch_no >= GPIOTE_CHANNEL_MAX)
     {
@@ -133,7 +133,7 @@ FORCE_INLINE void gpio_int_enable(uint8_t ch_no)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-FORCE_INLINE void gpio_int_disable(uint8_t ch_no)
+__FORCE_INLINE void gpio_int_disable(uint8_t ch_no)
 {
     if(ch_no >= GPIOTE_CHANNEL_MAX)
     {
@@ -143,7 +143,7 @@ FORCE_INLINE void gpio_int_disable(uint8_t ch_no)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-FORCE_INLINE void task_explicit_set(uint8_t ch_no)
+__FORCE_INLINE void task_explicit_set(uint8_t ch_no)
 {
     if(ch_no >= GPIOTE_CHANNEL_MAX)
     {
@@ -158,7 +158,7 @@ FORCE_INLINE void task_explicit_set(uint8_t ch_no)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-FORCE_INLINE void task_explicit_clr(uint8_t ch_no)
+__FORCE_INLINE void task_explicit_clr(uint8_t ch_no)
 {
     if(ch_no >= GPIOTE_CHANNEL_MAX)
     {
@@ -173,7 +173,7 @@ FORCE_INLINE void task_explicit_clr(uint8_t ch_no)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-FORCE_INLINE void task_explicit_out(uint8_t ch_no)
+__FORCE_INLINE void task_explicit_out(uint8_t ch_no)
 {
     if(ch_no >= GPIOTE_CHANNEL_MAX)
     {

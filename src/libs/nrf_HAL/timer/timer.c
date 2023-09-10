@@ -194,7 +194,7 @@ void timer_config(uint8_t timer_number, const my_timer_cfg *cfg)
    
 }
 
-FORCE_INLINE uint32_t timer_get_counter_val(uint8_t timer_number)
+__FORCE_INLINE uint32_t timer_get_counter_val(uint8_t timer_number)
 {
     // it will always use the timer counter_capture 0 register to get the value
     uint32_t number = 0;

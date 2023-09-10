@@ -169,7 +169,7 @@ static uint32_t get_spi_instance(uint8_t spi_num)
 }
 
 //// config the spi
-FORCE_INLINE void spi_config(uint8_t spi_num, const my_spi_cfg *cfg)
+__FORCE_INLINE void spi_config(uint8_t spi_num, const my_spi_cfg *cfg)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
@@ -214,7 +214,7 @@ FORCE_INLINE void spi_config(uint8_t spi_num, const my_spi_cfg *cfg)
     preg->PSEL.MOSI = cfg->mosi_pin;
 }
 
-FORCE_INLINE void spi_config_mode(uint8_t spi_num, uint8_t spi_mode)
+__FORCE_INLINE void spi_config_mode(uint8_t spi_num, uint8_t spi_mode)
 {
     if ((spi_mode > 3) || (spi_num > 2))
         return;
@@ -229,7 +229,7 @@ FORCE_INLINE void spi_config_mode(uint8_t spi_num, uint8_t spi_mode)
 /// @brief set the dummy tx byte according to the sensor
 /// @param spi_num
 /// @param tx_byte
-FORCE_INLINE void spi_set_dummy_tx(uint8_t spi_num, uint8_t tx_byte)
+__FORCE_INLINE void spi_set_dummy_tx(uint8_t spi_num, uint8_t tx_byte)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
@@ -238,7 +238,7 @@ FORCE_INLINE void spi_set_dummy_tx(uint8_t spi_num, uint8_t tx_byte)
 }
 
 //// init the SPI module
-FORCE_INLINE void spi_module_init(uint8_t spi_num)
+__FORCE_INLINE void spi_module_init(uint8_t spi_num)
 {
     // nullify the IRQ handlers
     for (uint8_t i = 0; i < SPI_TOTAL_INTERRUPTS; i++)
@@ -260,7 +260,7 @@ FORCE_INLINE void spi_module_init(uint8_t spi_num)
     preg->ENABLE = SPI_MASTER_ENABLE;
 }
 
-FORCE_INLINE void spi_module_deinit(uint8_t spi_num)
+__FORCE_INLINE void spi_module_deinit(uint8_t spi_num)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
@@ -278,17 +278,17 @@ FORCE_INLINE void spi_module_deinit(uint8_t spi_num)
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////  interrupt related APIs
 
-FORCE_INLINE void spi_add_irq_handler(uint8_t spi_num, uint8_t int_num, void (*func)(void))
+__FORCE_INLINE void spi_add_irq_handler(uint8_t spi_num, uint8_t int_num, void (*func)(void))
 {
     spi_intr_func[spi_num][int_num] = func;
 }
 
-FORCE_INLINE void spi_remove_irq_handler(uint8_t spi_num, uint8_t int_num)
+__FORCE_INLINE void spi_remove_irq_handler(uint8_t spi_num, uint8_t int_num)
 {
     spi_intr_func[spi_num][int_num] = NULL;
 }
 
-FORCE_INLINE void spi_enable_intr(uint8_t spi_num, uint8_t int_num)
+__FORCE_INLINE void spi_enable_intr(uint8_t spi_num, uint8_t int_num)
 {
 
     // first get the address of the SPI instances
@@ -317,7 +317,7 @@ FORCE_INLINE void spi_enable_intr(uint8_t spi_num, uint8_t int_num)
     }
 }
 
-FORCE_INLINE void spi_disable_intr(uint8_t spi_num, uint8_t int_num)
+__FORCE_INLINE void spi_disable_intr(uint8_t spi_num, uint8_t int_num)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
@@ -345,7 +345,7 @@ FORCE_INLINE void spi_disable_intr(uint8_t spi_num, uint8_t int_num)
     }
 }
 
-FORCE_INLINE void spi_enable_isr(uint8_t spi_num)
+__FORCE_INLINE void spi_enable_isr(uint8_t spi_num)
 {
     switch (spi_num)
     {
@@ -364,7 +364,7 @@ FORCE_INLINE void spi_enable_isr(uint8_t spi_num)
     }
 }
 
-FORCE_INLINE void spi_disable_isr(uint8_t spi_num)
+__FORCE_INLINE void spi_disable_isr(uint8_t spi_num)
 {
     switch (spi_num)
     {
@@ -386,14 +386,14 @@ FORCE_INLINE void spi_disable_isr(uint8_t spi_num)
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////   spi_transfer APIs
 
-FORCE_INLINE void spi_continous_xfr(uint8_t spi_num)
+__FORCE_INLINE void spi_continous_xfr(uint8_t spi_num)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
     preg->SHORTS = _BV(17);
 }
 
-FORCE_INLINE void spi_one_shot_xfr(uint8_t spi_num)
+__FORCE_INLINE void spi_one_shot_xfr(uint8_t spi_num)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
@@ -409,7 +409,7 @@ FORCE_INLINE void spi_one_shot_xfr(uint8_t spi_num)
  * @param[5] rx size
  * @param[6] timeout
  */
-FORCE_INLINE uint8_t spi_polling_xfr(uint8_t spi_num, const uint8_t *tx_buff, uint8_t tx_size, uint8_t *rx_buff, uint8_t rx_size)
+__FORCE_INLINE uint8_t spi_polling_xfr(uint8_t spi_num, const uint8_t *tx_buff, uint8_t tx_size, uint8_t *rx_buff, uint8_t rx_size)
 {
 
     // first get the address of the SPI instances
@@ -439,7 +439,7 @@ FORCE_INLINE uint8_t spi_polling_xfr(uint8_t spi_num, const uint8_t *tx_buff, ui
     return nrf_OK;
 }
 
-FORCE_INLINE void spi_start_xfr(uint8_t spi_num)
+__FORCE_INLINE void spi_start_xfr(uint8_t spi_num)
 {
 
     // first get the address of the SPI instances
@@ -448,21 +448,21 @@ FORCE_INLINE void spi_start_xfr(uint8_t spi_num)
     preg->TASKS_START = 1UL;
 }
 
-FORCE_INLINE void spi_stop_xfr(uint8_t spi_num)
+__FORCE_INLINE void spi_stop_xfr(uint8_t spi_num)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
     preg->TASKS_STOP = 1UL;
 }
 
-FORCE_INLINE void spi_suspend_xfr(uint8_t spi_num)
+__FORCE_INLINE void spi_suspend_xfr(uint8_t spi_num)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
     preg->TASKS_SUSPEND = 1UL;
 }
 
-FORCE_INLINE void spi_resume_xfr(uint8_t spi_num)
+__FORCE_INLINE void spi_resume_xfr(uint8_t spi_num)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
@@ -473,7 +473,7 @@ FORCE_INLINE void spi_resume_xfr(uint8_t spi_num)
 ////////////////////////////////////////////////////////////////////////////////////////////
 /////////////SPI DMA APIS
 
-FORCE_INLINE void spi_set_tx_buff(uint8_t spi_num, const uint8_t *tx_buff, uint8_t tx_size)
+__FORCE_INLINE void spi_set_tx_buff(uint8_t spi_num, const uint8_t *tx_buff, uint8_t tx_size)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);
@@ -482,7 +482,7 @@ FORCE_INLINE void spi_set_tx_buff(uint8_t spi_num, const uint8_t *tx_buff, uint8
     preg->TXD.MAXCNT = tx_size;
 }
 
-FORCE_INLINE void spi_set_rx_buff(uint8_t spi_num, uint8_t *rx_buff, uint8_t rx_size)
+__FORCE_INLINE void spi_set_rx_buff(uint8_t spi_num, uint8_t *rx_buff, uint8_t rx_size)
 {
     // first get the address of the SPI instances
     NRF_SPIM_Type *preg = (NRF_SPIM_Type *)get_spi_instance(spi_num);

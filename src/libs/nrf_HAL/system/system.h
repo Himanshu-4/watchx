@@ -88,17 +88,19 @@ extern void delay_microsec(uint16_t delay_time);
 #define delay(x) (delay_milisec(x))
 #endif
 
-#define U32_MAX (0xFFFFFFFFUL)
 
+#define U32_MAX (0xFFFFFFFFUL)
 #define U16_MAX (0xFFFFU)
 
 #define U_0 (0UL)
 
 ////////////////////////////////////////////////////////////////////
-//////////////// forcely inline 
-#define FORCE_INLINE inline __attribute__((always_inline))
-#define __NAKED __attribute__((naked))
+//////////////// compiler attributes 
 
+#define __FORCE_INLINE inline __attribute__((always_inline))
+#define __NAKED __attribute__((naked))
+#define __NO_OPTIMISATION __attribute__((optimize("O0")))
+#define __MAX_OPTIMISATION __attribute__((optimize("O3")))
 
 /// @brief this is the defination if err base in various components 
 #define NRF_SYSTEM_ERR_BASE 0x00UL

@@ -245,7 +245,7 @@ void system_shutdown(void)
 }
 
 
-FORCE_INLINE int str_to_int(char const *str, uint16_t len)
+__FORCE_INLINE int str_to_int(char const *str, uint16_t len)
 {
      // Initialize result
     int res = 0;
@@ -272,7 +272,7 @@ FORCE_INLINE int str_to_int(char const *str, uint16_t len)
 /// @brief convert a string to float 
 /// @param str 
 /// @return float value 
-FORCE_INLINE float str_to_float(char const *str , uint16_t len)
+__FORCE_INLINE float str_to_float(char const *str , uint16_t len)
 { 
     float floatValue = 0.0f;
     int decimalFlag = 0;
@@ -297,7 +297,7 @@ FORCE_INLINE float str_to_float(char const *str , uint16_t len)
 }
 
 // Reverses a string 'str' of length 'len'
-FORCE_INLINE void reverse(char *str, int len)
+__FORCE_INLINE void reverse(char *str, int len)
 {
     int i = 0, j = len - 1, temp;
     while (i < j)
@@ -310,7 +310,7 @@ FORCE_INLINE void reverse(char *str, int len)
     }
 }
 
-FORCE_INLINE int int_to_str(int x, char str[], int d)
+__FORCE_INLINE int int_to_str(int x, char str[], int d)
 {
     int i = 0;
     while (x)
