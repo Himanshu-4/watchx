@@ -112,7 +112,7 @@ static void oled_pre_init(void)
 
 /// @brief this will init the oled module
 /// @param  void
-void __attribute__((optimize("O0"))) nrf_oled_screen_init(void)
+void nrf_oled_screen_init(void)
 {
     /// pre init the oled pins
     oled_pre_init();

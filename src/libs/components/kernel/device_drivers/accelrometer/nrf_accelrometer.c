@@ -17,8 +17,8 @@
 ///====================================================================
 ///============================ define the threshold value used for accel
 
-#define ACCEL_CONFIG_OUTPUT_RANGE adxl_range_2g
-#define ACCEL_CONFIG_DATA_RATE adxl_datarate_25
+#define ACCEL_CONFIG_OUTPUT_RANGE adxl_range_16g
+#define ACCEL_CONFIG_DATA_RATE adxl_datarate_3200
 
 // #define ACCEL_TAP_AXES (tap_axis_en_x | tap_axis_en_y | tap_axis_en_z)
 
@@ -266,16 +266,15 @@ void nrf_accel_resume_events(void)
 /// @param  void 
 void nrf_accel_read_raw(void)
 {
-    // uint8_t databuff[6]  =  {0};
-    // int16_t data[3] = {0};
+    uint8_t databuff[6]  =  {0};
+    int16_t data[3] = {0};
 
-    // adxl_read_data(databuff,6);
-    // read_accelration(data, databuff, 6 );
+    adxl_read_data(databuff,6);
+    read_accelration(data, databuff, 6 );
+    printf("%6.6f,%6.6f,%6.6f\r\n",data[0] *accel_gain_in_mg, 
+    data[1]*accel_gain_in_mg, data[2]*accel_gain_in_mg );
 
-    // printf("%f,%f,%f\r\n",data[0] *accel_gain_in_g, 
-    // data[1]*accel_gain_in_g, data[2]*accel_gain_in_g );
-
-    adxl_Read_reg();
+    // adxl_Read_reg();
 }
 
 

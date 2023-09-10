@@ -154,8 +154,6 @@ void general_task_function(void *param)
               
             }
         }
-        
-        delay(10);
 
         /// handle the accelrometer here 
         uint8_t evttype =  nrf_accel_get_evtq();
@@ -165,6 +163,7 @@ void general_task_function(void *param)
             NRF_LOG_INFO("evt is %d",evttype) ;
         }
 
+        // nrf_accel_read_raw();
         // NRF_LOG_INFO("main task 1");
     }
 

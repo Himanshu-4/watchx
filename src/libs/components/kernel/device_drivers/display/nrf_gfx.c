@@ -4,6 +4,18 @@
 #include "nrf_custom_log.h"
 
 
+////==========================================================================================
+//====================== static functions ====================================================
+
+/// @brief send the frame data to the oled 
+/// @param frame 
+/// @param size 
+static void oled_send_frame_data(const uint8_t * frame, uint16_t size)
+{
+
+}
+
+
 //============================================================================================
 ///===================== basic graphics init library =========================================
 
@@ -21,4 +33,7 @@ void nrf_gfx_lib_test(void)
 {
     
 }
+
+
+
 
