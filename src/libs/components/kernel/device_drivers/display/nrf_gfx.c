@@ -25,7 +25,7 @@ static void oled_send_frame_data(const uint8_t * frame, uint16_t size)
 /// @param COLUMN_MAX 
 void nrf_gfx_lib_init(uint16_t ROW_MAX , uint16_t COLUMN_MAX )
 {
-    ////send data to oled and turn it on
+  
     
 }
 
@@ -33,7 +33,16 @@ void nrf_gfx_lib_init(uint16_t ROW_MAX , uint16_t COLUMN_MAX )
 /// @param  
 void nrf_gfx_lib_test(void)
 {
-    
+    ////send data to oled and turn it on
+    /// set the horizontal mode and page addrss and column addresss 
+
+    nrf_oled_set_addressing_mode(OLED_HORIZONTAL_ADDR_MODE);
+    nrf_oled_set_page_addr(SSD_OLED_PAGE_0,SSD_OLED_PAGE_7);
+    nrf_oled_set_column_addr(OLED_COLUMN_ADDR_START,OLED_COLUMN_ADDR_END);
+
+    uint8_t img[] = {0x12,12,123,123,10,10};
+    nrf_oled_send_img_data(img,sizeof(img));
+
 }
 
 

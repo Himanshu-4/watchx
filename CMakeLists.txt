@@ -27,7 +27,7 @@ set(DEBUG_Flags
         )
 
 set(RELEASE_Flags 
-        -O3 -g0
+        -O3 -g0 
         )
 # specify the C standard and the c extensions
 
@@ -264,7 +264,7 @@ target_compile_definitions(freertos_lib PRIVATE
 
 target_compile_options(freertos_lib PRIVATE
            ${COMMON_C_FLAGS}
-           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -O0 >
+           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized  -O0>
            $<$<COMPILE_LANGUAGE:CXX>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti>
            $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp >
              )

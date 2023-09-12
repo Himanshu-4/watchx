@@ -79,6 +79,8 @@ enum _NRF_OLED_PAGES_ADDR_
     SSD_OLED_PAGE_MAX
 };
 
+#define OLED_COLUMN_ADDR_START 0x00
+#define OLED_COLUMN_ADDR_END 0x7f
 //// these addresses are starting from zero 
 
 #define SSD_OLED_COLUMN_ADDR_MAX 124
@@ -208,7 +210,10 @@ void nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr);
 
 
 
-
+/// @brief to send the oled data to the module 
+/// @param data 
+/// @param size 
+void nrf_oled_send_img_data(const uint8_t * data, uint16_t size);
 
 
 #endif

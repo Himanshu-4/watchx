@@ -87,7 +87,7 @@
 
 #define NRF_CONFIG_SPI_DRIVER_INSTALL 1
 #define NRF_CONFIG_SPI_DUMMY_TX_BYTE 0x00
-#define NRF_CONFIG_SPI_MISO_LINE PIN_3
+#define NRF_CONFIG_SPI_MISO_LINE PIN_2
 #define NRF_CONFIG_SPI_MOSI_LINE PIN_4
 #define NRF_CONFIG_SPI_SCK_LINE PIN_5
 #define NRF_CONFIG_SPI_MODE_USED SPI_MODE_0
@@ -104,9 +104,9 @@
 
 #define NRF_CONFIG_OLED_SPI_HOST_USED NRF_CONFIG_SPI_HARDWARE_USE
 
-#define NRF_CONFIG_OLED_CHIP_SELECT_PIN PIN_2
-#define NRF_CONFIG_OLED_DC_OUT_PIN PIN_11
-#define NRF_CONFIG_OLED_MOD_RESET_PIN PIN_12
+#define NRF_CONFIG_OLED_CHIP_SELECT_PIN PIN_3
+#define NRF_CONFIG_OLED_DC_OUT_PIN PIN_12
+#define NRF_CONFIG_OLED_MOD_RESET_PIN PIN_11
 
 ////================================================================================
 ////================================================================================
