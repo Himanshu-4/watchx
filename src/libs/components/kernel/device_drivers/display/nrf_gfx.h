@@ -25,15 +25,18 @@ void nrf_gfx_lib_reset(void);
 void nrf_gfx_lib_test(void);
 
 
-void nrf_gfx_send_frame_data(const uint8_t * frame, uint16_t frame_size);
+void nrf_gfx_lib_send_frame_data(const uint8_t * frame, uint16_t frame_size);
 
-void nrf_gfx_set_pointer_location(uint8_t x, uint8_t y);
+void nrf_gfx_lib_set_pointer_location(uint8_t x, uint8_t y);
 
-void nrf_gfx_set_bitmap(uint8_t x, uint8_t y , const uint8_t * img, uint16_t size );
+void nrf_gfx_lib_set_bitmap(uint8_t x, uint8_t y , const uint8_t * img, uint16_t size );
 
-void nrf_gfx_clear_screen(void);
 
-void nrf_gfx_screen_refresh();
+/// @brief clear the display ram 
+/// @param  void
+void nrf_gfx_lib_clear_display(void);
+
+void nrf_gfx_lib_screen_refresh();
 
 
 

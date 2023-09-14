@@ -209,11 +209,19 @@ void nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr);
 void nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr);
 
 
+//=======================================================================================
+//===================== send the image data to the oled driver 
 
 /// @brief to send the oled data to the module 
 /// @param data 
 /// @param size 
-void nrf_oled_send_img_data(const uint8_t * data, uint16_t size);
+void nrf_oled_send_img_data_from_ram(const uint8_t * data, uint16_t size);
+
+
+/// @brief to send the img data from the the flash 
+/// @param data 
+/// @param size 
+void nrf_oled_send_img_data_from_flash(const uint8_t * data, uint16_t size);
 
 
 #endif
