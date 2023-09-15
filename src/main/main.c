@@ -108,7 +108,7 @@ int main()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////// static functions define here /////////////////////////////////////////////
-
+#include "nrf_gfx.h"
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////// genral task /////////////////////////////////////////////
@@ -117,6 +117,8 @@ void general_task_function(void *param)
     UNUSED_VARIABLE(param);
     uint32_t ret = 0;
 
+    uint8_t bri =0;
+    delay(10);
     ///// check for the button events and print it
     for (;;)
     {
@@ -126,17 +128,30 @@ void general_task_function(void *param)
             // NRF_LOG_WARNING("%d", evt);
             if (evt == NRF_BUTTON_UP_EVT)
             {
-           
+
+                nrf_gfx_lib_set_display_brightness(bri);
+                bri +=10;
+                if(bri > 100)
+                {
+                    bri =100;
+                }      
+                NRF_LOG_INFO("brei %d",bri);          
                 // NRF_LOG_INFO("%d", nvs_add_data(uid, data_buff , min_Size + uid ));
                 // NRF_LOG_WARNING("pointer %x",nvs_get_data_pointer(uid));
                 //// start the advertise
-                NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
+                // NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
             }
             else if (evt == NRF_BUTTON_DOWN_EVT)
             {
-                
+                nrf_gfx_lib_set_display_brightness(bri);
+                bri -=10;
+                if(bri > 100)
+                {
+                    bri =0;
+                }       
+                NRF_LOG_INFO("breitness %d",bri);        
                 // get the data pointer
-                NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
+                // NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
 
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
@@ -150,7 +165,9 @@ void general_task_function(void *param)
             {
                 // NRF_LOG_WARNING("%d", ble_gap_delete_bonds());
                 /// show memory content 
-                NRF_LOG_INFO("batt is %d",ble_peer_get_battery_info());
+                // NRF_LOG_INFO("batt is %d",ble_peer_get_battery_info());
+                 /// testing the oled 
+                    nrf_gfx_lib_test();
               
             }
         }

@@ -39,6 +39,18 @@ void nrf_gfx_lib_clear_display(void);
 void nrf_gfx_lib_screen_refresh();
 
 
+/// @brief draw string on the oled with start location 
+/// @param startx 
+/// @param starty 
+/// @param string 
+/// @param string_size 
+void nrf_gfx_lib_draw_string(uint8_t startx,uint8_t starty,const char *string, uint16_t string_size);
+
+
+/// @brief set the display brightness in terms of percentage 
+/// @param percentage 
+void nrf_gfx_lib_set_display_brightness(uint8_t percentage);
+
 
 
 #endif

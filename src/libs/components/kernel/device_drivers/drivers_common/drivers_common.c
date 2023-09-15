@@ -35,7 +35,7 @@ void Hardware_drivers_install(void)
     time_init();
 #endif
 
-#if defined(INSTALL_GPIO_ISR_SERVICE)
+#if defined(NRF_CONFIG_INSTALL_GPIO_ISR_SERVICE)
 
     gpio_install_isr_servc();
 #endif

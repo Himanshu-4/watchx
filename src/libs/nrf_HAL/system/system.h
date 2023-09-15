@@ -108,6 +108,8 @@ extern void delay_microsec(uint16_t delay_time);
 #define __NO_OPTIMISATION __attribute__((optimize("O0")))
 #define __MAX_OPTIMISATION __attribute__((optimize("O3")))
 
+////////////////////////////////////////////////////////////////////
+//////////////// Error bases 
 /// @brief this is the defination if err base in various components 
 #define NRF_SYSTEM_ERR_BASE 0x00UL
 #define NRF_BLE_ERR_BASE 0x20UL
@@ -143,6 +145,37 @@ enum _NRF_ERROR_TYPES_
 // if(x != NULL)   
 // {x(##__VA_ARGS__);} 
 
+/// @brief this will map the input to a particular slope y2 - max out y1 - min output , x1 = min input x2 max input 
+///  Linear mapping function
+__STATIC_INLINE double map_d(double input, double input_min, double input_max, double output_min, double output_max) {
+    // Ensure that the input value is within the input range
+    if (input < input_min) {
+        input = input_min;
+    } else if (input > input_max) {
+        input = input_max;
+    }
+    // Calculate the mapped value
+    double mapped_value = ((input - input_min)  * (output_max - output_min))/(input_max - input_min) + output_min;
+
+    return mapped_value;
+}
+
+
+/// @brief this will map the input to a particular slope y2 - max out y1 - min output , x1 = min input x2 max input 
+///  Linear mapping function
+__STATIC_INLINE uint32_t map_i(uint32_t input, uint32_t input_min, uint32_t input_max, uint32_t output_min, uint32_t output_max) 
+{
+    // Ensure that the input value is within the input range
+    if (input < input_min) {
+        input = input_min;
+    } else if (input > input_max) {
+        input = input_max;
+    }
+    // Calculate the mapped value
+    uint32_t mapped_value = ((input - input_min)  * (output_max - output_min))/(input_max - input_min) + output_min;
+
+    return mapped_value;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////

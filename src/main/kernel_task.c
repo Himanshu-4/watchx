@@ -168,7 +168,6 @@ void kernel_task(void *param)
     UNUSED_PARAMETER(param);
 
     /// init the device driver at the start of kernel task 
-
     nrf_button_evt_lib_init();
     nrf_accel_evt_lib_init();
 
@@ -176,8 +175,7 @@ void kernel_task(void *param)
     nrf_oled_screen_init();
     nrf_gfx_lib_init(2,3);
 
-    /// testing the oled 
-    nrf_gfx_lib_test();
+   
     /// global err to store the err of retutrns
     uint32_t err = 0;
     /// direct gor to main loop

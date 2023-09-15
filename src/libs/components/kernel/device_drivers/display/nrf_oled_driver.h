@@ -133,14 +133,14 @@ void nrf_oled_reset_driver(void);
 ///////////////////  scrolling related APIs 
 enum _SCROLL_FRAME_FREQ_
 {
-    scrool_freq_5fps = 0x00,
-    scrool_freq_64fps,
-    scrool_freq_128fps,
-    scrool_freq_256fps,
-    scrool_freq_3fps,
-    scrool_freq_4fps,
-    scrool_freq_25fps,
-    scrool_freq_2fps,
+    scroll_freq_5fps = 0x00,
+    scroll_freq_64fps,
+    scroll_freq_128fps,
+    scroll_freq_256fps,
+    scroll_freq_3fps,
+    scroll_freq_4fps,
+    scroll_freq_25fps,
+    scroll_freq_2fps,
     scroll_freq_max
 };
 

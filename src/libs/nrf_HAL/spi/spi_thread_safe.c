@@ -87,9 +87,6 @@ uint8_t spi_poll_xfr_thread_safe(uint8_t spi_num, uint8_t csn_pin, const spi_xfr
 
     // assign the csn pin
     current_csn_pin[spi_num] = csn_pin;
-
-    
-    NRF_LOG_INFO("b %x,s %d",spi_buff->tx_buff, spi_buff->tx_size);
     spi_set_tx_buff(spi_num, spi_buff->tx_buff, spi_buff->tx_size);
     spi_set_rx_buff(spi_num, spi_buff->rx_buff, spi_buff->rx_size);
     // pull the spi csn pin low
