@@ -63,23 +63,22 @@ void nrf_gfx_lib_test(void)
 
     nrf_gfx_lib_clear_display();
 
-    nrf_oled_set_addressing_mode(OLED_HORIZONTAL_ADDR_MODE);
-    nrf_oled_set_page_addr(SSD_OLED_PAGE_0,SSD_OLED_PAGE_7);
-    nrf_oled_set_column_addr(OLED_COLUMN_ADDR_START,10);
+    // nrf_oled_set_addressing_mode(OLED_HORIZONTAL_ADDR_MODE);
+    // nrf_oled_set_page_addr(SSD_OLED_PAGE_0,SSD_OLED_PAGE_7);
+    // nrf_oled_set_column_addr(OLED_COLUMN_ADDR_START,10);
 
     // uint8_t img[1024] = {0x01, [1022] = 0xff};
 
   
 
     // const char * str = "Himanshu jangra ";
-
     // nrf_gfx_lib_draw_string(10,0,str,strlen(str));
-    // const char *s = "anil chutiya gandva";
-    // nrf_gfx_lib_draw_string(0,1,s,strlen(s));
+    const char *s = "anil chutiya gandva";
+    nrf_gfx_lib_draw_string(0,1,s,strlen(s));
 
-    nrf_oled_send_img_data_from_flash(midFont[0], sizeof(midFont[4]));
+    // nrf_oled_send_img_data_from_flash(midFont[0], sizeof(midFont[4]));
 
-      // nrf_oled_config_horizontal_scroll(OLED_SCROLL_TYPE_LEFT, SSD_OLED_PAGE_0,SSD_OLED_PAGE_0,scroll_freq_5fps);
+    //   nrf_oled_config_horizontal_scroll(OLED_SCROLL_TYPE_LEFT, SSD_OLED_PAGE_0,SSD_OLED_PAGE_0,scroll_freq_5fps);
 
     // nrf_oled_config_horizontal_scroll(OLED_SCROLL_TYPE_RIGHT,SSD_OLED_PAGE_0,SSD_OLED_PAGE_0,scroll_freq_2fps);
     // nrf_oled_config_vert_and_horizontal_scroll(OLED_SCROLL_TYPE_LEFT ,SSD_OLED_PAGE_0,SSD_OLED_PAGE_0,scroll_freq_5fps,8);
