@@ -32,7 +32,9 @@
         "initializer_list": "c",
         "nrf_oled_driver.h": "c",
         "spi.h": "c",
-        "gpio.h": "c"
+        "gpio.h": "c",
+        "nrf_rtc.h": "c",
+        "rtc_timer.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator":"MinGW Makefiles",
