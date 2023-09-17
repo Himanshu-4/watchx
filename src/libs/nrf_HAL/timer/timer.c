@@ -40,7 +40,7 @@ void TIMER4_IRQHandler(void)
 
 /// @brief enable the timer interrupt in nvic
 /// @param timer_no
-static void timer_int_enable(uint8_t timer_no)
+static void timer_isr_enable(uint8_t timer_no)
 {
     // set the nvic priority bits and enable the interrupt in nvic
 
@@ -72,7 +72,7 @@ static void timer_int_enable(uint8_t timer_no)
 
 /// @brief disable the timer interrupt in nvic side
 /// @param timer_no
-static void timer_int_disable(uint8_t timer_no)
+static void timer_isr_disable(uint8_t timer_no)
 {
 
     switch (timer_no)
@@ -137,7 +137,7 @@ static uint32_t timer_get_addr_from_no(uint8_t number)
 void timer_module_init(uint8_t timer_no)
 {
 
-    timer_int_disable(timer_no);
+    timer_isr_disable(timer_no);
 
 
     // // make all the callbacks to NULL
@@ -159,7 +159,7 @@ void timer_module_deint(uint8_t timer_no)
     // disable all the interrupt timers
      NRF_TIMER_Type *timer_inst = (NRF_TIMER_Type *)(timer_get_addr_from_no(timer_no));
 
-    timer_int_disable(timer_no);
+    timer_isr_disable(timer_no);
     // // stop all the timers
     // for (int i = 1; i <= 4; i++)
     // {
@@ -178,7 +178,7 @@ void timer_config(uint8_t timer_number, const my_timer_cfg *cfg)
 {
 
     // disale the timer interrupt
-    timer_int_disable(timer_number);
+    timer_isr_disable(timer_number);
     timer_stop(timer_number);
 
     NRF_TIMER_Type *timer_inst = (NRF_TIMER_Type *)(timer_get_addr_from_no(timer_number));
@@ -232,14 +232,14 @@ void timer_add_irq_handler(uint8_t timer_number, void (*func)(void))
 {
     timer_callback_fun[timer_number - 1] = func;
     // enable the interrupt in nvic
-    timer_int_enable(timer_number);
+    timer_isr_enable(timer_number);
 }
 
 void timer_remove_irq_handler(uint8_t timer_number)
 {
     // make the callback to null since array is indexed through 0 so we have to do -1
     timer_callback_fun[timer_number - 1] = NULL;
-    timer_int_disable(timer_number);
+    timer_isr_disable(timer_number);
 }
 
 void timer_add_interupt_time(uint8_t timer_number, uint8_t capt_comp_id, uint32_t counter_val)

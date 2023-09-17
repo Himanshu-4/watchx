@@ -23,6 +23,8 @@
 
 /// include the kernel task
 #include "kernel_task.h"
+#include "nrf_gfx.h"
+#include "time_manager/kernel_time.h"
 
 #include "ble_ams.h"
 #include "ble_peer_info.h"
@@ -108,7 +110,7 @@ int main()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////// static functions define here /////////////////////////////////////////////
-#include "nrf_gfx.h"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////// genral task /////////////////////////////////////////////
@@ -157,7 +159,17 @@ void general_task_function(void *param)
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
                 // NRF_LOG_INFO("delete %d", ble_gap_delete_bonds());
-                ble_ams_print_media_info();
+                // ble_ams_print_media_info();
+                /// print timer info
+                kernel_time_struct_t time = {0};
+                kernel_date_struct_t date = {0};
+
+                kernel_time_get_current_time(&time);
+                kernel_time_get_current_date(&date);
+
+                /// print it 
+                NRF_LOG_INFO("%d,%d,%d D %d,%d,%d,%d",time.hour,time.minutes,time.seconds,
+                date.date,date.day,date.month,date.year);
                 //   ble_gap_print_keys(0);
     
             }
@@ -167,7 +179,7 @@ void general_task_function(void *param)
                 /// show memory content 
                 // NRF_LOG_INFO("batt is %d",ble_peer_get_battery_info());
                  /// testing the oled 
-                    nrf_gfx_lib_test();
+                    // nrf_gfx_lib_test();
               
             }
         }

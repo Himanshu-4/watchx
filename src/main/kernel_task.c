@@ -128,7 +128,11 @@ void Kernel_task_preinit(void)
     // init the ams service
     ble_ams_pre_init();
 
-    /// init nvs
+
+    //// init the kernel time module here 
+    kernel_time_pre_init(NULL,NULL);
+
+    /// init nvs flash library 
     nvs_flash_init(NRF_CONFIG_NVS_FLASH_OPERATION_TIMEOUT);
 
     /// define and add  ble related callbacks here
@@ -181,7 +185,7 @@ void kernel_task(void *param)
     /// direct gor to main loop
     goto main_loop;
 
-/// @brief this is to init the ble functionality and then go to main loop
+/// @brief this is to init the ble functionality when connected and then go to main loop
 ble_funcs_init:
 {
 
@@ -221,7 +225,7 @@ ble_funcs_init:
     goto main_loop;
 }
 
-/// @brief this is to deinit the ble functionality and go to main loop
+/// @brief this is to deinit the ble functionality when disconnected and go to main loop
 ble_funcs_deinit:
 {
     uint16_t conn_handle = ble_gap_get_conn_handle(BLE_GAP_DEVICE_INDEX);
