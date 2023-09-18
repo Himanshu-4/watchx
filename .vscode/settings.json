@@ -34,7 +34,10 @@
         "spi.h": "c",
         "gpio.h": "c",
         "nrf_rtc.h": "c",
-        "rtc_timer.h": "c"
+        "rtc_timer.h": "c",
+        "kernel_task.h": "c",
+        "nrf_gfx.h": "c",
+        "watchdog.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator":"MinGW Makefiles",

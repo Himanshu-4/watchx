@@ -29,6 +29,18 @@ enum _RTC_TIMER_COMPARE_REG_VALUES_
     RTC_TIMER_COMPARE_MAX
 };
 
+/// these are the events that you can track
+#define RTC_TIM_EVT_TICK _BV(1)
+#define RTC_TIM_EVT_OVRFLW _BV(2)
+#define RTC_TIM_EVT_COMPARE(x) _BV(3 + x)
+
+
+//// these are the mask events that used to check the events
+#define RTC_TIM_EVT_TICK_INDEX 1
+#define RTC_TIM_EVT_OVRFLW_INDEX 2
+#define RTC_TIM_EVT_COMPARE_INDEX(x) (3 +x)
+
+
 ////================= function declartion
 
 /// @brief configure the rtc timer prescaler
@@ -89,4 +101,12 @@ void rtc_Timer_set_Comapre_reg(uint8_t timer_no, uint8_t compare_reg, uint32_t v
 /// @return counter value
 uint32_t rtc_Timer_get_counter_value(uint8_t timer_no);
 
+
+/// @brief get the rtc event and clear it 
+/// @param timer_no 
+/// @return event value with proper bit shifted 
+uint32_t rtc_Timer_get_event_src_and_clear(uint8_t timer_no);
+
+
+///// end of the header file 
 #endif

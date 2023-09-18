@@ -21,6 +21,10 @@
 #include "memory_manager/kernel_mem_manager.h"
 #include "memory_manager/kernel_link_list.h"
 
+#include "RTC_timer.h"
+#include "watchdog.h"
+
+
 /// include the kernel task
 #include "kernel_task.h"
 #include "nrf_gfx.h"
@@ -63,13 +67,15 @@ int main()
 
     if (sys_init() != nrf_OK)
     {
-        APP_ERROR_HANDLER(nrf_ERR_OPERATION_FAILED);
+        NRF_LOG_ERROR("sys init failed");
+        // APP_ERROR_HANDLER(nrf_ERR_OPERATION_FAILED);
     }
 
     /// init the kernel task preinit
     Kernel_task_preinit();
     
-
+    watchdog_init(1);
+    watchdog_start();
     /// @todo have to implement the kernel init file
     // watchx_kernel_init();
     /// init the accelrometer task
@@ -180,7 +186,7 @@ void general_task_function(void *param)
                 // NRF_LOG_INFO("batt is %d",ble_peer_get_battery_info());
                  /// testing the oled 
                     // nrf_gfx_lib_test();
-              
+              NRF_LOG_INFO("timer counter %d",rtc_Timer_get_counter_value(NRF_RTC_TIMER_2));
             }
         }
 
@@ -191,6 +197,8 @@ void general_task_function(void *param)
         {
             NRF_LOG_INFO("evt is %d",evttype) ;
         }
+
+        watchdog_reset();
 
         // nrf_accel_read_raw();
         // NRF_LOG_INFO("main task 1");

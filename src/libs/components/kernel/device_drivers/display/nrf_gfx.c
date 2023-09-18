@@ -73,7 +73,7 @@ void nrf_gfx_lib_test(void)
 
     // const char * str = "Himanshu jangra ";
     // nrf_gfx_lib_draw_string(10,0,str,strlen(str));
-    const char *s = "anil chutiya gandva";
+    const char *s = "Baadshe kaam krle";
     nrf_gfx_lib_draw_string(0,1,s,strlen(s));
 
     // nrf_oled_send_img_data_from_flash(midFont[0], sizeof(midFont[4]));

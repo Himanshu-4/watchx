@@ -148,7 +148,7 @@
 #define NRF_CONFIG_BUTTON_EVENTQ_ITEM_SIZE (sizeof(uint8_t))
 
 ////// define the event q length for the buttons event
-#define NRF_CONFIG_BUTTON_EVENTQ_ITEM_LEN 2
+#define NRF_CONFIG_BUTTON_EVENTQ_ITEM_LEN 5
 
 ////================================================================================
 ////================================================================================

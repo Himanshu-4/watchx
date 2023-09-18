@@ -39,8 +39,7 @@ const uint8_t kernel_months_max_Days_leap_year[12] =
 /// for a leap year the year must be multiple of 4
 #define LEAP_YEAR_BASE_NUMBER 4
 
-#define RTC_TIMER_PRESCALER 0xfff
-
+#define RTC_TIMER_PRESCALER 327
 #define RTC_TIMER_COMPARE_VALUE 100
 
 #define RTC_TIMER_USED NRF_RTC_TIMER_2
@@ -50,68 +49,77 @@ static volatile kernel_time_struct_t current_time;
 
 static volatile kernel_date_struct_t current_date;
 
+/// @brief RTC itterrupt handler
+/// @param
 static void rtc_timer_2_handler(void)
 {
     /// we should know the handler frequency for now we take 1 seconds
 
-    /// based on that update time
-    /// update the seconds
-    current_time.seconds++;
+    uint32_t evt = rtc_Timer_get_event_src_and_clear(RTC_TIMER_USED);
 
-    /// check the seconds
-    if (current_time.seconds > KERNEL_TIME_SECONDS_MAX)
+    if (evt & RTC_TIM_EVT_COMPARE(0))
     {
-        /// increment the minutes
-        current_time.minutes++;
-        current_time.seconds = 0;
 
-        /// check the minutes
-        if (current_time.minutes > KERNEL_TIME_MINUTE_MAX)
+        /// based on that update time
+        /// update the seconds
+        current_time.seconds++;
+
+        /// check the seconds
+        if (current_time.seconds > KERNEL_TIME_SECONDS_MAX)
         {
-            /// increment the hour
-            current_time.hour++;
-            current_time.minutes = 0;
+            /// increment the minutes
+            current_time.minutes++;
+            current_time.seconds = 0;
 
-            /// check the hour
-            if (current_time.hour > KERNEL_TIME_HOUR_MAX)
+            /// check the minutes
+            if (current_time.minutes > KERNEL_TIME_MINUTE_MAX)
             {
-                /// restore the hour
-                current_time.hour = 0;
+                /// increment the hour
+                current_time.hour++;
+                current_time.minutes = 0;
 
-                //// increment the date and day
-                current_date.day++;
-                current_date.date++;
-
-                /// safeley increment the day
-                if (current_date.day > DAY_SUN)
+                /// check the hour
+                if (current_time.hour > KERNEL_TIME_HOUR_MAX)
                 {
-                    current_date.day = DAY_MON;
-                }
+                    /// restore the hour
+                    current_time.hour = 0;
 
-                /// check the month  overflow
-                if (current_date.date > (GET_REMNDER(current_date.year, LEAP_YEAR_BASE_NUMBER) ? (kernel_months_max_Days[current_date.month]) : (kernel_months_max_Days_leap_year[current_date.month])))
-                {
-                    current_date.date = 1;
+                    //// increment the date and day
+                    current_date.day++;
+                    current_date.date++;
 
-                    /// increment the month
-                    current_date.month++;
-
-                    if (current_date.month > MONTH_DEC)
+                    /// safeley increment the day
+                    if (current_date.day > DAY_SUN)
                     {
-                        current_date.month = MONTH_JAN;
+                        current_date.day = DAY_MON;
+                    }
 
-                        /// increment the year
-                        current_date.year++;
+                    /// check the month  overflow
+                    if (current_date.date > (GET_REMNDER(current_date.year, LEAP_YEAR_BASE_NUMBER) ? (kernel_months_max_Days[current_date.month]) : (kernel_months_max_Days_leap_year[current_date.month])))
+                    {
+                        current_date.date = 1;
 
-                        //// should end here
+                        /// increment the month
+                        current_date.month++;
+
+                        if (current_date.month > MONTH_DEC)
+                        {
+                            current_date.month = MONTH_JAN;
+
+                            /// increment the year
+                            current_date.year++;
+
+                            //// should end here
+                        }
                     }
                 }
             }
         }
-    }
 
+    
     //// clear the timer counter
     rtc_Timer_clear(RTC_TIMER_USED);
+    }
 }
 
 //-------------------------------- functions definations------------------------------------------
@@ -123,6 +131,7 @@ void kernel_time_pre_init(kernel_time_struct_t *time, kernel_date_struct_t *date
     rtc_Timer_Config(RTC_TIMER_USED, RTC_TIMER_PRESCALER);
     rtc_Timer_add_irq_handler(RTC_TIMER_USED, rtc_timer_2_handler);
     rtc_Timer_int_enable(RTC_TIMER_USED, RTC_TIM_EVT_MASK_COMPARE0);
+    rtc_Timer_event_enable(RTC_TIMER_USED, RTC_TIM_EVT_MASK_COMPARE0);
 
     if (time != NULL)
     {
@@ -147,13 +156,11 @@ void kernel_time_pre_init(kernel_time_struct_t *time, kernel_date_struct_t *date
     }
 
     /// set the timer counter register
-    rtc_Timer_set_Comapre_reg(RTC_TIMER_USED,RTC_TIMER_COMPARE_0, RTC_TIMER_COMPARE_VALUE);
     rtc_Timer_clear(RTC_TIMER_USED);
-    
-    nrf_delay_ms(10);
-    /// START THE TIMer 
-    rtc_Timer_start(RTC_TIMER_USED);
+    rtc_Timer_set_Comapre_reg(RTC_TIMER_USED, RTC_TIMER_COMPARE_0, RTC_TIMER_COMPARE_VALUE);
 
+    /// START THE TIMer
+    rtc_Timer_start(RTC_TIMER_USED);
 }
 
 /// @brief get the current time from the kernel time module

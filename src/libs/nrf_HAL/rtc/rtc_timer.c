@@ -205,3 +205,37 @@ uint32_t rtc_Timer_get_counter_value(uint8_t timer_no)
     uint32_t counter_value = timer_inst->COUNTER;
     return counter_value;
 }
+
+
+/// @brief get the rtc event and clear it 
+/// @param timer_no 
+/// @return event value with proper bit shifted 
+uint32_t rtc_Timer_get_event_src_and_clear(uint8_t timer_no)
+{
+    //// check every event and clear the event 
+    NRF_RTC_Type *timer_inst = (NRF_RTC_Type *)rtc_timer_get_addr_from_no(timer_no);
+    uint32_t event =0;
+
+    if(timer_inst->EVENTS_TICK)
+    {
+        event |= RTC_TIM_EVT_TICK;
+        /// clear the event 
+        timer_inst->EVENTS_TICK =0;
+    }
+    if(timer_inst->EVENTS_OVRFLW)
+    {
+        event |= RTC_TIM_EVT_OVRFLW;
+        //// clear the event 
+        timer_inst->EVENTS_OVRFLW =0;
+    }
+    for (uint8_t i = 0; i < RTC_TIMER_COMPARE_MAX; i++)
+    {
+        if(timer_inst->EVENTS_COMPARE[i])
+        {
+            event |= RTC_TIM_EVT_COMPARE(i);
+            /// clear the event 
+            timer_inst->EVENTS_COMPARE[i] = 0;
+        }   
+    }
+    
+}

@@ -19,7 +19,6 @@ void watchdog_init(uint16_t time_sec)
 */
 void watchdog_start(void)
 {
-
     // check if the watchdog is running or not 
     if(NRF_WDT->RUNSTATUS == 0UL)
     {

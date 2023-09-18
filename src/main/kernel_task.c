@@ -130,7 +130,7 @@ void Kernel_task_preinit(void)
 
 
     //// init the kernel time module here 
-    kernel_time_pre_init(NULL,NULL);
+    // kernel_time_pre_init(NULL,NULL);
 
     /// init nvs flash library 
     nvs_flash_init(NRF_CONFIG_NVS_FLASH_OPERATION_TIMEOUT);
@@ -178,7 +178,8 @@ void kernel_task(void *param)
     /// int the oled screen and gfx lib 
     nrf_oled_screen_init();
     nrf_gfx_lib_init(2,3);
-
+    /// test the gfx library 
+    nrf_gfx_lib_test();
    
     /// global err to store the err of retutrns
     uint32_t err = 0;

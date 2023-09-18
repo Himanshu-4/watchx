@@ -11,7 +11,7 @@
 
 /***
  * @name watchdog_init
- * @param the reload timer value
+ * @param the reload time value in sec 
  * @note it only init the watchdog but not start it 
 */
 void watchdog_init(uint16_t);
