@@ -238,4 +238,5 @@ uint32_t rtc_Timer_get_event_src_and_clear(uint8_t timer_no)
         }   
     }
     
+    return event;
 }

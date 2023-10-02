@@ -31,5 +31,14 @@ enum _BLE_GATT_SERVER_ERRORS_
 /// @param  void 
 void ble_gatt_server_pre_init(void);
 
+/// @brief send the battery notifcation 
+/// @param  data pointer
+/// @param len
+void ble_gatt_server_send_batt_notif(uint8_t *data, uint16_t len);
+
+/// @brief init the gatt server with this conn handle
+/// @param conn_handle 
+void ble_gatt_server_init(uint16_t conn_handle);
+
 
 #endif

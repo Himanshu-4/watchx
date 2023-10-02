@@ -139,8 +139,8 @@ void kernel_time_pre_init(kernel_time_struct_t *time, kernel_date_struct_t *date
     }
     else
     {
-        current_time.hour = 16;
-        current_time.minutes = 26;
+        current_time.hour = 12;
+        current_time.minutes = 05;
         current_time.seconds = 12;
     }
     if (date != NULL)
@@ -149,9 +149,9 @@ void kernel_time_pre_init(kernel_time_struct_t *time, kernel_date_struct_t *date
     }
     else
     {
-        current_date.date = 16;
-        current_date.day = DAY_SAT;
-        current_date.month = MONTH_SEP;
+        current_date.date = 2;
+        current_date.day = DAY_MON;
+        current_date.month = MONTH_OCT;
         current_date.year = 2023;
     }
 

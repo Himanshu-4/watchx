@@ -63,9 +63,9 @@ void ble_gatt_server_handler(ble_evt_t const *p_ble_evt)
         ///// handle the write request
     case BLE_GATTS_EVT_WRITE:
     {
-        // NRF_LOG_INFO("evtwrite cmd");
+        NRF_LOG_INFO("evtwrite cmd");
         // the app will enable the notification and indication here
-        // NRF_LOG_INFO("data len %d ,data %d", p_ble_evt->evt.gatts_evt.params.write.len, p_ble_evt->evt.gatts_evt.params.write.data[0]);
+        NRF_LOG_INFO("data len %d ,data %d", p_ble_evt->evt.gatts_evt.params.write.len, p_ble_evt->evt.gatts_evt.params.write.data[0]);
     }
     break;
 

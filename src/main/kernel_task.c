@@ -130,7 +130,7 @@ void Kernel_task_preinit(void)
 
 
     //// init the kernel time module here 
-    // kernel_time_pre_init(NULL,NULL);
+    kernel_time_pre_init(NULL,NULL);
 
     /// init nvs flash library 
     nvs_flash_init(NRF_CONFIG_NVS_FLASH_OPERATION_TIMEOUT);
@@ -193,6 +193,7 @@ ble_funcs_init:
     uint16_t conn_handle = ble_gap_get_conn_handle(BLE_GAP_DEVICE_INDEX);
     NRF_LOG_INFO("connhand %d", conn_handle);
 
+
     /// @note this function will wait for the security procedure to finish and then proceed .
     /// start the pairing process
     err = ble_gap_security_init(BLE_GAP_DEVICE_INDEX);
@@ -201,12 +202,14 @@ ble_funcs_init:
     {
         goto main_loop;
     }
+    
+    /// init the gatt server 
+    ble_gatt_server_init(conn_handle);
 
-    /// init the ble client
+    //  init the ble client
     err = gatt_client_init(conn_handle);
     NRF_ASSERT(err);
 
-    /// @todo find why we have to give a delay here
     //// set the gatt server mtu
     err = gatt_client_set_server_mtu(conn_handle, BLE_GATT_SERVER_RX_MTU);
     NRF_ASSERT(err);
@@ -215,7 +218,7 @@ ble_funcs_init:
     err = ble_peer_device_init(conn_handle);
     NRF_ASSERT(err);
 
-    // gatt_client_explore_service(conn_handle, 10);
+    // gatt_client_explore_servsice(conn_handle, 10);
     /// init the apple ams
     err = ble_ams_init(conn_handle);
     NRF_ASSERT(err);
@@ -237,8 +240,8 @@ ble_funcs_deinit:
     NRF_LOG_WARNING("disc %d", conn_handle);
     ////////// call the deinit process of the above init process
 
-    //// deinit the ancs , ams ,device info and other device functionality
-    /// deinit the apple ancs, ams task
+    // deinit the ancs , ams ,device info and other device functionality
+    // deinit the apple ancs, ams task
     err = ble_ams_deinit();
     NRF_ASSERT(err);
 

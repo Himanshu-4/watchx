@@ -16,6 +16,7 @@
 #include "nrf_button.h"
 
 #include "ble_gap_func.h"
+#include "ble_gatt_server.h"
 
 //// include the kernel mem manager
 #include "memory_manager/kernel_mem_manager.h"
@@ -74,8 +75,8 @@ int main()
     /// init the kernel task preinit
     Kernel_task_preinit();
     
-    watchdog_init(1);
-    watchdog_start();
+    // watchdog_init(1);
+    // watchdog_start();
     /// @todo have to implement the kernel init file
     // watchx_kernel_init();
     /// init the accelrometer task
@@ -137,45 +138,47 @@ void general_task_function(void *param)
             if (evt == NRF_BUTTON_UP_EVT)
             {
 
-                nrf_gfx_lib_set_display_brightness(bri);
-                bri +=10;
-                if(bri > 100)
-                {
-                    bri =100;
-                }      
-                NRF_LOG_INFO("brei %d",bri);          
+                // nrf_gfx_lib_set_display_brightness(bri);
+                // bri +=10;
+                // if(bri > 100)
+                // {
+                //     bri =100;
+                // }      
+                // NRF_LOG_INFO("brei %d",bri);          
                 // NRF_LOG_INFO("%d", nvs_add_data(uid, data_buff , min_Size + uid ));
                 // NRF_LOG_WARNING("pointer %x",nvs_get_data_pointer(uid));
                 //// start the advertise
-                // NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
+                NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
             }
             else if (evt == NRF_BUTTON_DOWN_EVT)
             {
-                nrf_gfx_lib_set_display_brightness(bri);
-                bri -=10;
-                if(bri > 100)
-                {
-                    bri =0;
-                }       
-                NRF_LOG_INFO("breitness %d",bri);        
+                // nrf_gfx_lib_set_display_brightness(bri);
+                // bri -=10;
+                // if(bri > 100)
+                // {
+                //     bri =0;
+                // }       
+                // NRF_LOG_INFO("breitness %d",bri);        
                 // get the data pointer
-                // NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
+                NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
 
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
+                uint8_t data =3;
+                ble_gatt_server_send_batt_notif(&data,1);
                 // NRF_LOG_INFO("delete %d", ble_gap_delete_bonds());
                 // ble_ams_print_media_info();
                 /// print timer info
-                kernel_time_struct_t time = {0};
-                kernel_date_struct_t date = {0};
+                // kernel_time_struct_t time = {0};
+                // kernel_date_struct_t date = {0};
 
-                kernel_time_get_current_time(&time);
-                kernel_time_get_current_date(&date);
+                // kernel_time_get_current_time(&time);
+                // kernel_time_get_current_date(&date);
 
-                /// print it 
-                NRF_LOG_INFO("%d,%d,%d D %d,%d,%d,%d",time.hour,time.minutes,time.seconds,
-                date.date,date.day,date.month,date.year);
+                // /// print it 
+                // NRF_LOG_INFO("%d,%d,%d D %d,%d,%d,%d",time.hour,time.minutes,time.seconds,
+                // date.date,date.day,date.month,date.year);
                 //   ble_gap_print_keys(0);
     
             }
@@ -186,7 +189,7 @@ void general_task_function(void *param)
                 // NRF_LOG_INFO("batt is %d",ble_peer_get_battery_info());
                  /// testing the oled 
                     // nrf_gfx_lib_test();
-              NRF_LOG_INFO("timer counter %d",rtc_Timer_get_counter_value(NRF_RTC_TIMER_2));
+            //   NRF_LOG_INFO("timer counter %d",rtc_Timer_get_counter_value(NRF_RTC_TIMER_2));
             }
         }
 
@@ -198,7 +201,7 @@ void general_task_function(void *param)
             NRF_LOG_INFO("evt is %d",evttype) ;
         }
 
-        watchdog_reset();
+
 
         // nrf_accel_read_raw();
         // NRF_LOG_INFO("main task 1");
