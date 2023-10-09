@@ -40,6 +40,7 @@
         "watchdog.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
-    "cmake.generator":"MinGW Makefiles",
+    "cmake.generator": "MinGW Makefiles",
+    "C_Cpp.errorSquiggles": "disabled",
     
 }

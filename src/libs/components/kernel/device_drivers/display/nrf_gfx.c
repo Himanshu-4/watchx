@@ -8,6 +8,9 @@
 ////==========================================================================================
 //====================== static functions ====================================================
 
+const uint8_t clear_ram_content[1024] ={0};
+
+
 /// @brief send the frame data to the oled 
 /// @param frame 
 /// @param size 
@@ -96,8 +99,8 @@ void nrf_gfx_lib_clear_display(void)
     nrf_oled_set_addressing_mode(OLED_HORIZONTAL_ADDR_MODE);
     nrf_oled_set_page_addr(SSD_OLED_PAGE_0,SSD_OLED_PAGE_7);
     nrf_oled_set_column_addr(OLED_COLUMN_ADDR_START,OLED_COLUMN_ADDR_END);
-    uint8_t clear_ram[1024] ={0};
-    nrf_oled_send_img_data_from_ram(clear_ram,sizeof(clear_ram));
+    
+    nrf_oled_send_img_data_from_ram(clear_ram_content,sizeof(clear_ram_content));
 }
 
 

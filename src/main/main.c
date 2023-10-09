@@ -22,7 +22,6 @@
 #include "memory_manager/kernel_mem_manager.h"
 #include "memory_manager/kernel_link_list.h"
 
-#include "RTC_timer.h"
 #include "watchdog.h"
 
 
@@ -138,29 +137,29 @@ void general_task_function(void *param)
             if (evt == NRF_BUTTON_UP_EVT)
             {
 
-                // nrf_gfx_lib_set_display_brightness(bri);
-                // bri +=10;
-                // if(bri > 100)
-                // {
-                //     bri =100;
-                // }      
-                // NRF_LOG_INFO("brei %d",bri);          
+                nrf_gfx_lib_set_display_brightness(bri);
+                bri +=10;
+                if(bri > 100)
+                {
+                    bri =100;
+                }      
+                NRF_LOG_INFO("brei %d",bri);          
                 // NRF_LOG_INFO("%d", nvs_add_data(uid, data_buff , min_Size + uid ));
                 // NRF_LOG_WARNING("pointer %x",nvs_get_data_pointer(uid));
                 //// start the advertise
-                NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
+                // NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
             }
             else if (evt == NRF_BUTTON_DOWN_EVT)
             {
-                // nrf_gfx_lib_set_display_brightness(bri);
-                // bri -=10;
-                // if(bri > 100)
-                // {
-                //     bri =0;
-                // }       
-                // NRF_LOG_INFO("breitness %d",bri);        
+                nrf_gfx_lib_set_display_brightness(bri);
+                bri -=10;
+                if(bri > 100)
+                {
+                    bri =0;
+                }       
+                NRF_LOG_INFO("breitness %d",bri);        
                 // get the data pointer
-                NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
+                // NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
 
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
@@ -170,15 +169,15 @@ void general_task_function(void *param)
                 // NRF_LOG_INFO("delete %d", ble_gap_delete_bonds());
                 // ble_ams_print_media_info();
                 /// print timer info
-                // kernel_time_struct_t time = {0};
-                // kernel_date_struct_t date = {0};
+                kernel_time_struct_t time = {0};
+                kernel_date_struct_t date = {0};
 
-                // kernel_time_get_current_time(&time);
-                // kernel_time_get_current_date(&date);
+                kernel_time_get_current_time(&time);
+                kernel_time_get_current_date(&date);
 
                 // /// print it 
-                // NRF_LOG_INFO("%d,%d,%d D %d,%d,%d,%d",time.hour,time.minutes,time.seconds,
-                // date.date,date.day,date.month,date.year);
+                NRF_LOG_INFO("%d,%d,%d D %d,%d,%d,%d",time.hour,time.minutes,time.seconds,
+                date.date,date.day,date.month,date.year);
                 //   ble_gap_print_keys(0);
     
             }
