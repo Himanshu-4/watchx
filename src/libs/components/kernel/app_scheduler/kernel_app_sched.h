@@ -16,6 +16,9 @@ uint32_t kernel_app_schd_lock(void);
 
 uint32_t kernel_app_schd_unlock(void);
 
+uint32_t kernel_app_schd_get_status(void);
+
+
 typedef void (*schd_app_Type)(void);
 
 uint32_t kernel_app_schd_send_app(schd_app_Type new_apps);

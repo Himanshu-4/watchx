@@ -117,10 +117,10 @@ void ble_ancs_pre_init(void)
 //// create a kernel memory instance to hold the data from the notification handler into this memory
 /// this is useful because it can give us compile time memory consumption , which in our case is useful because now run time
 ///// consumption can be minimized
-KERNEL_MEM_INSTANTISE(ble_ancs_mem_inst, ble_ancs_mem_pool, BLE_ANCS_MEM_SIZE, ble_ancs_memory_mutex);
+KERNEL_MEM_INSTANTIATE(ble_ancs_mem_inst, ble_ancs_mem_pool, BLE_ANCS_MEM_SIZE, ble_ancs_memory_mutex);
 
 //// initalise a linklist for the ancs lib  here
-KERNEL_LINKLIST_INSTANTISE(ble_ancs_ll_inst, ancs_ll_memory, BLE_ANCS_LL_SIZE, ble_ancs_ll_static_mutex_buff);
+KERNEL_LINKLIST_INSTANTIATE(ble_ancs_ll_inst, ancs_ll_memory, BLE_ANCS_LL_SIZE, ble_ancs_ll_static_mutex_buff);
 
 /// @brief this is to init the ancs profile from iphone
 /// @param conn_handle

@@ -171,7 +171,7 @@ void ble_ams_pre_init(void)
 /// this is useful because it can give us compile time memory consumption , which in our case is useful because now run time
 ///// consumption can be minimized
 
-KERNEL_MEM_INSTANTISE(ble_ams_mem_inst, ble_ams_mem_pool, BLE_AMS_MEM_SIZE, ble_ams_memory_mutex);
+KERNEL_MEM_INSTANTIATE(ble_ams_mem_inst, ble_ams_mem_pool, BLE_AMS_MEM_SIZE, ble_ams_memory_mutex);
 
 /// @brief this is to init the ams at a coonection event
 /// @param  connection_handle

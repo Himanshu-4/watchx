@@ -56,7 +56,7 @@ typedef struct _KERNEL_LINKLIST_INST_
 
 
 /// @brief a-> instnace b-> mem_name c-> size, d-> mutex 
-#define KERNEL_LINKLIST_INSTANTISE(a,b,c,d) \
+#define KERNEL_LINKLIST_INSTANTIATE(a,b,c,d) \
     static uint8_t KERNEL_LINK_LIST_SECTION __USED b[c];    \
     static StaticSemaphore_t d; \
     static kernel_linklist_instance a;  \

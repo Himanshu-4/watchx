@@ -40,7 +40,7 @@ typedef struct _KERNEL_MEM_INSTANCE_
 
 /// this will help you to initialize the memory in any particular file
 /// @brief this is to init the mem a-> kernel mem instnace name , b -> memory pool name , c-> memory size ,d -> kernel memory mutex buffer
-#define KERNEL_MEM_INSTANTISE(a, b, c, d)          \
+#define KERNEL_MEM_INSTANTIATE(a, b, c, d)          \
     static uint8_t KERNEL_MEM_SECTION __USED b[c]; \
     static StaticSemaphore_t d;                    \
     static kernel_mem_instance a;           \
