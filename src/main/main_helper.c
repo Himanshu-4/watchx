@@ -1,6 +1,3 @@
-#include "main_helper.h"
-
-
 /////// include the neccesary system related files 
 #include "system.h"
 

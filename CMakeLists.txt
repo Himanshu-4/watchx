@@ -205,9 +205,6 @@ set(SDK_INCLUDE_DIR
 
         # the ble component directory  
         ${CMAKE_SOURCE_DIR}/libs/components/ble 
-
-        # the watchx app directory 
-        ${CMAKE_SOURCE_DIR}/libs/components/app  
          
       )
 
@@ -449,7 +446,7 @@ ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi_thread_safe.c
 ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi.c
 )
 # Set specific compiler flags for "special_file.cpp"
-set_source_files_properties(${EXCLUDE_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O0")
+set_source_files_properties(${EXCLUDE_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O3")
 
 #######################################################################################3###########################
 ##################################################################################################
@@ -598,19 +595,45 @@ set(EXCLUDE_KERNEL_FILES_FOR_OPTIMISATION
 ${CMAKE_SOURCE_DIR}/libs/components/kernel/device_drivers/display/nrf_oled_driver.c
 )
 # Set specific compiler flags for "special_file.cpp"
-set_source_files_properties(${EXCLUDE_KERNEL_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O0 -g3")
+set_source_files_properties(${EXCLUDE_KERNEL_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O3 -g0")
 ###########################################################################################################################################################
 ##########################################################################################################################################################
 #########################################################################################################################################################
 ############################################################## specify the main source files of your project here 
+# this contains kernel   files 
+
+        # this is kernel task files 
+        file ( GLOB app_schedulers_files 
+        ${CMAKE_SOURCE_DIR}/main/*.c 
+        ${CMAKE_SOURCE_DIR}/main/*/*/*.c
+        ${CMAKE_SOURCE_DIR}/main/*/*.c
+        )
+
+
+set(WATCH_APP_INCLUDE_DIR)
+
+foreach(watchxapp_schd_srcs ${app_schedulers_files})
+
+get_filename_component(dirname ${watchxapp_schd_srcs} DIRECTORY)
+
+list(APPEND WATCH_APP_INCLUDE_DIR ${dirname})
+endforeach(watchxapp_schd_srcs ${app_schedulers_files})
+
+# remove the duplicates directory from the includes 
+list(REMOVE_DUPLICATES WATCH_APP_INCLUDE_DIR)
+
+message("the watchx kernel dir")
+# display the content 
+foreach(srcs ${WATCH_APP_INCLUDE_DIR})
+message(${srcs})
+endforeach(srcs ${WATCH_APP_INCLUDE_DIR})
 
 set(PROJECT_FILES
-${CMAKE_SOURCE_DIR}/main/main.c
-${CMAKE_SOURCE_DIR}/main/kernel_task.c
+${app_schedulers_files}
 )
 
 set(PROJECT_INCLUDE_DIR
-        ${CMAKE_SOURCE_DIR}/main
+        ${WATCH_APP_INCLUDE_DIR}
         )
 #########################################################################
 ################################# build the project 
