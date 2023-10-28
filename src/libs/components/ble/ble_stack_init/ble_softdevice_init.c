@@ -379,7 +379,6 @@ static void nrf_enable_Softdevice(void)
 
 void nrf_softdevice_init_and_start(void)
 {
-
     // softdevice stack initialization
     nrf_enable_Softdevice();
     
@@ -392,8 +391,6 @@ void nrf_softdevice_init_and_start(void)
     // this have a deffered interrupt processing mechanism so that
     // as to make the interurpt handler as short as possible and let the processing runs in thread mode 
     nrf_sdh_freertos_init();
-
-    
 }
 
 

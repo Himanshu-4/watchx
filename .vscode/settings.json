@@ -37,7 +37,8 @@
         "rtc_timer.h": "c",
         "kernel_task.h": "c",
         "nrf_gfx.h": "c",
-        "watchdog.h": "c"
+        "watchdog.h": "c",
+        "kernel_queue.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator": "MinGW Makefiles",

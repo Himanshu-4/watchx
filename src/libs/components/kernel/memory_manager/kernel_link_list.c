@@ -18,16 +18,15 @@
 /// @return succ/failure
 kernel_LL_err_type kernel_ll_init(kernel_linklist_instance *instance, uint8_t *mem_inst, uint16_t size, StaticSemaphore_t *mutexbuff_ptr, uint16_t timeout, uint16_t sizeof_one_node)
 {
-    instance->kernel_linklist_mutexhandle = xSemaphoreCreateMutexStatic(mutexbuff_ptr);
-    NRF_ASSERT((instance->kernel_linklist_mutexhandle == NULL));
-
-    instance->kernel_linklist_mutex_timeout = timeout;
-
     /// verify that we get the total size
     if (size % sizeof_one_node != 0)
     {
         return KERNEL_LL_ERR_INVALID_PARAM;
     }
+    
+    instance->kernel_linklist_mutexhandle = xSemaphoreCreateMutexStatic(mutexbuff_ptr);
+    NRF_ASSERT((instance->kernel_linklist_mutexhandle == NULL));
+    instance->kernel_linklist_mutex_timeout = timeout;
 
     /// head pointer
     instance->head_ptr = NULL;
@@ -56,7 +55,7 @@ kernel_LL_err_type kernel_ll_deinit(kernel_linklist_instance *instnace)
 {
     xSemaphoreGive(instnace->kernel_linklist_mutexhandle);
     memset(instnace->mem_ptr, 0, instnace->total_mem_size);
-    memset(&instnace, 0, sizeof(kernel_linklist_instance));
+    // memset(&instnace, 0, sizeof(kernel_linklist_instance));
     return KERNEL_LL_OP_SUCESS;
 }
 
