@@ -21,6 +21,7 @@
 //// include the kernel mem manager
 #include "memory_manager/kernel_mem_manager.h"
 #include "memory_manager/kernel_link_list.h"
+#include "memory_manager/kernel_queue.h"
 
 #include "watchdog.h"
 
@@ -120,14 +121,19 @@ int main()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////// genral task /////////////////////////////////////////////
+
+KERNEL_Q_INSTANTIATE(q_inst,q_mem,20,q_semphr);
+
 void general_task_function(void *param)
 {
     UNUSED_VARIABLE(param);
     uint32_t ret = 0;
 
-    uint8_t bri =0;
+    NRF_LOG_INFO("memory %x",q_mem);
+    kernel_q_create(&q_inst,q_mem,20,&q_semphr,100,4);
     delay(10);
     ///// check for the button events and print it
+    int i=0;
     for (;;)
     {
         uint8_t evt = nrf_btn_get_evtq();
@@ -136,58 +142,33 @@ void general_task_function(void *param)
             // NRF_LOG_WARNING("%d", evt);
             if (evt == NRF_BUTTON_UP_EVT)
             {
+                uint16_t num = ++i;
+                ret =kernel_q_send_to_back(&q_inst, u8_ptr &i, 4);
 
-                nrf_gfx_lib_set_display_brightness(bri);
-                bri +=10;
-                if(bri > 100)
-                {
-                    bri =100;
-                }      
-                NRF_LOG_INFO("brei %d",bri);          
-                // NRF_LOG_INFO("%d", nvs_add_data(uid, data_buff , min_Size + uid ));
-                // NRF_LOG_WARNING("pointer %x",nvs_get_data_pointer(uid));
-                //// start the advertise
-                // NRF_LOG_INFO("adv%d", ble_gap_start_advertise(BLE_ADVERTISE_WITH_FAST_PAIR));
+                NRF_LOG_INFO("ADD %d num %d",ret,num);
+
             }
             else if (evt == NRF_BUTTON_DOWN_EVT)
-            {
-                nrf_gfx_lib_set_display_brightness(bri);
-                bri -=10;
-                if(bri > 100)
-                {
-                    bri =0;
-                }       
-                NRF_LOG_INFO("breitness %d",bri);        
-                // get the data pointer
+            {       
+                uint16_t num =0;
+                ret = kernel_q_recieve_from_front(&q_inst, u8_ptr &num,2);
+                NRF_LOG_INFO("READ %d num %d",ret,num);        
                 // NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
 
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
-                uint8_t data =3;
-                ble_gatt_server_send_batt_notif(&data,1);
-                // NRF_LOG_INFO("delete %d", ble_gap_delete_bonds());
-                // ble_ams_print_media_info();
-                /// print timer info
-                kernel_time_struct_t time = {0};
-                kernel_date_struct_t date = {0};
+                int index = kernel_q_get_total_index(&q_inst);
+                void *ptr = kernel_q_get_Data_ptr(&q_inst,index);
+                ret = kernel_q_remove_index(&q_inst,index);
+                NRF_LOG_INFO("rem %d ptr %x data %d ind %d",ret,ptr,*(u8_ptr ptr),index);
 
-                kernel_time_get_current_time(&time);
-                kernel_time_get_current_date(&date);
-
-                // /// print it 
-                NRF_LOG_INFO("%d,%d,%d D %d,%d,%d,%d",time.hour,time.minutes,time.seconds,
-                date.date,date.day,date.month,date.year);
-                //   ble_gap_print_keys(0);
-    
             }
             else if(evt == NRF_BUTTON_HOME_EVT)
             {
-                // NRF_LOG_WARNING("%d", ble_gap_delete_bonds());
-                /// show memory content 
-                // NRF_LOG_INFO("batt is %d",ble_peer_get_battery_info());
-                 /// testing the oled 
-                    // nrf_gfx_lib_test();
+                NRF_LOG_INFO("freesize %d, used size %d, total index %d", kernel_q_get_free_size(&q_inst),
+                kernel_q_get_used_size(&q_inst), kernel_q_get_total_index(&q_inst)
+                );
             //   NRF_LOG_INFO("timer counter %d",rtc_Timer_get_counter_value(NRF_RTC_TIMER_2));
             }
         }

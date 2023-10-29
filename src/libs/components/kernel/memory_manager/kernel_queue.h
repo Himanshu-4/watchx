@@ -69,8 +69,8 @@ typedef struct  _KERNEL_Q_STRUCT_INSTACES_
     
 }kernel_q_instance;
 
-
-#define KERNEL_Q_INSTANTISE(a,b,c,d)    \
+/// @brief a=kernel_qinstance, b=q-memory c=q-memsize d=semphr
+#define KERNEL_Q_INSTANTIATE(a,b,c,d)    \
     static uint8_t KERNEL_QUEUE_SECTION __USED b[c];    \
     static StaticSemaphore_t d; \
     static kernel_q_instance a; \

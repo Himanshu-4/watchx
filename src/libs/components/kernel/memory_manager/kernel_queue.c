@@ -108,7 +108,7 @@ uint16_t kernel_q_get_total_index(const kernel_q_instance *q_inst)
   {
     return 0;
   }
-  return (q_inst->total_mem_size / q_inst->size_of_node);
+  return (q_inst->used_size / q_inst->size_of_node);
 }
 
 //========== sending API =========================================================
@@ -293,7 +293,7 @@ uint8_t *kernel_q_get_Data_ptr(const kernel_q_instance *q_inst, uint16_t index)
   if (q_inst->used_size == 0)
     return NULL;
   /// check invalid index
-  if ((index < 1) || ((q_inst->used_size / q_inst->size_of_node) < index))
+  if ((index <= 0) || (index > (q_inst->used_size / q_inst->size_of_node) ))
     return NULL;
 
   uint8_t *ptr = NULL;
@@ -335,7 +335,7 @@ kernel_q_err_type kernel_q_remove_index(kernel_q_instance *q_inst, uint16_t inde
   if (q_inst->used_size == 0)
     return kernel_q_err_q_empty;
   /// check invalid index
-  if ((index < 1) || ((q_inst->used_size / q_inst->size_of_node) < index))
+  if ((index <= 0) || ( index > (q_inst->used_size / q_inst->size_of_node) ))
     return kernel_q_err_invalid_param;
 
   if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS)
@@ -397,7 +397,7 @@ kernel_q_err_type kernel_q_remove_index(kernel_q_instance *q_inst, uint16_t inde
 /// @param index
 /// @param data
 /// @return succ/failure
-kernel_q_err_type kernel_q_change_data_at_index(const kernel_q_instance *q_inst, uint8_t index, uint8_t *data, uint16_t size)
+kernel_q_err_type kernel_q_modify_data_at_index(const kernel_q_instance *q_inst, uint8_t index, uint8_t *data, uint16_t size)
 {
   VERIFY_INIT(q_inst);
   if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED)
@@ -407,7 +407,7 @@ kernel_q_err_type kernel_q_change_data_at_index(const kernel_q_instance *q_inst,
   if (q_inst->used_size == 0)
     return kernel_q_err_q_empty;
   /// check invalid index
-  if ((index < 1) || ((q_inst->used_size / q_inst->size_of_node) < index))
+  if ((index <= 0) || (index > (q_inst->used_size / q_inst->size_of_node)))
     return kernel_q_err_invalid_param;
 
   if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS)
