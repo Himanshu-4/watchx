@@ -20,7 +20,7 @@ project(Watchx
 enable_language(C ASM)
 
 
-set(CMAKE_BUILD_TYPE RELEASE )
+set(CMAKE_BUILD_TYPE "Release" )
 # specify whether u want to generate DEbug or release Version
 set(DEBUG_Flags 
         -O0 -g3
@@ -227,8 +227,8 @@ set(FREERTOS_SRC
         ${NRF_SDK_DIR}/external/freertos/source/portable/MemMang/heap_4.c 
 
         # freerttos porting code for nrf52 target 
-        ${NRF_SDK_DIR}/external/freertos/portable/GCC/nrf52/port.c
         # ${NRF_SDK_DIR}/external/freertos/portable/ARM_CM4F/port.c 
+        ${NRF_SDK_DIR}/external/freertos/portable/GCC/nrf52/port.c
         ${NRF_SDK_DIR}/external/freertos/portable/CMSIS/nrf52/port_cmsis.c 
         ${NRF_SDK_DIR}/external/freertos/portable/CMSIS/nrf52/port_cmsis_systick.c 
 

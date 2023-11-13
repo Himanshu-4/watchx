@@ -250,7 +250,7 @@ extern uint32_t SystemCoreClock;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define NRF_BLE_FREERTOS_SDH_TASK_STACK 256
+#define NRF_BLE_FREERTOS_SDH_TASK_STACK 256 /// 1kb of space 
 
 ///////// rest application uses the priority 5 and idle task have 0 priority 
 #define SOFTDEVICE_TASK_PRIORITY 7
@@ -258,6 +258,10 @@ extern uint32_t SystemCoreClock;
 #define NRF_KERNEL_TASK_STACK_DEPTH 512 //// this will equal to 2KB of space  
 
 #define KERNEL_TASK_PRIORITY 6 //////// task priority of the kernel task 
+
+
+#define APP_SCHD_TASK_PRIORITY 5 
+#define APP_SCHD_TASK_STACK_DEPTH 1024 /// this will be 4 kb of space 
 
 
 #endif

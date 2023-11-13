@@ -24,6 +24,7 @@ enum
 {
     SPI_XFR_OK,
     SPI_ERROR_XFR_TIMEOUT,
+    SPI_ERROR_BUSY
 };
 
 

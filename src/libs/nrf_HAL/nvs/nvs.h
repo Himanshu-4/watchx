@@ -123,6 +123,7 @@ uint32_t  nvs_erase_partition(void);
 enum _NVS_ERR_CODE_
 {
     NVS_OP_SUCCESS,
+    NVS_ERR_BUSY,
     NVS_ERR_UID_ABSENT,
     NVS_ERR_UID_ALRDY_PRESENT,
     NVS_ERR_FLASH_ERASE_FAILED,

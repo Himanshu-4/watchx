@@ -18,14 +18,11 @@
 #include "ble_gap_func.h"
 #include "ble_gatt_server.h"
 
-//// include the kernel mem manager
-#include "memory_manager/kernel_mem_manager.h"
-#include "memory_manager/kernel_link_list.h"
 #include "memory_manager/kernel_queue.h"
 
 #include "watchdog.h"
 
-
+#include "nrf_button.h"
 /// include the kernel task
 #include "kernel_task.h"
 #include "nrf_gfx.h"
@@ -34,7 +31,6 @@
 #include "ble_ams.h"
 #include "ble_peer_info.h"
 
-#include "device_drivers/accelrometer/nrf_accelromter.h"
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////// general Task Function decleartions /////////////////////////////////////
@@ -128,7 +124,7 @@ void general_task_function(void *param)
 {
     UNUSED_VARIABLE(param);
     uint32_t ret = 0;
-
+    
     NRF_LOG_INFO("memory %x",q_mem);
     kernel_q_create(&q_inst,q_mem,20,&q_semphr,100,4);
     delay(10);
@@ -173,13 +169,13 @@ void general_task_function(void *param)
             }
         }
 
-        /// handle the accelrometer here 
-        uint8_t evttype =  nrf_accel_get_evtq();
+        // /// handle the accelrometer here 
+        // uint8_t evttype =  nrf_accel_get_evtq();
         
-        if(evttype != NRF_ACCEL_EVT_NONE)
-        {
-            NRF_LOG_INFO("evt is %d",evttype) ;
-        }
+        // if(evttype != NRF_ACCEL_EVT_NONE)
+        // {
+        //     NRF_LOG_INFO("evt is %d",evttype) ;
+        // }
 
 
 

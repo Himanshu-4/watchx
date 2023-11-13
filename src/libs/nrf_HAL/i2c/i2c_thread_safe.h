@@ -18,6 +18,7 @@ typedef struct PACKED
 enum 
 {
     I2C_XFR_OK,
+    I2C_ERR_BUSY = 3,
     I2C_ERROR_XFR_TIMEOUT =5,
     I2C_ERR_DATA_NACK = 4,
     I2C_ERR_ADDR_NACK = 2,

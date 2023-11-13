@@ -18,19 +18,29 @@ MEMORY
 
 SECTIONS
 {
-   .kernel_memory_types :
+   .kernel_memory_types(NOLOAD) :
   {
     /* processor can read write faster at 4 byte align address  */
+    /* here kernel memory allocater region */
     . = ALIGN(4);
     PROVIDE(__start_kernel_mem_allocated_data = .);
-    KEEP(*(SORT(.kernel_mem_data)))
+    KEEP(*(SORT(.kernel_mem_data*)))
     PROVIDE(__end_kernel_mem_allocated_data = .);
 
+  /* kernel linklist alloccated region */
     . = ALIGN(4);
     PROVIDE(__start_kernel_ll_allocated_data = .);
-    KEEP(*(SORT(.kernel_linklist_data)))
+    KEEP(*(SORT(.kernel_linklist_data*)))
     PROVIDE(__end_kernel_ll_allocated_data = .);
     . = ALIGN(4);
+  /* kernel Queue allocated region */
+  . = ALIGN(4);
+  PROVIDE(__start_kernel_queue_allocated_data = .);
+  KEEP(*(SORT(.kernel_queue_data*)))
+  PROVIDE(__end_kernel_queue_allocated_data = .);
+  . = ALIGN(4);
+
+  /* we can use the location pointer for tracking the  */
   } > RAM
 
 } INSERT AFTER .data;

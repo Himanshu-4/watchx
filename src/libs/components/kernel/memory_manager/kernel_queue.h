@@ -25,7 +25,7 @@
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-#define KERNEL_QUEUE_SECTION __section(".kernel_fifo_queue_data")
+#define KERNEL_QUEUE_SECTION __section(".kernel_queue_data")
 
 #define KERNEL_QUEUE_INITED 0x12
 #define KERNEL_QUEUE_DEINITED 0x22
