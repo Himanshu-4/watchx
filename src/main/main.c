@@ -3,33 +3,14 @@
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "task.h"
-#include "queue.h"
 
 ////////// include user libs here
 #include "system.h"
-#include "gpio.h"
-#include "gpiote.h"
-#include "nrf_time.h"
-#include "nvs.h"
-
-/////// include the device
-#include "nrf_button.h"
-
-#include "ble_gap_func.h"
-#include "ble_gatt_server.h"
-
-#include "memory_manager/kernel_queue.h"
-
-#include "watchdog.h"
 
 #include "nrf_button.h"
+
 /// include the kernel task
 #include "kernel_task.h"
-#include "nrf_gfx.h"
-#include "time_manager/kernel_time.h"
-
-#include "ble_ams.h"
-#include "ble_peer_info.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +61,8 @@ int main()
 
     // hardfault is diabled . please enable it
 
+    app_start_scheduler();
+    
     genral_task_handle = xTaskCreateStatic(general_task_function, genral_task_name, genral_task_stack_size,
                                            genral_task_param, genral_task_priority, gen_task_stack, &gen_task_buffer);
     if (genral_task_handle == NULL)
@@ -118,7 +101,7 @@ int main()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////// genral task /////////////////////////////////////////////
 
-KERNEL_Q_INSTANTIATE(q_inst,q_mem,20,q_semphr);
+
 
 void general_task_function(void *param)
 {
