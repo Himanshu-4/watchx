@@ -6,11 +6,14 @@
 
 ////////// include user libs here
 #include "system.h"
-
-#include "nrf_button.h"
+#include "nrf_custom_log.h"
 
 /// include the kernel task
 #include "kernel_task.h"
+
+
+#include "nrf_button.h"
+#include "ble_gap_func.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +42,6 @@ xTaskHandle genral_task_handle = NULL; //!< Reference to SoftDevice FreeRTOS tas
 ///////////////////////////////////////////////////////////////////// defination of main task
 
 
-
 int main()
 {
 
@@ -61,7 +63,7 @@ int main()
 
     // hardfault is diabled . please enable it
 
-    app_start_scheduler();
+    // app_start_scheduler();
     
     genral_task_handle = xTaskCreateStatic(general_task_function, genral_task_name, genral_task_stack_size,
                                            genral_task_param, genral_task_priority, gen_task_stack, &gen_task_buffer);
@@ -85,10 +87,14 @@ int main()
         // gpio_pin_toogle(LED_1);
 
         nrf_delay_ms(100);
+        
+        system_soft_reset();
     }
 
     return 0;
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,8 +114,6 @@ void general_task_function(void *param)
     UNUSED_VARIABLE(param);
     uint32_t ret = 0;
     
-    NRF_LOG_INFO("memory %x",q_mem);
-    kernel_q_create(&q_inst,q_mem,20,&q_semphr,100,4);
     delay(10);
     ///// check for the button events and print it
     int i=0;
@@ -121,33 +125,21 @@ void general_task_function(void *param)
             // NRF_LOG_WARNING("%d", evt);
             if (evt == NRF_BUTTON_UP_EVT)
             {
-                uint16_t num = ++i;
-                ret =kernel_q_send_to_back(&q_inst, u8_ptr &i, 4);
-
-                NRF_LOG_INFO("ADD %d num %d",ret,num);
-
+                NRF_LOG_INFO("starting adv %d",ble_gap_start_advertise(0));
             }
             else if (evt == NRF_BUTTON_DOWN_EVT)
-            {       
-                uint16_t num =0;
-                ret = kernel_q_recieve_from_front(&q_inst, u8_ptr &num,2);
-                NRF_LOG_INFO("READ %d num %d",ret,num);        
-                // NRF_LOG_INFO("adv%d", ble_gap_stop_advertise());
+            {            
+                NRF_LOG_INFO("stopping adv%d", ble_gap_stop_advertise());
 
             }
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
-                int index = kernel_q_get_total_index(&q_inst);
-                void *ptr = kernel_q_get_Data_ptr(&q_inst,index);
-                ret = kernel_q_remove_index(&q_inst,index);
-                NRF_LOG_INFO("rem %d ptr %x data %d ind %d",ret,ptr,*(u8_ptr ptr),index);
+                
 
             }
             else if(evt == NRF_BUTTON_HOME_EVT)
             {
-                NRF_LOG_INFO("freesize %d, used size %d, total index %d", kernel_q_get_free_size(&q_inst),
-                kernel_q_get_used_size(&q_inst), kernel_q_get_total_index(&q_inst)
-                );
+              
             //   NRF_LOG_INFO("timer counter %d",rtc_Timer_get_counter_value(NRF_RTC_TIMER_2));
             }
         }

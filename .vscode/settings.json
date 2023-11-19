@@ -38,7 +38,11 @@
         "kernel_task.h": "c",
         "nrf_gfx.h": "c",
         "watchdog.h": "c",
-        "kernel_queue.h": "c"
+        "kernel_queue.h": "c",
+        "string.h": "c",
+        "nrf_err_types.h": "c",
+        "nrf52832_peripherals.h": "c",
+        "ble_gap.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator": "MinGW Makefiles",

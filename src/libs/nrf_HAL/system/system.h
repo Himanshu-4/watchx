@@ -27,6 +27,9 @@
 #include "sys_config.h"
 
 
+////---------------- include the err file 
+#include "nrf_err_types.h"
+
 
 
 #define SET 1
@@ -108,27 +111,7 @@ extern void delay_microsec(uint16_t delay_time);
 #define __NO_OPTIMISATION __attribute__((optimize("O0")))
 #define __MAX_OPTIMISATION __attribute__((optimize("O3")))
 
-////////////////////////////////////////////////////////////////////
-//////////////// Error bases 
-/// @brief this is the defination if err base in various components 
-#define NRF_SYSTEM_ERR_BASE 0x00UL
-#define NRF_BLE_ERR_BASE 0x20UL
-#define NRF_KERNEL_ERR_BASE 0x100UL
-#define NRF_APPS_ERR_BASE 0x200UL 
 
-/// errors for the anonymus  enum
-enum _NRF_ERROR_TYPES_
-{
-    nrf_OK = 0x00UL + NRF_SYSTEM_ERR_BASE,
-    nrf_ERR_TIMEOUT,
-    nrf_clock_init_failed,
-    nrf_ERR_OCCURED,
-    nrf_ERR_INVALID_PARAM,
-    nrf_ERR_INVALID_STATE,
-    nrf_ERR_OPERATION_FAILED,
-    nrf_ERR_OUT_OF_MEM,
-    nrf_ERR_MAX_LIMIT,
-};
 
 #define ERR_CHK(x)         \
     do                     \

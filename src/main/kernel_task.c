@@ -178,9 +178,7 @@ void kernel_task(void *param)
     /// int the oled screen and gfx lib 
     nrf_oled_screen_init();
     nrf_gfx_lib_init(2,3);
-    /// test the gfx library 
-    nrf_gfx_lib_test();
-   
+       
     /// global err to store the err of retutrns
     uint32_t err = 0;
     /// direct gor to main loop
@@ -356,6 +354,7 @@ static void ble_client_handle_value_notification(ble_gattc_evt_t const *gattc_ev
     /// handle the ancs client
     kernel_Task_woken = ble_ancs_client_event_handler(gattc_evt);
 
+    /////// only handle the ble event when required like a uurgent notif rcvd like call,alarm
     if (kernel_Task_woken)
     { //// switch the kernel task state
         kernel_task_run(kernel_state_ble_notif_recv);
