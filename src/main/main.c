@@ -15,6 +15,8 @@
 #include "nrf_button.h"
 #include "ble_gap_func.h"
 
+#include "app_homescreen.h"
+#include "nrf_gfx.h"
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////// general Task Function decleartions /////////////////////////////////////
@@ -51,6 +53,14 @@ int main()
         // APP_ERROR_HANDLER(nrf_ERR_OPERATION_FAILED);
     }
 
+
+    genral_task_handle = xTaskCreateStatic(general_task_function, genral_task_name, genral_task_stack_size,
+                                           genral_task_param, genral_task_priority, gen_task_stack, &gen_task_buffer);
+    if (genral_task_handle == NULL)
+    {
+        APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
+    }
+
     /// init the kernel task preinit
     Kernel_task_preinit();
     
@@ -64,13 +74,6 @@ int main()
     // hardfault is diabled . please enable it
 
     // app_start_scheduler();
-    
-    genral_task_handle = xTaskCreateStatic(general_task_function, genral_task_name, genral_task_stack_size,
-                                           genral_task_param, genral_task_priority, gen_task_stack, &gen_task_buffer);
-    if (genral_task_handle == NULL)
-    {
-        APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
-    }
 
     vTaskStartScheduler();
     for (;;)
@@ -114,11 +117,10 @@ void general_task_function(void *param)
     UNUSED_VARIABLE(param);
     uint32_t ret = 0;
     
-    delay(10);
+    delay(100);
     ///// check for the button events and print it
     int i=0;
 
-    
     for (;;)
     {
         uint8_t evt = nrf_btn_get_evtq();
@@ -137,11 +139,13 @@ void general_task_function(void *param)
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
                 
+                app_homescreen_init();
 
             }
             else if(evt == NRF_BUTTON_HOME_EVT)
             {
-              
+                
+              nrf_gfx_lib_clear_display();
             //   NRF_LOG_INFO("timer counter %d",rtc_Timer_get_counter_value(NRF_RTC_TIMER_2));
             }
         }

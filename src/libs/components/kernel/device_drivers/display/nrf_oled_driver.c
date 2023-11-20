@@ -289,14 +289,14 @@ void nrf_oled_deactivate_scroll(void)
 /// @param start_page 
 /// @param end_page 
 /// @param frame_freq 
-void nrf_oled_config_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
+uint32_t nrf_oled_config_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
 , uint8_t end_page, uint8_t frame_freq)
 {
     if((start_page >= SSD_OLED_PAGE_MAX) || (end_page >= SSD_OLED_PAGE_MAX ))
     {
-        return ;
+        return nrf_ERR_INVALID_PARAM;
     }
-    if(frame_freq >= scroll_freq_max) return;
+    if(frame_freq >= scroll_freq_max) return nrf_ERR_INVALID_PARAM;
     const uint8_t cmd[] = 
     {
         ((scroll_type == OLED_SCROLL_TYPE_LEFT)?
@@ -304,6 +304,7 @@ void nrf_oled_config_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
         0x00,start_page,frame_freq,end_page,0x00,0xff
     };
     oled_send_cmd(cmd, sizeof(cmd));
+    return nrf_OK;
 }
 
 /// @brief configure the vertical and horixontal scroll
@@ -312,15 +313,17 @@ void nrf_oled_config_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
 /// @param end_page 
 /// @param frame_freq 
 /// @param vertical_row_offset 
-void nrf_oled_config_vert_and_horizontal_scroll(uint8_t scroll_type, uint8_t start_page,
+uint32_t nrf_oled_config_vert_and_horizontal_scroll(uint8_t scroll_type, uint8_t start_page,
 uint8_t end_page , uint8_t frame_freq, uint8_t vertical_row_offset)
 {
     if((start_page >= SSD_OLED_PAGE_MAX) || (end_page >= SSD_OLED_PAGE_MAX ))
     {
-        return ;
+        return nrf_ERR_INVALID_PARAM;
     }
-    if(frame_freq >= scroll_freq_max) return;
-    if(vertical_row_offset >= SSD_OLED_ROW_ADDR_MAX) return;
+    if((frame_freq >= scroll_freq_max) || (vertical_row_offset >= SSD_OLED_ROW_ADDR_MAX) )
+    {
+        return nrf_ERR_INVALID_PARAM;
+    }
 
     const uint8_t cmd[] = 
     {
@@ -329,18 +332,20 @@ uint8_t end_page , uint8_t frame_freq, uint8_t vertical_row_offset)
         0x00,start_page,frame_freq,end_page,vertical_row_offset
     };
         oled_send_cmd(cmd, sizeof(cmd));
+
+        return nrf_OK;
 }
 
 /// @brief config the ertical scroll area 
 /// @param start_row 
 /// @param end_row 
-void nrf_oled_config_vertical_scroll_area(uint8_t start_row_fixed, uint8_t total_row_in_scroll)
+uint32_t nrf_oled_config_vertical_scroll_area(uint8_t start_row_fixed, uint8_t total_row_in_scroll)
 {
     if((start_row_fixed >= SSD_OLED_ROW_ADDR_MAX) || (total_row_in_scroll >= SSD_OLED_COLUMN_ADDR_MAX))
-    return;
+    return nrf_ERR_INVALID_PARAM;
 
     if((start_row_fixed + total_row_in_scroll) >= SSD_OLED_ROW_ADDR_MAX)
-    return;
+    return nrf_ERR_INVALID_PARAM;
 
     uint8_t cmd[] =
     {
@@ -349,6 +354,7 @@ void nrf_oled_config_vertical_scroll_area(uint8_t start_row_fixed, uint8_t total
     };
 
     oled_send_cmd(cmd,sizeof(cmd));
+    return nrf_OK;
 }
 
 
@@ -358,21 +364,28 @@ void nrf_oled_config_vertical_scroll_area(uint8_t start_row_fixed, uint8_t total
 
 /// @brief set the addressing mode of the oled 
 /// @param mode 
-void nrf_oled_set_addressing_mode(uint8_t mode)
+uint32_t nrf_oled_set_addressing_mode(uint8_t mode)
 {
+    if (mode > OLED_PAGE_ADDR_MODE)
+    return nrf_ERR_INVALID_PARAM;
+
     uint8_t cmd[] =
     {
         SSD13X_REG_SET_MEMORY_ADDRESING_MODE,mode
     };
     oled_send_cmd(cmd,sizeof(cmd));
+    
+    return nrf_OK;
 }
 
 /// @brief set the oled page addressing ,it is not self incrementing 
 /// @param page_start_addr 
-/// @param lower_colum_addr 
-/// @param higher_colum_addr 
-void nrf_oled_config_page_addressing(uint8_t page_start_addr, uint8_t column_start_Addr)
+/// @param colum_start_addr 
+uint32_t nrf_oled_config_page_addressing(uint8_t page_start_addr, uint8_t column_start_Addr)
 {
+    if ((page_start_addr >= SSD_OLED_PAGE_MAX) || (column_start_Addr >= SSD_OLED_COLUMN_ADDR_MAX))
+    return nrf_ERR_INVALID_PARAM;
+
     uint8_t cmd[] =
     {
         (SSD13X_REG_SET_PAGE_START_ADDRESS_FOR_PAGE_ADDRESSING_MASK | page_start_addr),
@@ -380,22 +393,25 @@ void nrf_oled_config_page_addressing(uint8_t page_start_addr, uint8_t column_sta
         (SSD13X_REG_SET_HIGHER_COLUM_ADDR_FORPAGE_ADDRESSING_MASK | ((column_start_Addr >> NO_OF_NIBBLE_BITS) & LOWER_NIBBLE_MASK))
     };
     oled_send_cmd(cmd,sizeof(cmd));
+    return nrf_OK;
 }
 
 /// @brief set column address for hoircontal or vertical scrolling mode 
 /// @param colum_start_addr 
 /// @param colum_end_addr 
 /// @return 
-void nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr)
+uint32_t nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr)
 {
-       if((colum_start_addr >= SSD_OLED_COLUMN_ADDR_MAX) || (colum_end_addr >= SSD_OLED_COLUMN_ADDR_MAX))
-    return;
+    if((colum_start_addr >= SSD_OLED_COLUMN_ADDR_MAX) || (colum_end_addr >= SSD_OLED_COLUMN_ADDR_MAX))
+    return nrf_ERR_INVALID_PARAM;
+    
 
     uint8_t cmd[] = 
     {
         SSD13X_REG_SET_COLUMN_ADDRESSING, colum_start_addr,colum_end_addr
     };
     oled_send_cmd(cmd,sizeof(cmd));
+    return nrf_OK;
 }
 
 
@@ -403,16 +419,18 @@ void nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr)
 /// @param page_start_addr 
 /// @param page_end_addr 
 /// @return err codes 
-void nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr)
+uint32_t nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr)
 {
     if((page_start_addr >= SSD_OLED_PAGE_MAX) || (page_end_addr >= SSD_OLED_PAGE_MAX))
-    return;
+    return nrf_ERR_INVALID_PARAM;
+    
 
     uint8_t cmd[] = 
     {
         SSD13X_REG_SET_PAGE_ADDRESSING,page_start_addr,page_end_addr
     };
     oled_send_cmd(cmd,sizeof(cmd));
+    return nrf_OK;
 }
 
 ///=====================================================================================================

@@ -83,7 +83,7 @@ enum _NRF_OLED_PAGES_ADDR_
 #define OLED_COLUMN_ADDR_END 0x7f
 //// these addresses are starting from zero 
 
-#define SSD_OLED_COLUMN_ADDR_MAX 124
+#define SSD_OLED_COLUMN_ADDR_MAX 128
 #define SSD_OLED_ROW_ADDR_MAX 64
 
 
@@ -160,7 +160,8 @@ void nrf_oled_deactivate_scroll(void);
 /// @param start_page 
 /// @param end_page 
 /// @param frame_freq 
-void nrf_oled_config_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
+/// @return succ/failure
+uint32_t nrf_oled_config_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
 , uint8_t end_page, uint8_t frame_freq);
 
 
@@ -170,13 +171,15 @@ void nrf_oled_config_horizontal_scroll(uint8_t scroll_type, uint8_t start_page
 /// @param end_page 
 /// @param frame_freq 
 /// @param vertical_row_offset 
-void nrf_oled_config_vert_and_horizontal_scroll(uint8_t scroll_type, uint8_t start_page,
+/// @return succ/failure
+uint32_t nrf_oled_config_vert_and_horizontal_scroll(uint8_t scroll_type, uint8_t start_page,
 uint8_t end_page , uint8_t frame_freq, uint8_t vertical_row_offset);
 
 /// @brief config the ertical scroll area 
 /// @param start_row 
 /// @param end_row 
-void nrf_oled_config_vertical_scroll_area(uint8_t start_row_fixed, uint8_t total_row_in_scroll);
+/// @return succ/failure
+uint32_t nrf_oled_config_vertical_scroll_area(uint8_t start_row_fixed, uint8_t total_row_in_scroll);
 
 ////////////=================================================================================================
 ///// ====================================== to set the address in horizontal and vertical addressing mode 
@@ -188,25 +191,27 @@ void nrf_oled_config_vertical_scroll_area(uint8_t start_row_fixed, uint8_t total
 
 /// @brief set the addressing mode of the oled 
 /// @param mode 
-void nrf_oled_set_addressing_mode(uint8_t mode);
+/// @return succ/failure
+uint32_t nrf_oled_set_addressing_mode(uint8_t mode);
 
 /// @brief set the oled page addressing ,it is not self incrementing  
 /// @param page_start_addr 
 /// @param column_start_addr 
-void nrf_oled_config_page_addressing(uint8_t page_start_addr, uint8_t column_start_Addr);
+/// @return succ/failure
+uint32_t nrf_oled_config_page_addressing(uint8_t page_start_addr, uint8_t column_start_Addr);
 
 
 /// @brief to set the page addresse for horizontal or vertical addressing mode 
 /// @param page_start_addr 
 /// @param page_end_addr 
-/// @return err codes 
-void nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr);
+/// @return succ/failure
+uint32_t nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr);
 
 /// @brief set column address for hoircontal or vertical scrolling mode 
 /// @param colum_start_addr 
 /// @param colum_end_addr 
-/// @return 
-void nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr);
+/// @return succ/failure
+uint32_t nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr);
 
 
 //=======================================================================================

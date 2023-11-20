@@ -35,6 +35,9 @@ enum _MONTHS_INDEX_
     font_month_december,
 };
 
+
+extern const uint8_t largeFont[][48];
+
 extern const uint8_t midFont[10][57];
 
 extern const uint8_t small2Font[][22];

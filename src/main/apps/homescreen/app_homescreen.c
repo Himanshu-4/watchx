@@ -10,10 +10,12 @@
 
 void app_homescreen_init(void)
 {
-
+    
+    nrf_gfx_lib_test();
+    // nrf_gfx_lib_screen_refresh();
+    NRF_LOG_INFO("homescreen");
+    nrf_gfx_lib_set_bitmap(2,10,30,largeFont[0],48 );
 }
-
-uint32_t app_homescreen_init(void);
 
 
 void app_homescreen_window(void *param)

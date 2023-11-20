@@ -52,7 +52,7 @@ void nrf_gfx_lib_set_bitmap(uint8_t x, uint8_t y ,uint8_t width , const uint8_t 
 /// @param  void
 void nrf_gfx_lib_clear_display(void);
 
-/// @brief referesh the screen to a new frame ]
+/// @brief referesh the screen and oled driver 
 /// @param  
 void nrf_gfx_lib_screen_refresh(void);
 

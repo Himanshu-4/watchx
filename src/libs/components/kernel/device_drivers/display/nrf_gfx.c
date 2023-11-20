@@ -40,9 +40,12 @@ void nrf_gfx_lib_init(uint16_t ROW_MAX , uint16_t COLUMN_MAX )
 /// @param string_size 
 void nrf_gfx_lib_draw_string(uint8_t startx,uint8_t starty,const char *string, uint16_t string_size)
 {
+    uint32_t ret =0;
     /// set the horizontal addressing mode
-    nrf_oled_set_addressing_mode(OLED_PAGE_ADDR_MODE);
-    nrf_oled_config_page_addressing(starty,startx);
+    ret =nrf_oled_set_addressing_mode(OLED_PAGE_ADDR_MODE);
+    NRF_ASSERT(ret);
+    ret =nrf_oled_config_page_addressing(startx,starty);
+    NRF_ASSERT(ret);
 
     char my_string[string_size][5];
 
@@ -62,14 +65,22 @@ void nrf_gfx_lib_draw_string(uint8_t startx,uint8_t starty,const char *string, u
 /// @param size 
 void nrf_gfx_lib_set_bitmap(uint8_t x, uint8_t y ,uint8_t width , const uint8_t * img, uint16_t size )
 {
+    uint32_t ret =0;
     /// set the horizontal addressing mode so that it automatically shift to next page
-    nrf_oled_set_addressing_mode(OLED_HORIZONTAL_ADDR_MODE);
+    ret = nrf_oled_set_addressing_mode(OLED_HORIZONTAL_ADDR_MODE);
 
+    NRF_ASSERT(ret);
     /// set the start page and column adddr 
 
     uint8_t height = size/width;
-    nrf_oled_set_page_addr();
+    
+    ret= nrf_oled_set_page_addr(x,height);
+    NRF_ASSERT(ret);
+    ret = nrf_oled_set_column_addr(y,width);
+    NRF_ASSERT(ret);
 
+    /// send the bitmap data 
+    nrf_oled_send_img_data_from_flash(img,size);
 
 }
 
@@ -95,8 +106,8 @@ void nrf_gfx_lib_test(void)
 
     // const char * str = "Himanshu jangra ";
     // nrf_gfx_lib_draw_string(10,0,str,strlen(str));
-    const char *s = "Baadshe kaam krle";
-    nrf_gfx_lib_draw_string(0,1,s,strlen(s));
+    const char *s = "swapnil broh whats up ";
+    nrf_gfx_lib_draw_string(0,10,s,strlen(s));
 
     // nrf_oled_send_img_data_from_flash(midFont[0], sizeof(midFont[4]));
 
@@ -121,6 +132,13 @@ void nrf_gfx_lib_clear_display(void)
     
     /// we can ignore the stuff that the spi driver will transmit 0 data because the dma cannt refer to flash addresess
     nrf_oled_send_img_data_from_ram(clear_ram_content,sizeof(clear_ram_content));
+}
+
+/// @brief referesh the screen and oled driver 
+/// @param  
+void nrf_gfx_lib_screen_refresh(void)
+{
+    nrf_oled_reset_driver();
 }
 
 
