@@ -5,6 +5,6 @@
 #include "system.h"
 
 
-
+void app_homescreen_init(void);
 
 #endif

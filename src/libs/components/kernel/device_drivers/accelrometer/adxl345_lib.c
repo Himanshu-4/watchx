@@ -65,7 +65,7 @@ uint32_t adxl_configure(const adxl_config cfg)
 {
     /// check the device id first
     if (read_reg(ADXL_REG_DEVID) != ADXL_DEVID)
-        return nrf_ERR_OCCURED;
+        return nrf_ERR_NOT_SUPPORTED;
 
     ADXL_STANDBY();
 

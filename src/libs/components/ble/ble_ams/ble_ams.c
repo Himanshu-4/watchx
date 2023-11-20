@@ -209,7 +209,7 @@ uint32_t ble_ams_init(uint16_t conn_handle)
     // serach the service if present
     if (err != nrf_OK)
     {
-        return nrf_ERR_OPERATION_FAILED;
+        return nrf_ERR_NOT_FOUND;
     }
 
     /// discover control point char and desc
@@ -418,7 +418,7 @@ uint32_t ble_ams_execute_cmd(ble_ams_media_cmds cmd_id)
     }
     if (err == 0)
     {
-        return nrf_ERR_OPERATION_FAILED;
+        return nrf_ERR_INVALID_DATA;
     }
 
     /// we can execute the cmds

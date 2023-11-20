@@ -345,7 +345,7 @@ static uint32_t nvs_read_raw_data(uint32_t uid, uint8_t *buff, uint16_t size)
                 /// chec if requested size is larger then stored size
                 if (size > ((ptr[NVS_STRUCT_LEN] - NVS_META_DATA_SIZE_WORDS) * 4))
                 {
-                    return nrf_ERR_OUT_OF_MEM;
+                    return nrf_ERR_NO_MEMORY;
                 }
                 //// copy the data into the buffer
                 memcpy(buff, (uint8_t *)&ptr[NVS_STRUCT_DATA], size);
@@ -619,7 +619,7 @@ uint32_t nvs_flash_init(uint32_t timeout)
     if (nvs_mutex_handle == NULL)
     {
         NRF_LOG_ERROR("nvs handle 0");
-        return nrf_ERR_OUT_OF_MEM;
+        return nrf_ERR_NO_MEMORY;
     }
 
     

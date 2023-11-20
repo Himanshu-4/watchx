@@ -81,6 +81,14 @@ void kernel_time_set_current_date(kernel_date_struct_t * my_date);
 void kernel_time_pre_init(kernel_time_struct_t * time, kernel_date_struct_t * data);
 
 
+/// @brief used to remove the callback every second
+/// @param  
+void kernel_timer_remove_sec_callback(void);
+
+/// @brief used to add a callback to call every second
+/// @param func 
+void kernel_timer_add_sec_callback( void(*)(void) );
+
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////// you can also create timers based event in this kernel 

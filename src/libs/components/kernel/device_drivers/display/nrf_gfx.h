@@ -15,8 +15,12 @@
 void nrf_gfx_lib_init(uint16_t ROW_MAX , uint16_t COLUMN_MAX );
 
 
+/// @brief deinit the gfx library 
+/// @param  
 void nrf_gfx_lib_deinit(void);
 
+/// @brief reset the graphics library 
+/// @param  
 void nrf_gfx_lib_reset(void);
 
 
@@ -24,19 +28,33 @@ void nrf_gfx_lib_reset(void);
 /// @param  
 void nrf_gfx_lib_test(void);
 
-
+/// @brief send the frame data to the graphics library 
+/// @param frame 
+/// @param frame_size 
 void nrf_gfx_lib_send_frame_data(const uint8_t * frame, uint16_t frame_size);
 
-void nrf_gfx_lib_set_pointer_location(uint8_t x, uint8_t y);
+/// @brief set the pointer to the display to fill the ram buffer 
+/// @param x 
+/// @param y 
+/// @param addressing_mode 
+void nrf_gfx_lib_set_pointer_location(uint8_t x, uint8_t y, uint8_t addr_modes);
 
-void nrf_gfx_lib_set_bitmap(uint8_t x, uint8_t y , const uint8_t * img, uint16_t size );
+/// @brief send the bitmap data to the graphics lib 
+/// @param x 
+/// @param y 
+/// @param width of bitmap
+/// @param img 
+/// @param size 
+void nrf_gfx_lib_set_bitmap(uint8_t x, uint8_t y ,uint8_t width , const uint8_t * img, uint16_t size );
 
 
 /// @brief clear the display ram 
 /// @param  void
 void nrf_gfx_lib_clear_display(void);
 
-void nrf_gfx_lib_screen_refresh();
+/// @brief referesh the screen to a new frame ]
+/// @param  
+void nrf_gfx_lib_screen_refresh(void);
 
 
 /// @brief draw string on the oled with start location 

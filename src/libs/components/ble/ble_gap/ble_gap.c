@@ -464,7 +464,7 @@ static uint32_t nrf_start_dhkey_calculation(uint8_t index)
     if (err_code != 1)
     {
         NRF_LOG_ERROR("peerkey inv");
-        return nrf_ERR_OPERATION_FAILED;
+        return nrf_ERR_INVALID_DATA;
     }
 
     /// compute here the shared secret from our private key and peer public key
@@ -473,7 +473,7 @@ static uint32_t nrf_start_dhkey_calculation(uint8_t index)
     if (err_code != 1)
     {
         NRF_LOG_ERROR("dhkey fail");
-        return nrf_ERR_OPERATION_FAILED;
+        return nrf_ERR_INTERNAL;
     }
 
     err_code = sd_ble_gap_lesc_dhkey_reply(gap_inst[index].ble_gap_conn_handle, &peer_dh_key);

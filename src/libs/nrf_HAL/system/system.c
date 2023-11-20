@@ -62,7 +62,7 @@ static bool clock_setup_init(void)
     if (!(NRF_CLOCK->HFCLKSTAT & 1UL))
     {
         // high frequency external crystal oscillator is not able to start
-        return nrf_clock_init_failed;
+        return nrf_ERR_INTERNAL;
     }
 
     // clear the event of hf started
@@ -73,7 +73,7 @@ static bool clock_setup_init(void)
 
     if (NRF_CLOCK->LFCLKRUN & 1UL)
     {
-        return nrf_clock_init_failed;
+        return nrf_ERR_INTERNAL;
     }
 
     // set the low spped clock source to xtal

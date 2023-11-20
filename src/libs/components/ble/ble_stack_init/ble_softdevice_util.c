@@ -167,7 +167,7 @@ uint32_t softdevice_enable_req(void)
 
     if(ret_code != 0)
     {
-        return nrf_ERR_OPERATION_FAILED;
+        return nrf_ERR_INTERNAL;
     }
 
     nrf_softdevice_enabled = true;
@@ -195,7 +195,7 @@ uint32_t softdevice_disable_req(void)
 
     if(ret_code != 0)
     {
-        return nrf_ERR_OPERATION_FAILED;
+        return nrf_ERR_INTERNAL;
     }
 
     nrf_softdevice_enabled = false ;

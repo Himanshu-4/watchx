@@ -151,7 +151,7 @@ uint32_t ble_ancs_init(uint16_t conn_handle)
     // serach the service if present
     if (err != nrf_OK)
     {
-        return nrf_ERR_OPERATION_FAILED;
+        return nrf_ERR_NOT_FOUND;
     }
 
     /// discover the notification source char

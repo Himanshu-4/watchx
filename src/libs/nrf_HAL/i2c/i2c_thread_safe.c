@@ -72,7 +72,7 @@ void i2c_thread_safe_init(uint8_t i2c_hardware, const my_i2c_config *i2c_cfg, ui
     
     if (i2c_semphr_handle[i2c_hardware] == NULL)
     {
-        APP_ERROR_HANDLER(nrf_ERR_OUT_OF_MEM);
+        APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
     }
 
     // always give the  semaphore after initaling

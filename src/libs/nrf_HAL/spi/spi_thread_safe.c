@@ -215,7 +215,7 @@ void spi_2_int_handler(void)
     gpio_pin_set(current_csn_pin[SPI2]);
     /////////// high task wokn = false so to avoid context switching
     BaseType_t high_task_awoken = pdFALSE;
-    uint32_t res = nrf_ERR_OCCURED;
+    uint32_t res = nrf_ERR_INTERNAL;
 
     // check and clear the event
     if (NRF_SPIM2->EVENTS_END)

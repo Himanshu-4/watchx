@@ -159,7 +159,7 @@ uint8_t uart_log_bytes(const uint8_t *buff, uint16_t size)
         // check if input data is bigger than remainng size
         if ((tx_ring_buff_size - (tx_Head_index - tx_Tail_index)) <= size)
         {
-            err = nrf_ERR_OUT_OF_MEM;
+            err = nrf_ERR_NO_MEMORY;
             goto return_mech;
         }
 
@@ -195,7 +195,7 @@ uint8_t uart_log_bytes(const uint8_t *buff, uint16_t size)
     {
         if ((tx_Tail_index - tx_Head_index) <= size)
         {
-            err = nrf_ERR_OUT_OF_MEM;
+            err = nrf_ERR_NO_MEMORY;
             goto return_mech;
         }
 

@@ -487,7 +487,7 @@ __FORCE_INLINE uint8_t i2c_polling_write_data(uint8_t i2c_num, const uint8_t *tx
         {
        
             i2c_stop_xfr(i2c_num);
-            err_code = nrf_ERR_OCCURED;
+            err_code = nrf_ERR_INTERNAL;
             // go to return mechanisms
             goto return_mech;
         }
@@ -537,7 +537,7 @@ __FORCE_INLINE uint8_t i2c_polling_read_data(uint8_t i2c_num, uint8_t *rx_buff, 
         {
  
             i2c_stop_xfr(i2c_num);
-            err_code = nrf_ERR_OCCURED;
+            err_code = nrf_ERR_INTERNAL;
             goto return_mech;
         }
         if (timeout <= 2)
@@ -591,7 +591,7 @@ __FORCE_INLINE uint8_t i2c_polling_write_and_read(uint8_t i2c_num, const uint8_t
         {
             
             i2c_stop_xfr(i2c_num);
-            err_code = nrf_ERR_OCCURED;
+            err_code = nrf_ERR_INTERNAL;
             goto return_mech;
             //  return nrf_ERR_INVALID;
         }
@@ -624,7 +624,7 @@ __FORCE_INLINE uint8_t i2c_polling_write_and_read(uint8_t i2c_num, const uint8_t
         {
             
             i2c_stop_xfr(i2c_num);
-            err_code = nrf_ERR_OCCURED;
+            err_code = nrf_ERR_INTERNAL;
             goto return_mech;
             //  return nrf_ERR_INVALID;
         }

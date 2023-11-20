@@ -55,6 +55,25 @@ void nrf_gfx_lib_draw_string(uint8_t startx,uint8_t starty,const char *string, u
     nrf_oled_send_img_data_from_ram(u8_ptr my_string,sizeof(my_string));
 }
 
+/// @brief send the bitmap data to the graphics lib 
+/// @param x 
+/// @param y 
+/// @param img 
+/// @param size 
+void nrf_gfx_lib_set_bitmap(uint8_t x, uint8_t y ,uint8_t width , const uint8_t * img, uint16_t size )
+{
+    /// set the horizontal addressing mode so that it automatically shift to next page
+    nrf_oled_set_addressing_mode(OLED_HORIZONTAL_ADDR_MODE);
+
+    /// set the start page and column adddr 
+
+    uint8_t height = size/width;
+    nrf_oled_set_page_addr();
+
+
+}
+
+
 /// @brief to test the gfx library for testing 
 /// @param  
 void nrf_gfx_lib_test(void)
@@ -100,6 +119,7 @@ void nrf_gfx_lib_clear_display(void)
     nrf_oled_set_page_addr(SSD_OLED_PAGE_0,SSD_OLED_PAGE_7);
     nrf_oled_set_column_addr(OLED_COLUMN_ADDR_START,OLED_COLUMN_ADDR_END);
     
+    /// we can ignore the stuff that the spi driver will transmit 0 data because the dma cannt refer to flash addresess
     nrf_oled_send_img_data_from_ram(clear_ram_content,sizeof(clear_ram_content));
 }
 
@@ -108,6 +128,6 @@ void nrf_gfx_lib_clear_display(void)
 /// @param percentage 
 void nrf_gfx_lib_set_display_brightness(uint8_t percentage)
 {
-    printf("%d ",map_i(percentage,0,100,0,0xff));
+    // printf("%d ",map_i(percentage,0,100,0,0xff));
     nrf_oled_set_contrast_ratio(map_i(percentage,0,100,0,0xff));
 }

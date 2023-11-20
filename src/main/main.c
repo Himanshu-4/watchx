@@ -69,7 +69,7 @@ int main()
                                            genral_task_param, genral_task_priority, gen_task_stack, &gen_task_buffer);
     if (genral_task_handle == NULL)
     {
-        APP_ERROR_HANDLER(nrf_ERR_OUT_OF_MEM);
+        APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
     }
 
     vTaskStartScheduler();
@@ -117,6 +117,8 @@ void general_task_function(void *param)
     delay(10);
     ///// check for the button events and print it
     int i=0;
+
+    
     for (;;)
     {
         uint8_t evt = nrf_btn_get_evtq();

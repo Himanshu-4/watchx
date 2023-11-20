@@ -2,6 +2,8 @@
 
 #include "RTC_timer.h"
 
+static void (*kernel_timer_1_sec_handler)(void) = NULL;
+
 //// create a const mapping for the max days in months
 
 const uint8_t kernel_months_max_Days[12] =
@@ -120,7 +122,12 @@ static void rtc_timer_2_handler(void)
     //// clear the timer counter
     rtc_Timer_clear(RTC_TIMER_USED);
     }
+
+    if (kernel_timer_1_sec_handler)
+    {kernel_timer_1_sec_handler();}
+
 }
+
 
 //-------------------------------- functions definations------------------------------------------
 
@@ -190,4 +197,19 @@ void kernel_time_set_current_time(kernel_time_struct_t *my_time)
 void kernel_time_set_current_date(kernel_date_struct_t *my_date)
 {
     memcpy(u8_ptr & current_date, my_date, sizeof(kernel_date_struct_t));
+}
+
+
+/// @brief used to add a callback to call every second
+/// @param func 
+void kernel_timer_add_sec_callback( void(*func)(void) )
+{
+     kernel_timer_1_sec_handler = func;  
+}
+
+/// @brief used to remove the callback every second
+/// @param  
+void kernel_timer_remove_sec_callback(void)
+{
+    kernel_timer_1_sec_handler = NULL;
 }
