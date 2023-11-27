@@ -72,8 +72,9 @@ void nrf_gfx_lib_set_bitmap(uint8_t x, uint8_t y ,uint8_t width , const uint8_t 
     NRF_ASSERT(ret);
     /// set the start page and column adddr 
 
-    uint8_t height = size/width;
+    uint8_t height = (size/width)  - 1;
     
+
     ret= nrf_oled_set_page_addr(x,height);
     NRF_ASSERT(ret);
     ret = nrf_oled_set_column_addr(y,width);
@@ -92,8 +93,7 @@ void nrf_gfx_lib_test(void)
     ////send data to oled and turn it on
     /// set the horizontal mode and page addrss and column addresss 
     nrf_oled_flip_180(1);
-    // nrf_oled_invert_display(OLED_DISPLAY_SET_INVERT);
-
+    nrf_oled_invert_display(OLED_DISPLAY_SET_INVERT);
     nrf_gfx_lib_clear_display();
 
     // nrf_oled_set_addressing_mode(OLED_HORIZONTAL_ADDR_MODE);
