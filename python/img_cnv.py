@@ -1,21 +1,12 @@
+import tkinter as tk
 
-from PIL import Image
+root = tk.Tk()
+canvas = tk.Canvas(root, width=200, height=200)
+canvas.pack()
 
-# Open the image
-image_path = "data/new.png"  # Replace with the path to your image
-image = Image.open(image_path)
+# Create a rectangle and get its item ID
+rectangle_id = canvas.create_rectangle(50, 50, 150, 150, fill="blue")
 
-# Resize the image to 128x32 if needed
-image = image.resize((128, 32))
+print("Item ID of the rectangle:", rectangle_id)
 
-# Convert the image to grayscale
-image = image.convert("L")
-
-# Get the pixel values as a list
-pixels = list(image.getdata())
-
-# Convert pixel values to hex code
-hex_code = [format(pixel, '02x') for pixel in pixels]
-
-# Print the hex code
-print(hex_code)
+root.mainloop()

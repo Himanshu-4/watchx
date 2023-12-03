@@ -139,13 +139,10 @@ void general_task_function(void *param)
             else if (evt == NRF_BUTTON_MIDD_EVT)
             {
                 
-                app_homescreen_init();
-
             }
             else if(evt == NRF_BUTTON_HOME_EVT)
             {
                 
-              nrf_gfx_lib_clear_display();
             //   NRF_LOG_INFO("timer counter %d",rtc_Timer_get_counter_value(NRF_RTC_TIMER_2));
             }
         }
