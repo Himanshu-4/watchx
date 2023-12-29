@@ -42,7 +42,7 @@ void uart_log_deinit(void);
  * @brief it directly copies the data from the buffer into the ring buffer and 
  * then enables the transfer 
 */
-uint8_t  uart_log_bytes(const uint8_t * buff , uint16_t size );
+uint32_t  uart_log_bytes(const uint8_t * buff , uint16_t size );
 
 
 /***
@@ -95,7 +95,7 @@ uint8_t get_num_rx_bytes(void);
  * arr[size]
  * get_rx_data(arr, size)
 */
-uint8_t get_rx_data(uint8_t *rx_buff, uint8_t size);
+uint32_t get_rx_data(uint8_t *rx_buff, uint8_t size);
 
 
 #endif

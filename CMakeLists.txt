@@ -17,7 +17,8 @@ message("the openocd is here $ENV{OPENOCD}")
 project(Watchx 
        VERSION 1.0.0 )
 
-enable_language(C ASM)
+enable_language(C ASM CXX)
+
 
 
 set(CMAKE_BUILD_TYPE "Release" )
@@ -31,7 +32,7 @@ set(RELEASE_Flags
         )
 # specify the C standard and the c extensions
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 

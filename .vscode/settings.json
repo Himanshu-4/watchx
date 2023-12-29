@@ -42,7 +42,10 @@
         "string.h": "c",
         "nrf_err_types.h": "c",
         "nrf52832_peripherals.h": "c",
-        "ble_gap.h": "c"
+        "ble_gap.h": "c",
+        "app_homescreen.h": "c",
+        "uart_logs.h": "c",
+        "uart_drv.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator": "MinGW Makefiles",

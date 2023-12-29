@@ -70,5 +70,6 @@
 			"partition_table.h": "c"
 		},
 		"C_Cpp.errorSquiggles": "enabled",
+		"C_Cpp.codeAnalysis.clangTidy.enabled": false
 	}
 }

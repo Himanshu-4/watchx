@@ -132,13 +132,14 @@ class BinaryGridApp:
         start_x *= 8
         end_x *= 8
                 
-        for y in range(start_y,end_y,1): 
-            for x in range(start_x,end_x,1):
+        for y in range(start_y,end_y ,1): 
+            for x in range(start_x,end_x ,1):
                 one_byte =0
                 for i in range(8):
                     one_byte |= (   ( 1 if (self.canvas.itemcget(self._rects[x][(y* 8)  + i], "fill") == "black") else 0 ) << i)
                 data.append(one_byte)
 
+        log.info(f"data of the list is {len(data)} ")
         log.info(data)
 
 if __name__ == "__main__":
