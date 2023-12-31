@@ -1,6 +1,6 @@
 ---
 Language: Cpp
-AccessModifierOffset: -2
+AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: true
 AlignConsecutiveAssignments: false
@@ -58,8 +58,8 @@ ColumnLimit: 140
 CommentPragmas: '^ IWYU pragma:'
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
-ConstructorInitializerIndentWidth: 2
-ContinuationIndentWidth: 2
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
 DeriveLineEnding: false
 DerivePointerAlignment: false
@@ -89,7 +89,7 @@ IndentAccessModifiers: false
 IndentCaseLabels: true
 IndentGotoLabels: true
 IndentPPDirectives: BeforeHash
-IndentWidth: 2
+IndentWidth: 4
 IndentWrappedFunctionNames: false
 # Requires Clang >= 15, could also cause incorrect code formatting:
 # InsertBraces: true

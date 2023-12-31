@@ -1,9 +1,8 @@
 #include "kernel_queue.h"
 
-#define VERIFY_INIT(x)                                  \
-  if ((q_inst->kernel_q_inited != KERNEL_QUEUE_INITED)) \
-  {                                                     \
-    return kernel_q_err_not_inited;                     \
+#define VERIFY_INIT(x)                                                                                                                     \
+    if ((q_inst->kernel_q_inited != KERNEL_QUEUE_INITED)) {                                                                                \
+      return kernel_q_err_not_inited;                                                                                                      \
   }
 
 ///======= Queue management API
@@ -15,13 +14,15 @@
 /// @param mutexbuff_ptr
 /// @param timeout
 /// @param size_of_one_node
-kernel_q_err_type kernel_q_create(kernel_q_instance *q_inst,
-                                  uint8_t *mem_inst, uint16_t size, StaticSemaphore_t *mutexbuff_ptr,
-                                  uint16_t timeout, uint16_t size_of_node)
+kernel_q_err_type kernel_q_create(kernel_q_instance* q_inst,
+                                  uint8_t* mem_inst,
+                                  uint16_t size,
+                                  StaticSemaphore_t* mutexbuff_ptr,
+                                  uint16_t timeout,
+                                  uint16_t size_of_node)
 {
-  if (size % size_of_node != 0)
-  {
-    return kernel_q_err_invalid_param;
+    if (size % size_of_node != 0) {
+      return kernel_q_err_invalid_param;
   }
   q_inst->kernel_q_mutex_handle = xSemaphoreCreateMutexStatic(mutexbuff_ptr);
   NRF_ASSERT(q_inst->kernel_q_mutex_handle == NULL);
@@ -48,7 +49,7 @@ kernel_q_err_type kernel_q_create(kernel_q_instance *q_inst,
 
 /// @brief delete the q and its resources, freeing the memory
 /// @param  q_instance
-kernel_q_err_type kernel_q_delete(kernel_q_instance *q_inst)
+kernel_q_err_type kernel_q_delete(kernel_q_instance* q_inst)
 {
   VERIFY_INIT(q_inst);
 
@@ -66,7 +67,7 @@ kernel_q_err_type kernel_q_delete(kernel_q_instance *q_inst)
 
 /// @brief reset the Q and its resources, free the locks
 /// @param q_inst
-kernel_q_err_type kernel_q_reset(const kernel_q_instance *q_inst)
+kernel_q_err_type kernel_q_reset(const kernel_q_instance* q_inst)
 {
   VERIFY_INIT(q_inst);
   /// give the semaphore and reset the memory
@@ -78,11 +79,10 @@ kernel_q_err_type kernel_q_reset(const kernel_q_instance *q_inst)
 /// @brief get the free size in the q
 /// @param q_inst
 /// @return free size
-uint16_t kernel_q_get_free_size(const kernel_q_instance *q_inst)
+uint16_t kernel_q_get_free_size(const kernel_q_instance* q_inst)
 {
-  if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED)
-  {
-    return 0;
+    if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED) {
+      return 0;
   }
   return (q_inst->total_mem_size - q_inst->used_size);
 }
@@ -90,11 +90,10 @@ uint16_t kernel_q_get_free_size(const kernel_q_instance *q_inst)
 /// @brief get the used size in the q
 /// @param q_inst
 /// @return used size
-uint16_t kernel_q_get_used_size(const kernel_q_instance *q_inst)
+uint16_t kernel_q_get_used_size(const kernel_q_instance* q_inst)
 {
-  if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED)
-  {
-    return 0;
+    if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED) {
+      return 0;
   }
   return q_inst->used_size;
 }
@@ -102,11 +101,10 @@ uint16_t kernel_q_get_used_size(const kernel_q_instance *q_inst)
 /// @brief get the total index present in the q , it will be usedsize/node_size
 /// @param q_inst
 /// @return total_index present in the q
-uint16_t kernel_q_get_total_index(const kernel_q_instance *q_inst)
+uint16_t kernel_q_get_total_index(const kernel_q_instance* q_inst)
 {
-  if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED)
-  {
-    return 0;
+    if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED) {
+      return 0;
   }
   return (q_inst->used_size / q_inst->size_of_node);
 }
@@ -118,30 +116,26 @@ uint16_t kernel_q_get_total_index(const kernel_q_instance *q_inst)
 /// @param  q_instance
 /// @param src
 /// @return succ/failure
-kernel_q_err_type kernel_q_send_to_back(kernel_q_instance *q_inst, const uint8_t *src, const uint16_t size)
+kernel_q_err_type kernel_q_send_to_back(kernel_q_instance* q_inst, const uint8_t* src, const uint16_t size)
 {
   VERIFY_INIT(q_inst);
 
-  /// first check is there any space available
-  if (q_inst->total_mem_size == q_inst->used_size)
-  {
-    return kernel_q_err_out_of_mem;
+    /// first check is there any space available
+    if (q_inst->total_mem_size == q_inst->used_size) {
+      return kernel_q_err_out_of_mem;
   }
 
-  if ((src == NULL) || (size == 0))
-  {
-    return kernel_q_err_invalid_param;
+    if ((src == NULL) || (size == 0)) {
+      return kernel_q_err_invalid_param;
   }
-  /// take mutex
-  if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS)
-  {
-    return kernel_q_err_mutex_timeout;
+    /// take mutex
+    if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS) {
+      return kernel_q_err_mutex_timeout;
   }
 
-  //// check that is back is at the end of memory
-  if (q_inst->back_index == q_inst->total_mem_size)
-  {
-    q_inst->back_index = 0;
+    //// check that is back is at the end of memory
+    if (q_inst->back_index == q_inst->total_mem_size) {
+      q_inst->back_index = 0;
   }
   //// copy new data
   memcpy(&q_inst->mem_ptr[q_inst->back_index], src, MIN_OF(size, q_inst->size_of_node));
@@ -160,34 +154,28 @@ kernel_q_err_type kernel_q_send_to_back(kernel_q_instance *q_inst, const uint8_t
 /// @param q_inst
 /// @param src
 /// @return succ/failure
-kernel_q_err_type kernel_q_send_to_front(kernel_q_instance *q_inst, const uint8_t *src, const uint16_t size)
+kernel_q_err_type kernel_q_send_to_front(kernel_q_instance* q_inst, const uint8_t* src, const uint16_t size)
 {
   VERIFY_INIT(q_inst);
-  /// first check is there any space available
-  if (q_inst->total_mem_size == q_inst->used_size)
-  {
-    return kernel_q_err_out_of_mem;
+    /// first check is there any space available
+    if (q_inst->total_mem_size == q_inst->used_size) {
+      return kernel_q_err_out_of_mem;
   }
 
-  if ((src == NULL) || (size == 0))
-  {
-    return kernel_q_err_invalid_param;
+    if ((src == NULL) || (size == 0)) {
+      return kernel_q_err_invalid_param;
   }
-  /// take mutex
-  if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS)
-  {
-    return kernel_q_err_mutex_timeout;
+    /// take mutex
+    if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS) {
+      return kernel_q_err_mutex_timeout;
   }
-  /// move the index
-  if (q_inst->front_index == 0)
-  {
-    // q_inst->front_ahead_back =1;
-    q_inst->front_index = q_inst->total_mem_size - q_inst->size_of_node;
-  }
-  else
-  {
-    q_inst->front_index -= q_inst->size_of_node;
-  }
+    /// move the index
+    if (q_inst->front_index == 0) {
+      // q_inst->front_ahead_back =1;
+      q_inst->front_index = q_inst->total_mem_size - q_inst->size_of_node;
+    } else {
+      q_inst->front_index -= q_inst->size_of_node;
+    }
   memcpy(&q_inst->mem_ptr[q_inst->front_index], src, MIN_OF(size, q_inst->size_of_node));
 
   /// increment the size
@@ -203,22 +191,19 @@ kernel_q_err_type kernel_q_send_to_front(kernel_q_instance *q_inst, const uint8_
 /// @param q_inst
 /// @param dest
 /// @return succ/failure
-kernel_q_err_type kernel_q_recieve_from_front(kernel_q_instance *q_inst, uint8_t *dest, uint16_t size)
+kernel_q_err_type kernel_q_recieve_from_front(kernel_q_instance* q_inst, uint8_t* dest, uint16_t size)
 {
   VERIFY_INIT(q_inst);
-  /// first check is there any data available
-  if (0 == q_inst->used_size)
-  {
-    return kernel_q_err_q_empty;
+    /// first check is there any data available
+    if (0 == q_inst->used_size) {
+      return kernel_q_err_q_empty;
   }
-  if ((dest == NULL))
-  {
-    return kernel_q_err_invalid_param;
+    if ((dest == NULL)) {
+      return kernel_q_err_invalid_param;
   }
-  /// take mutex
-  if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS)
-  {
-    return kernel_q_err_mutex_timeout;
+    /// take mutex
+    if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS) {
+      return kernel_q_err_mutex_timeout;
   }
 
   /// copy the data
@@ -242,22 +227,19 @@ kernel_q_err_type kernel_q_recieve_from_front(kernel_q_instance *q_inst, uint8_t
 /// @param q_inst
 /// @param dest
 /// @return succ/failure
-kernel_q_err_type kernel_q_recieve_from_back(kernel_q_instance *q_inst, uint8_t *dest, uint16_t size)
+kernel_q_err_type kernel_q_recieve_from_back(kernel_q_instance* q_inst, uint8_t* dest, uint16_t size)
 {
   VERIFY_INIT(q_inst);
-  /// first check is there any data available
-  if (0 == q_inst->used_size)
-  {
-    return kernel_q_err_q_empty;
+    /// first check is there any data available
+    if (0 == q_inst->used_size) {
+      return kernel_q_err_q_empty;
   }
-  if ((dest == NULL))
-  {
-    return kernel_q_err_invalid_param;
+    if ((dest == NULL)) {
+      return kernel_q_err_invalid_param;
   }
-  /// take mutex
-  if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS)
-  {
-    return kernel_q_err_mutex_timeout;
+    /// take mutex
+    if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS) {
+      return kernel_q_err_mutex_timeout;
   }
 
   /// after change the front index
@@ -280,44 +262,37 @@ kernel_q_err_type kernel_q_recieve_from_back(kernel_q_instance *q_inst, uint8_t 
 
 // //======================== more API ===========================================
 
-/// @brief get the data pointer from teh q
+/// @brief get the data pointer from the q
 /// @param q_inst
 /// @param index
 /// @return data ptr/NULL
-uint8_t *kernel_q_get_Data_ptr(const kernel_q_instance *q_inst, uint16_t index)
+uint8_t* kernel_q_get_Data_ptr(const kernel_q_instance* q_inst, uint16_t index)
 {
-  if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED)
-  {
-    return NULL;
+    if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED) {
+      return NULL;
   }
   if (q_inst->used_size == 0)
     return NULL;
   /// check invalid index
-  if ((index <= 0) || (index > (q_inst->used_size / q_inst->size_of_node) ))
+  if ((index <= 0) || (index > (q_inst->used_size / q_inst->size_of_node)))
     return NULL;
 
-  uint8_t *ptr = NULL;
+  uint8_t* ptr = NULL;
 
-  if (q_inst->front_index >= q_inst->back_index)
-  {
-    /// get the index between front_index -> memend , 0->backindex
-    uint16_t ff_index = (q_inst->total_mem_size - q_inst->front_index) / q_inst->size_of_node;
-    //  uint16_t bb_index = (q_inst->back_index)/q_inst->size_of_node;
+    if (q_inst->front_index >= q_inst->back_index) {
+      /// get the index between front_index -> memend , 0->backindex
+      uint16_t ff_index = (q_inst->total_mem_size - q_inst->front_index) / q_inst->size_of_node;
+      //  uint16_t bb_index = (q_inst->back_index)/q_inst->size_of_node;
 
-    if (index <= ff_index)
-    {
+        if (index <= ff_index) {
+          ptr = &q_inst->mem_ptr[q_inst->front_index + ((index - 1) * q_inst->size_of_node)];
+        } else {
+          ptr = &q_inst->mem_ptr[(index - ff_index - 1) * q_inst->size_of_node];
+        }
+    } else {
+      // we have to only do one way search only
       ptr = &q_inst->mem_ptr[q_inst->front_index + ((index - 1) * q_inst->size_of_node)];
     }
-    else
-    {
-      ptr = &q_inst->mem_ptr[(index - ff_index - 1) * q_inst->size_of_node];
-    }
-  }
-  else
-  {
-    // we have to only do one way search only
-    ptr = &q_inst->mem_ptr[q_inst->front_index + ((index - 1) * q_inst->size_of_node)];
-  }
   return ptr;
 }
 
@@ -325,69 +300,62 @@ uint8_t *kernel_q_get_Data_ptr(const kernel_q_instance *q_inst, uint16_t index)
 /// @param q_inst
 /// @param index
 /// @return succ/failure
-kernel_q_err_type kernel_q_remove_index(kernel_q_instance *q_inst, uint16_t index)
+kernel_q_err_type kernel_q_remove_index(kernel_q_instance* q_inst, uint16_t index)
 {
   VERIFY_INIT(q_inst);
-  if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED)
-  {
-    return kernel_q_err_not_inited;
+    if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED) {
+      return kernel_q_err_not_inited;
   }
-  if (q_inst->used_size == 0)
-    return kernel_q_err_q_empty;
-  /// check invalid index
-  if ((index <= 0) || ( index > (q_inst->used_size / q_inst->size_of_node) ))
-    return kernel_q_err_invalid_param;
-
-  if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS)
-  {
-    return kernel_q_err_mutex_timeout;
-  }  
-  /// have to check if
-  if (q_inst->front_index >= q_inst->back_index)
-  {
-    uint16_t ff_index = (q_inst->total_mem_size - q_inst->front_index) / q_inst->size_of_node;
-    uint16_t bb_index = (q_inst->back_index)/q_inst->size_of_node;
-
-    /// check if we get the data in the front of front index
-    if(index <= ff_index)
-    {
-      /// find the copy size 
-      uint16_t copy_size = (ff_index - index)*q_inst->size_of_node;
-       uint8_t *new_ptr = &q_inst->mem_ptr[q_inst->front_index + (index - 1) * q_inst->size_of_node];
-        uint8_t *old_ptr =  &q_inst->mem_ptr[q_inst->front_index + (index * q_inst->size_of_node)];
-      //// shift the data to the specific positions 
-      memcpy(new_ptr,old_ptr,copy_size);
-      /// copy last node of front index 
-      memcpy(&q_inst->mem_ptr[q_inst->total_mem_size-q_inst->size_of_node], q_inst->mem_ptr,q_inst->size_of_node);
-
-      /// shift the whole array to left 
-      memcpy(q_inst->mem_ptr,&q_inst->mem_ptr[q_inst->size_of_node],(bb_index-1)*q_inst->size_of_node);
-    }
-    else 
-    { 
-        uint8_t * new_ptr = &q_inst->mem_ptr[(index-1-ff_index) * q_inst->size_of_node];
-        uint8_t * old_ptr = &q_inst->mem_ptr[(index-ff_index) * q_inst->size_of_node];
-        uint16_t copy_size = (bb_index- (index -ff_index)) * q_inst->size_of_node;
-        memcpy(new_ptr,old_ptr,copy_size);
-    }
+    if (q_inst->used_size == 0) {
+      return kernel_q_err_q_empty;
   }
-  else
-  {
-    /// we have to shift back the data
+    /// check invalid index
+    if ((index <= 0) || (index > (q_inst->used_size / q_inst->size_of_node))) {
+      return kernel_q_err_invalid_param;
+  }
+
+    if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS) {
+      return kernel_q_err_mutex_timeout;
+  }
+    /// have to check if
+    if (q_inst->front_index >= q_inst->back_index) {
+      uint16_t ff_index = (q_inst->total_mem_size - q_inst->front_index) / q_inst->size_of_node;
+      uint16_t bb_index = (q_inst->back_index) / q_inst->size_of_node;
+
+        /// check if we get the data in the front of front index
+        if (index <= ff_index) {
+          /// find the copy size
+          uint16_t copy_size = (ff_index - index) * q_inst->size_of_node;
+          uint8_t* new_ptr = &q_inst->mem_ptr[q_inst->front_index + (index - 1) * q_inst->size_of_node];
+          uint8_t* old_ptr = &q_inst->mem_ptr[q_inst->front_index + (index * q_inst->size_of_node)];
+          //// shift the data to the specific positions
+          memcpy(new_ptr, old_ptr, copy_size);
+          /// copy last node of front index
+          memcpy(&q_inst->mem_ptr[q_inst->total_mem_size - q_inst->size_of_node], q_inst->mem_ptr, q_inst->size_of_node);
+
+          /// shift the whole array to left
+          memcpy(q_inst->mem_ptr, &q_inst->mem_ptr[q_inst->size_of_node], (bb_index - 1) * q_inst->size_of_node);
+        } else {
+          uint8_t* new_ptr = &q_inst->mem_ptr[(index - 1 - ff_index) * q_inst->size_of_node];
+          uint8_t* old_ptr = &q_inst->mem_ptr[(index - ff_index) * q_inst->size_of_node];
+          uint16_t copy_size = (bb_index - (index - ff_index)) * q_inst->size_of_node;
+          memcpy(new_ptr, old_ptr, copy_size);
+        }
+    } else {
+      /// we have to shift back the data
       uint16_t copy_size = ((q_inst->used_size / q_inst->size_of_node) - index) * q_inst->size_of_node;
-     uint8_t *new_ptr = &q_inst->mem_ptr[q_inst->front_index + (index - 1) * q_inst->size_of_node];
-      uint8_t *old_ptr =  &q_inst->mem_ptr[q_inst->front_index + (index * q_inst->size_of_node)];
-      memcpy(new_ptr,old_ptr,copy_size);
-  }
+      uint8_t* new_ptr = &q_inst->mem_ptr[q_inst->front_index + (index - 1) * q_inst->size_of_node];
+      uint8_t* old_ptr = &q_inst->mem_ptr[q_inst->front_index + (index * q_inst->size_of_node)];
+      memcpy(new_ptr, old_ptr, copy_size);
+    }
 
   q_inst->back_index -= q_inst->size_of_node;
-  if(0 == q_inst->back_index )
-  {
-    q_inst->back_index = q_inst->total_mem_size;
+    if (0 == q_inst->back_index) {
+      q_inst->back_index = q_inst->total_mem_size;
   }
   q_inst->used_size -= q_inst->size_of_node;
 
-   //// give the mutex back
+  //// give the mutex back
   xSemaphoreGive(q_inst->kernel_q_mutex_handle);
   return 0;
 }
@@ -397,53 +365,45 @@ kernel_q_err_type kernel_q_remove_index(kernel_q_instance *q_inst, uint16_t inde
 /// @param index
 /// @param data
 /// @return succ/failure
-kernel_q_err_type kernel_q_modify_data_at_index(const kernel_q_instance *q_inst, uint8_t index, uint8_t *data, uint16_t size)
+kernel_q_err_type kernel_q_modify_data_at_index(const kernel_q_instance* q_inst, uint8_t index, uint8_t* data, uint16_t size)
 {
   VERIFY_INIT(q_inst);
-  if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED)
-  {
-    return kernel_q_err_not_inited;
+    if (q_inst->kernel_q_inited != KERNEL_QUEUE_INITED) {
+      return kernel_q_err_not_inited;
   }
-  if (q_inst->used_size == 0)
-    return kernel_q_err_q_empty;
-  /// check invalid index
-  if ((index <= 0) || (index > (q_inst->used_size / q_inst->size_of_node)))
-    return kernel_q_err_invalid_param;
+    if (q_inst->used_size == 0) {
+      return kernel_q_err_q_empty;
+  }
+    /// check invalid index
+    if ((index <= 0) || (index > (q_inst->used_size / q_inst->size_of_node))) {
+      return kernel_q_err_invalid_param;
+  }
 
-  if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS)
-  {
-    return kernel_q_err_mutex_timeout;
-  } 
+    if (xSemaphoreTake(q_inst->kernel_q_mutex_handle, q_inst->mutex_Timeout) != pdPASS) {
+      return kernel_q_err_mutex_timeout;
+  }
 
-  uint8_t *ptr = NULL;
+  uint8_t* ptr = NULL;
 
-  if (q_inst->front_index >= q_inst->back_index)
-  {
-    /// get the index between front_index -> memend , 0->backindex
-    uint16_t ff_index = (q_inst->total_mem_size - q_inst->front_index) / q_inst->size_of_node;
-    //  uint16_t bb_index = (q_inst->back_index)/q_inst->size_of_node;
+    if (q_inst->front_index >= q_inst->back_index) {
+      /// get the index between front_index -> memend , 0->backindex
+      uint16_t ff_index = (q_inst->total_mem_size - q_inst->front_index) / q_inst->size_of_node;
+      //  uint16_t bb_index = (q_inst->back_index)/q_inst->size_of_node;
 
-    if (index <= ff_index)
-    {
+        if (index <= ff_index) {
+          ptr = &q_inst->mem_ptr[q_inst->front_index + ((index - 1) * q_inst->size_of_node)];
+        } else {
+          ptr = &q_inst->mem_ptr[(index - ff_index - 1) * q_inst->size_of_node];
+        }
+    } else {
+      // we have to only do one way search only
       ptr = &q_inst->mem_ptr[q_inst->front_index + ((index - 1) * q_inst->size_of_node)];
     }
-    else
-    {
-      ptr = &q_inst->mem_ptr[(index - ff_index - 1) * q_inst->size_of_node];
-    }
-  }
-  else
-  {
-    // we have to only do one way search only
-    ptr = &q_inst->mem_ptr[q_inst->front_index + ((index - 1) * q_inst->size_of_node)];
-  }
 
   /// copy the data at the founded index
   memcpy(ptr, data, MIN_OF(size, q_inst->size_of_node));
 
-   //// give the mutex back
+  //// give the mutex back
   xSemaphoreGive(q_inst->kernel_q_mutex_handle);
   return 0;
 }
-
-
