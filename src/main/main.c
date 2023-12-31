@@ -91,8 +91,8 @@ int main()
 
             nrf_delay_ms(100);
 
-            system_soft_reset();
         }
+        system_soft_reset();
 
     return 0;
 }
