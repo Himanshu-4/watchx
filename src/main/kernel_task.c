@@ -25,6 +25,7 @@
 /// implement the driver for the kernel
 #include "device_drivers/drivers_common/drivers_common.h"
 
+/// include other device driver 
 #include "device_drivers/accelrometer/nrf_accelromter.h"
 #include "device_drivers/button/nrf_button.h"
 #include "device_drivers/display/nrf_oled_driver.h"

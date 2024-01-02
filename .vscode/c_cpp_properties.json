@@ -8,6 +8,9 @@
 
                 "D:\\smart_watch\\watchx\\src\\config",
 
+                // include the test directory of the Watchx project 
+                "D:\\smart_watch\\watchx\\tests\\**",
+
                 "D:\\smart_watch\\watchx\\nRF5_SDK_17\\external\\freertos\\source\\include",
                 // "D:\\stimveda_codebase\\watchx\\nRF5_SDK_17\\freertos\\include",
                 "D:\\smart_watch\\watchx\\nRF5_SDK_17\\external\\fprintf",

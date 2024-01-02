@@ -1,3 +1,4 @@
+# minimum cmake required for processing this file 
 cmake_minimum_required(VERSION 3.2.0)
 
 
@@ -32,7 +33,7 @@ set(RELEASE_Flags
         )
 # specify the C standard and the c extensions
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -167,9 +168,9 @@ set( SDK_SRC_FILES
 # specify the include directories 
 set(SDK_INCLUDE_DIR 
 
-      ${NRF_SDK_DIR}/external/freertos/include 
-      ${CMAKE_PROJECT_DIR}/src/config
+      ${CMAKE_SOURCE_DIR}/config
 
+      ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/system
       ##########################################################################3
       ############################################################################
       ########################  these are the includes when using a softdevice 
@@ -198,14 +199,9 @@ set(SDK_INCLUDE_DIR
 #       ${NRF_SDK_DIR}/integration/nrfx/legacy 
 #       ${NRF_SDK_DIR}/integration/nrfx 
       
-         # contains the main_helper library 
-         ${CMAKE_SOURCE_DIR}/main
+      # contains the watchx kernel directory 
+      ${PROJECT_KERNEL_FOLDER} 
 
-         # the kernel component directory 
-         ${CMAKE_SOURCE_DIR}/libs/components/Kernel 
-
-        # the ble component directory  
-        ${CMAKE_SOURCE_DIR}/libs/components/ble 
          
       )
 
@@ -213,7 +209,7 @@ set(SDK_INCLUDE_DIR
 ###########################################################################################################################################################
 ##########################################################################################################################################################
 #########################################################################################################################################################
-############################################################## set the FREERTOS sources and include directories 
+################# build the freertos library here ############################################################ 
 
 # freertos source files 
 set(FREERTOS_SRC
@@ -273,7 +269,14 @@ target_include_directories(freertos_lib PUBLIC SYSTEM
         ${SDK_INCLUDE_DIR}
             )
 
-            
+message(" =========================== the Freertos Includes directories are ============================")
+foreach(item ${SDK_INCLUDE_DIR})
+        message(${item})
+endforeach(item ${SDK_INCLUDE_DIR})
+foreach(item ${FREERTOS_INCLUDE})
+        message(${item})
+endforeach(item ${FREERTOS_INCLUDE})
+
 
 ##################################################################################################################################################################
 ############################################################################################################################################################################
@@ -311,13 +314,13 @@ set(MICRO_ECC_CRYPTO_COMPILE_DEFS
 )
 
 
-target_compile_definitions(micro_ecc_Crypto_lib PRIVATE
+target_compile_definitions(micro_ecc_Crypto_lib PUBLIC
         ${COMMON_DEFINES}   
         $<$<COMPILE_LANGUAGE:C>: ${MICRO_ECC_CRYPTO_COMPILE_DEFS}>
         $<$<COMPILE_LANGUAGE:ASM>: ${MICRO_ECC_CRYPTO_COMPILE_DEFS} >
 )
 
-target_compile_options(micro_ecc_Crypto_lib PRIVATE
+target_compile_options(micro_ecc_Crypto_lib PUBLIC
            ${COMMON_C_FLAGS}
            $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fomit-frame-pointer  >
            $<$<COMPILE_LANGUAGE:CXX>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti -fomit-frame-pointer>
@@ -330,7 +333,12 @@ target_include_directories(micro_ecc_Crypto_lib PUBLIC SYSTEM
            )
 
 
-        
+# get all the includes of the MICRO ECC INC 
+message("================= the Micro ecc library has following includes dir=============================")
+foreach(item ${MICROECC_CRYPTO_INC})
+        message(${item})
+endforeach(item ${MICROECC_CRYPTO_INC})
+
 ##################################################################################################################################################################
 ############################################################################################################################################################################
 ##############################################################################################################################################################################
@@ -382,52 +390,53 @@ target_include_directories(micro_ecc_Crypto_lib PUBLIC SYSTEM
 ##################################################################################################################################################################
 ############################################################################################################################################################################
 ##############################################################################################################################################################################
-##########################################################   Build the SDK stdlib files   ##################################################################################
+##########################################################   Build the SDK HAL library   ##################################################################################
 
 file(GLOB_RECURSE nrf_hal_libs_srcs 
         ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/*.c  
 )
+
+set(NRF_HAL_DIR_INC )
 
 
 foreach(hal_libs ${nrf_hal_libs_srcs})
 
 get_filename_component(hal_libs ${hal_libs} DIRECTORY)
 
-list(APPEND SDK_INCLUDE_DIR ${hal_libs})
+list(APPEND NRF_HAL_DIR_INC ${hal_libs})
 endforeach(hal_libs ${nrf_hal_libs_srcs})
 
-message("NRF HAL library directory")
 
-list(REMOVE_DUPLICATES SDK_INCLUDE_DIR)
-foreach(srcs ${SDK_INCLUDE_DIR})
-message(${srcs})
-endforeach(srcs ${SDK_INCLUDE_DIR})
+list(REMOVE_DUPLICATES NRF_HAL_DIR_INC)
 
-message("NRF HAL Sources ")
+message("============================= NRF HAL Direcroties ========================================")
+
+foreach(item ${NRF_HAL_DIR_INC})
+message(${item})
+endforeach(item ${NRF_HAL_DIR_INC})
 
 
-
-list(APPEND 
-    SDK_SRC_FILES
+set(NRF_HAL_SRC_FILES
         ${nrf_hal_libs_srcs}
     )
 
         # build the nrf sdk library 
 
         # make a library of external 
-        add_library(nrf_sdk_libs  OBJECT 
+        add_library(nrf_hal_lib  OBJECT 
         ${SDK_SRC_FILES}
+        ${NRF_HAL_SRC_FILES}
         )
         
         
         
-        target_compile_definitions(nrf_sdk_libs PRIVATE
+        target_compile_definitions(nrf_hal_lib PUBLIC
             ${COMMON_DEFINES}   
         #     ${NIMBLE_STACK_DEFINES}
         
         )
         
-        target_compile_options(nrf_sdk_libs PRIVATE
+        target_compile_options(nrf_hal_lib PUBLIC
                ${COMMON_C_FLAGS}
                $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized  >
                $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti >
@@ -436,9 +445,11 @@ list(APPEND
                  )
         
         
-        target_include_directories(nrf_sdk_libs PUBLIC SYSTEM 
+        target_include_directories(nrf_hal_lib PUBLIC SYSTEM 
             ${SDK_INCLUDE_DIR}
             ${FREERTOS_INCLUDE}
+            ${NRF_HAL_DIR_INC}
+
           )
 
 
@@ -449,89 +460,12 @@ ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi.c
 # Set specific compiler flags for "special_file.cpp"
 set_source_files_properties(${EXCLUDE_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O3")
 
-#######################################################################################3###########################
-##################################################################################################
-##################################################################################################
 
-# this contains the all ble  related files 
+###########################################################################################
+############################################################################################
+############################################################################################
+############### Watchx Kernel library #############################################
 
-
-file(GLOB_RECURSE ble_nordic_files 
-        ${PROJECT_BLE_FOLDER}/*/*.c 
-)
-
-# this contains the directories of the ble library 
-set(BLE_LIB_INCLUDE_DIR)
-
-foreach(ble_sources ${ble_nordic_files})
-
-get_filename_component(dirname ${ble_sources} DIRECTORY)
-
-list(APPEND BLE_LIB_INCLUDE_DIR ${dirname})
-endforeach(ble_sources ${ble_nordic_files})
-
-
-message("BLE library directories are ")
-
-# remove the duplicates directory from the includes 
-list(REMOVE_DUPLICATES BLE_LIB_INCLUDE_DIR)
-
-# print the direcotries 
-foreach(srcs ${BLE_LIB_INCLUDE_DIR})
-
-message(${srcs})
-
-endforeach(srcs ${BLE_LIB_INCLUDE_DIR})
-
-
-set(BLE_LIBS_SRC
-        # this is the ble stack init files 
-        ${ble_nordic_files}
-        )
-
-
-        # make a library of external 
-add_library(ble_library STATIC 
-${BLE_LIBS_SRC}
-)
-
-
-target_compile_definitions(ble_library PRIVATE
-    ${COMMON_DEFINES}   
-)
-
-target_compile_options(ble_library PRIVATE
-       ${COMMON_C_FLAGS}
-       $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-return-type >
-       $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-return-type -fno-rtti >
-       $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp >
-         )
-
-
-target_include_directories(ble_library PUBLIC SYSTEM 
-    ${BLE_LIB_INCLUDE_DIR}
-    ${SDK_INCLUDE_DIR}
-    ${FREERTOS_INCLUDE} 
-    
-    # crypto library implementation 
-#     ${TINY_CRYPTO_INC}
-    ${MICROECC_CRYPTO_INC}
-  
-        )
-
-# target_link_libraries(ble_library 
-#                 freertos_lib)
-
-##############################################################################
-###########################################################################################3
-################################################################################################
-######################################################################################################
-####################################################################################################
-
-
-# this contains kernel   files 
-
-        # this is kernel task files 
 file ( GLOB watchx_kernel_files 
         ${PROJECT_KERNEL_FOLDER}/*/*.c 
         ${PROJECT_KERNEL_FOLDER}/*/*/*.c
@@ -549,11 +483,11 @@ endforeach(watchxkernel_srcs ${watchx_kernel_files})
 # remove the duplicates directory from the includes 
 list(REMOVE_DUPLICATES WATCH_KERNEL_INCLUDE_DIR)
 
-message("the watchx kernel dir")
-# display the content 
-foreach(srcs ${WATCH_KERNEL_INCLUDE_DIR})
-message(${srcs})
-endforeach(srcs ${WATCH_KERNEL_INCLUDE_DIR})
+message("================= watchx kernel dir are ==================================")
+
+foreach(item ${WATCH_KERNEL_INCLUDE_DIR})
+message(${item})
+endforeach(item ${WATCH_KERNEL_INCLUDE_DIR})
 
 set( WATCHX_KERNEL_SRC 
       ${watchx_kernel_files}
@@ -566,13 +500,13 @@ ${WATCHX_KERNEL_SRC}
 
 
 
-target_compile_definitions(watchx_kernel_lib PRIVATE
+target_compile_definitions(watchx_kernel_lib PUBLIC
     ${COMMON_DEFINES}   
 #     ${NIMBLE_STACK_DEFINES}
 
 )
 
-target_compile_options(watchx_kernel_lib PRIVATE
+target_compile_options(watchx_kernel_lib PUBLIC
        ${COMMON_C_FLAGS}
        $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized  >
        $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti >
@@ -584,53 +518,122 @@ target_include_directories(watchx_kernel_lib PUBLIC SYSTEM
     ${WATCH_KERNEL_INCLUDE_DIR}
     ${SDK_INCLUDE_DIR}
     ${FREERTOS_INCLUDE}
-    ${BLE_LIB_INCLUDE_DIR}
+    ${NRF_HAL_DIR_INC}
         )
 
+
 # we have to link this static library 
-target_link_libraries( watchx_kernel_lib
-        nrf_sdk_libs
+# target_link_libraries( watchx_kernel_lib
+#         nrf_hal_lib
+# )
+
+# set(EXCLUDE_KERNEL_FILES_FOR_OPTIMISATION
+# ${CMAKE_SOURCE_DIR}/libs/components/kernel/device_drivers/display/nrf_oled_driver.c
+# )
+# # Set specific compiler flags for "special_file.cpp"
+# set_source_files_properties(${EXCLUDE_KERNEL_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O3 -g0")
+
+###################################################################################################
+##################################################################################################
+############################ Build the BLE library ####################################
+
+
+file(GLOB_RECURSE ble_nordic_files 
+        ${PROJECT_BLE_FOLDER}/*/*.c 
 )
 
-set(EXCLUDE_KERNEL_FILES_FOR_OPTIMISATION
-${CMAKE_SOURCE_DIR}/libs/components/kernel/device_drivers/display/nrf_oled_driver.c
+
+# this contains the directories of the ble library 
+set(BLE_LIB_INCLUDE_DIR)
+
+foreach(ble_sources ${ble_nordic_files})
+
+get_filename_component(dirname ${ble_sources} DIRECTORY)
+
+list(APPEND BLE_LIB_INCLUDE_DIR ${dirname})
+endforeach(ble_sources ${ble_nordic_files})
+
+
+
+# remove the duplicates directory from the includes 
+list(REMOVE_DUPLICATES BLE_LIB_INCLUDE_DIR)
+
+message("====================== BLE library dir are ========================== ")
+
+foreach(item ${BLE_LIB_INCLUDE_DIR})
+message(${item})
+endforeach(item ${BLE_LIB_INCLUDE_DIR})
+
+
+set(BLE_LIBS_SRC
+        # this is the ble stack init files 
+        ${ble_nordic_files}
+        )
+
+
+        # make a library of external 
+add_library(ble_library STATIC 
+${BLE_LIBS_SRC}
 )
-# Set specific compiler flags for "special_file.cpp"
-set_source_files_properties(${EXCLUDE_KERNEL_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O3 -g0")
+
+
+target_compile_definitions(ble_library PUBLIC
+    ${COMMON_DEFINES}   
+)
+
+target_compile_options(ble_library PUBLIC
+       ${COMMON_C_FLAGS}
+       $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-return-type >
+       $<$<COMPILE_LANGUAGE:CXX>: -Wno-unused-but-set-variable -Wno-maybe-uninitialized -Wno-return-type -fno-rtti >
+       $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp >
+         )
+
+
+target_include_directories(ble_library PUBLIC SYSTEM 
+    ${BLE_LIB_INCLUDE_DIR}
+    ${SDK_INCLUDE_DIR}
+    ${NRF_HAL_DIR_INC}
+    ${FREERTOS_INCLUDE} 
+    
+    # crypto library implementation 
+#     ${TINY_CRYPTO_INC}
+    ${MICROECC_CRYPTO_INC}
+        )
+
+# target_link_libraries(ble_library 
+#                 freertos_lib)
+
 ###########################################################################################################################################################
 ##########################################################################################################################################################
 #########################################################################################################################################################
 ############################################################## specify the main source files of your project here 
-# this contains kernel   files 
 
-        # this is kernel task files 
-        file ( GLOB app_schedulers_files 
+        # search for app files recursively 
+        file ( GLOB_RECURSE main_app_files 
         ${CMAKE_SOURCE_DIR}/main/*.c 
-        ${CMAKE_SOURCE_DIR}/main/*/*/*.c
-        ${CMAKE_SOURCE_DIR}/main/*/*.c
         )
 
 
 set(WATCH_APP_INCLUDE_DIR)
 
-foreach(watchxapp_schd_srcs ${app_schedulers_files})
+foreach(watchxapp_schd_srcs ${main_app_files})
 
 get_filename_component(dirname ${watchxapp_schd_srcs} DIRECTORY)
 
 list(APPEND WATCH_APP_INCLUDE_DIR ${dirname})
-endforeach(watchxapp_schd_srcs ${app_schedulers_files})
+endforeach(watchxapp_schd_srcs ${main_app_files})
 
 # remove the duplicates directory from the includes 
 list(REMOVE_DUPLICATES WATCH_APP_INCLUDE_DIR)
 
-message("the watchx kernel dir")
+message("============================== the watchx Main apps dir============================")
 # display the content 
 foreach(srcs ${WATCH_APP_INCLUDE_DIR})
 message(${srcs})
 endforeach(srcs ${WATCH_APP_INCLUDE_DIR})
 
 set(PROJECT_FILES
-${app_schedulers_files}
+        ${main_app_files}
 )
 
 set(PROJECT_INCLUDE_DIR
@@ -652,6 +655,7 @@ target_include_directories(${EXECUTABLE} PRIVATE
              ${BLE_LIB_INCLUDE_DIR}
              ${PROJECT_INCLUDE_DIR}
              ${WATCH_KERNEL_INCLUDE_DIR}
+             ${FREERTOS_INCLUDE}
         )
 
         
@@ -675,7 +679,7 @@ target_compile_options(${EXECUTABLE} PRIVATE
 target_link_libraries(${EXECUTABLE}
                        freertos_lib
                        ble_library
-                       nrf_sdk_libs 
+                       nrf_hal_lib 
                        watchx_kernel_lib
                 #        tiny_Crypto
                         micro_ecc_Crypto_lib
@@ -696,6 +700,13 @@ set_target_properties(${EXECUTABLE}
  )      
 
 
+##################################################################################################################################################################
+############################################################################################################################################################################
+##############################################################################################################################################################################
+##########################################################   create extra files from the build hex and bin format  ##################################################################################
+
+# ==============  add the custom directory to the ============================================
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests )
 
 ##################################################################################################################################################################
 ############################################################################################################################################################################
@@ -725,12 +736,6 @@ add_custom_command(TARGET ${EXECUTABLE}
 ########################## these are Python app 
 set(python_path 
         D:\\smart_watch\\watchx\\python)
-
-
-# this is the test application for testing the device sensor and communication 
-add_custom_target(test
-                COMMAND echo "testing Host Application for device "
-                COMMAND python ${python_path}/test_app.py)
 
 
 
