@@ -556,6 +556,7 @@ const uint8_t ascii_day_char_big_font[][8] =
 
 // Character set for this language
 
+//no chnage
 
 
 const uint8_t ascii_char[][6]=
