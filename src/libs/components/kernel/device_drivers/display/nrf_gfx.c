@@ -75,6 +75,29 @@ void nrf_gfx_lib_set_bitmap(uint8_t start_x, uint8_t start_y, uint8_t end_x, uin
     nrf_oled_send_img_data_from_flash(img, size);
 }
 
+/// @brief clear the bitmap data of the graphic library 
+/// @param start_x 
+/// @param start_y 
+/// @param end_x 
+/// @param end_y 
+void nrf_gfx_lib_clear_bitmap(uint8_t start_x, uint8_t start_y ,uint8_t end_x, uint8_t end_y )
+{
+     uint32_t ret = 0;
+    /// set the horizontal addressing mode so that it automatically shift to next page
+    ret = nrf_oled_set_addressing_mode(OLED_HORIZONTAL_ADDR_MODE);
+
+    NRF_ASSERT(ret);
+    /// set the start page and column adddr
+    ret = nrf_oled_set_page_addr(start_y, end_y);
+    NRF_ASSERT(ret);
+    ret = nrf_oled_set_column_addr(start_x, end_x);
+    NRF_ASSERT(ret);
+
+    uint16_t size = NEGLECT_ZERO(end_y,start_y) * NEGLECT_ZERO(end_x,start_x) ;
+    nrf_oled_send_img_data_from_flash(clear_ram_content,size);
+}
+
+
 /// @brief to test the gfx library for testing
 /// @param
 void nrf_gfx_lib_test(void)
@@ -91,7 +114,7 @@ void nrf_gfx_lib_test(void)
     // uint8_t img[1024] = {0x01, [1022] = 0xff};
     // const char * str = "Himanshu jangra ";
     // nrf_gfx_lib_draw_string(10,0,str,strlen(str));
-    const char* s = "swapnil broh whats up ";
+    const char* s = "hi there  whats up ";
     nrf_gfx_lib_draw_string(0, 10, s, strlen(s));
 
     // nrf_oled_send_img_data_from_flash(midFont[0], sizeof(midFont[4]));

@@ -36,8 +36,12 @@
  * send data size           4
  * show bitmap              5
  * clear command            6
- * rest coomnads can be added but later
+ * rest coomands can be added but later
  *
+ * send coordinates cmd will send like this startx,starty,endx,endy [every data is in 1 byte format]
+ * clear command -> will clear the screen
+ * show bitmpa will show the bitmap content
+ * send data will gather the data
  *
  *
  * ------------------- Data size -----------------------------------------
@@ -78,6 +82,8 @@
 
 #define GFX_CMD_ARR_MAX_SIZE 30
 
+#define GFX_CMD_MAX_BITMAP_SIZE 1024
+
 typedef enum _CMD_TYPES_
 {
     GFX_CMD_NOP,
@@ -96,6 +102,7 @@ typedef enum _CMD_RESPS_
     RSP_ACK,
     RSP_NACK,
     RSP_Invalid_cmd,
+    RSP_Invalid_state,
     RSP_Invalid_param,
     RSP_data_overflw,
     RSP_Busy,
@@ -111,6 +118,15 @@ typedef struct __packed _CMD_STRUCT_
     uint8_t data[1]; // 1 is only used for placeholder for compilation
     // this is treated as a pointer, the array is decayed into pointer
 } gfx_cmd_struct_t;
+
+typedef struct __packed _COORDINATES_
+{
+    uint8_t startx;
+    uint8_t starty;
+    uint8_t endx;
+    uint8_t endy;
+
+} bitmap_cord_struct_t;
 
 void test_oled_anim_prog(void* param)
 {
@@ -199,10 +215,20 @@ int main()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////// ///////////// /////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////// static functions define here /////////////////////////////////////////////
+///////////////////////////////////////////////////////////////// static functions declare here
+////////////////////////////////////////////////
+
+/// @brief to get the serial command from the serial port
+/// @param arr
+/// @param size
+/// @return succ/err code
+static uint32_t get_host_cmd(uint8_t* arr, uint8_t size);
+
+/// @brief to get the data from the serial port
+/// @param arr
+/// @param size
+/// @return succ/failure
+static uint32_t get_host_data(uint8_t* arr, uint16_t size);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,6 +239,11 @@ void general_task_function(void* param)
 
     uint8_t cmd_arr[GFX_CMD_ARR_MAX_SIZE] = {0};
 
+    bitmap_cord_struct_t coords;
+    uint16_t size_of_bitmap = 0;
+    uint8_t* bitmap = 0;
+    uint16_t last_updated_size = 0;
+
     UNUSED_VARIABLE(param);
 
     delay(100);
@@ -220,11 +251,14 @@ void general_task_function(void* param)
     uint32_t err = 0;
 
     for (;;) {
+
+    main_top:
         uint8_t evt = nrf_btn_get_evtq();
         if (evt != 0) {
             // NRF_LOG_WARNING("%d", evt);
             if (evt == NRF_BUTTON_UP_EVT) {
                 // NRF_LOG_INFO("starting adv %d", ble_gap_start_advertise(0));
+                nrf_gfx_lib_draw_string(0, 0, "MONDAY  24 OCT 2024 ", 21);
 
             } else if (evt == NRF_BUTTON_DOWN_EVT) {
                 // NRF_LOG_INFO("stopping adv%d", ble_gap_stop_advertise());
@@ -240,11 +274,20 @@ void general_task_function(void* param)
             }
         }
 
+        // get the host command and then proceed
+        if (get_host_cmd(cmd_arr, sizeof(gfx_cmd_struct_t)) != 0) {
+            continue;
+        }
+
         gfx_cmd_struct_t* cmd = (gfx_cmd_struct_t*) &cmd_arr;
+
         /// process the cmd
         switch (cmd->cmd_type) {
+
             case GFX_CMD_RESET:
 
+                /// after send the ack
+                printf("%d\r\n", RSP_ACK);
                 break;
 
             case GFX_CMD_NOP:
@@ -253,28 +296,49 @@ void general_task_function(void* param)
                 break;
 
             case GFX_CMD_SEND_COORDINATES:
-
+                // get the coordinates
+                memcpy(&coords, &cmd->data, sizeof(coords));
                 break;
 
             case GFX_CMD_SEND_DATA:
 
+                // copy the data into the malloc buffer 
+                // first check that size is appropriate
                 break;
 
             case GFX_CMD_SEND_DATA_SIZE:
+                memcpy(&size_of_bitmap, cmd->data, sizeof(uint16_t));
 
+                /// now we have to allocate that much amount of memory
+                bitmap = (uint8_t*) malloc(MIN_OF(size_of_bitmap, GFX_CMD_MAX_BITMAP_SIZE));
                 break;
 
             case GFX_CMD_SHOW_BITMAP:
-
+                nrf_gfx_lib_set_bitmap(coords.startx, coords.starty, coords.endx, coords.endy, bitmap, size_of_bitmap);
                 break;
 
             case GFX_CMD_CLEAR_BITMAP:
-
+                /// check the coordinates supplied in the cmd
+                memcpy(&coords, &cmd->data, sizeof(coords));
+                /// get the size of the bitmap and send it to the
+                nrf_gfx_lib_clear_bitmap(coords.startx, coords.starty, coords.endx, coords.endy);
                 break;
 
             default:
+                printf("%d\r\n", RSP_Invalid_cmd);
                 break;
+
+                memset(cmd_arr, 0, sizeof(cmd_arr));
+
+                goto main_top;
         }
+
+    reset_gfx:
+        /// reset the coordinates, size and bitmap
+        bitmap = NULL;
+        memset(&coords, 0, sizeof(coords));
+        size_of_bitmap = 0;
+        memset(cmd_arr, 0, sizeof(cmd_arr));
 
         // /// handle the accelrometer here
         // uint8_t evttype =  nrf_accel_get_evtq();
@@ -295,9 +359,9 @@ void general_task_function(void* param)
 /// @param arr
 /// @param size
 /// @return succ/err code
-uint32_t get_host_cmd(uint8_t* arr, uintt8_t size)
+uint32_t get_host_cmd(uint8_t* arr, uint8_t size)
 {
-    uint32_t err = 0;
+    uint32_t err = nrf_ERR_TIMEOUT;
     /// check for the number of bytes in the uart buffer
     if (get_num_rx_bytes() >= sizeof(gfx_cmd_struct_t)) {
 
@@ -323,13 +387,13 @@ uint32_t get_host_cmd(uint8_t* arr, uintt8_t size)
 /// @param size
 /// @return succ/failure
 uint32_t get_host_data(uint8_t* arr, uint16_t size)
-{   
-    uint32_t err = 0;
+{
+    uint32_t err = nrf_ERR_TIMEOUT;
     /// check for the number of bytes in the uart buffer
     if (get_num_rx_bytes() >= sizeof(gfx_cmd_struct_t)) {
 
         /// give a nice delay of 15 msec so that the rx finish getting all the data
-        delay(15);
+        delay(30);
 
         /// new cmd arrives ,process it
         /// get the cmd

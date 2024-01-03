@@ -40,7 +40,7 @@ void nrf_gfx_lib_send_frame_data(const uint8_t * frame, uint16_t frame_size);
 void nrf_gfx_lib_set_pointer_location(uint8_t x, uint8_t y, uint8_t addr_modes);
 
 
-/// @brief send the bitmap data to the graphics lib 
+/// @brief send the bitmap data of the graphics library 
 /// @param start_x must be size (0-7)
 /// @param start_y must be (0-127) column 
 /// @param end_x must be size (0-7)
@@ -48,6 +48,13 @@ void nrf_gfx_lib_set_pointer_location(uint8_t x, uint8_t y, uint8_t addr_modes);
 /// @param img 
 /// @param size 
 void nrf_gfx_lib_set_bitmap(uint8_t start_x, uint8_t start_y ,uint8_t end_x, uint8_t end_y ,const uint8_t * img, uint16_t size );
+
+/// @brief clear the bitmap data of the graphic library 
+/// @param start_x 
+/// @param start_y 
+/// @param end_x 
+/// @param end_y 
+void nrf_gfx_lib_clear_bitmap(uint8_t start_x, uint8_t start_y ,uint8_t end_x, uint8_t end_y );
 
 /// @brief clear the display ram 
 /// @param  void

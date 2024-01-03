@@ -31,6 +31,8 @@
 #include "nrf_err_types.h"
 
 
+//======================================== Bits/Bytes banding macros ===================================
+///-----------------------------------------------------------------------------------------------------
 
 #define SET 1
 #define RESET 0
@@ -61,6 +63,8 @@
 
 /// @brief modulus function map to positive 
 #define MOD(x) ((x>=0)?((x)):(-(x)))
+
+#define NEGLECT_ZERO(x,y) ((MOD((x-y)) == 0)? (1): (MOD((x-y))))
 
 ///////////// get the size of the buffer of uint32_t  from uint8_t buff
 // #define buff_size8_to_32(size) (((size)/4) + (((size)%4)==0?(0):(1)) )
