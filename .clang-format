@@ -1,4 +1,4 @@
----
+
 Language: Cpp
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
@@ -29,7 +29,7 @@ BinPackParameters: false
 BraceWrapping:
   AfterCaseLabel: true
   AfterClass: true
-  AfterControlStatement: false
+  AfterControlStatement: true
   AfterEnum: true
   AfterFunction: true
   AfterNamespace: true

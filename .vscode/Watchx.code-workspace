@@ -68,7 +68,8 @@
 			"main_helper.h": "c",
 			"ble_event_handler.h": "c",
 			"partition_table.h": "c",
-			"ble_ancs.h": "c"
+			"ble_ancs.h": "c",
+			"nrf_gfx.h": "c"
 		},
 		"C_Cpp.errorSquiggles": "enabled",
 		"C_Cpp.codeAnalysis.clangTidy.enabled": false,

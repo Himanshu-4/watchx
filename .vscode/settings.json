@@ -49,6 +49,9 @@
     },
     "C_Cpp.dimInactiveRegions": false,
     "cmake.generator": "MinGW Makefiles",
-    "C_Cpp.errorSquiggles": "disabled",
+    "cmake.configureOnEdit": false,
+    "cmake.configureOnOpen": false,
+    
+    "C_Cpp.errorSquiggles": "enabled",
     
 }

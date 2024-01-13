@@ -5,7 +5,7 @@
 #include "system.h"
 
 
-
+#define NRF_GFX_OLED_BUFF_MAX_SIZE 1024
 //============================================================================================
 ///===================== basic graphics init library =========================================
 
@@ -76,7 +76,6 @@ void nrf_gfx_lib_draw_string(uint8_t startx,uint8_t starty,const char *string, u
 /// @brief set the display brightness in terms of percentage 
 /// @param percentage 
 void nrf_gfx_lib_set_display_brightness(uint8_t percentage);
-
 
 
 #endif

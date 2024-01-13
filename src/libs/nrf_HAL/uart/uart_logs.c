@@ -21,7 +21,7 @@ static SemaphoreHandle_t mutex_for_tx_log = NULL;
 static StaticSemaphore_t TX_MutexBuffer;
 
     // wait only for 10 seconds
-    #define tick_to_wait_for_mutex 1000
+#define wait_for_uart (pdMS_TO_TICKS(NRF_UART_LOGS_WAIT_TIME))
 
 static SemaphoreHandle_t mutex_for_rx_log = NULL;
 
@@ -76,7 +76,9 @@ void rx_complete_callback(void);
 //// initialize the uart log , it enables the uart , set up the intr callbacks and
 void uart_log_init(void)
 {
-  const uart_config_t my_uart_cfg = {.baud_rate = UART_LOG_BAUD_RATE,
+  /// it uses stack rather than flash, 
+  /// with static keyword it will then use flash  
+  const static uart_config_t my_uart_cfg = {.baud_rate = UART_LOG_BAUD_RATE,
                                      .hardware_flow.flow_control = HARDWARE_FLOW_DISABLE,
                                      .parity = PARITY_EXCLUDED,
                                      .rxd_pin = UART_RX_DEFAULT_PIN,
@@ -147,7 +149,7 @@ uint32_t uart_log_bytes(const uint8_t* buff, uint16_t size)
 
   #if defined(FREERTOS_ENV)
 
-  if (xSemaphoreTake(mutex_for_tx_log, 10) != pdTRUE)
+  if (xSemaphoreTake(mutex_for_tx_log, wait_for_uart ) != pdTRUE)
     return nrf_ERR_TIMEOUT;
 
   #endif
@@ -269,7 +271,7 @@ char read_char(void)
 {
   #if defined(FREERTOS_ENV)
     // wait for mutex
-    if (xSemaphoreTake(mutex_for_rx_log, pdMS_TO_TICKS(tick_to_wait_for_mutex)) != pdTRUE) {
+    if (xSemaphoreTake(mutex_for_rx_log, wait_for_uart) != pdTRUE) {
       return nrf_ERR_TIMEOUT;
   }
   #endif
@@ -317,7 +319,7 @@ uint32_t get_rx_data(uint8_t* rx_buff, uint8_t size)
 
   #if defined(FREERTOS_ENV)
     // wait for mutex
-    if (xSemaphoreTake(mutex_for_rx_log, pdMS_TO_TICKS(tick_to_wait_for_mutex)) != pdTRUE) {
+    if (xSemaphoreTake(mutex_for_rx_log, wait_for_uart) != pdTRUE) {
       return nrf_ERR_TIMEOUT;
   }
 

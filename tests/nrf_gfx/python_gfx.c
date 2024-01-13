@@ -82,7 +82,7 @@
 
 #define GFX_CMD_ARR_MAX_SIZE 30
 
-#define GFX_CMD_MAX_BITMAP_SIZE 1024
+#define GFX_CMD_MAX_BITMAP_SIZE NRF_GFX_OLED_BUFF_MAX_SIZE
 
 typedef enum _CMD_TYPES_
 {
@@ -106,9 +106,12 @@ typedef enum _CMD_RESPS_
     RSP_Invalid_param,
     RSP_data_overflw,
     RSP_Busy,
+    RSP_err_occured,
     RSP_OP_failed,
 
 } gfx_cmd_rsp;
+
+#define SEND_RSP(x) (printf("%d\r\n", x))
 
 typedef struct __packed _CMD_STRUCT_
 {
@@ -127,11 +130,6 @@ typedef struct __packed _COORDINATES_
     uint8_t endy;
 
 } bitmap_cord_struct_t;
-
-void test_oled_anim_prog(void* param)
-{
-    UNUSED_PARAMETER(param);
-}
 
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -162,7 +160,8 @@ xTaskHandle genral_task_handle = NULL; //!< Reference to SoftDevice FreeRTOS tas
 int main()
 {
 
-    if (sys_init() != nrf_OK) {
+    if (sys_init() != nrf_OK)
+    {
         NRF_LOG_ERROR("sys init failed");
         // APP_ERROR_HANDLER(nrf_ERR_OPERATION_FAILED);
     }
@@ -174,7 +173,8 @@ int main()
                                            genral_task_priority,
                                            gen_task_stack,
                                            &gen_task_buffer);
-    if (genral_task_handle == NULL) {
+    if (genral_task_handle == NULL)
+    {
         APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
     }
 
@@ -193,7 +193,8 @@ int main()
     // app_start_scheduler();
 
     vTaskStartScheduler();
-    for (;;) {
+    for (;;)
+    {
         // printf("dev id is %x\r\n ", st_get_device_id());
         // printf("the vcell is %f V,soc %d %%, the remcap %dmAh,tte is %lds, current %ldmA, temperature %f*C status %X \r\n",
         // fgage_get_vcell(), fgage_get_soc(), fgage_get_remcap(), fgage_get_tte(), fgage_get_curent(), (float)fgage_get_temp(),
@@ -250,71 +251,82 @@ void general_task_function(void* param)
 
     uint32_t err = 0;
 
-    for (;;) {
+    for (;;)
+    {
 
     main_top:
+
+        /// Handle the button events
         uint8_t evt = nrf_btn_get_evtq();
-        if (evt != 0) {
+        if (evt != 0)
+        {
             // NRF_LOG_WARNING("%d", evt);
-            if (evt == NRF_BUTTON_UP_EVT) {
+            if (evt == NRF_BUTTON_UP_EVT)
+            {
                 // NRF_LOG_INFO("starting adv %d", ble_gap_start_advertise(0));
                 nrf_gfx_lib_draw_string(0, 0, "MONDAY  24 OCT 2024 ", 21);
 
-            } else if (evt == NRF_BUTTON_DOWN_EVT) {
+            } else if (evt == NRF_BUTTON_DOWN_EVT)
+            {
                 // NRF_LOG_INFO("stopping adv%d", ble_gap_stop_advertise());
 
                 /// clear the display of the nrf gfx
                 nrf_gfx_lib_clear_display();
 
-            } else if (evt == NRF_BUTTON_MIDD_EVT) {
+            } else if (evt == NRF_BUTTON_MIDD_EVT)
+            {
 
-            } else if (evt == NRF_BUTTON_HOME_EVT) {
+            } else if (evt == NRF_BUTTON_HOME_EVT)
+            {
 
                 //   NRF_LOG_INFO("timer counter %d",rtc_Timer_get_counter_value(NRF_RTC_TIMER_2));
             }
         }
 
         // get the host command and then proceed
-        if (get_host_cmd(cmd_arr, sizeof(gfx_cmd_struct_t)) != 0) {
+        if (get_host_cmd(cmd_arr, sizeof(gfx_cmd_struct_t)) != 0)
+        {
             continue;
         }
 
         gfx_cmd_struct_t* cmd = (gfx_cmd_struct_t*) &cmd_arr;
 
         /// process the cmd
-        switch (cmd->cmd_type) {
+        switch (cmd->cmd_type)
+        {
 
             case GFX_CMD_RESET:
-
-                /// after send the ack
-                printf("%d\r\n", RSP_ACK);
-                break;
+                goto reset_gfx;
 
             case GFX_CMD_NOP:
-                // send the ACK response
-                printf("%d\r\n", RSP_ACK);
                 break;
 
             case GFX_CMD_SEND_COORDINATES:
                 // get the coordinates
                 memcpy(&coords, &cmd->data, sizeof(coords));
+
                 break;
 
             case GFX_CMD_SEND_DATA:
-
-                // copy the data into the malloc buffer 
+            uint16_t tl =0;
+                // copy the data into the malloc buffer
                 // first check that size is appropriate
                 break;
 
             case GFX_CMD_SEND_DATA_SIZE:
                 memcpy(&size_of_bitmap, cmd->data, sizeof(uint16_t));
-
+                if (size_of_bitmap >= GFX_CMD_MAX_BITMAP_SIZE)
+                {
+                    SEND_RSP(RSP_data_overflw);
+                    goto reset_gfx;
+                }
                 /// now we have to allocate that much amount of memory
                 bitmap = (uint8_t*) malloc(MIN_OF(size_of_bitmap, GFX_CMD_MAX_BITMAP_SIZE));
                 break;
 
             case GFX_CMD_SHOW_BITMAP:
                 nrf_gfx_lib_set_bitmap(coords.startx, coords.starty, coords.endx, coords.endy, bitmap, size_of_bitmap);
+
                 break;
 
             case GFX_CMD_CLEAR_BITMAP:
@@ -325,13 +337,12 @@ void general_task_function(void* param)
                 break;
 
             default:
-                printf("%d\r\n", RSP_Invalid_cmd);
-                break;
+                SEND_RSP(RSP_Invalid_cmd);
+                goto reset_gfx;
+        } // exit the switch loop
 
-                memset(cmd_arr, 0, sizeof(cmd_arr));
-
-                goto main_top;
-        }
+        SEND_RSP(RSP_ACK);
+        goto main_top;
 
     reset_gfx:
         /// reset the coordinates, size and bitmap
@@ -363,7 +374,8 @@ uint32_t get_host_cmd(uint8_t* arr, uint8_t size)
 {
     uint32_t err = nrf_ERR_TIMEOUT;
     /// check for the number of bytes in the uart buffer
-    if (get_num_rx_bytes() >= sizeof(gfx_cmd_struct_t)) {
+    if (get_num_rx_bytes() >= sizeof(gfx_cmd_struct_t))
+    {
 
         /// give a nice delay of 15 msec so that the rx finish getting all the data
         delay(15);
@@ -373,10 +385,12 @@ uint32_t get_host_cmd(uint8_t* arr, uint8_t size)
         err = get_rx_data(arr, MIN_OF(size, get_num_rx_bytes()));
 
         // check succesfull logs
-        if (err != 0) {
+        if (err != 0)
+        {
             /// err occured
             uart_flush_buffer();
             memset(arr, 0, size);
+            SEND_RSP(RSP_err_occured);
         }
     }
     return err;
@@ -390,7 +404,8 @@ uint32_t get_host_data(uint8_t* arr, uint16_t size)
 {
     uint32_t err = nrf_ERR_TIMEOUT;
     /// check for the number of bytes in the uart buffer
-    if (get_num_rx_bytes() >= sizeof(gfx_cmd_struct_t)) {
+    if (get_num_rx_bytes() >= sizeof(gfx_cmd_struct_t))
+    {
 
         /// give a nice delay of 15 msec so that the rx finish getting all the data
         delay(30);
@@ -400,7 +415,8 @@ uint32_t get_host_data(uint8_t* arr, uint16_t size)
         err = get_rx_data(arr, MIN_OF(size, get_num_rx_bytes()));
 
         // check succesfull logs
-        if (err != 0) {
+        if (err != 0)
+        {
             /// err occured
             uart_flush_buffer();
             memset(arr, 0, size);
