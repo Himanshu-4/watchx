@@ -3,6 +3,9 @@
 
 #include "system.h"
 
+/// we dont want to spend the time in initing the fifo memory space to 0 so custom allocate the buufer 
+#define FIFO_BUFFER_SECTION __section(".fifo_buffer")
+
 #if defined USE_NRF_LOGS
 
 ///////////////////////////////////////////////////////////////
@@ -35,7 +38,7 @@ static StaticSemaphore_t RX_MutexBuffer;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////// Handle UArt TX here
 
-static volatile uint8_t tx_ring_buff[tx_ring_buff_size + 1];
+static uint8_t FIFO_BUFFER_SECTION tx_ring_buff[tx_ring_buff_size + 1];
 
 ///// define the global variables to use in our case
 static volatile uint16_t tx_Head_index = 0;
@@ -51,7 +54,7 @@ static volatile uint16_t last_tx_size = 0;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////// Handle UArt RX here
 
-static volatile uint8_t rx_ring_buff[rx_ring_buff_size + 1];
+static uint8_t FIFO_BUFFER_SECTION rx_ring_buff[rx_ring_buff_size + 1];
 
 ///// define the global variables to use in our case
 static volatile uint16_t rx_Head_index = 0;
@@ -299,6 +302,28 @@ char read_char(void)
   // else flush the buffer and then start transmit again
 }
 
+
+/// @brief get the pointer of the last element in the queue aka head 
+/// @param  void
+/// @return pointer 
+uint8_t * uart_get_head_ptr(void)
+{
+    if (!rx_enable_flag)
+    {return NULL;}
+    
+  /// check if size is not 0 
+    if ((rx_Head_index - rx_Tail_index) == 0)
+    {
+      return NULL;
+    }
+  
+  return &rx_ring_buff[rx_Tail_index];
+
+}
+
+/// @brief read the no of bytes in the recive buffer 
+/// @param  void
+/// @return no of bytes 
 uint8_t get_num_rx_bytes(void)
 {
   /// find out where head and tail are located
@@ -394,15 +419,31 @@ void rx_complete_callback(void)
   uart_start_reception();
 }
 
-void uart_flush_buffer(void)
-{
 
+/// @brief flush the tx buffer 
+/// @param  void
+void uart_flush_tx_buffer(void)
+{
   tx_Head_index = 0;
   tx_Tail_index = 0;
   tx_Tail_equals_Head = 1;
+}
 
+
+/// @brief flush the recieve buffer  
+/// @param  void
+void uart_flush_rx_buffer(void)
+{
   rx_Head_index = 0;
   rx_Tail_index = 0;
+}
+
+/// @brief flush the buffers of tx and rx 
+/// @param  
+void uart_flush_buffer(void)
+{
+  uart_flush_tx_buffer();
+  uart_flush_rx_buffer();
 }
 
 void uart_stop_logging(void)

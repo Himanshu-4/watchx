@@ -397,12 +397,13 @@ uint32_t nrf_oled_config_page_addressing(uint8_t page_start_addr, uint8_t column
 }
 
 /// @brief set column address for hoircontal or vertical scrolling mode 
-/// @param colum_start_addr 
-/// @param colum_end_addr 
+/// @param colum_start_addr  (0,127)
+/// @param colum_end_addr  (0,127)
 /// @return 
 uint32_t nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_addr)
 {
-    if((colum_start_addr >= SSD_OLED_COLUMN_ADDR_MAX) || (colum_end_addr >= SSD_OLED_COLUMN_ADDR_MAX))
+    if((colum_start_addr >= SSD_OLED_COLUMN_ADDR_MAX) || (colum_end_addr >= SSD_OLED_COLUMN_ADDR_MAX) 
+    || (colum_start_addr > colum_end_addr))
     return nrf_ERR_INVALID_PARAM;
     
 
@@ -416,12 +417,13 @@ uint32_t nrf_oled_set_column_addr(uint8_t colum_start_addr, uint8_t colum_end_ad
 
 
 /// @brief to set the page addresse for horizontal or vertical addressing mode 
-/// @param page_start_addr 
-/// @param page_end_addr 
+/// @param page_start_addr (0,7)
+/// @param page_end_addr (0,7)
 /// @return err codes 
 uint32_t nrf_oled_set_page_addr(uint8_t page_start_addr, uint8_t page_end_addr)
 {
-    if((page_start_addr >= SSD_OLED_PAGE_MAX) || (page_end_addr >= SSD_OLED_PAGE_MAX))
+    if((page_start_addr >= SSD_OLED_PAGE_MAX) || (page_end_addr >= SSD_OLED_PAGE_MAX) 
+    || (page_start_addr > page_end_addr))
     return nrf_ERR_INVALID_PARAM;
     
 

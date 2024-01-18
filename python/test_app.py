@@ -186,80 +186,80 @@ def main():
 
 
 
-    # # flush the buffer content 
-    # ser.reset_input_buffer()
-    # ser.reset_output_buffer()
+    # flush the buffer content 
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
 
-    # print("sending serial data\r\n")
-    # ser.write(bytes(ser_str , encoding='utf-8'))
-    # var = ser.read(len(ser_str))
-    # print(var)
-    # ser.close()
+    print("sending serial data\r\n")
+    ser.write(bytes(ser_str , encoding='utf-8'))
+    var = ser.read(len(ser_str))
+    print(var)
+    ser.close()
 
 
-# import serial
+import serial
 
-# Baud_Rate = 115200
-# Ser = serial.Serial('COM9', Baud_Rate)
+Baud_Rate = 115200
+Ser = serial.Serial('COM9', Baud_Rate)
 
-# while Ser.isOpen():
-#     input('Error: Ser is already open, please close it manually. if the port is closed, press enter\n')
-#     try:
-#         Ser.close()
-#     except serial.serialutil.PortNotOpenError:
-#         pass
-# Ser.open()
+while Ser.isOpen():
+    input('Error: Ser is already open, please close it manually. if the port is closed, press enter\n')
+    try:
+        Ser.close()
+    except serial.serialutil.PortNotOpenError:
+        pass
+Ser.open()
 
-# Serial_com = [] #a str array with the relevant commands
+Serial_com = [] #a str array with the relevant commands
 
-# for i in range(len(Serial_com)):
-#     ter = Ser.readline()
-#     while ter != 0xaf:
-#         #print(str(ter))
-#         print(str(ter.decode('utf-8').rstrip('\r\n')))
-#         ter = Ser.readline()
-#     sleep(1)
-#     if i == 0:
-#         print('login: root')
-#         Ser.write(bytes("root", encoding='utf-8'))
-#     else:
-#         print('\n\n\n\n\nroot @ Ser: ~  # ' + str(Serial_com[i]))
-#         Ser.write(bytes(Serial_com[i], encoding='utf8'))
+for i in range(len(Serial_com)):
+    ter = Ser.readline()
+    while ter != 0xaf:
+        #print(str(ter))
+        print(str(ter.decode('utf-8').rstrip('\r\n')))
+        ter = Ser.readline()
+    sleep(1)
+    if i == 0:
+        print('login: root')
+        Ser.write(bytes("root", encoding='utf-8'))
+    else:
+        print('\n\n\n\n\nroot @ Ser: ~  # ' + str(Serial_com[i]))
+        Ser.write(bytes(Serial_com[i], encoding='utf8'))
 
-# def print_format_table():
-#     """
-#     prints table of formatted text format options
-#     """
-#     for style in range(8):
-#         for fg in range(30, 38):
-#             s1 = ''
-#             for bg in range(40, 48):
-#                 format = ';'.join([str(style), str(fg), str(bg)])
-#                 s1 += '\x1b[%sm %s \x1b[0m' % (format, format)
-#             print(s1)
-#         print('\n')
+def print_format_table():
+    """
+    prints table of formatted text format options
+    """
+    for style in range(8):
+        for fg in range(30, 38):
+            s1 = ''
+            for bg in range(40, 48):
+                format = ';'.join([str(style), str(fg), str(bg)])
+                s1 += '\x1b[%sm %s \x1b[0m' % (format, format)
+            print(s1)
+        print('\n')
  
 
-# for the time limit per question
-# input_time = int(input("Set time limit in seconds: "))
+for the time limit per question
+input_time = int(input("Set time limit in seconds: "))
   
-# # Print the question to display
-# print("Who is your best friend?")
+# Print the question to display
+print("Who is your best friend?")
   
-# # Set the timer for the specified time and call the
-# # function to print the message when time is over
-# t = Timer(input_time, lambda: print(
-#     "\nYour writing time is over!!\nEnter / to quit the program"))
+# Set the timer for the specified time and call the
+# function to print the message when time is over
+t = Timer(input_time, lambda: print(
+    "\nYour writing time is over!!\nEnter / to quit the program"))
   
-# # Start the timer
-# t.start()
+# Start the timer
+t.start()
   
-# # Print a message for user specifying number of seconds
-# print("You have", str(input_time), " seconds to write the answer")
+# Print a message for user specifying number of seconds
+print("You have", str(input_time), " seconds to write the answer")
   
-# # Get value from user
-# answer = input()
+# Get value from user
+answer = input()
   
-# # Stop the timer
-# t.cancel()
+# Stop the timer
+t.cancel()
 

@@ -52,6 +52,14 @@ uint32_t  uart_log_bytes(const uint8_t * buff , uint16_t size );
 */
 void uart_flush_buffer(void);
 
+/// @brief flush the recieve buffer  
+/// @param  void
+void uart_flush_rx_buffer(void);
+
+/// @brief flush the tx buffer 
+/// @param  void
+void uart_flush_tx_buffer(void);
+
 /***
  * @name uart_stop_logging
  * @param void
@@ -70,6 +78,11 @@ void uart_start_logging();
 /////////////////////////////////////////////////////////////////////////////
 //////////////////////// this here is the RX part //////////////////////////
 
+
+/// @brief get the pointer of the last element in the queue aka head 
+/// @param  void
+/// @return pointer 
+uint8_t * uart_get_head_ptr(void);
 
 /**
  * @name read_char

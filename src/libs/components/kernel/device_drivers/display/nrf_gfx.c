@@ -52,10 +52,10 @@ void nrf_gfx_lib_draw_string(uint8_t startx, uint8_t starty, const char* string,
 }
 
 /// @brief send the bitmap data to the graphics lib
-/// @param start_x must be size (0-7)
-/// @param start_y must be (0-127) column
-/// @param end_x must be size (0-7)
-/// @param end_y must be (0-127) column
+/// @param start_x must be size (0-127) row
+/// @param start_y must be (0-7) column
+/// @param end_x must be size (0-127) row
+/// @param end_y must be (0-7) column
 /// @param img
 /// @param size
 void nrf_gfx_lib_set_bitmap(uint8_t start_x, uint8_t start_y, uint8_t end_x, uint8_t end_y, const uint8_t* img, uint16_t size)
@@ -76,10 +76,10 @@ void nrf_gfx_lib_set_bitmap(uint8_t start_x, uint8_t start_y, uint8_t end_x, uin
 }
 
 /// @brief clear the bitmap data of the graphic library
-/// @param start_x
-/// @param start_y
-/// @param end_x
-/// @param end_y
+/// @param start_x (0,127) row
+/// @param start_y (0,7) column
+/// @param end_x (0,127) row
+/// @param end_y (0,7) column
 void nrf_gfx_lib_clear_bitmap(uint8_t start_x, uint8_t start_y, uint8_t end_x, uint8_t end_y)
 {
 
