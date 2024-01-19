@@ -63,7 +63,7 @@
 #define UART_TX_DEFAULT_PIN 6UL
 #define UART_RX_DEFAULT_PIN 8UL
 
-#define UART_LOG_BAUD_RATE UART_Baudrate_921600 
+#define NRF_UART_LOG_BAUD_RATE UART_Baudrate_1M 
 
 #define NRF_LOG_MAX_ERRORS 1
 #define NRF_LOG_MAX_WARNINGS 2
@@ -72,6 +72,9 @@
 
 #define DEBUG_LOG_MAX NRF_LOG_MAX_INFO
 
+#define NRF_CONFIG_UART_TX_BUFF_SIZE  500 /// 500 byte buffer size 
+
+#define NRF_CONFIG_UART_RX_BUFF_SIZE  200 /// rx buffer size
 
 #define NRF_UART_LOGS_WAIT_TIME 100 /// this is 100 milliseconds 
 ////================================================================================

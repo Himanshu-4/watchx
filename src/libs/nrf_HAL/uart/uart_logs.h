@@ -2,17 +2,9 @@
 #define _UART_LOGS_H
 
 /// include the uart buffer 
-#include "uart_drv.h"
+
 #include "ansii_color_codes.h"
-
-
-
-// specify the tx ring buffe size 
-#define tx_ring_buff_size 255
-
-// specify the rx ring buffer  size 
-#define rx_ring_buff_size 255
-
+#include "system.h"
 
 ///////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -80,9 +72,9 @@ void uart_start_logging();
 
 
 /// @brief get the pointer of the last element in the queue aka head 
-/// @param  void
+/// @param  offset(cannot larger than 255)
 /// @return pointer 
-uint8_t * uart_get_head_ptr(void);
+uint8_t * uart_get_head_ptr(uint8_t offset);
 
 /**
  * @name read_char
