@@ -212,6 +212,7 @@ void uart_start_transmit(void)
 void uart_stop_tranmsit(void)
 {
     NRF_UARTE0->TASKS_STOPTX = 1UL;
+
 }
 
 /// @brief start the reception
@@ -322,47 +323,47 @@ uint32_t *uart_get_event_addr(uint8_t event_type)
     {
     case UART_EVENT_CTS:
         /* code */
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_CTS;
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_CTS;
         break;
     case UART_EVENT_NCTS:
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_NCTS;
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_NCTS;
         /* code */
         break;
-    case UART_EVENT_RXDDRY:
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_RXDRDY;
+    case UART_EVENT_RXDRDY:
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_RXDRDY;
         /* code */
         break;
     case UART_EVENT_ENDRX:
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_ENDRX;
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_ENDRX;
         /* code */
         break;
     case UART_EVENT_TXDRDY:
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_TXDRDY;
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_TXDRDY;
         /* code */
         break;
     case UART_EVENT_ENDTX:
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_ENDTX;
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_ENDTX;
         /* code */
         break;
     case UART_EVENT_ERROR:
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_ERROR;
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_ERROR;
         /* code */
         break;
     case UART_EVENT_RXTO:
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_RXTO;
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_RXTO;
         /* code */
         break;
     case UART_EVENT_RXSTARTED:
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_RXSTARTED;
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_RXSTARTED;
         /* code */
         break;
 
     case UART_EVENT_TXSTARTED:
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_TXSTARTED;
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_TXSTARTED;
         /* code */
         break;
     case UART_EVENT_TXSTOPPED:
-        ptr = (uint32_t *)NRF_UARTE0->EVENTS_TXSTOPPED;
+        ptr = (uint32_t *)&NRF_UARTE0->EVENTS_TXSTOPPED;
         /* code */
         break;
     }

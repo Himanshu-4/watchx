@@ -1,8 +1,8 @@
 /****
  *
- * This is a UART logger based on DMA implementations
+ * This is a  logger module based on UART & DMA implementations
  *
- * this UART trasmitter and reciever supports the buffer overiding feature
+ * this logger trasmitter and reciever supports the buffer overiding feature
  * i.e. the CPU can overwrite the last data or we can say that the buffer
  * will overshift if full
  *
@@ -10,7 +10,7 @@
  *
  *
  */
-#include "uart_logs.h"
+#include "logger.h"
 
 #include "gpio.h"
 #include "uart_drv.h"
@@ -82,18 +82,16 @@ static uart_log_struct_t FIFO_BUFFER_SECTION uart_log;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////// Handle UArt TX here
 
-///////////////////////////////////////////////////////////////////////////
-//////////////////////////// callbacks
 
 /// @brief tha tx_complete callback
 void uart_tx_cmplete_callback(void);
 
 /// @brief callback for rx complete
-void rx_complete_callback(void);
+void rx_data_ready_callback(void);
 
-/// @brief init the logger module
-/// @param  void
-void uart_log_init(void)
+/// @brief logger inits to init the Logger module 
+/// @param  
+void logger_init(void)
 {
 
     /// define those buffers to be only used by the
@@ -118,103 +116,187 @@ void uart_log_init(void)
 
     memset(&uart_log, 0, sizeof(uart_log));
 
-    uart_log.rx.buff = &rx_buff;
-    uart_log.tx.buff = &tx_buff;
+    uart_log.rx.pbuff = &rx_buff;
+    uart_log.tx.pbuff = &tx_buff;
 
     // add the callback for tx complete
     uart_add_irq_handler(UART_INT_ENDTX, uart_tx_cmplete_callback);
     // enable the intr  // always specify the mask when enabling interrupt
 
-    uart_continous_reception();
     // add callback for rx complete
-    uart_add_irq_handler(UART_INT_RXDRDY, rx_complete_callback);
+    uart_add_irq_handler(UART_INT_RXDRDY, rx_data_ready_callback);
     // enable the interrupt for the rx complete // always specify the mask when enbaling intr
 
     // start the rx transmission
     uart_set_rx_buff((uint8_t*) &uart_log.rx.buff, 1);
-    uart_start_reception();
-
+    
     /// enable the interupt for the transmission and reception
     uart_enable_int(UART_INT_ENDTX_Mask);
-    uart_enable_int(UART_INT_ENDRX_Mask);
+    uart_enable_int(UART_INT_RXDRDY_Mask);
 }
 
-void uart_log_deinit()
+/// @brief logger deinit to deinit the logger module 
+/// @param  
+void logger_deinit(void)
 {
     /// disable the APIs
-    uart_log.rx.enable_flag =0;
-    uart_log.tx.enable_flag =0;
+    uart_log.rx.enable_flag = 0;
+    uart_log.tx.enable_flag = 0;
+
+    // also reset the metadata
+    uart_log.rx.head=0;
+    uart_log.rx.tail =0;
+
+    uart_log.tx.head=0;
+    uart_log.tx.tail =0;
     
     // disable the isr
     uart_disable_isr();
     // deinit the uart
     uart_deinit();
-
 }
 
 /// @brief flush the tx buffer
 /// @param  void
-void uart_flush_tx_buffer(void)
+void logger_flush_tx_buffer(void)
 {
-    tx_Head_index = 0;
-    tx_Tail_index = 0;
-    tx_Tail_equals_Head = 1;
+    uart_stop_tx()
 }
 
 /// @brief flush the recieve buffer
 /// @param  void
-void uart_flush_rx_buffer(void)
+void logger_flush_rx_buffer(void)
 {
+    /// reset the buffer  and also resetart the transmission 
+    // stop the transmiison first 
+    uart_stop_rx();
+    /// reset the FIFO
+    uart_log.rx.head =0;
+    uart_log.rx.tail =0;
 
 }
 
 /// @brief flush the buffers of tx and rx
 /// @param
-void uart_flush_buffer(void)
+void logger_flush_buffer(void)
 {
     uart_flush_tx_buffer();
     uart_flush_rx_buffer();
 }
 
-/// @brief start the reception process 
-/// @param  void 
-void uart_start_rx(void)
-{
-
-}
-
-/// @brief stop the reception process 
+/// @brief start the reception process
 /// @param  void
-void uart_stop_rx(void)
+/// @note this Api assumes that you updated the DMA pointer;s correctly 
+/// and will only start the RX process accordingly 
+void logger_start_rx(void)
 {
-    rx_enable_flag = 0;
+    /// start the reception
+    if (uart_log.rx.xfr_start)
+    {
+        return;
+    }
+
+    *uart_get_event_addr(UART_EVENT_RXSTARTED) = 0;
+
+    /// start the continous reception mode 
+    uart_continous_reception();
+    uart_start_reception();
+    /// wait for the it to complete
+    while (*uart_get_event_addr(UART_EVENT_RXSTARTED) != 1)
+    {
+        __NOP()
+    } /// waste some CPU cycles to get the UART stop
+    *uart_get_event_addr(UART_EVENT_RXSTARTED) = 0;
+    
+    /// change the flag
+    uart_log.rx.xfr_start = 1;
+    uart_log.rx.enable_flag = 1;
 }
 
-/// @brief start the tx process again 
-/// @param  
-void uart_start_tx(void)
+/// @brief stop the reception process
+/// @param  void
+void logger_stop_rx(void)
 {
+       /// disable the transfer and stop the hardware
+    if (!uart_log.rx.xfr_start)
+    {
+        return;
+    }
+    *uart_get_event_addr(UART_EVENT_ENDRX) = 0;
+    uart_one_shot_reception();
+    //// first stop the transfers
+    uart_stop_reception();
+    
 
+    /// wait for the it to complete
+    while (*uart_get_event_addr(UART_EVENT_ENDRX) != 1)
+    {
+        __NOP()
+    } /// waste some CPU cycles to get the UART stop
+    *uart_get_event_addr(UART_EVENT_ENDRX) = 0;
+    /// change the flag
+    uart_log.rx.xfr_start = 0;
+    uart_log.rx.enable_flag = 0;
 }
 
-/// @brief stop the tx process 
-/// @param  void 
-void uart_stop_tx(void)
+
+/// @brief start the tx process again
+/// @param void
+/// @note this API is assuming that you set up the DMA pointers correctly 
+/// because this API won't set the DMA pointer 
+void logger_start_tx(void)
 {
-    /// disable the transfer and stop the hardware 
+    /// start the transmiison
     if (uart_log.tx.xfr_start)
     {
-        
+        return;
     }
+
+    *uart_get_event_addr(UART_EVENT_TXSTARTED) = 0;
+
+    uart_start_transmit();
+    /// wait for the it to complete
+    while (*uart_get_event_addr(UART_EVENT_TXSTARTED) != 1)
+    {
+        __NOP()
+    } /// waste some CPU cycles to get the UART stop
+    *uart_get_event_addr(UART_EVENT_TXSTARTED) = 0;
+    
+    /// change the flag
+    uart_log.tx.xfr_start = 1;
+    uart_log.tx.enable_flag = 1;
 }
 
+/// @brief stop the tx process
+/// @param  void
+void logger_stop_tx(void)
+{
+    /// disable the transfer and stop the hardware
+    if (!uart_log.tx.xfr_start)
+    {
+        return;
+    }
+    *uart_get_event_addr(UART_EVENT_TXSTOPPED) = 0;
+    //// first stop the transfers
+    uart_stop_tranmsit();
+
+    /// wait for the it to complete
+    while (*uart_get_event_addr(UART_EVENT_TXSTOPPED) != 1)
+    {
+        __NOP()
+    } /// waste some CPU cycles to get the UART stop
+    *uart_get_event_addr(UART_EVENT_TXSTOPPED) = 0;
+    /// change the flag
+    uart_log.tx.xfr_start = 0;
+    uart_log.tx.enable_flag = 0;
+}
 
 /// @brief log the bytes to the UART ring buffer and make to ready it for transmission
-/// @param buff 
-/// @param size 
-/// @param override 
-/// @return succ/err code 
-uint32_t uart_transmit_bytes(const uint8_t* buff, uint16_t size, bool override)
+/// @param buff
+/// @param size
+/// @param override
+/// @return succ/err code
+uint32_t logger_transmit_bytes(const uint8_t* buff, uint16_t size, bool override)
 {
 
     uint32_t err = nrf_OK;
@@ -337,7 +419,7 @@ void uart_tx_cmplete_callback(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////// Handle UArt RX here
 
-char read_char(void)
+char logger_read_char(void)
 {
 #if defined(FREERTOS_ENV)
     // wait for mutex
@@ -374,7 +456,7 @@ char read_char(void)
 /// @brief get the pointer of the last element in the queue aka head
 /// @param  offset(cannot larger than 255)
 /// @return pointer
-uint8_t* uart_get_head_ptr(uint8_t offset)
+uint8_t* logger_get_rx_head_ptr(uint8_t offset)
 {
     if (!rx_enable_flag)
     {
@@ -407,7 +489,7 @@ uint8_t get_num_rx_bytes(void)
     return diff;
 }
 
-uint32_t get_rx_data(uint8_t* rx_buff, uint8_t size)
+uint32_t logger_get_rx_data(uint8_t* rx_buff, uint8_t size)
 {
     if (!rx_enable_flag)
         return nrf_ERR_INVALID_STATE;
@@ -465,7 +547,9 @@ uint32_t get_rx_data(uint8_t* rx_buff, uint8_t size)
     return nrf_OK;
 }
 
-void rx_complete_callback(void)
+/// @brief data ready callback for the logger module 
+/// @param  
+void rx_data_ready_callback(void)
 {
     if (!rx_enable_flag)
         return;
@@ -491,4 +575,3 @@ void rx_complete_callback(void)
     // start the reception
     uart_start_reception();
 }
-

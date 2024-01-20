@@ -1,5 +1,5 @@
-#ifndef _UART_LOGS_H
-#define _UART_LOGS_H
+#ifndef _LOGGER_MODULE_H
+#define _LOGGER_MODULE_H
 
 /// include the uart buffer 
 
@@ -12,19 +12,13 @@
 ////////////////////////////////////////////////////////////////////////////
 //////////////// basic uart Logger controlling functions ////////////////////
 
-/****
- * @name uart_log_init
- * @param void 
- * @brief used to init the log of the uart , set ups intr and isrs 
-*/
-void uart_log_init(void);
+/// @brief logger inits to init the Logger module 
+/// @param  
+void logger_init(void);
 
-/****
- * @name uart_log_deinit
- * @param void 
- * @brief used to deinit the log of the uart , disable  intr and isrs 
-*/
-void uart_log_deinit(void);
+/// @brief logger deinit to deinit the logger module 
+/// @param  
+void logger_deinit(void);
 
 
 
