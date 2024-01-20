@@ -8,10 +8,9 @@
 
 ///////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
-
-/// define the functions here 
-
-////////////// this is for the tX Part only 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+//////////////// basic uart Logger controlling functions ////////////////////
 
 /****
  * @name uart_log_init
@@ -27,14 +26,16 @@ void uart_log_init(void);
 */
 void uart_log_deinit(void);
 
-/****
- * @name uart_log_bytes
- * @param buffer pointer 
- * @param the size of the buffer 
- * @brief it directly copies the data from the buffer into the ring buffer and 
- * then enables the transfer 
-*/
-uint32_t  uart_log_bytes(const uint8_t * buff , uint16_t size );
+
+
+
+
+/// @brief log the bytes to the UART ring buffer and make to ready it for transmission
+/// @param buff 
+/// @param size 
+/// @param override 
+/// @return succ/err code 
+uint32_t uart_transmit_bytes(const uint8_t* buff, uint16_t size, bool override);
 
 
 /***

@@ -39,7 +39,7 @@ enum _UART_EVENT_TYPES_
 {
     UART_EVENT_CTS,
     UART_EVENT_NCTS,
-    UART_EVENT_RXDDRY,
+    UART_EVENT_RXDRDY,
     UART_EVENT_ENDRX,
     UART_EVENT_TXDRDY,
     UART_EVENT_ENDTX,
@@ -54,7 +54,7 @@ enum _UART_INTERRUPT_TYPES_
 {
     UART_INT_CTS,        
     UART_INT_NCTS,       
-    UART_INT_RXDDRY,     
+    UART_INT_RXDRDY,     
     UART_INT_ENDRX,      
     UART_INT_TXDRDY,     
     UART_INT_ENDTX,      
@@ -70,7 +70,7 @@ enum _UART_INTERRUPT_MASK_TYPES_
 {
     UART_INT_CTS_Mask       = 0,
     UART_INT_NCTS_Mask      = 1,
-    UART_INT_RXDDRY_Mask    = 2,
+    UART_INT_RXDRDY_Mask    = 2,
     UART_INT_ENDRX_Mask     = 4,
     UART_INT_TXDRDY_Mask    = 7,
     UART_INT_ENDTX_Mask     = 8,

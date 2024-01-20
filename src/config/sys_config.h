@@ -74,7 +74,7 @@
 
 #define NRF_CONFIG_UART_TX_BUFF_SIZE  500 /// 500 byte buffer size 
 
-#define NRF_CONFIG_UART_RX_BUFF_SIZE  200 /// rx buffer size
+#define NRF_CONFIG_UART_RX_BUFF_SIZE  500 /// 500 byte rx buffer size
 
 #define NRF_UART_LOGS_WAIT_TIME 100 /// this is 100 milliseconds 
 ////================================================================================

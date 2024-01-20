@@ -42,13 +42,19 @@ SECTIONS
   PROVIDE(__end_kernel_queue_allocated_data = .);
   . = ALIGN(4);
 
-  /* fifo memeory allocated for uart buffers  */
-   . = ALIGN(4);
-  PROVIDE(__start_fifo_allocated_data = .);
-  KEEP(*(SORT(.fifo_buffer*)))
-  PROVIDE(__end_fifo_allocated_data = .);
-  . = ALIGN(4);
 
+  /* we can use the location pointer for tracking the  */
+  } > RAM
+
+  .fifo_uart_buffers(NOLOAD) :
+  {
+        /* fifo memeory allocated for uart buffers  */
+    . = ALIGN(4);
+    PROVIDE(__start_fifo_allocated_data = .);
+    KEEP(*(SORT(.fifo_buffer*)))
+    PROVIDE(__end_fifo_allocated_data = .);
+    . = ALIGN(4);
+    
   /* we can use the location pointer for tracking the  */
   } > RAM
 
