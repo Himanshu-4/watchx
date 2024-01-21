@@ -29,7 +29,7 @@ void logger_deinit(void);
 /// @param size 
 /// @param override 
 /// @return succ/err code 
-uint32_t uart_transmit_bytes(const uint8_t* buff, uint16_t size, bool override);
+uint32_t uart_transmit_bytes(const uint8_t* buff, uint16_t size);
 
 
 /***

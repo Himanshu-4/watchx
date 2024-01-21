@@ -270,14 +270,18 @@ uint32_t *uart_get_dma_rx_buff(void)
     return (uint32_t *)NRF_UARTE0->RXD.PTR;
 }
 
-/// @brief get the amount value from dma
-uint8_t uart_get_rx_amount(void)
+/// @brief get the last datalen xfr by the dma
+/// @param void
+/// @return  lenght of data transfer by DMA 
+uint8_t uart_get_last_rx_len(void)
 {
     return NRF_UARTE0->RXD.AMOUNT;
 }
 
-/// @brief get the amount value from the dma
-uint8_t uart_get_tx_amount(void)
+/// @brief get the last transfer by the DMA 
+/// @param void
+/// @return lenght of data transfer by DMA 
+uint8_t uart_get_last_tx_len(void)
 {
     return NRF_UARTE0->TXD.AMOUNT;
 }

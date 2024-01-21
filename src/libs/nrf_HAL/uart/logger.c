@@ -15,19 +15,8 @@
 #include "gpio.h"
 #include "uart_drv.h"
 
-// #include "FreeRTOS.h"
-// #include "FreeRTOSConfig.h"
-// #include "semphr.h"
-
-/// we dont want to spend the time in initing the fifo memory space to 0 so custom allocate the buufer
+/// we dont want to spend the time in initing the fifo memory space to 0 so custom allocate the buffer
 #define FIFO_BUFFER_SECTION __section(".fifo_buffer")
-
-///////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-///////////////////////   create API for the Freertos so that it is easi;y modifieable
-
-// wait only for 10 seconds
-#define wait_for_uart (pdMS_TO_TICKS(NRF_UART_LOGS_WAIT_TIME))
 
 #define UART_TX_BUFFER_SIZE NRF_CONFIG_UART_TX_BUFF_SIZE
 
@@ -35,10 +24,12 @@
 
 #define UART_LOGGER_BAUD_RATE NRF_UART_LOG_BAUD_RATE
 
+#define UART_DMA_MAX_SIZE 255
+
 typedef struct __PACKED __UART_FIFO_STRUCT__
 {
 
-    uint16_t head;
+    uint16_t head; /// the UART_BUFF_SIZE is dead end , niether head and tail present there
     uint16_t tail;
     bool enable_flag;
 
@@ -82,15 +73,14 @@ static uart_log_struct_t FIFO_BUFFER_SECTION uart_log;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////// Handle UArt TX here
 
-
 /// @brief tha tx_complete callback
 void uart_tx_cmplete_callback(void);
 
 /// @brief callback for rx complete
 void rx_data_ready_callback(void);
 
-/// @brief logger inits to init the Logger module 
-/// @param  
+/// @brief logger inits to init the Logger module
+/// @param
 void logger_init(void)
 {
 
@@ -129,27 +119,26 @@ void logger_init(void)
 
     // start the rx transmission
     uart_set_rx_buff((uint8_t*) &uart_log.rx.buff, 1);
-    
+
     /// enable the interupt for the transmission and reception
     uart_enable_int(UART_INT_ENDTX_Mask);
     uart_enable_int(UART_INT_RXDRDY_Mask);
 }
 
-/// @brief logger deinit to deinit the logger module 
-/// @param  
+/// @brief logger deinit to deinit the logger module
+/// @param
 void logger_deinit(void)
 {
     /// disable the APIs
-    uart_log.rx.enable_flag = 0;
-    uart_log.tx.enable_flag = 0;
+    logger_flush_buffer();
 
     // also reset the metadata
-    uart_log.rx.head=0;
-    uart_log.rx.tail =0;
+    uart_log.rx.head = 0;
+    uart_log.rx.tail = 0;
 
-    uart_log.tx.head=0;
-    uart_log.tx.tail =0;
-    
+    uart_log.tx.head = 0;
+    uart_log.tx.tail = 0;
+
     // disable the isr
     uart_disable_isr();
     // deinit the uart
@@ -160,34 +149,36 @@ void logger_deinit(void)
 /// @param  void
 void logger_flush_tx_buffer(void)
 {
-    uart_stop_tx()
+    logger_stop_tx();
+    /// reset the FIFO
+    uart_log.tx.head = 0;
+    uart_log.tx.tail = 0;
 }
 
 /// @brief flush the recieve buffer
 /// @param  void
 void logger_flush_rx_buffer(void)
 {
-    /// reset the buffer  and also resetart the transmission 
-    // stop the transmiison first 
-    uart_stop_rx();
+    /// reset the buffer  and also resetart the transmission
+    // stop the transmiison first
+    logger_stop_rx();
     /// reset the FIFO
-    uart_log.rx.head =0;
-    uart_log.rx.tail =0;
-
+    uart_log.rx.head = 0;
+    uart_log.rx.tail = 0;
 }
 
 /// @brief flush the buffers of tx and rx
-/// @param
+/// @param void
 void logger_flush_buffer(void)
 {
-    uart_flush_tx_buffer();
-    uart_flush_rx_buffer();
+    logger_flush_tx_buffer();
+    logger_flush_rx_buffer();
 }
 
 /// @brief start the reception process
 /// @param  void
-/// @note this Api assumes that you updated the DMA pointer;s correctly 
-/// and will only start the RX process accordingly 
+/// @note this Api assumes that you updated the DMA pointers correctly
+/// and will only start the RX process accordingly
 void logger_start_rx(void)
 {
     /// start the reception
@@ -198,7 +189,7 @@ void logger_start_rx(void)
 
     *uart_get_event_addr(UART_EVENT_RXSTARTED) = 0;
 
-    /// start the continous reception mode 
+    /// start the continous reception mode
     uart_continous_reception();
     uart_start_reception();
     /// wait for the it to complete
@@ -207,7 +198,7 @@ void logger_start_rx(void)
         __NOP()
     } /// waste some CPU cycles to get the UART stop
     *uart_get_event_addr(UART_EVENT_RXSTARTED) = 0;
-    
+
     /// change the flag
     uart_log.rx.xfr_start = 1;
     uart_log.rx.enable_flag = 1;
@@ -217,7 +208,7 @@ void logger_start_rx(void)
 /// @param  void
 void logger_stop_rx(void)
 {
-       /// disable the transfer and stop the hardware
+    /// disable the transfer and stop the hardware
     if (!uart_log.rx.xfr_start)
     {
         return;
@@ -226,7 +217,6 @@ void logger_stop_rx(void)
     uart_one_shot_reception();
     //// first stop the transfers
     uart_stop_reception();
-    
 
     /// wait for the it to complete
     while (*uart_get_event_addr(UART_EVENT_ENDRX) != 1)
@@ -239,18 +229,36 @@ void logger_stop_rx(void)
     uart_log.rx.enable_flag = 0;
 }
 
-
 /// @brief start the tx process again
 /// @param void
-/// @note this API is assuming that you set up the DMA pointers correctly 
-/// because this API won't set the DMA pointer 
-void logger_start_tx(void)
+/// @return errcode
+/// @note this API will automatically set up the DMA pointers and also it only works when
+/// there is data available in the buffer otherwise it won't start
+uint32_t logger_start_tx(void)
 {
     /// start the transmiison
     if (uart_log.tx.xfr_start)
     {
-        return;
+        return nrf_ERR_INVALID_STATE;
     }
+
+    /// check if data is available in the buffer or not
+    if (!(uart_log.tx.head - uart_log.tx.tail))
+    {
+        return nrf_ERR_INTERNAL;
+    }
+
+    uint8_t dma_size = 0;
+    /// calculate how much size we have to transfers
+    if (uart_log.tx.head > uart_log.tx.tail)
+    {
+        dma_size = MIN_OF(UART_DMA_MAX_SIZE, (uart_log.tx.head - uart_log.tx.tail));
+    } else
+    {
+        dma_size = MIN_OF(UART_DMA_MAX_SIZE, (UART_TX_BUFFER_SIZE - uart_log.tx.tail));
+    }
+    /// set up the DMA pointers correctly
+    uart_set_tx_buff(&uart_log.tx.pbuff[uart_log.tx.tail], dma_size);
 
     *uart_get_event_addr(UART_EVENT_TXSTARTED) = 0;
 
@@ -261,10 +269,12 @@ void logger_start_tx(void)
         __NOP()
     } /// waste some CPU cycles to get the UART stop
     *uart_get_event_addr(UART_EVENT_TXSTARTED) = 0;
-    
+
     /// change the flag
     uart_log.tx.xfr_start = 1;
     uart_log.tx.enable_flag = 1;
+
+    return nrf_OK;
 }
 
 /// @brief stop the tx process
@@ -276,6 +286,11 @@ void logger_stop_tx(void)
     {
         return;
     }
+
+    /// stop the transfer process
+    uart_log.tx.xfr_start = 0;
+    uart_log.tx.enable_flag = 0;
+
     *uart_get_event_addr(UART_EVENT_TXSTOPPED) = 0;
     //// first stop the transfers
     uart_stop_tranmsit();
@@ -286,9 +301,6 @@ void logger_stop_tx(void)
         __NOP()
     } /// waste some CPU cycles to get the UART stop
     *uart_get_event_addr(UART_EVENT_TXSTOPPED) = 0;
-    /// change the flag
-    uart_log.tx.xfr_start = 0;
-    uart_log.tx.enable_flag = 0;
 }
 
 /// @brief log the bytes to the UART ring buffer and make to ready it for transmission
@@ -296,80 +308,84 @@ void logger_stop_tx(void)
 /// @param size
 /// @param override
 /// @return succ/err code
-uint32_t logger_transmit_bytes(const uint8_t* buff, uint16_t size, bool override)
+uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size)
 {
-
-    uint32_t err = nrf_OK;
-    //////////// there are 2 possible cases
-    if (tx_Head_index >= tx_Tail_index)
+    if (!uart_log.tx.enable_flag)
     {
-        // check if input data is bigger than remainng size
-        if ((tx_ring_buff_size - (tx_Head_index - tx_Tail_index)) <= size)
+        return nrf_ERR_INVALID_STATE;
+    }
+    if (size >= UART_TX_BUFFER_SIZE)
+    {
+        return nrf_ERR_NO_MEMORY;
+    }
+
+    //////////// there are 2 possible cases
+    if (uart_log.tx.head > uart_log.tx.tail)
+    {
+        // check if size > size bw headindex to buff_size
+        if ((UART_TX_BUFFER_SIZE - uart_log.tx.head) <= size)
         {
-            err = nrf_ERR_NO_MEMORY;
-            goto return_mech;
+            /// copy the data in one go and return
+            memcpy(&uart_log.tx.pbuff[uart_log.tx.head], pbuff, size);
+            /// update the head
+            uart_log.tx.head += size;
+            if (uart_log.tx.head >= UART_TX_BUFFER_SIZE) /// check if is at dead end
+            {
+                uart_log.tx.head = 0;
+            }
+
+        } else // split the data in two parts
+        {
+            /// copy the head to BUFF_SIZE and then remaining
+            uint16_t first_segment = UART_TX_BUFFER_SIZE - uart_log.tx.head;
+            uint16_t second_segment = size - first_segment;
+            memcpy(&uart_log.tx.pbuff[uart_log.tx.head], pbuff, first_segment);
+
+            /// copy the second segment
+            memcpy(uart_log.tx.pbuff, &pbuff[first_segment], second_segment);
+
+            /// update the head
+            uart_log.tx.head = second_segment;
+            /// check if second segment will shift the tail
+            if (second_segment >= uart_log.tx.tail)
+            {
+                /// stop the uart transfers and update the pointers
+                logger_stop_tx();
+                /// shift the tail
+                uart_log.tx.tail = uart_log.tx.head + 1; /// we have to maintain a distnace of 1 byte
+            }
         }
 
-        // check if head index equals tail
-        if (tx_Head_index == tx_Tail_index)
-        {
-            tx_Tail_equals_Head = 1;
-        }
-
-        /////// there are 2 casess
-        /// 256-head index can have all the data
-        if ((tx_ring_buff_size - tx_Head_index) >= size)
-        {
-            // than start copying the data from tx_head_index
-            memcpy((uint8_t*) &tx_ring_buff[tx_Head_index], (uint8_t*) buff, size);
-            tx_Head_index += size;
-        } else // split the data in multiple parts
-        {
-            // need to split the data in 2 xfrs
-            uint8_t first_xfr = (tx_ring_buff_size - tx_Head_index);
-            uint8_t rest_xfr = (size - first_xfr);
-
-            // start copyting the data
-            memcpy((uint8_t*) &tx_ring_buff[tx_Head_index], (uint8_t*) buff, first_xfr);
-            memcpy((uint8_t*) &tx_ring_buff[0], (uint8_t*) (buff + first_xfr), rest_xfr);
-
-            // update the tx_head index
-            tx_Head_index = rest_xfr;
-        }
     } else
     {
-        if ((tx_Tail_index - tx_Head_index) <= size)
+        /// first check if there is segmented copy or normal copy
+        if ((uart_log.tx.head + size) >= UART_TX_BUFFER_SIZE)
         {
-            err = nrf_ERR_NO_MEMORY;
-            goto return_mech;
-        }
 
-        /// transfer the content to the buffer
-        memcpy((uint8_t*) &tx_ring_buff[tx_Head_index], (uint8_t*) buff, size);
-        // update the index
-        tx_Head_index += size;
-    }
-
-    // if tails equal head then start logging by triggering the start task explicitly
-    if (tx_Tail_equals_Head)
-    {
-        // there are 2 cases
-        if (tx_Head_index > tx_Tail_index)
-        {
-            last_tx_size = (tx_Head_index - tx_Tail_index);
         } else
         {
-            last_tx_size = tx_ring_buff_size - tx_Tail_index;
-        }
-        uart_set_tx_buff((uint8_t*) &tx_ring_buff[tx_Tail_index], last_tx_size);
-        // update the head pointer and then trigger the start task
-        uart_start_transmit();
+            /// check for shifting
+            /// no shifting when head == tail
+            if (uart_log.tx.head == uart_log.tx.tail)
+            {
 
-        tx_Tail_equals_Head = 0;
+            } else
+            {
+                if ((uart_log.tx.head + size) >= uart_log.tx.tail)
+                {
+
+                } else
+                {
+                    /* code */
+                }
+            }
+        }
     }
 
-return_mech:
-    return err;
+    /// start the logger to transmit
+    logger_start_tx();
+
+    return nrf_OK;
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -377,47 +393,45 @@ return_mech:
 
 void uart_tx_cmplete_callback(void)
 {
-
-    // first update the no of bytes
-    tx_Tail_index += last_tx_size;
-
-    // set the equal flag // means no more data to trnasfer
-    if (tx_Head_index == tx_Tail_index)
+    /// check if transfer is stopped or not
+    if (!uart_log.tx.enable_flag)
     {
-        tx_Tail_equals_Head = 1;
+        return;
+    }
+    /// increment the tail to that addr
+    uart_log.tx.tail += uart_get_last_tx_len();
+
+    /// now check if this make the tail exceeding the buffer length
+    if (uart_log.tx.tail >= UART_TX_BUFFER_SIZE)
+    {
+        uart_log.tx.tail = 0;
+    }
+
+    /// check if there is any data left to transfers
+    if (!(uart_log.tx.head - uart_log.tx.tail))
+    {
+        uart_log.tx.xfr_start = 0;
         return;
     }
 
-    if (tx_Tail_index >= tx_ring_buff_size)
+    uint8_t dma_size = 0;
+    /// calculate how much size we have to transfers
+    if (uart_log.tx.head > uart_log.tx.tail)
     {
-        tx_Tail_index = 0;
+        dma_size = MIN_OF(UART_DMA_MAX_SIZE, (uart_log.tx.head - uart_log.tx.tail));
+    } else
+    {
+        dma_size = MIN_OF(UART_DMA_MAX_SIZE, (UART_TX_BUFFER_SIZE - uart_log.tx.tail));
     }
-
-    int no_of_bytes_remains = (tx_Head_index - tx_Tail_index);
-    /// check now how much bytes left to send
-    // if the head pointer is leading the tail pointer
-    if (no_of_bytes_remains > 0)
-    {
-        last_tx_size = no_of_bytes_remains;
-        uart_set_tx_buff((uint8_t*) &tx_ring_buff[tx_Tail_index], no_of_bytes_remains);
-    } else // if the head pointer lags the tail pointer
-    {
-        uint8_t size = (tx_ring_buff_size - tx_Tail_index);
-
-        last_tx_size = size;
-
-        uart_set_tx_buff((uint8_t*) &tx_ring_buff[tx_Tail_index], size);
-
-        /* code */
-    }
-
+    /// set up the DMA pointers
+    uart_set_tx_buff(&uart_log.tx.pbuff[uart_log.tx.tail], dma_size);
     uart_start_transmit();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////// Handle UArt RX here
+//=================================================================================================
+///================================================================================================
+// +++++++++++++++++++++++++++++++++++ Handle logger RX here +++++++++++++++++++++++++++++++++++++++
+//==================================================================================================
 
 char logger_read_char(void)
 {
@@ -547,8 +561,8 @@ uint32_t logger_get_rx_data(uint8_t* rx_buff, uint8_t size)
     return nrf_OK;
 }
 
-/// @brief data ready callback for the logger module 
-/// @param  
+/// @brief data ready callback for the logger module
+/// @param
 void rx_data_ready_callback(void)
 {
     if (!rx_enable_flag)

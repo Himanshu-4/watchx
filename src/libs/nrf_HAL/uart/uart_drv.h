@@ -231,11 +231,15 @@ uint32_t * uart_get_dma_tx_buff(void);
 /// @brief get the dma rx buffer address 
 uint32_t * uart_get_dma_rx_buff(void);
 
-/// @brief get the amount value from dma 
-uint8_t uart_get_rx_amount(void);
+/// @brief get the last datalen xfr by the dma
+/// @param void
+/// @return  lenght of data transfer by DMA 
+uint8_t uart_get_last_rx_len(void);
 
-/// @brief get the amount value from the dma 
-uint8_t uart_get_tx_amount(void);
+/// @brief get the last transfer by the DMA 
+/// @param void
+/// @return lenght of data transfer by DMA 
+uint8_t uart_get_last_tx_len(void);
 
 ////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
