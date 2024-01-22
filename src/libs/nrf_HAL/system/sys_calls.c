@@ -35,8 +35,13 @@
 #include "ansii_color_codes.h"
 
 
-/// @brief this is the prototype of the function uart log libs 
-extern uint8_t  uart_log_bytes(const uint8_t * buff , uint16_t size );
+/// @brief log the bytes to the UART ring buffer and make to ready it for transmission
+/// @param buff
+/// @param size
+/// @param override
+/// @return succ/err code
+extern uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size);
+
 
 // /* Variables */
 // extern int __io_putchar(int ch) __attribute__((weak));
@@ -79,7 +84,7 @@ return len;
  int _write(int file, char *ptr, int len)
 {
 	
-    uart_log_bytes((uint8_t *)ptr , len);
+    logger_transmit_bytes((uint8_t *)ptr , len);
 	return len;
 }
 

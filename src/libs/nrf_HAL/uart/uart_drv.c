@@ -4,6 +4,10 @@ static void (*uart_irq_handler[TOTAL_INTERUPTS])(void) = {NULL};
 
 extern void UARTE0_UART0_IRQHandler(void);
 
+
+/// @brief Events only generated when you enable them from the API
+/// @param  void
+/// @note the genrated event will be auto cleared by this handler 
 void UARTE0_UART0_IRQHandler(void)
 {
 

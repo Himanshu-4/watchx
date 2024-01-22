@@ -12,54 +12,53 @@
 ////////////////////////////////////////////////////////////////////////////
 //////////////// basic uart Logger controlling functions ////////////////////
 
-/// @brief logger inits to init the Logger module 
-/// @param  
+/// @brief logger inits to init the Logger module
+/// @param void
 void logger_init(void);
 
-/// @brief logger deinit to deinit the logger module 
-/// @param  
+/// @brief logger deinit to deinit the logger module
+/// @param void
 void logger_deinit(void);
 
+/// @brief flush the tx buffer
+/// @param  void
+void logger_flush_tx_buffer(void);
 
+/// @brief flush the recieve buffer
+/// @param  void
+void logger_flush_rx_buffer(void);
 
+/// @brief flush the buffers of tx and rx
+/// @param void
+void logger_flush_buffer(void);
 
+/// @brief start the reception process
+/// @param  void
+/// @note this Api assumes that you updated the DMA pointers correctly
+/// and will only start the RX process accordingly
+void logger_start_rx(void);
+
+/// @brief stop the reception process
+/// @param  void
+void logger_stop_rx(void);
+
+/// @brief start the tx process again
+/// @param void
+/// @note this API will automatically set up the DMA pointers and also it only works when
+/// there is data available in the buffer otherwise it won't start
+void logger_start_tx(void);
+
+/// @brief stop the tx process
+/// @param  void
+void logger_stop_tx(void);
 
 /// @brief log the bytes to the UART ring buffer and make to ready it for transmission
-/// @param buff 
-/// @param size 
-/// @param override 
-/// @return succ/err code 
-uint32_t uart_transmit_bytes(const uint8_t* buff, uint16_t size);
+/// @param buff
+/// @param size
+/// @param override
+/// @return succ/err code
+uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size);
 
-
-/***
- * @name uart_flush_buffer
- * @param  void
- * @brief used to flush the ring buffer and makes h == t
-*/
-void uart_flush_buffer(void);
-
-/// @brief flush the recieve buffer  
-/// @param  void
-void uart_flush_rx_buffer(void);
-
-/// @brief flush the tx buffer 
-/// @param  void
-void uart_flush_tx_buffer(void);
-
-/***
- * @name uart_stop_logging
- * @param void
- * @brief used to temporarly stop logging of the uart 
-*/
-void uart_stop_logging(void);
-
-/***
- * @name uart_start_logging 
- * @param void
- * @brief used to restart the logging or start it 
-*/
-void uart_start_logging();
 
 ////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////

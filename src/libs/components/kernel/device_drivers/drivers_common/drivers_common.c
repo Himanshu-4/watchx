@@ -14,7 +14,7 @@
 #endif
 
 // uart log library
-#include "uart_logs.h"
+#include "logger.h"
 #include "gpiote.h"
 #include "nrf_time.h"
 #include "ansii_color_codes.h"
@@ -89,7 +89,7 @@ void Hardware_drivers_install(void)
 //////////////////////////////////////////////////////////////////////////
 #if defined(UART_DRIVER_INSTALL)
 
-    uart_log_init();
+    logger_init();
 
 #endif
 }
@@ -121,7 +121,7 @@ void Hardware_drivers_uninstall(void)
 #endif
 
 #if defined(UART_DRIVER_INSTALL)
-    uart_log_deinit();
+    logger_deinit();
 #endif
 
 //// else use the polling API used to transfer data
@@ -140,7 +140,7 @@ void Hardware_drivers_uninstall(void)
 
 #if defined(UART_DRIVER_INSTALL)
 
-    uart_log_deinit();
+    logger_deinit();
 
 #endif
 

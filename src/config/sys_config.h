@@ -72,11 +72,10 @@
 
 #define DEBUG_LOG_MAX NRF_LOG_MAX_INFO
 
-#define NRF_CONFIG_UART_TX_BUFF_SIZE  500 /// 500 byte buffer size 
+#define NRF_CONFIG_UART_TX_BUFF_SIZE  10 /// 500 byte buffer size 
 
-#define NRF_CONFIG_UART_RX_BUFF_SIZE  500 /// 500 byte rx buffer size
+#define NRF_CONFIG_UART_RX_BUFF_SIZE  10 /// 500 byte rx buffer size
 
-#define NRF_UART_LOGS_WAIT_TIME 100 /// this is 100 milliseconds 
 ////================================================================================
 ////================================================================================
 ////=================================== I2c configurations
