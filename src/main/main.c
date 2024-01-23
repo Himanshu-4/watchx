@@ -162,10 +162,6 @@ void general_task_function(void* param)
             } else if (evt == NRF_BUTTON_MIDD_EVT)
             {
 
-            } else if (evt == NRF_BUTTON_HOME_EVT)
-            {
-
-                //   NRF_LOG_INFO("timer counter %d",rtc_Timer_get_counter_value(NRF_RTC_TIMER_2));
             }
         }
 
