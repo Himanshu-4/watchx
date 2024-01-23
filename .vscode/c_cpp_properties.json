@@ -93,8 +93,8 @@
             ],
             "compilerPath": "C:\\Program Files (x86)\\GNU Arm Embedded Toolchain\\12.2 2023.03\\bin\\arm-none-eabi-gcc.exe",
             
-            "cStandard": "c23",
-            "cppStandard": "c++23",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-arm",
             "configurationProvider": "ms-vscode.cpp-tools",
             "compileCommands": "D:\\smart_watch\\Watchx\\build\\compile_commands.json"

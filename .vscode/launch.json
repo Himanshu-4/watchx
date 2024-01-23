@@ -9,11 +9,13 @@
             "executable": "${workspaceRoot}/build/Watchx.elf",
             "request": "launch",
             "servertype": "jlink",
+            "interface": "swd",
             // This may need to be arm-none-eabi-gdb depending on your system
             "gdbPath": "arm-none-eabi-gdb",
             // Connect to an already running OpenOCD instance
-            "gdbTarget": "localhost:3333",
+            "gdbTarget": "localhost:50000",
             "svdFile": "${workspaceRoot}/nrf52.svd",
+            "showDevDebugOutput":"raw" ,
             "device": "nrf52",
             "runToEntryPoint": "main",
             // "preLaunchCommands": ["make all"],
@@ -24,6 +26,27 @@
             ]
         },
         {
+            "name": "Test attach",
+            "type": "cortex-debug",
+            // "cortex-debug.armToolchainPath":"arm-none-eabi-gdb",
+            "cwd": "${workspaceRoot}",
+            "executable": "${workspaceRoot}/build/tests/my_test.elf",
+            "request":"attach",
+            "servertype": "jlink",
+            // This may need to be arm-none-eabi-gdb depending on your system
+            "gdbPath": "arm-none-eabi-gdb",
+            // Connect to an already running OpenOCD instance
+            "gdbTarget": "localhost:50000",
+            "svdFile": "${workspaceRoot}/nrf52.svd",
+            "device": "nrf52",
+            "runToEntryPoint": "main",
+            // "preLaunchCommands": ["make all"],
+            // Work around for stopping at main on restart
+            "postRestartCommands": [
+                "break main",
+                "continue"
+            ]
+        },   {
             "name": "Test app",
             "type": "cortex-debug",
             // "cortex-debug.armToolchainPath":"arm-none-eabi-gdb",
@@ -34,7 +57,7 @@
             // This may need to be arm-none-eabi-gdb depending on your system
             "gdbPath": "arm-none-eabi-gdb",
             // Connect to an already running OpenOCD instance
-            "gdbTarget": "localhost:3333",
+            "gdbTarget": "localhost:50000",
             "svdFile": "${workspaceRoot}/nrf52.svd",
             "device": "nrf52",
             "runToEntryPoint": "main",

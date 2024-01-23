@@ -28,12 +28,11 @@
 
 #include <string.h>
 
-////// include the system.h file 
+////// include the system.h file
 #include "system.h"
 
-/////m to color code the output errors 
+/////m to color code the output errors
 #include "ansii_color_codes.h"
-
 
 /// @brief log the bytes to the UART ring buffer and make to ready it for transmission
 /// @param buff
@@ -42,15 +41,12 @@
 /// @return succ/err code
 extern uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size);
 
-
 // /* Variables */
 // extern int __io_putchar(int ch) __attribute__((weak));
 // extern int __io_getchar(void) __attribute__((weak));
 
-
 // char *__env[1] = { 0 };
 // char **environ = __env;
-
 
 // /* Functions */
 // void initialise_monitor_handles()
@@ -59,13 +55,13 @@ extern uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size);
 
 int _getpid(void)
 {
-	return 1;
+    return 1;
 }
 
 int _kill(int pid, int sig)
 {
-	// errno = EINVAL;
-	return -1;
+    // errno = EINVAL;
+    return -1;
 }
 
 // void _exit (int status)
@@ -74,51 +70,48 @@ int _kill(int pid, int sig)
 // 	while (1) {}		/* Make sure we hang here */
 // }
 
- int _read(int file, char *ptr, int len)
+int _read(int file, char* ptr, int len)
 {
-	
 
-return len;
+    return len;
 }
 
- int _write(int file, char *ptr, int len)
+int _write(int file, char* ptr, int len)
 {
-	
-    logger_transmit_bytes((uint8_t *)ptr , len);
-	return len;
-}
 
+    logger_transmit_bytes((uint8_t*) ptr, len);
+    return len;
+}
 
 //////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
-/////////////// here are some low level system calls 
-
+/////////////// here are some low level system calls
 
 int _close(int file)
 {
-	return -1;
+    return -1;
 }
 
 //  error: 'struct stat' declared inside parameter list will not be visible outside of this definition or declaration [-Werror]
 //   103 | int _fstat(int file, struct stat *st
 // this is needed to resolve above error
 
-struct stat *st;
+struct stat* st;
 
-int _fstat(int file, struct stat *st)
+int _fstat(int file, struct stat* st)
 {
-	// st->st_mode = S_IFCHR;
-	return 0;
+    // st->st_mode = S_IFCHR;
+    return 0;
 }
 
 int _isatty(int file)
 {
-	return 1;
+    return 1;
 }
 
 int _lseek(int file, int ptr, int dir)
 {
-	return 0;
+    return 0;
 }
 
 // int _open(char *path, int flags, ...)
@@ -168,59 +161,60 @@ int _lseek(int file, int ptr, int dir)
 // 	return -1;
 // }
 
-
-
-
-/// enable the defualt handlers 
+/// enable the defualt handlers
 void enable_fault_handlers(void)
 {
 #if defined(ENABLE_HARDFAULT_EXCEPTION)
-NVIC_EnableIRQ(HardFault_IRQn);
+    NVIC_EnableIRQ(HardFault_IRQn);
 #endif
 
 #if defined(ENABLE_MEM_MANAGE_EXCEPTION)
-NVIC_EnableIRQ(MemoryManagement_IRQn);
+    NVIC_EnableIRQ(MemoryManagement_IRQn);
 #endif
 
-#if defined(ENABLE_BUSFAULT_EXCEPTION )
-NVIC_EnableIRQ(BusFault_IRQn);
+#if defined(ENABLE_BUSFAULT_EXCEPTION)
+    NVIC_EnableIRQ(BusFault_IRQn);
 #endif
 
 #if defined(ENABLE_USAGE_FAULT_EXCEPTION)
-NVIC_EnableIRQ(UsageFault_IRQn);
+    NVIC_EnableIRQ(UsageFault_IRQn);
 #endif
-	
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
-//////                 define the fault handlers 
+//////                 define the fault handlers
 
-static void default_handler(void)
+static void default_handler(const char* reason, uint16_t len)
 {
-	system_soft_reset();
+    // system_soft_reset();
+    logger_transmit_bytes((uint8_t *)reason, len);
+    /// hang the processor
+    while (1)
+    {
+        __NOP();
+    }
 }
 
 void HardFault_Handler(void)
 {
-default_handler();
+    default_handler("Hardfault\r\n",strlen("Hardfault\r\n"));
 }
+
 void MemoryManagement_Handler(void)
 {
-default_handler();
+    default_handler("mem_manage_fault\r\n",strlen("mem_manage_fault\r\n"));
 }
 
 void BusFault_Handler(void)
 {
-default_handler();
+    default_handler("BUSfault_handler\r\n",strlen("BUSfault_handler\r\n"));
 }
 
 void UsageFault_Handler(void)
 {
-default_handler();
+    default_handler("Usage fault\r\n",strlen("Usage fault\r\n"));
 }
-
-
 
 // void app_error_handler(uint32_t error_code, uint32_t line_num, const uint8_t * p_file_name)
 // {
@@ -234,18 +228,13 @@ default_handler();
 // 	while(1);
 // }
 
-
-
-
-
 void softdevice_err_handler(uint32_t id, uint32_t pc, uint32_t info)
 {
 
-	printf(BRED"apperror->id %ld,pc %ld, info %ld\r\n",id,pc,info);
-	nrf_delay_ms(2000);
-	system_soft_reset();
-	
-	while(1);
+    printf(BRED "apperror->id %ld,pc %ld, info %ld\r\n", id, pc, info);
+    nrf_delay_ms(2000);
+    system_soft_reset();
 
-
+    while (1)
+        ;
 }

@@ -35,13 +35,15 @@ to periodically yield to the scheduler.
 #include "kernel_task.h"
 
 #include "nrf_button.h"
-#include "ble_gap_func.h"
 
 #include "nrf_gfx.h"
 
 #include "gpiote.h"
 
 #include "logger.h"
+
+
+#include "device_drivers/drivers_common/drivers_common.h"
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////// general Task Function decleartions /////////////////////////////////////
@@ -79,6 +81,9 @@ int main()
         // APP_ERROR_HANDLER(nrf_ERR_OPERATION_FAILED);
     }
 
+
+
+
     genral_task_handle = xTaskCreateStatic(general_task_function,
                                            genral_task_name,
                                            genral_task_stack_size,
@@ -91,8 +96,9 @@ int main()
         APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
     }
 
+    Hardware_drivers_install();
     /// init the kernel task preinit
-    Kernel_task_preinit();
+    // Kernel_task_preinit();
 
 
     const my_gpio_cfg nrf_buttons_gpio_type =
@@ -193,11 +199,9 @@ void general_task_function(void* param)
             // NRF_LOG_WARNING("%d", evt);
             if (evt == NRF_BUTTON_UP_EVT)
             {
-                NRF_LOG_INFO("starting adv %d", ble_gap_start_advertise(0));
-        
+             
             } else if (evt == NRF_BUTTON_DOWN_EVT)
             {
-                NRF_LOG_INFO("stopping adv%d", ble_gap_stop_advertise());
                 nrf_gfx_lib_clear_display();
 
             } else if (evt == NRF_BUTTON_MIDD_EVT)

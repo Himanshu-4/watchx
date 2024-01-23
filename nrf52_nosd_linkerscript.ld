@@ -1,21 +1,41 @@
 
+/* Linker script to configure memory regions. */
 
 SEARCH_DIR(.)
 GROUP(-lgcc -lc -lnosys)
 
-
 /* //// this linkerscript will not be using softdevice so has to be used without softdevice  */
+/* MEMORY
+{
+  FLASH (rx) : ORIGIN = 0x0, LENGTH = 0x80000
+  RAM (rwx) :  ORIGIN = 0x20000000, LENGTH = 0x10000 
+
+} */
+
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x0 , LENGTH =0x80000
-  /* RAM (rwx) :  ORIGIN = 0x20005968, LENGTH = 0xa698
-  we have 52kb ram available for us the sd only require 12kb  */
-  RAM (rwx) :  ORIGIN = 0x20000000, LENGTH = 0x10000
+  FLASH (rx) : ORIGIN = 0x00000, LENGTH = 0x78000
+  RAM (rwx) :  ORIGIN = 0x20000000, LENGTH = 64K
 }
+
+SECTIONS
+{
+  .noinit(NOLOAD):
+  {
+    PROVIDE(__start_noinit_data = .);
+    *(.noinit)
+    PROVIDE(__stop_noinit_data = .);
+  } > RAM
+} INSERT AFTER .bss
 
 
 SECTIONS
 {
+   . = ALIGN(4);
+  .mem_section_dummy_ram :
+  {
+  }
+ 
   /* describing a section to place into ram and not to load it from flash  */
    .kernel_memory_types(NOLOAD) :
   {
@@ -58,4 +78,15 @@ SECTIONS
 
 } INSERT AFTER .data;
 
+
+SECTIONS
+{
+  .mem_section_dummy_rom :
+  {
+  }
+} INSERT AFTER .text
+
+
 INCLUDE "nrf_common.ld"
+
+

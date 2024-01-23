@@ -22,10 +22,10 @@ enable_language(C ASM CXX)
 
 
 
-set(CMAKE_BUILD_TYPE "Release" )
+set(CMAKE_BUILD_TYPE "Debug" )
 # specify whether u want to generate DEbug or release Version
 set(DEBUG_Flags 
-        -O0 -g3
+        -O0
         )
 
 set(RELEASE_Flags 
@@ -35,7 +35,12 @@ set(RELEASE_Flags
 
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_C_EXTENSIONS ON)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+
 
 
 # also export compile commadnds 
@@ -54,9 +59,13 @@ set( LINKER_SRCH_PATH
         D:/smart_watch/watchx
         )
 
-set(app_linker_Script 
+set(LINKER_SCRIPT_WITH_SD 
         nrf52_linkerscript.ld
     )
+
+set(LINKER_SCRIPT_WITHOUT_SD 
+        nrf52_nosd_linkerscript.ld
+)
 
 
 set(NIMBLE_PATH 
@@ -113,7 +122,7 @@ set(COMMON_C_FLAGS
         -mfpu=fpv4-sp-d16
         # -mfloat-abi=soft #for  using the soft floating point library 
         $<$<CONFIG:RELEASE>: ${RELEASE_Flags}>
-        $<$<CONFIG:DEBUG>: ${DEBUG_Flags} lfgnklsdh>
+        $<$<CONFIG:DEBUG>: ${DEBUG_Flags} >
         
         -mthumb
         -mabi=aapcs
@@ -137,14 +146,14 @@ set(COMMON_C_FLAGS
 
 set(LINKER_FLAGS 
         -L${LINKER_SRCH_PATH}
-        -T${app_linker_Script}
+        # -T${app_linker_Script}
         -mcpu=cortex-m4
         -mthumb -mabi=aapcs
         -mfloat-abi=hard -mfpu=fpv4-sp-d16
         -u _printf_float # this will include the printf symbol in the elf
         # ${DEBUG_Flags}
         $<$<CONFIG:RELEASE>: ${RELEASE_Flags} >
-        $<$<CONFIG:DEBUG>: ${DEBUG_Flags} kjgjvjkb>
+        $<$<CONFIG:DEBUG>: ${DEBUG_Flags} >
         -Wl,-Map=${PROJECT_NAME}.map
         -Wl,--gc-sections --specs=nano.specs
         -Wl,--start-group
@@ -154,6 +163,9 @@ set(LINKER_FLAGS
         -lm # link with the math library 
         -Wl,--print-memory-usage
     )
+
+
+
 
 ###########################################################################################################################################################
 ##########################################################################################################################################################
@@ -258,7 +270,7 @@ target_compile_definitions(freertos_lib PRIVATE
 
 target_compile_options(freertos_lib PRIVATE
            ${COMMON_C_FLAGS}
-           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized  -O0>
+           $<$<COMPILE_LANGUAGE:C>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized  >
            $<$<COMPILE_LANGUAGE:CXX>:  -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-rtti>
            $<$<COMPILE_LANGUAGE:ASM>: -MP -MD -x assembler-with-cpp >
              )
@@ -453,12 +465,12 @@ set(NRF_HAL_SRC_FILES
           )
 
 
-set(EXCLUDE_FILES_FOR_OPTIMISATION 
-${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi_thread_safe.c
-${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi.c
-)
-# Set specific compiler flags for "special_file.cpp"
-set_source_files_properties(${EXCLUDE_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O3")
+# set(EXCLUDE_FILES_FOR_OPTIMISATION 
+# ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi_thread_safe.c
+# ${CMAKE_SOURCE_DIR}/libs/nrf_HAL/spi/spi.c
+# )
+# # Set specific compiler flags for "special_file.cpp"
+# set_source_files_properties(${EXCLUDE_FILES_FOR_OPTIMISATION}  PROPERTIES COMPILE_FLAGS "-O3")
 
 
 ###########################################################################################
@@ -691,7 +703,7 @@ target_link_libraries(${EXECUTABLE}
 target_link_options(${EXECUTABLE} PRIVATE
 
         ${LINKER_FLAGS}
-
+        -T${LINKER_SCRIPT_WITH_SD}
         )
 
      # set the target properties to make output file as .elf executable and linkable format 

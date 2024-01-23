@@ -112,9 +112,9 @@ file ( GLOB_RECURSE TEST_SOURCE_FILES
 list(APPEND TEST_INCLUDES_DIR 
     ${CMAKE_PROJECT_DIR}/src/main )
     
-list(APPEND TEST_SOURCE_FILES 
-${CMAKE_PROJECT_DIR}/src/main/kernel_task.c 
-)
+# list(APPEND TEST_SOURCE_FILES 
+# ${CMAKE_PROJECT_DIR}/src/main/kernel_task.c 
+# )
 
 # foreach(test_srcs ${test_src_Files})
 
@@ -162,21 +162,19 @@ target_include_directories(${TEST_EXECUTABLE}  PUBLIC SYSTEM
     ${WATCH_KERNEL_INCLUDE_DIR}
     ${SDK_INCLUDE_DIR}
     ${FREERTOS_INCLUDE}
-    ${BLE_LIB_INCLUDE_DIR}
     ) 
 
 # link the test target 
 target_link_libraries(${TEST_EXECUTABLE}
 freertos_lib
-ble_library
 nrf_hal_lib 
 watchx_kernel_lib
-micro_ecc_Crypto_lib
 #        tiny_Crypto
   )
 
 target_link_options(${TEST_EXECUTABLE} PRIVATE
           ${LINKER_FLAGS}
+          -T${LINKER_SCRIPT_WITHOUT_SD}
         )
 set_target_properties(${TEST_EXECUTABLE}
           PROPERTIES SUFFIX .elf
