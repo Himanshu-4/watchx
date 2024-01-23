@@ -42,6 +42,8 @@ to periodically yield to the scheduler.
 
 #include "logger.h"
 
+#include "nrf_time.h"
+
 
 #include "device_drivers/drivers_common/drivers_common.h"
 //////////////////////////////////////////////////////////////////////////////////////
@@ -83,20 +85,24 @@ int main()
 
 
 
+    // genral_task_handle = xTaskCreateStatic(general_task_function,
+    //                                        genral_task_name,
+    //                                        genral_task_stack_size,
+    //                                        genral_task_param,
+    //                                        genral_task_priority,
+    //                                        gen_task_stack,
+    //                                        &gen_task_buffer);
+    // if (genral_task_handle == NULL)
+    // {
+    //     APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
+    // }
 
-    genral_task_handle = xTaskCreateStatic(general_task_function,
-                                           genral_task_name,
-                                           genral_task_stack_size,
-                                           genral_task_param,
-                                           genral_task_priority,
-                                           gen_task_stack,
-                                           &gen_task_buffer);
-    if (genral_task_handle == NULL)
-    {
-        APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
-    }
+    // Hardware_drivers_install();
+    time_init();
+    logger_init();
+    logger_enable_tx();
+    gpio_install_isr_servc();
 
-    Hardware_drivers_install();
     /// init the kernel task preinit
     // Kernel_task_preinit();
 
@@ -132,6 +138,10 @@ int main()
 
     
 
+    printf("initing  rtos\r\n");
+    printf("ptr %x \r\n",logger_get_tx_buff_addr());
+    nrf_delay_ms(100);
+    logger_flush_buffer();
     // watchdog_init(1);
     // watchdog_start();
     /// @todo have to implement the kernel init file
@@ -143,7 +153,7 @@ int main()
 
     // app_start_scheduler();
 
-    vTaskStartScheduler();
+    // vTaskStartScheduler();
     for (;;)
     {
         // printf("dev id is %x\r\n ", st_get_device_id());
@@ -151,14 +161,15 @@ int main()
         // fgage_get_vcell(), fgage_get_soc(), fgage_get_remcap(), fgage_get_tte(), fgage_get_curent(), (float)fgage_get_temp(),
         // fgage_get_status());
 
+
         __WFI();
         __NOP();
         // delay(500);
         //     // // no delay at al
         // uart_log_bytes((uint8_t *)msg, sizeof(msg) );
         // gpio_pin_toogle(LED_1);
-
-        nrf_delay_ms(100);
+        // printf("hi from board\r\n");
+        nrf_delay_ms(1000);
     }
     system_soft_reset();
 

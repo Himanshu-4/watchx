@@ -16,41 +16,41 @@ void __WEAK SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQHandler(void)
     if (NRF_SPIM0->EVENTS_STARTED)
     {
         NRF_SPIM0->EVENTS_STARTED = 0;
-        if (spi_0_intr_func[SPI_INT_STARTED_Func] != NULL)
+        if (spi_intr_func[0][SPI_INT_STARTED_Func] != NULL)
         {
-            spi_0_intr_func[SPI_INT_STARTED_Func]();
+            spi_intr_func[0][SPI_INT_STARTED_Func]();
         }
     }
     else if (NRF_SPIM0->EVENTS_ENDRX)
     {
         NRF_SPIM0->EVENTS_ENDRX = 0;
-        if (spi_0_intr_func[SPI_INT_ENDRX_Func] != NULL)
+        if (spi_intr_func[0][SPI_INT_ENDRX_Func] != NULL)
         {
-            spi_0_intr_func[SPI_INT_ENDRX_Func]();
+            spi_intr_func[0][SPI_INT_ENDRX_Func]();
         }
     }
     else if (NRF_SPIM0->EVENTS_END)
     {
         NRF_SPIM0->EVENTS_END = 0;
-        if (spi_0_intr_func[SPI_INT_END_Func] != NULL)
+        if (spi_intr_func[0][SPI_INT_END_Func] != NULL)
         {
-            spi_0_intr_func[SPI_INT_END_Func]();
+            spi_intr_func[0][SPI_INT_END_Func]();
         }
     }
     else if (NRF_SPIM0->EVENTS_ENDTX)
     {
         NRF_SPIM0->EVENTS_ENDTX = 0;
-        if (spi_0_intr_func[SPI_INT_ENDTX_Func] != NULL)
+        if (spi_intr_func[0][SPI_INT_ENDTX_Func] != NULL)
         {
-            spi_0_intr_func[SPI_INT_ENDTX_Func]();
+            spi_intr_func[0][SPI_INT_ENDTX_Func]();
         }
     }
     else if (NRF_SPIM0->EVENTS_STARTED)
     {
         NRF_SPIM0->EVENTS_STARTED = 0;
-        if (spi_0_intr_func[SPI_INT_STARTED_Func] != NULL)
+        if (spi_intr_func[0][SPI_INT_STARTED_Func] != NULL)
         {
-            spi_0_intr_func[SPI_INT_STARTED_Func]();
+            spi_intr_func[0][SPI_INT_STARTED_Func]();
         }
     }
 }
@@ -61,41 +61,41 @@ void __WEAK SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQHandler(void)
     if (NRF_SPIM1->EVENTS_STARTED)
     {
         NRF_SPIM1->EVENTS_STARTED = 0;
-        if (spi_1_intr_func[SPI_INT_STARTED_Func] != NULL)
+        if (spi_intr_func[1][SPI_INT_STARTED_Func] != NULL)
         {
-            spi_1_intr_func[SPI_INT_STARTED_Func]();
+            spi_intr_func[1][SPI_INT_STARTED_Func]();
         }
     }
     else if (NRF_SPIM1->EVENTS_ENDRX)
     {
         NRF_SPIM1->EVENTS_ENDRX = 0;
-        if (spi_1_intr_func[SPI_INT_ENDRX_Func] != NULL)
+        if (spi_intr_func[1][SPI_INT_ENDRX_Func] != NULL)
         {
-            spi_1_intr_func[SPI_INT_ENDRX_Func]();
+            spi_intr_func[1][SPI_INT_ENDRX_Func]();
         }
     }
     else if (NRF_SPIM1->EVENTS_END)
     {
         NRF_SPIM1->EVENTS_END = 0;
-        if (spi_1_intr_func[SPI_INT_END_Func] != NULL)
+        if (spi_intr_func[1][SPI_INT_END_Func] != NULL)
         {
-            spi_1_intr_func[SPI_INT_END_Func]();
+            spi_intr_func[1][SPI_INT_END_Func]();
         }
     }
     else if (NRF_SPIM1->EVENTS_ENDTX)
     {
         NRF_SPIM1->EVENTS_ENDTX = 0;
-        if (spi_1_intr_func[SPI_INT_ENDTX_Func] != NULL)
+        if (spi_intr_func[1][SPI_INT_ENDTX_Func] != NULL)
         {
-            spi_1_intr_func[SPI_INT_ENDTX_Func]();
+            spi_intr_func[1][SPI_INT_ENDTX_Func]();
         }
     }
     else if (NRF_SPIM1->EVENTS_STARTED)
     {
         NRF_SPIM1->EVENTS_STARTED = 0;
-        if (spi_1_intr_func[SPI_INT_STARTED_Func] != NULL)
+        if (spi_intr_func[1][SPI_INT_STARTED_Func] != NULL)
         {
-            spi_1_intr_func[SPI_INT_STARTED_Func]();
+            spi_intr_func[1][SPI_INT_STARTED_Func]();
         }
     }
 }
@@ -106,41 +106,41 @@ void SPIM2_SPIS2_SPI2_IRQHandler(void)
     if (NRF_SPIM2->EVENTS_STARTED)
     {
         NRF_SPIM2->EVENTS_STARTED = 0;
-        if (spi_2_intr_func[SPI_INT_STARTED_Func] != NULL)
+        if (spi_intr_func[2][SPI_INT_STARTED_Func] != NULL)
         {
-            spi_2_intr_func[SPI_INT_STARTED_Func]();
+            spi_intr_func[2][SPI_INT_STARTED_Func]();
         }
     }
     else if (NRF_SPIM2->EVENTS_ENDRX)
     {
         NRF_SPIM2->EVENTS_ENDRX = 0;
-        if (spi_2_intr_func[SPI_INT_ENDRX_Func] != NULL)
+        if (spi_intr_func[2][SPI_INT_ENDRX_Func] != NULL)
         {
-            spi_2_intr_func[SPI_INT_ENDRX_Func]();
+            spi_intr_func[2][SPI_INT_ENDRX_Func]();
         }
     }
     else if (NRF_SPIM2->EVENTS_END)
     {
         NRF_SPIM2->EVENTS_END = 0;
-        if (spi_2_intr_func[SPI_INT_END_Func] != NULL)
+        if (spi_intr_func[2][SPI_INT_END_Func] != NULL)
         {
-            spi_2_intr_func[SPI_INT_END_Func]();
+            spi_intr_func[2][SPI_INT_END_Func]();
         }
     }
     else if (NRF_SPIM2->EVENTS_ENDTX)
     {
         NRF_SPIM2->EVENTS_ENDTX = 0;
-        if (spi_2_intr_func[SPI_INT_ENDTX_Func] != NULL)
+        if (spi_intr_func[2][SPI_INT_ENDTX_Func] != NULL)
         {
-            spi_2_intr_func[SPI_INT_ENDTX_Func]();
+            spi_intr_func[2][SPI_INT_ENDTX_Func]();
         }
     }
     else if (NRF_SPIM2->EVENTS_STARTED)
     {
-        NRF_SPIM2->EVENTS_STARTED = fdgsg 0;
-        if (spi_2_intr_func[SPI_INT_STARTED_Func] != NULL)
+        NRF_SPIM2->EVENTS_STARTED =  0;
+        if (spi_intr_func[2][SPI_INT_STARTED_Func] != NULL)
         {
-            spi_2_intr_func[SPI_INT_STARTED_Func]();
+            spi_intr_func[2][SPI_INT_STARTED_Func]();
         }
     }
 }

@@ -5,18 +5,13 @@ SEARCH_DIR(.)
 GROUP(-lgcc -lc -lnosys)
 
 /* //// this linkerscript will not be using softdevice so has to be used without softdevice  */
-/* MEMORY
+MEMORY
 {
   FLASH (rx) : ORIGIN = 0x0, LENGTH = 0x80000
   RAM (rwx) :  ORIGIN = 0x20000000, LENGTH = 0x10000 
 
-} */
-
-MEMORY
-{
-  FLASH (rx) : ORIGIN = 0x00000, LENGTH = 0x78000
-  RAM (rwx) :  ORIGIN = 0x20000000, LENGTH = 64K
 }
+
 
 SECTIONS
 {

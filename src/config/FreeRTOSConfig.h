@@ -140,6 +140,9 @@
 /* Define to trap errors during development. */
 #if defined(DEBUG_NRF) || defined(DEBUG_NRF_USER)
 #define configASSERT(x) ASSERT(x)
+
+#else 
+#define configASSERT(x) ASSERT(x)
 #endif
 
 /* FreeRTOS MPU specific definitions. */

@@ -201,6 +201,7 @@ void logger_start_rx(void)
     *uart_get_event_addr(UART_EVENT_RXSTARTED) = 0;
 }
 
+
 /// @brief stop the reception process
 /// @param  void
 void logger_stop_rx(void)

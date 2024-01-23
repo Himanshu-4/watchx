@@ -166,7 +166,7 @@ target_include_directories(${TEST_EXECUTABLE}  PUBLIC SYSTEM
 
 # link the test target 
 target_link_libraries(${TEST_EXECUTABLE}
-freertos_lib
+# freertos_lib
 nrf_hal_lib 
 watchx_kernel_lib
 #        tiny_Crypto
