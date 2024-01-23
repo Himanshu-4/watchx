@@ -69,9 +69,13 @@
 			"ble_event_handler.h": "c",
 			"partition_table.h": "c",
 			"ble_ancs.h": "c",
-			"nrf_gfx.h": "c"
+			"nrf_gfx.h": "c",
+			"nrf_button.h": "c"
 		},
 		"C_Cpp.errorSquiggles": "enabled",
+
+
+		/// @todo have to enable the Clang-tidy later 
 		"C_Cpp.codeAnalysis.clangTidy.enabled": false,
 
 

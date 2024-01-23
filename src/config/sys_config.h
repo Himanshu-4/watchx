@@ -63,7 +63,7 @@
 #define UART_TX_DEFAULT_PIN 6UL
 #define UART_RX_DEFAULT_PIN 8UL
 
-#define NRF_UART_LOG_BAUD_RATE UART_Baudrate_1M 
+#define NRF_UART_LOG_BAUD_RATE UART_BAUDRATE_BAUDRATE_Baud1M
 
 #define NRF_LOG_MAX_ERRORS 1
 #define NRF_LOG_MAX_WARNINGS 2
@@ -72,9 +72,9 @@
 
 #define DEBUG_LOG_MAX NRF_LOG_MAX_INFO
 
-#define NRF_CONFIG_UART_TX_BUFF_SIZE  10 /// 500 byte buffer size 
+#define NRF_CONFIG_UART_TX_BUFF_SIZE  100 /// 500 byte buffer size 
 
-#define NRF_CONFIG_UART_RX_BUFF_SIZE  10 /// 500 byte rx buffer size
+#define NRF_CONFIG_UART_RX_BUFF_SIZE  100 /// 500 byte rx buffer size
 
 ////================================================================================
 ////================================================================================
@@ -135,7 +135,6 @@
 #define NRF_CONFIG_MIDDLE_BUTTON_PIN PIN_13
 #define NRF_CONFIG_UP_BUTTON_PIN PIN_14
 #define NRF_CONFIG_DOWN_BUTTON_PIN PIN_15
-#define NRF_CONFIG_HOME_BUTTON_PIN PIN_16
 
 //////////// define the interrupt type
 #define NRF_CONFIG_BUTTON_INTERRUPT_POLARITY EVENT_RISING_EDGE
@@ -144,7 +143,6 @@
 #define NRF_CONFIG_MIDDLE_BUTTON_GPIOTE_CHANNEL GPIOTE_CHANNEL_1
 #define NRF_CONFIG_UP_BUTTON_GPIOTE_CHANNEL GPIOTE_CHANNEL_2
 #define NRF_CONFIG_DOWN_BUTTON_GPIOTE_CHANNEL GPIOTE_CHANNEL_3
-#define NRF_CONFIG_HOME_BUTTON_GPIOTE_CHANNEL GPIOTE_CHANNEL_4
 
 #define NRF_CONFIG_BUTTON_EVENT_WAIT_TIME 2000 /// 2 secs
 

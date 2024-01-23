@@ -52,12 +52,43 @@ void logger_start_tx(void);
 /// @param  void
 void logger_stop_tx(void);
 
+/// @brief enable the logger transmission
+/// @param  void
+void logger_enable_tx(void);
+
+/// @brief disable the logger transmission
+/// @param  void
+void logger_disable_tx(void);
+
+/// @brief enable the logger reception
+/// @param  void
+void logger_enable_rx(void);
+
+/// @brief disable the logger reception 
+/// @param  void
+void logger_disable_rx(void);
+
+/// @brief return the pointer of the TX addr 
+/// @param  void
+/// @return buff addr 
+uint8_t * logger_get_tx_buff_addr(void);
+
+/// @brief get the pointer of the RX buffer 
+/// @param  void
+/// @return buff address 
+uint8_t * logger_get_rx_buff_addr(void);
+
+
+/////////////////////////////////////////////////////////////////////////////
+//////////////////////// transmit API  //////////////////////////
+
 /// @brief log the bytes to the UART ring buffer and make to ready it for transmission
 /// @param buff
 /// @param size
 /// @param override
 /// @return succ/err code
 uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size);
+
 
 
 ////////////////////////////////////////////////////////////////////////////

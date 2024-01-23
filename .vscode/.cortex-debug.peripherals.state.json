@@ -1,0 +1,243 @@
+[
+    {
+        "node": "APPROTECT.FORCEPROTECT",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "APPROTECT.DISABLE",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "CLOCK",
+        "expanded": true,
+        "format": 0,
+        "pinned": false
+    },
+    {
+        "node": "CLOCK.HFCLKRUN",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "CLOCK.HFCLKSTAT",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "CLOCK.LFCLKRUN",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "CLOCK.LFCLKSTAT",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "CLOCK.LFCLKSRCCOPY",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "CLOCK.LFCLKSRC",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "CLOCK.TRACECONFIG",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "FICR.NFC",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "P0.DIRSET",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "NVMC.ICACHECNF",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "POWER.POFCON",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "POWER.DCDCEN",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "SAADC.STATUS",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "SAADC.CH[0]",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "SAADC.CH[0].PSELP",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "SAADC.CH[0].PSELN",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "SAADC.CH[0].CONFIG",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "SAADC.SAMPLERATE",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "SAADC.RESULT",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TIMER1.INTENSET",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TIMER1.INTENCLR",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TIMER1.BITMODE",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TIMER1.PRESCALER",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TWIM0.SHORTS",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TWIM0.INTEN",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TWIM0.ERRORSRC",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TWIM0.ENABLE",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TWIM0.PSEL",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TWIM0.FREQUENCY",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TWIM0.RXD",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TWIM0.TXD",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "TWIM0.ADDRESS",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "UARTE0.INTEN",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "UARTE0.INTENSET",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "UARTE0.PSEL",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "UARTE0.BAUDRATE",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "UARTE0.TXD",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "UICR.NRFFW[11]",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "UICR.PSELRESET[0]",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "UICR.PSELRESET[1]",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "UICR.APPROTECT",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "UICR.NFCPINS",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "WDT.RUNSTATUS",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "WDT.CRV",
+        "expanded": true,
+        "format": 0
+    },
+    {
+        "node": "WDT.CONFIG",
+        "expanded": true,
+        "format": 0
+    }
+]

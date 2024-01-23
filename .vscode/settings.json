@@ -51,7 +51,16 @@
     "cmake.generator": "MinGW Makefiles",
     "cmake.configureOnEdit": false,
     "cmake.configureOnOpen": false,
-    
     "C_Cpp.errorSquiggles": "disabled",
-    
+
+    "git-autoconfig.configList": [
+        {    
+            "user.email": "janragi123@gmail.com",
+            "user.name": "Himanshu-4"
+        }
+        
+    ]
+    /**
+     * @file "settings.json"
+     * @desc "This is what my configuration looks like" */
 }

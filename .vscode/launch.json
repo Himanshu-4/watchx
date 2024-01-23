@@ -1,0 +1,69 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Main app",
+            "type": "cortex-debug",
+            // "cortex-debug.armToolchainPath":"arm-none-eabi-gdb",
+            "cwd": "${workspaceRoot}",
+            "executable": "${workspaceRoot}/build/Watchx.elf",
+            "request": "launch",
+            "servertype": "jlink",
+            // This may need to be arm-none-eabi-gdb depending on your system
+            "gdbPath": "arm-none-eabi-gdb",
+            // Connect to an already running OpenOCD instance
+            "gdbTarget": "localhost:3333",
+            "svdFile": "${workspaceRoot}/nrf52.svd",
+            "device": "nrf52",
+            "runToEntryPoint": "main",
+            // "preLaunchCommands": ["make all"],
+            // Work around for stopping at main on restart
+            "postRestartCommands": [
+                "break main",
+                "continue"
+            ]
+        },
+        {
+            "name": "Test app",
+            "type": "cortex-debug",
+            // "cortex-debug.armToolchainPath":"arm-none-eabi-gdb",
+            "cwd": "${workspaceRoot}",
+            "executable": "${workspaceRoot}/build/Watchx.elf",
+            "request": "launch",
+            "servertype": "jlink",
+            // This may need to be arm-none-eabi-gdb depending on your system
+            "gdbPath": "arm-none-eabi-gdb",
+            // Connect to an already running OpenOCD instance
+            "gdbTarget": "localhost:3333",
+            "svdFile": "${workspaceRoot}/nrf52.svd",
+            "device": "nrf52",
+            "runToEntryPoint": "main",
+            // "preLaunchCommands": ["make all"],
+            // Work around for stopping at main on restart
+            "postRestartCommands": [
+                "break main",
+                "continue"
+            ]
+        },
+    ]
+}
+//  {
+//         "name": "Debug - Openocd docker Remote",
+//         "type":"cortex-debug",
+//         "cortex-debug.armToolchainPath": "C:\\Program Files (x86)\\GNU Arm Embedded Toolchain\\10 2021.07\\bin",
+//         "cwd": "${workspaceRoot}",
+//         "executable": "${command:cmake.launchTargetPath}",
+//         "request": "launch",
+//         "servertype": "external",
+//         // This may need to be arm-none-eabi-gdb depending on your system
+//         "gdbPath" : "${env:ARM_NONE_EABI_TOOLCHAIN_PATH}/bin/arm-none-eabi-gdb",
+//         // Connect to an already running OpenOCD instance
+//         "gdbTarget": "host.docker.internal:3333",
+//         "svdFile": "${workspaceRoot}/nrf52.svd",
+//         "runToMain": true,
+//         // Work around for stopping at main on restart
+//         "postRestartCommands": [
+//             "break main",
+//             "continue"
+//         ]
+//     },
