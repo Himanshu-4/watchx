@@ -93,6 +93,8 @@ void logger_init(void)
     // enable the isr
     uart_enable_isr();
 
+    memset(&uart_log,0,sizeof(uart_log));
+
     uart_log.rx.pbuff = rx_buff;
     uart_log.tx.pbuff = tx_buff;
 
@@ -351,7 +353,7 @@ uint8_t* logger_get_rx_buff_addr(void)
 /// @param size
 /// @param override
 /// @return succ/err code
-uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size)
+uint32_t logger_transmit_bytes(const char * pbuff, uint16_t size)
 {
     if (!uart_log.tx.enable_flag)
     {
@@ -373,8 +375,6 @@ uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size)
         {
             /// also stop the xfr
             logger_stop_tx();
-            // i.e. buffer is also full
-            uart_log.tx.buff_full = 1;
             uart_log.tx.tail = second_segment;
         }
 
@@ -393,15 +393,13 @@ uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size)
         //     /// this case there will be no shifting for sure
 
         // }
-        if (uart_log.tx.head < uart_log.tx.tail)
+        if ((uart_log.tx.head < uart_log.tx.tail) || uart_log.tx.buff_full)
         {
             /// check for shifting/overiding
             if ((uart_log.tx.head + size) >= uart_log.tx.tail)
             {
                 /// stop the uart transfers as tail is shifted and update the pointers
                 logger_stop_tx();
-                // i.e. buffer is also full
-                uart_log.tx.buff_full = 1;
                 uart_log.tx.tail = uart_log.tx.head + size;
 
                 if (uart_log.tx.tail >= UART_TX_BUFFER_SIZE)
@@ -421,6 +419,12 @@ uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size)
         }
     }
 
+    /// check if buffer gets full /// we know that writing shift the head but still if they become equal 
+    /// i.e. due to they get full
+    if(uart_log.tx.head == uart_log.tx.tail)
+    {
+        uart_log.tx.buff_full=1;
+    }
     /// start the logger to transmit
     logger_start_tx();
 
@@ -449,6 +453,8 @@ void uart_tx_cmplete_callback(void)
     if ((uart_log.tx.head == uart_log.tx.tail) && (!uart_log.tx.buff_full))
     {
         uart_log.tx.xfr_start = 0;
+        // uart_log.tx.head = 0;  /// this will make the buffer to start from 0
+        // uart_log.tx.tail =uart_log.tx.head =0;
         return;
     }
     uart_log.tx.buff_full = 0;

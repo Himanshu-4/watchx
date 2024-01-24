@@ -53,16 +53,16 @@ extern uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size);
 // {
 // }
 
-int _getpid(void)
-{
-    return 1;
-}
+// int _getpid(void)
+// {
+//     return 1;
+// }
 
-int _kill(int pid, int sig)
-{
-    // errno = EINVAL;
-    return -1;
-}
+// int _kill(int pid, int sig)
+// {
+//     // errno = EINVAL;
+//     return -1;
+// }
 
 // void _exit (int status)
 // {
@@ -96,23 +96,23 @@ int _close(int file)
 //   103 | int _fstat(int file, struct stat *st
 // this is needed to resolve above error
 
-struct stat* st;
+// struct stat* st;
 
-int _fstat(int file, struct stat* st)
-{
-    // st->st_mode = S_IFCHR;
-    return 0;
-}
+// int _fstat(int file, struct stat* st)
+// {
+//     // st->st_mode = S_IFCHR;
+//     return 0;
+// }
 
-int _isatty(int file)
-{
-    return 1;
-}
+// int _isatty(int file)
+// {
+//     return 1;
+// }
 
-int _lseek(int file, int ptr, int dir)
-{
-    return 0;
-}
+// int _lseek(int file, int ptr, int dir)
+// {
+//     return 0;
+// }
 
 // int _open(char *path, int flags, ...)
 // {

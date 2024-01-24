@@ -44,7 +44,6 @@ to periodically yield to the scheduler.
 
 #include "nrf_time.h"
 
-
 #include "device_drivers/drivers_common/drivers_common.h"
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -85,17 +84,17 @@ int main()
 
 
 
-    // genral_task_handle = xTaskCreateStatic(general_task_function,
-    //                                        genral_task_name,
-    //                                        genral_task_stack_size,
-    //                                        genral_task_param,
-    //                                        genral_task_priority,
-    //                                        gen_task_stack,
-    //                                        &gen_task_buffer);
-    // if (genral_task_handle == NULL)
-    // {
-    //     APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
-    // }
+    genral_task_handle = xTaskCreateStatic(general_task_function,
+                                           genral_task_name,
+                                           genral_task_stack_size,
+                                           genral_task_param,
+                                           genral_task_priority,
+                                           gen_task_stack,
+                                           &gen_task_buffer);
+    if (genral_task_handle == NULL)
+    {
+        APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
+    }
 
     // Hardware_drivers_install();
     time_init();
@@ -236,12 +235,15 @@ void general_task_function(void* param)
     vTaskDelete(NULL);
 }
 
-
+/// @brief this is the IRQ handler for the GPIO interrupt
+/// @param void
+/// @note 
+/// @todo d  
 void gpio_irq_han(void)
 {
-    printf("This is the First line of the example test an-->\r\n");
-    printf("second example line is started from here to t--:\r\n");
-    printf("third loie of logger mofule is for the purpos--?\r\n");
+    logger_transmit_bytes("0123456789\r\n",12);
+    logger_transmit_bytes("ABCDEFGHIJ\r\n",12);
+    logger_transmit_bytes("abcdefghij\r\n",12);
     // printf("interrupt trger from pin 16\r\n");
     // printf("interrupt trger from pin 16\r\n");
     

@@ -296,7 +296,8 @@ ble_func_recv_indic:
     }
 
 main_loop:
-    uint32_t cmd = kernel_state_idle;
+    {
+        uint32_t cmd = kernel_state_idle;
         for (;;) {
 
                 switch (cmd) {
@@ -318,7 +319,7 @@ main_loop:
             /// waiting for a commadn queue from the BLE tasks, forever
             xQueueReceive(kernel_cmd_q_handle, &cmd, U32_MAX);
         }
-
+    }
     //// never reach here
     vTaskDelete(NULL);
 }

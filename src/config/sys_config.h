@@ -4,7 +4,7 @@
 #if defined(BUILD_APPLICATION)
 
 ///////// init the freertos enviournment for the system
-// #define FREERTOS_ENV 1
+#define FREERTOS_ENV 1
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,9 +72,9 @@
 
 #define DEBUG_LOG_MAX NRF_LOG_MAX_INFO
 
-#define NRF_CONFIG_UART_TX_BUFF_SIZE  100 /// 500 byte buffer size 
+#define NRF_CONFIG_UART_TX_BUFF_SIZE  20 /// 500 byte buffer size 
 
-#define NRF_CONFIG_UART_RX_BUFF_SIZE  100 /// 500 byte rx buffer size
+#define NRF_CONFIG_UART_RX_BUFF_SIZE  20 /// 500 byte rx buffer size
 
 ////================================================================================
 ////================================================================================

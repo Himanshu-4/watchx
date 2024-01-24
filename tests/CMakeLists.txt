@@ -61,9 +61,9 @@ micro_ecc_Crypto_lib
 target_link_options(${PY_GFX_TOOL} PRIVATE
           ${LINKER_FLAGS}
         )
-set_target_properties(${PY_GFX_TOOL}
-          PROPERTIES SUFFIX .elf
-          )
+# set_target_properties(${PY_GFX_TOOL}
+#           PROPERTIES SUFFIX .out
+#           )
 
 # ======================== adding the custom target file ===========================
 
@@ -74,21 +74,21 @@ add_custom_command(TARGET ${PY_GFX_TOOL}
         COMMAND echo  "Succesfully build the test program  :)"
         COMMAND echo  "BUilding Extra Files for test program  Hex, BIN "
         
-        COMMAND ${CMAKE_OBJCOPY} -O ihex ${PY_GFX_TOOL}.elf   ${PY_GFX_TOOL}.hex
-        COMMAND ${CMAKE_OBJCOPY} -O binary ${PY_GFX_TOOL}.elf  ${PY_GFX_TOOL}.bin
+        COMMAND ${CMAKE_OBJCOPY} -O ihex ${PY_GFX_TOOL}${CMAKE_EXECUTABLE_SUFFIX}   ${PY_GFX_TOOL}.hex
+        COMMAND ${CMAKE_OBJCOPY} -O binary ${PY_GFX_TOOL}${CMAKE_EXECUTABLE_SUFFIX}  ${PY_GFX_TOOL}.bin
         )
 
   #Print executable size
 add_custom_command(TARGET ${PY_GFX_TOOL}
             POST_BUILD
             COMMAND echo "The Size of your project is shown below :) "
-            COMMAND ${CMAKE_SIZE_UTIL} ${PY_GFX_TOOL}.elf
+            COMMAND ${CMAKE_SIZE_UTIL} ${PY_GFX_TOOL}${CMAKE_EXECUTABLE_SUFFIX}
   )
       
 ### adding custom target to flash the test programs 
 
 add_custom_target(flash_py_tool        
-COMMAND echo "flashing ${TEST_EXECUTABLE}.elf into the nrf52832"
+COMMAND echo "flashing ${TEST_EXECUTABLE}.hex into the nrf52832"
 COMMAND nrfjprog -f nrf52 --program ${PY_GFX_TOOL}.hex --sectorerase --verify
 COMMAND nrfjprog -f nrf52 --reset
 )
@@ -166,7 +166,7 @@ target_include_directories(${TEST_EXECUTABLE}  PUBLIC SYSTEM
 
 # link the test target 
 target_link_libraries(${TEST_EXECUTABLE}
-# freertos_lib
+freertos_lib
 nrf_hal_lib 
 watchx_kernel_lib
 #        tiny_Crypto
@@ -176,9 +176,9 @@ target_link_options(${TEST_EXECUTABLE} PRIVATE
           ${LINKER_FLAGS}
           -T${LINKER_SCRIPT_WITHOUT_SD}
         )
-set_target_properties(${TEST_EXECUTABLE}
-          PROPERTIES SUFFIX .elf
-          )
+# set_target_properties(${TEST_EXECUTABLE}
+#           PROPERTIES SUFFIX .out
+#           )
 
 # ======================== adding the custom target file ===========================
 
@@ -189,21 +189,21 @@ add_custom_command(TARGET ${TEST_EXECUTABLE}
         COMMAND echo  "Succesfully build the test program  :)"
         COMMAND echo  "BUilding Extra Files for test program  Hex, BIN "
         
-        COMMAND ${CMAKE_OBJCOPY} -O ihex ${TEST_EXECUTABLE}.elf   ${TEST_EXECUTABLE}.hex
-        COMMAND ${CMAKE_OBJCOPY} -O binary ${TEST_EXECUTABLE}.elf  ${TEST_EXECUTABLE}.bin
+        COMMAND ${CMAKE_OBJCOPY} -O ihex ${TEST_EXECUTABLE}${CMAKE_EXECUTABLE_SUFFIX}   ${TEST_EXECUTABLE}.hex
+        COMMAND ${CMAKE_OBJCOPY} -O binary ${TEST_EXECUTABLE}${CMAKE_EXECUTABLE_SUFFIX} ${TEST_EXECUTABLE}.bin
         )
 
   #Print executable size
 add_custom_command(TARGET ${TEST_EXECUTABLE}
             POST_BUILD
             COMMAND echo "The Size of your project is shown below :) "
-            COMMAND ${CMAKE_SIZE_UTIL} ${TEST_EXECUTABLE}.elf
+            COMMAND ${CMAKE_SIZE_UTIL} ${TEST_EXECUTABLE}${CMAKE_EXECUTABLE_SUFFIX}
   )
       
 ### adding custom target to flash the test programs 
 
 add_custom_target(flash_test        
-COMMAND echo "flashing ${TEST_EXECUTABLE}.elf into the nrf52832"
+COMMAND echo "flashing ${TEST_EXECUTABLE}.hex into the nrf52832"
 COMMAND nrfjprog -f nrf52 --program ${TEST_EXECUTABLE}.hex --sectorerase --verify
 COMMAND nrfjprog -f nrf52 --reset
 )

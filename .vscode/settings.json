@@ -62,7 +62,8 @@
             "user.name": "Himanshu-4"
         }
         
-    ]
+    ],
+    "cortex-debug.variableUseNaturalFormat": false
     /**
      * @file "settings.json"
      * @desc "This is what my configuration looks like" */

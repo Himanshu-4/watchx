@@ -23,6 +23,8 @@ enable_language(C ASM CXX)
 
 
 set(CMAKE_BUILD_TYPE "Debug" )
+
+set(CMAKE_EXECUTABLE_SUFFIX .elf)
 # specify whether u want to generate DEbug or release Version
 set(DEBUG_Flags 
         -O0
@@ -110,7 +112,9 @@ set(COMMON_DEFINES
         -DNRF_SD_BLE_API_VERSION=7
         -DS132
         -DSOFTDEVICE_PRESENT
-        
+
+        $<$<CONFIG:DEBUG>: -DDEBUG >
+        $<$<CONFIG:RELEASE>: -DRELEASE >
           # -DDEBUG  # if you want to debug the code then check it otherwise comment it 
         # -DSOFTDEVICE_PRESENT # tell the compiler that softdevice is present 
         # -DENABLE_SWO # uncomment it if you want to enable serial wire output 
@@ -707,9 +711,9 @@ target_link_options(${EXECUTABLE} PRIVATE
         )
 
      # set the target properties to make output file as .elf executable and linkable format 
-set_target_properties(${EXECUTABLE}
-        PROPERTIES SUFFIX  .elf
- )      
+# set_target_properties(${EXECUTABLE}
+#         PROPERTIES SUFFIX  .out
+#  )      
 
 
 ##################################################################################################################################################################
@@ -732,8 +736,8 @@ add_custom_command(TARGET ${EXECUTABLE}
         COMMAND echo  "Succesfully build YOUR Project  :)"
         COMMAND echo  "BUilding Extra Files Hex, BIN "
         
-        COMMAND ${CMAKE_OBJCOPY} -O ihex ${EXECUTABLE}.elf   ${PROJECT_NAME}.hex
-        COMMAND ${CMAKE_OBJCOPY} -O binary ${EXECUTABLE}.elf ${PROJECT_NAME}.bin
+        COMMAND ${CMAKE_OBJCOPY} -O ihex ${EXECUTABLE}${CMAKE_EXECUTABLE_SUFFIX}   ${PROJECT_NAME}.hex
+        COMMAND ${CMAKE_OBJCOPY} -O binary ${EXECUTABLE}${CMAKE_EXECUTABLE_SUFFIX} ${PROJECT_NAME}.bin
         )
 
 
@@ -741,7 +745,7 @@ add_custom_command(TARGET ${EXECUTABLE}
 add_custom_command(TARGET ${EXECUTABLE}
         POST_BUILD
         COMMAND echo " THe Size of your project is shown below :) "
-        COMMAND ${CMAKE_SIZE_UTIL} ${EXECUTABLE}.elf
+        COMMAND ${CMAKE_SIZE_UTIL} ${EXECUTABLE}${CMAKE_EXECUTABLE_SUFFIX}
         )
 
 
@@ -787,13 +791,13 @@ add_custom_target(flash_softdevice
                 )
 
 add_custom_target(flash 
-                COMMAND echo "flashing ${PROJECT_NAME}.elf into the nrf52832"
+                COMMAND echo "flashing ${PROJECT_NAME}.hex into the nrf52832"
                 COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase --verify
                 COMMAND nrfjprog -f nrf52 --reset
                 )
 
 add_custom_target(flash_bin 
-                COMMAND echo "flashing ${PROJECT_NAME}.elf into the nrf52832"
+                COMMAND echo "flashing ${PROJECT_NAME}.hex into the nrf52832"
                 COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}_final.hex --sectorerase --verify
                 COMMAND nrfjprog -f nrf52 --reset
                 )

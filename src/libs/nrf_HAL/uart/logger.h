@@ -87,7 +87,7 @@ uint8_t * logger_get_rx_buff_addr(void);
 /// @param size
 /// @param override
 /// @return succ/err code
-uint32_t logger_transmit_bytes(const uint8_t* pbuff, uint16_t size);
+uint32_t logger_transmit_bytes(const char* pbuff, uint16_t size);
 
 
 

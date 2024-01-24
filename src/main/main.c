@@ -161,7 +161,6 @@ void general_task_function(void* param)
 
             } else if (evt == NRF_BUTTON_MIDD_EVT)
             {
-
             }
         }
 

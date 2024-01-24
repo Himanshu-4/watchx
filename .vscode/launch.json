@@ -6,12 +6,13 @@
             "type": "cortex-debug",
             // "cortex-debug.armToolchainPath":"arm-none-eabi-gdb",
             "cwd": "${workspaceRoot}",
-            "executable": "${workspaceRoot}/build/Watchx.elf",
+            "executable": "${workspaceRoot}/build/watchx.elf",
             "request": "launch",
             "servertype": "jlink",
             "interface": "swd",
             // This may need to be arm-none-eabi-gdb depending on your system
             "gdbPath": "arm-none-eabi-gdb",
+            "armToolchainPath": "C:\\Program Files (x86)\\GNU Arm Embedded Toolchain\\10 2021.07\\bin",
             // Connect to an already running OpenOCD instance
             "gdbTarget": "localhost:50000",
             "svdFile": "${workspaceRoot}/nrf52.svd",
@@ -30,7 +31,7 @@
             "type": "cortex-debug",
             // "cortex-debug.armToolchainPath":"arm-none-eabi-gdb",
             "cwd": "${workspaceRoot}",
-            "executable": "${workspaceRoot}/build/tests/my_test.elf",
+            "executable": "${workspaceRoot}/tests/my_test.elf",
             "request":"attach",
             "servertype": "jlink",
             // This may need to be arm-none-eabi-gdb depending on your system
@@ -38,7 +39,7 @@
             // Connect to an already running OpenOCD instance
             "gdbTarget": "localhost:50000",
             "svdFile": "${workspaceRoot}/nrf52.svd",
-            "device": "nrf52",
+            "armToolchainPath": "C:\\Program Files (x86)\\GNU Arm Embedded Toolchain\\10 2021.07\\bin",            "device": "nrf52",
             "runToEntryPoint": "main",
             // "preLaunchCommands": ["make all"],
             // Work around for stopping at main on restart
@@ -51,11 +52,12 @@
             "type": "cortex-debug",
             // "cortex-debug.armToolchainPath":"arm-none-eabi-gdb",
             "cwd": "${workspaceRoot}",
-            "executable": "${workspaceRoot}/build/tests/my_test.elf",
+            "executable": "${workspaceRoot}\\build\\tests\\my_test.elf",
             "request": "launch",
             "servertype": "jlink",
             // This may need to be arm-none-eabi-gdb depending on your system
             "gdbPath": "arm-none-eabi-gdb",
+            "armToolchainPath": "C:\\Program Files (x86)\\GNU Arm Embedded Toolchain\\10 2021.07\\bin",
             // Connect to an already running OpenOCD instance
             "gdbTarget": "localhost:50000",
             "svdFile": "${workspaceRoot}/nrf52.svd",
@@ -68,6 +70,16 @@
                 "continue"
             ]
         },
+    ],
+    "setupCommands": [
+        {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+        },
+        {
+            "text": "set charset UTF-8"
+        }
     ]
 }
 //  {
