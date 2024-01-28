@@ -98,7 +98,7 @@ class SR_LOGGER_TESTING:
         self.ser = serial.Serial()
         # config the serial port paramters 
         self.ser.baudrate = 1000000
-        self.ser.port = 'COM9'
+        self.ser.port = 'COM6'
         # turn off hardware flow control
         self.ser.xonxoff = True
         self.ser.rtscts = False
@@ -177,12 +177,13 @@ class SR_LOGGER_TESTING:
             
         else :
             log.info("the data returned by the device is ")
-            try:
-                decoded_data = read_data.decode('utf-8')
-            except UnicodeDecodeError as e:
-                log.error(f"Error decoding bytes: {e}")
-            else :
-                log.info(decoded_data)
+            log.info(read_data)
+            # try:
+            #     decoded_data = read_data.decode('utf-8')
+            # except UnicodeDecodeError as e:
+            #     log.error(f"Error decoding bytes: {e}")
+            # else :
+            #     log.info(decoded_data)
         
         # close the port  
         if(self.ser.is_open):

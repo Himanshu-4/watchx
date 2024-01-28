@@ -114,7 +114,7 @@ uint16_t logger_get_num_rx_bytes(void);
 /// @param rx_buff 
 /// @param size 
 /// @return succ/failure
-uint32_t logger_get_rx_data(char * pbuff, uint8_t size);
+uint32_t logger_get_rx_data(char * pbuff, uint16_t size);
 
 
 

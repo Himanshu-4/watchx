@@ -41,6 +41,16 @@ void UARTE0_UART0_IRQHandler(void)
             uart_irq_handler[UART_EVENT_RXTO]();
         }
     }
+     else if(NRF_UARTE0->EVENTS_RXDRDY)
+    {
+        NRF_UARTE0->EVENTS_RXDRDY =0;
+        if(uart_irq_handler[UART_EVENT_RXDRDY] != NULL)
+        {
+            uart_irq_handler[UART_EVENT_RXDRDY]();
+        }
+    }
+    
+    
 
     //  all the tx related events
     if (NRF_UARTE0->EVENTS_ENDTX)
@@ -68,6 +78,7 @@ void UARTE0_UART0_IRQHandler(void)
         }
     }
 
+   
 #if defined(FULL_IRQ_SUPPORTED)
     // process minor irqs here
     if (NRF_UARTE0->EVENTS_CTS)
@@ -177,26 +188,30 @@ void uart_disable_isr(void)
     NVIC_DisableIRQ(UARTE0_UART0_IRQn);
 }
 
-/// @brief uart add irq handler for the interrupt
+/// @brief used to add the irq handler to the interrupt
+/// @param int_type 
+/// @param func 
 void uart_add_irq_handler(uint8_t int_type, void (*func)(void))
 {
     uart_irq_handler[int_type] = func;
 }
 
 /// @brief remove the irq handler of the interrupt
+/// @param int_type always use type not mask
 void uart_remove_irq_handler(uint8_t int_type)
 {
     uart_irq_handler[int_type] = NULL;
 }
 
 /// @brief enable the interrupt for the event
-//// make sure to call this fun in parameter int_Type_mask
+//// @param int_type_mask to call this fun in parameter int_Type_mask
 void uart_enable_int(uint8_t int_type_mask)
 {
     NRF_UARTE0->INTENSET = _BV(int_type_mask);
 }
 
 //// @brief disable the interrupt for the event
+/// @param int_type_mask /// int type mask only
 void uart_disable_int(uint8_t int_type_mask)
 {
     NRF_UARTE0->INTENCLR = _BV(int_type_mask);

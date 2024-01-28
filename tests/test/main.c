@@ -1,24 +1,41 @@
 /******
- * Parallelism: The ability to perform multiple operations simultaneously.
- *  Multiprocessing is an example that spreads tasks over multiple CPU cores.
-Concurrency: The ability to execute more than one program or task simultaneously.
-Tasks can run in an overlapping manner and need not be parallel.
+//  * Parallelism: The ability to perform multiple operations simultaneously.
+//  *  Multiprocessing is an example that spreads tasks over multiple CPU cores.
+// Concurrency: The ability to execute more than one program or task simultaneously.
+// Tasks can run in an overlapping manner and need not be parallel.
 
-I/O bound task: A task dominated by waiting for input/output to complete.
-Coroutine (coro): A specialised function (co-operative routine) that is intended to run
-concurrently with other coros. Concurrency is achieved by periodically yielding to the
-scheduler, enabling other coros to run.
+// I/O bound task: A task dominated by waiting for input/output to complete.
+// Coroutine (coro): A specialised function (co-operative routine) that is intended to run
+// concurrently with other coros. Concurrency is achieved by periodically yielding to the
+// scheduler, enabling other coros to run.
 
-Event loop: A loop that monitors tasks to run. For microcontrollers, we have this
- running on a single CPU core and single thread.
-Scheduler: An event loop that facilitates asynchronous programming.
+// Event loop: A loop that monitors tasks to run. For microcontrollers, we have this
+//  running on a single CPU core and single thread.
+// Scheduler: An event loop that facilitates asynchronous programming.
 
-Pre-emptive scheduling: A scheduling technique that temporarily interrupts an
-running task without cooperation from the task, for it to be resumed at a later time.
+// Pre-emptive scheduling: A scheduling technique that temporarily interrupts an
+// running task without cooperation from the task, for it to be resumed at a later time.
 
-Cooperative scheduling: A scheduling technique that never initiates a context switch
-between tasks. It has lower overhead compared to pre-emptive scheduling and requires tasks
-to periodically yield to the scheduler.
+// Cooperative scheduling: A scheduling technique that never initiates a context switch
+// between tasks. It has lower overhead compared to pre-emptive scheduling and requires tasks
+// to periodically yield to the scheduler.
+
+*/
+/****
+ *
+ * This is a test program for testing the logger UART library and this is for 
+ * testing the LOGGER module through UART driver. 
+ * 
+ * the TX and RX part are written on the buffer overriding functionalities.
+ * The tx start as soon as some data is written on it and CPU is free to write more data 
+ * and to overwrite the buffer . the transfers handles automatically and its not dependent 
+ * on any RTOS. so the transmit triggers automatically, when the driver write some code
+ * on the LOGGER buffer. 
+ * 
+ * the RX part will recieve data into the LOGGER buffer and write until there is data available
+ * in the serial lines 
+ * 
+ * 
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -98,6 +115,9 @@ int main()
     }
    
     Hardware_drivers_install();
+
+    // start the receptoin process 
+    logger_start_rx();
     // Kernel_task_preinit();
 
 
@@ -132,8 +152,9 @@ int main()
 
     
 
-    printf("initing  rtos\r\n");
-    printf("ptr %x \r\n",logger_get_tx_buff_addr());
+
+    printf("t %x \r\n",logger_get_tx_buff_addr());
+    printf("r %x\r\n",logger_get_rx_buff_addr());
     // watchdog_init(1);
     // watchdog_start();
     /// @todo have to implement the kernel init file

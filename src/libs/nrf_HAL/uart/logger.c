@@ -263,6 +263,10 @@ uint32_t logger_transmit_bytes(const char* pbuff, uint16_t size)
     {
         return nrf_ERR_NO_MEMORY;
     }
+    if(size ==0)
+    {
+        return nrf_ERR_INVALID_LENGTH;
+    }
 
     //////////// First check if we have to do segment copy or not
     if ((uart_log.tx.head + size) > UART_TX_BUFFER_SIZE)
@@ -392,6 +396,8 @@ uint8_t* logger_get_rx_buff_addr(void)
 void logger_enable_rx(void)
 {
     uart_log.rx.enable_flag = 1;
+    // enable the interrupt 
+    uart_enable_int(UART_INT_RXDRDY_Mask);
 }
 
 /// @brief disable the logger reception
@@ -399,6 +405,8 @@ void logger_enable_rx(void)
 void logger_disable_rx(void)
 {
     uart_log.rx.enable_flag = 0;
+    /// disable the interrupt 
+    uart_disable_int(UART_INT_RXDRDY_Mask);
 }
 
 /// @brief flush the recieve buffer
@@ -486,6 +494,10 @@ void logger_stop_rx(void)
 /// @return return char read from the -1 if buff =empty 
 char logger_read_char(void)
 {
+    if(!uart_log.rx.enable_flag)
+    {
+        return -1;
+    }
     /// check if buffer is empty
     if((uart_log.rx.tail == uart_log.rx.head) && !(uart_log.rx.buff_full))
     {
@@ -541,13 +553,17 @@ uint16_t logger_get_num_rx_bytes(void)
 /// @param rx_buff 
 /// @param size 
 /// @return succ/failure
-uint32_t logger_get_rx_data(char * pbuff, uint8_t size)
+uint32_t logger_get_rx_data(char * pbuff, uint16_t size)
 {
     if (!uart_log.rx.enable_flag)
     {
         return nrf_ERR_INVALID_STATE;
     }
     
+    if((logger_get_num_rx_bytes() == 0) || (size =0))
+    {
+        return nrf_ERR_INTERNAL;
+    }
    /// check how much byte is available and then 
     if (size > logger_get_num_rx_bytes())
     {
@@ -591,12 +607,12 @@ uint32_t logger_get_rx_data(char * pbuff, uint8_t size)
 }
 
 /// @brief data ready callback for the logger module
-/// @param
+/// @param void
 void rx_data_ready_callback(void)
 {
     /// return if transfer is disable
-    if (uart_log.rx.enable_flag)
-        return;
+    if (!uart_log.rx.enable_flag)
+        {return;}
 
     uart_log.rx.head += 1;
     if(uart_log.rx.head >= UART_RX_BUFFER_SIZE)
@@ -618,3 +634,4 @@ void rx_data_ready_callback(void)
         uart_stop_reception();
     }
 }
+

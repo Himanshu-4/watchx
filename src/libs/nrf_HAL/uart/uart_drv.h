@@ -180,17 +180,24 @@ void uart_enable_isr(void);
 /// @param  void
 void uart_disable_isr(void);
 
-/// @brief uart add irq handler for the interrupt
-void uart_add_irq_handler(uint8_t, void (*)(void));
 
-/// @brief remove the irq handler of the interrupt 
-void uart_remove_irq_handler(uint8_t);
+/// @brief used to add the irq handler to the interrupt
+/// @param int_type 
+/// @param func 
+void uart_add_irq_handler(uint8_t int_type, void (*func)(void));
+
+/// @brief remove the irq handler of the interrupt
+/// @param int_type always use type not mask
+void uart_remove_irq_handler(uint8_t int_type);
 
 /// @brief enable the interrupt for the event
-void uart_enable_int(uint8_t);
+//// @param int_type_mask to call this fun in parameter int_Type_mask
+void uart_enable_int(uint8_t int_type_mask);
+
 
 //// @brief disable the interrupt for the event
-void uart_disable_int(uint8_t);
+/// @param int_type_mask /// int type mask only
+void uart_disable_int(uint8_t int_type_mask);
 
 
 ////////////////////////////////////////////////////////////////
