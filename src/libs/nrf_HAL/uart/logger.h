@@ -95,37 +95,28 @@ uint32_t logger_transmit_bytes(const char* pbuff, uint16_t size);
 /////////////////////////////////////////////////////////////////////////////
 //////////////////////// this here is the RX part //////////////////////////
 
+/// @brief read one element from the RX buffer 
+/// @param  void
+/// @return return char read from the -1 if buff =empty 
+char logger_read_char(void);
 
-/// @brief get the pointer of the last element in the queue aka head 
+/// @brief get the pointer of the last element in the queue aka head
 /// @param  offset(cannot larger than 255)
-/// @return pointer 
-uint8_t * uart_get_head_ptr(uint8_t offset);
+/// @return pointer
+char * logger_get_rx_head_ptr(uint8_t offset);
 
-/**
- * @name read_char
- * @param void
- * @brief used to get one byte from the rx ringbuffer 
-*/
-char read_char(void);
+/// @brief read the no of bytes in the recive buffer
+/// @param  void
+/// @return no of bytes
+uint16_t logger_get_num_rx_bytes(void);
 
-/**
- * @name get_num_rx_bytes
- * @return return the no of bytes in the ring buffer 
- * @brief used to get the remaining bytes in the ring buffer 
-*/
-uint8_t get_num_rx_bytes(void);
+/// @brief get the data copy into the rx_buffer 
+/// @param rx_buff 
+/// @param size 
+/// @return succ/failure
+uint32_t logger_get_rx_data(char * pbuff, uint8_t size);
 
-/***
- * @name get_rx_data
- * @param buffer pointer 
- * @param size of the buffer 
- * @return status of the function , if everything is ok then succ . if not then error
- * @brief used to get the data from the buffer , must call in the order 
- * size = get_num_rx_bytes
- * arr[size]
- * get_rx_data(arr, size)
-*/
-uint32_t get_rx_data(uint8_t *rx_buff, uint8_t size);
+
 
 
 #endif

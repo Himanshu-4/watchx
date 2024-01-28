@@ -49,6 +49,7 @@ to periodically yield to the scheduler.
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////// general Task Function decleartions /////////////////////////////////////
 
+
 void general_task_function(void*);
 
 #define genral_task_stack_size 256 // 1KB memory
@@ -242,8 +243,8 @@ void general_task_function(void* param)
 void gpio_irq_han(void)
 {
     logger_transmit_bytes("0123456789\r\n",12);
-    logger_transmit_bytes("ABCDEFGHIJ\r\n",12);
-    logger_transmit_bytes("abcdefghij\r\n",12);
+    logger_transmit_bytes("ABCDEF++GHIJ\r\n",14);
+    logger_transmit_bytes("abcdef--ghij\r\n",14);
     // printf("interrupt trger from pin 16\r\n");
     // printf("interrupt trger from pin 16\r\n");
     
