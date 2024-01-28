@@ -96,14 +96,8 @@ int main()
     {
         APP_ERROR_HANDLER(nrf_ERR_NO_MEMORY);
     }
-
-    // Hardware_drivers_install();
-    time_init();
-    logger_init();
-    logger_enable_tx();
-    gpio_install_isr_servc();
-
-    /// init the kernel task preinit
+   
+    Hardware_drivers_install();
     // Kernel_task_preinit();
 
 
@@ -140,8 +134,6 @@ int main()
 
     printf("initing  rtos\r\n");
     printf("ptr %x \r\n",logger_get_tx_buff_addr());
-    nrf_delay_ms(100);
-    logger_flush_buffer();
     // watchdog_init(1);
     // watchdog_start();
     /// @todo have to implement the kernel init file
@@ -210,7 +202,7 @@ void general_task_function(void* param)
             // NRF_LOG_WARNING("%d", evt);
             if (evt == NRF_BUTTON_UP_EVT)
             {
-             
+             printf("up event in the BOARD\r\n");
             } else if (evt == NRF_BUTTON_DOWN_EVT)
             {
                 nrf_gfx_lib_clear_display();
@@ -242,9 +234,16 @@ void general_task_function(void* param)
 /// @todo d  
 void gpio_irq_han(void)
 {
-    logger_transmit_bytes("0123456789\r\n",12);
-    logger_transmit_bytes("ABCDEF++GHIJ\r\n",14);
-    logger_transmit_bytes("abcdef--ghij\r\n",14);
+    /// get the rx data and print it 
+    uint16_t data_len = logger_get_num_rx_bytes();
+
+    char arr[data_len];
+
+    /// get the data 
+    logger_get_rx_data(arr,data_len);
+
+    logger_transmit_bytes(arr,data_len);
+    
     // printf("interrupt trger from pin 16\r\n");
     // printf("interrupt trger from pin 16\r\n");
     

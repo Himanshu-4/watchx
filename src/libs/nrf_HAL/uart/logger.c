@@ -374,7 +374,7 @@ void uart_tx_cmplete_callback(void)
 }
 
 // =================================================================================================
-// /================================================================================================
+// =================================================================================================
 // +++++++++++++++++++++++++++++++++++ Handle logger RX here +++++++++++++++++++++++++++++++++++++++
 // ==================================================================================================
 // =================================================================================================
@@ -486,6 +486,7 @@ void logger_stop_rx(void)
 /// @return return char read from the -1 if buff =empty 
 char logger_read_char(void)
 {
+    /// check if buffer is empty
     if((uart_log.rx.tail == uart_log.rx.head) && !(uart_log.rx.buff_full))
     {
         return -1;
@@ -528,7 +529,7 @@ uint16_t logger_get_num_rx_bytes(void)
         return UART_RX_BUFFER_SIZE;
     }
 
-    if (uart_log.rx.head > uart_log.rx.tail)
+    if (uart_log.rx.head >= uart_log.rx.tail)
     {
         return (uart_log.rx.head - uart_log.rx.tail);
     }

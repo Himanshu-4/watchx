@@ -90,7 +90,6 @@ void Hardware_drivers_install(void)
 #if defined(UART_DRIVER_INSTALL)
 
     logger_init();
-
     //// enable the tx and rx part 
     logger_enable_tx();
     logger_enable_rx();
